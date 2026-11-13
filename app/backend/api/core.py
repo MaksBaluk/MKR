@@ -43,10 +43,17 @@ def _revisions(snap: CohortSnapshot) -> list[dict]:
     return [{"id": vid, **snap.requirement_revisions[vid]} for vid in snap.vacancy_ids]
 
 
+def current_criteria_rows(rows) -> list:
+    """Drop a legacy holistic row (criterion_id == action_id) for actions that also have seeded
+    `<action>.<slug>` criterion rows; otherwise keep every row. Order is preserved."""
+    dotted = {r.action_id for r in rows if "." in r.criterion_id}
+    return [r for r in rows if not (r.action_id in dotted and r.criterion_id == r.action_id)]
+
+
 def _action_scores(rows) -> dict[str, float | None]:
     """Per action: mean (weights 1) of non-null scores of the latest revision per criterion; None if all null."""
     latest: dict[tuple[str, str], float | None] = {}
-    for r in rows:  # rows arrive oldest first
+    for r in current_criteria_rows(rows):  # rows arrive oldest first
         latest[(r.action_id, r.criterion_id)] = r.score
     by_action: dict[str, list[float]] = {}
     for (action, _), score in latest.items():

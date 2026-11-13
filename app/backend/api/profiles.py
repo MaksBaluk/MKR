@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from backend.api.cohorts import _market_input, get_or_create_cohort
 from backend.api.common import create_attempt, open_attempt
-from backend.api.core import _action_scores, _names, _revisions, attempt_scores
+from backend.api.core import _action_scores, _names, _revisions, attempt_scores, current_criteria_rows
 from backend.api.recommendations import NOTE, rank_items
 from backend.db import get_db
 from backend.domain.market import compute_market
@@ -176,8 +176,9 @@ def list_attempts(profile_id: str, db: Session = Depends(get_db), user: User = D
 # ---- results ---------------------------------------------------------------------------------------------
 
 def _competencies(db: Session, iv: CoreInterview) -> list[dict]:
-    rows = db.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == iv.id)
-                      .order_by(CriterionAssessment.revision, CriterionAssessment.created_at)).all()
+    rows = current_criteria_rows(db.scalars(
+        select(CriterionAssessment).where(CriterionAssessment.session_id == iv.id)
+        .order_by(CriterionAssessment.revision, CriterionAssessment.created_at)).all())
     latest_rev: dict[str, int] = {}
     for r in rows:
         latest_rev[r.action_id] = max(latest_rev.get(r.action_id, 0), r.revision)
