@@ -43,6 +43,11 @@ def serialize_vacancy(v: Vacancy, *, with_groups: bool = True) -> dict:
     return data
 
 
+def source_label(v: Vacancy) -> str:
+    """User-facing provenance label. Single point of change for catalog source naming."""
+    return "Тестова вакансія" if v.source_type == "SYNTHETIC_GENERATED" else "Djinni"
+
+
 def freeze_payload(records: list[dict]) -> tuple[list[dict], str]:
     """Canonical payload and sha256 for a frozen vacancy list (order as given)."""
     import hashlib
