@@ -1,7 +1,11 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { Suspense, useEffect, useId, useRef, useState, type RefObject } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Check, ChevronDown, Lock, LogOut, Menu, UsersRound } from 'lucide-react';
+import { Check, ChevronDown, Lock, LogOut, Menu, Settings2, UserRound, UsersRound } from 'lucide-react';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Avatar } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useActiveProfile } from '@/lib/activeProfile';
+import { trackLabel } from '@/lib/profiles';
 import { Dialog } from '@/components/ui/dialog';
 import {
   MOBILE_TAB_KEYS, STEPS, isFocusLayout, pageTitleFor, stepForPath, stepStates,
@@ -102,12 +106,10 @@ function StepperNav({ states, collapsed = false, onNavigate }: { states: StepSta
   );
 }
 
-function UserMenu({ name, email, onLogout }: { name: string; email: string; onLogout: () => void }) {
+/** Open/close behaviour shared by the top-bar menus: closes on navigation, outside click and Esc (focus returns). */
+function useMenu(ref: RefObject<HTMLDivElement | null>) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const menuId = useId();
   const { pathname } = useLocation();
-
   useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
     if (!open) return;
@@ -124,9 +126,63 @@ function UserMenu({ name, email, onLogout }: { name: string; email: string; onLo
       document.removeEventListener('mousedown', onDown);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open]);
+  }, [open, ref]);
+  return [open, setOpen] as const;
+}
 
-  const item = cn('flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl px-3 text-sm font-medium text-ink hover:bg-surface-muted', focusRing);
+const menuItem = cn('flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-ink hover:bg-surface-muted', focusRing);
+
+/** Active candidate profile switcher; changing it re-scopes results, market and the vacancy CTA app-wide. */
+function ProfileSwitcher() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useMenu(ref);
+  const menuId = useId();
+  const { profiles, active, setActive, status } = useActiveProfile();
+  if (status !== 'ready' || profiles.length === 0) return null;
+  return (
+    <div ref={ref} className="relative min-w-0">
+      <button type="button" aria-expanded={open} aria-controls={menuId} onClick={() => setOpen((v) => !v)}
+        aria-label={`Активний профіль: ${active?.name ?? 'не вибрано'}. Змінити профіль`}
+        className={cn('flex min-h-11 max-w-44 min-w-0 cursor-pointer items-center gap-2 rounded-xl border border-line px-2.5 hover:bg-surface-muted sm:max-w-64', focusRing)}>
+        <UserRound className="size-4 shrink-0 text-primary" aria-hidden="true" />
+        <span className="min-w-0 truncate text-sm font-medium text-ink">{active?.name ?? 'Профіль'}</span>
+        <ChevronDown className={cn('size-4 shrink-0 text-ink-subtle transition-transform motion-reduce:transition-none', open && 'rotate-180')} aria-hidden="true" />
+      </button>
+      <div id={menuId} hidden={!open}
+        className="absolute top-full right-0 z-40 mt-2 w-72 max-w-[calc(100vw-1rem)] rounded-2xl border border-line bg-surface p-2 shadow-raised">
+        <p className="px-3 pt-1 pb-2 text-xs font-medium text-ink-subtle">Активний профіль</p>
+        <ul>
+          {profiles.map((p) => {
+            const current = p.id === active?.id;
+            return (
+              <li key={p.id}>
+                <button type="button" aria-pressed={current} onClick={() => { setActive(p.id); setOpen(false); }} className={menuItem}>
+                  <Check className={cn('size-4 shrink-0 text-primary', !current && 'invisible')} aria-hidden="true" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate">{p.name}</span>
+                    <span className="block truncate text-xs font-normal text-ink-subtle">{trackLabel(p.track)}</span>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+          <li className="mt-1 border-t border-line pt-1">
+            <Link to="/profiles" className={menuItem}>
+              <Settings2 className="size-4 text-ink-subtle" aria-hidden="true" />Керувати профілями
+            </Link>
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function UserMenu({ name, email, onLogout }: { name: string; email: string; onLogout: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useMenu(ref);
+  const menuId = useId();
+
+  const item = menuItem;
   return (
     <div ref={ref} className="relative">
       <button type="button" aria-expanded={open} aria-controls={menuId} onClick={() => setOpen((v) => !v)}
@@ -223,6 +279,7 @@ export function AppShell({ name, email, interview, onLogout }: {
             </Link>
             <p className="ml-1 hidden min-w-0 flex-1 truncate text-base font-semibold text-ink sm:block">Оцінювання компетентностей</p>
             <span className="flex-1 sm:hidden" />
+            <ProfileSwitcher />
             <span aria-hidden="true" className="mx-1 hidden h-8 w-px bg-line sm:block" />
             <UserMenu name={name} email={email} onLogout={onLogout} />
           </div>
@@ -249,7 +306,13 @@ export function AppShell({ name, email, interview, onLogout }: {
           className={cn('flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:pb-10',
             focus ? 'pb-[calc(1.25rem+env(safe-area-inset-bottom))]' : 'pb-[calc(6rem+env(safe-area-inset-bottom))]')}>
           <div className="mx-auto w-full max-w-6xl">
-            <Outlet />
+            <ErrorBoundary resetKey={pathname}>
+              <Suspense fallback={
+                <div aria-busy="true"><p role="status" className="sr-only">Завантаження сторінки…</p><Skeleton className="h-64" /></div>
+              }>
+                <Outlet />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         </main>
       </div>

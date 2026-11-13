@@ -29,11 +29,12 @@ describe('stepForPath / pageTitleFor', () => {
 });
 
 describe('stepStates', () => {
-  test('before any interview only welcome and profile open; nothing after is reachable', () => {
+  test('before any interview only welcome, profile and the vacancy catalogue open', () => {
     const s = byKey(stepStates('/', null));
     expect(s.welcome.status).toBe('current');
     expect(s.profile).toMatchObject({ status: 'available', to: '/profile' });
-    for (const k of ['interview', 'results', 'vacancies', 'market']) {
+    expect(s.vacancies).toMatchObject({ status: 'available', to: '/vacancies', reason: null });
+    for (const k of ['interview', 'results', 'market']) {
       expect(s[k].status).toBe('locked');
       expect(s[k].to).toBeNull();
       expect(s[k].reason).toBeTruthy();
@@ -49,6 +50,8 @@ describe('stepStates', () => {
     expect(s.profile).toMatchObject({ status: 'done', to: null });
     expect(s.interview).toMatchObject({ status: 'available', to: '/interview/i1' });
     expect(s.results.status).toBe('locked');
+    expect(s.market.status).toBe('locked');
+    expect(s.vacancies).toMatchObject({ status: 'available', to: '/vacancies' });
   });
   test('finished interview unlocks results, vacancies and market', () => {
     const s = byKey(stepStates('/results', finished));

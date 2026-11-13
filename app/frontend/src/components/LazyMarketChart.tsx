@@ -1,4 +1,5 @@
 import { lazy, Suspense, type ComponentProps } from 'react';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { MarketChart as MarketChartType } from '@/components/MarketChart';
 
@@ -9,13 +10,15 @@ const MarketChart = lazy(() => import('@/components/MarketChart').then((m) => ({
 export function LazyMarketChart(props: ComponentProps<typeof MarketChartType>) {
   const rows = Math.min(props.market.length, 10);
   return (
-    <Suspense fallback={
-      <div aria-busy="true" className="flex" style={{ height: rows * 40 + 160 }}>
-        <p role="status" className="sr-only">Завантаження діаграми…</p>
-        <Skeleton className="w-full" />
-      </div>
-    }>
-      <MarketChart {...props} />
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={
+        <div aria-busy="true" className="flex" style={{ height: rows * 40 + 160 }}>
+          <p role="status" className="sr-only">Завантаження діаграми…</p>
+          <Skeleton className="w-full" />
+        </div>
+      }>
+        <MarketChart {...props} />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

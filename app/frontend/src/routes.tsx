@@ -1,6 +1,7 @@
-import { useEffect, type ReactNode } from 'react';
+import { lazy, useEffect, useState, type ReactNode } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { BarChart3, Briefcase, Compass, Construction, Loader2, MessageSquare, RefreshCw, UsersRound } from 'lucide-react';
+import { BarChart3, Compass, Loader2, MessageSquare, RefreshCw, UsersRound } from 'lucide-react';
+import { api } from '@/api';
 import { AppShell, SkipLink } from '@/components/AppShell';
 import { ErrorRetry } from '@/components/ErrorRetry';
 import { Alert } from '@/components/ui/alert';
@@ -18,6 +19,11 @@ import { MarketScreen } from '@/screens/MarketScreen';
 import { ResultsScreen } from '@/screens/ResultsScreen';
 import type { CandidateProfile } from '@/types';
 import { useSession } from '@/session';
+
+// Catalogue and profile management are separate chunks; a failed download is caught by the shell's ErrorBoundary.
+const VacanciesScreen = lazy(() => import('@/screens/VacanciesScreen').then((m) => ({ default: m.VacanciesScreen })));
+const VacancyDetail = lazy(() => import('@/screens/VacancyDetail').then((m) => ({ default: m.VacancyDetail })));
+const ProfilesScreen = lazy(() => import('@/screens/ProfilesScreen').then((m) => ({ default: m.ProfilesScreen })));
 
 function FullScreenLoader() {
   return (
@@ -86,13 +92,46 @@ function AuthenticatedLayout() {
   );
 }
 
+/**
+ * Candidate profile that owns an attempt. The interview API does not return the profile id, so the
+ * attempt lists are checked (active profile first; users have few profiles). Null while unknown.
+ */
+function useAttemptOwner(interviewId: string): CandidateProfile | null {
+  const { profiles, active } = useActiveProfile();
+  const [owner, setOwner] = useState<CandidateProfile | null>(null);
+  useEffect(() => {
+    let live = true;
+    const ordered = active ? [active, ...profiles.filter((p) => p.id !== active.id)] : profiles;
+    (async () => {
+      for (const p of ordered.filter((x) => x.attempts_count > 0)) {
+        try {
+          const r = await api<{ items: { id: string }[] }>(`/profiles/${encodeURIComponent(p.id)}/attempts`);
+          if (r.items.some((a) => a.id === interviewId)) {
+            if (live) setOwner(p);
+            return;
+          }
+        } catch {
+          return;
+        }
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [interviewId, profiles, active]);
+  return owner;
+}
+
 function InterviewPage() {
   const { id = '' } = useParams();
   const { profile, llmConfigured, refreshInterview } = useSession();
+  const owner = useAttemptOwner(id);
   const navigate = useNavigate();
   if (!profile) return null;
+  // Header shows the attempt's own profile (title/track) once known; the account profile until then.
+  const shown = owner ? { ...profile, desired_title: owner.desired_title, track: owner.track } : profile;
   return (
-    <InterviewScreen key={id} interviewId={id} profile={profile} llmConfigured={llmConfigured}
+    <InterviewScreen key={id} interviewId={id} profile={shown} llmConfigured={llmConfigured}
       onFinished={() => {
         void refreshInterview().finally(() => navigate('/results', { replace: true }));
       }} />
@@ -165,15 +204,6 @@ function ResultsPage() {
   );
 }
 
-function ComingSoonPage({ section, icon }: { section: string; icon: typeof Construction }) {
-  return (
-    <EmptyState icon={icon} title="Розділ у розробці"
-      action={<Button asChild variant="outline"><Link to="/">На головну</Link></Button>}>
-      Розділ «{section}» з’явиться найближчим часом.
-    </EmptyState>
-  );
-}
-
 function NotFoundPage() {
   return (
     <EmptyState icon={Compass} title="Такої сторінки немає"
@@ -190,9 +220,9 @@ export function AppRoutes() {
       <Route element={<AuthenticatedLayout />}>
         <Route index element={<WelcomeScreen />} />
         <Route path="profile" element={<ProfilePage />} />
-        <Route path="profiles" element={<ComingSoonPage section="Профілі" icon={UsersRound} />} />
-        <Route path="vacancies" element={<ComingSoonPage section="Вакансії" icon={Briefcase} />} />
-        <Route path="vacancies/:id" element={<ComingSoonPage section="Деталі вакансії" icon={Briefcase} />} />
+        <Route path="profiles" element={<ProfilesScreen />} />
+        <Route path="vacancies" element={<VacanciesScreen />} />
+        <Route path="vacancies/:id" element={<VacancyDetail />} />
         <Route path="market" element={<WithActiveProfile render={(p) => <MarketScreen key={p.id} profile={p} />} />} />
         <Route path="results" element={<ResultsPage />} />
         <Route path="interview/:id" element={<InterviewPage />} />

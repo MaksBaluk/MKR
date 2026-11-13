@@ -69,3 +69,11 @@ describe('fit labels', () => {
     expect(assessedLabel(5, 12)).toBe('оцінено 5 із 12 вимог');
   });
 });
+
+test('vacancyCount uses Ukrainian plural forms', async () => {
+  const { vacancyCount } = await import('@/lib/results');
+  expect([1, 3, 5, 11, 21, 22, 112].map(vacancyCount)).toEqual([
+    'Знайдено 1 вакансію', 'Знайдено 3 вакансії', 'Знайдено 5 вакансій', 'Знайдено 11 вакансій',
+    'Знайдено 21 вакансію', 'Знайдено 22 вакансії', 'Знайдено 112 вакансій',
+  ]);
+});

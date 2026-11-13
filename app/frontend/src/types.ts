@@ -126,3 +126,62 @@ export interface SelfRatingValue {
   action_id: string;
   value: number | null;
 }
+
+/** Row of the public vacancy catalogue (`GET /vacancies`). */
+export interface CatalogVacancy {
+  id: string;
+  track: string;
+  title: string;
+  company: string;
+  seniority: string | null;
+  location: string;
+  work_mode: string | null;
+  employment: string | null;
+  salary_min: number | null;
+  salary_max: number | null;
+  currency: string | null;
+  summary: string | null;
+  stack: string[] | null;
+  years_min: number | null;
+  years_max: number | null;
+  source_label: string | null;
+  requirements_count: number;
+}
+
+export interface CatalogPage {
+  items: CatalogVacancy[];
+  total: number;
+  page: number;
+  page_size: number;
+  /** Counts per option, computed with all other filters applied. */
+  facets: { track: Record<string, number>; work_mode: Record<string, number>; seniority: Record<string, number> };
+}
+
+export interface RequirementGroup {
+  id: string;
+  kind: 'MANDATORY' | 'DESIRED' | string;
+  label: string;
+  excerpt: string;
+  alternatives: { competency_id: string; name: string; required_level: number }[];
+}
+
+/** Full vacancy (`GET /vacancies/{id}`). */
+export interface VacancyDetail extends CatalogVacancy {
+  description: string | null;
+  responsibilities: string[] | null;
+  benefits: string[] | null;
+  source_type: string | null;
+  source_url: string | null;
+  fixture_version: string | null;
+  requirements: RequirementGroup[];
+}
+
+export interface AttemptSummary {
+  id: string;
+  attempt_no: number;
+  status: 'ACTIVE' | 'PAUSED' | 'FINISHED' | string;
+  cohort_id: string;
+  created_at: string | null;
+  topics_used: number;
+  answers_count: number;
+}

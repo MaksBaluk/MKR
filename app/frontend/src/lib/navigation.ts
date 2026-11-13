@@ -64,8 +64,8 @@ const AFTER_INTERVIEW = 'Доступно після завершення спі
 
 /**
  * Availability of each journey step for the candidate's current stage.
- * Before the interview nothing past the profile opens (no job choice before the interview);
- * results, vacancies and the market profile open only after the interview is finished.
+ * The vacancy catalogue is browsable at any time (it is not a job choice: the cohort is still system-selected);
+ * results and the market profile open only after the interview is finished.
  */
 export function stepStates(pathname: string, interview: SessionInterview | null): StepState[] {
   const current = stepForPath(pathname)?.key ?? null;
@@ -90,6 +90,9 @@ export function stepStates(pathname: string, interview: SessionInterview | null)
       case 'interview':
         if (stage === 'active' && interview) to = `/interview/${interview.id}`;
         else reason = stage === 'finished' ? 'Співбесіду завершено' : 'Спершу заповніть профіль';
+        break;
+      case 'vacancies':
+        to = '/vacancies';
         break;
       default:
         if (stage === 'finished') to = `/${step.key}`;

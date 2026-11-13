@@ -6,14 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field } from '@/components/ui/field';
 import { Input, Select } from '@/components/ui/input';
+import { TRACKS } from '@/lib/profiles';
 import type { CohortResponse, Profile } from '@/types';
 import { Loader2, MessageSquare } from 'lucide-react';
 
-const TRACKS = [
-  { value: 'python', label: 'Python-розробка' },
-  { value: 'marketing', label: 'Маркетинг' },
-  { value: 'design', label: 'Дизайн' },
-];
 
 export function ProfileScreen({ profile, onSaved, onStarted }: {
   profile: Profile;

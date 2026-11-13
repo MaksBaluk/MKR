@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle2, ChevronLeft, ChevronRight, FileText, Loader2, MapPin, MessageSquare, Search, SearchX, Sparkles } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { CheckCircle2, FileText, Loader2, MapPin, MessageSquare, Search, SearchX, Sparkles } from 'lucide-react';
 import { api, ApiError } from '@/api';
 import { InfoPopover } from '@/components/InfoPopover';
+import { Pagination } from '@/components/Pagination';
 import { LazyMarketChart } from '@/components/LazyMarketChart';
 import { ScaleLegend } from '@/components/ScaleLegend';
 import { SelfRatingList } from '@/components/SelfRatingList';
@@ -19,9 +20,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { bandFor } from '@/lib/bands';
 import {
   assessedLabel, DEFAULT_FILTERS, FIT_EXPLANATION, filtersFromQuery, filtersToQuery, fitLabel, hasActiveFilters,
-  MIN_SHARE_OPTIONS, PAGE_SIZE, pageRange, resultsApiPath, SENIORITIES, totalPages, WORK_MODES, type ResultsFilters,
+  MIN_SHARE_OPTIONS, PAGE_SIZE, resultsApiPath, SENIORITIES, totalPages, vacancyCount, WORK_MODES, type ResultsFilters,
 } from '@/lib/results';
-import { useSession } from '@/session';
+import { useStartAttempt } from '@/hooks/useStartAttempt';
 import type { CandidateProfile, CompetencyResult, ProfileResults, ResultVacancy, SelfRatingValue } from '@/types';
 
 const errorText = (err: unknown, fallback: string) => (err instanceof ApiError ? err.message : fallback);
@@ -48,32 +49,18 @@ export function useSelfRatings(profileId: string) {
 
 /** Shown when the active profile has no finished attempt yet. Starts or resumes one. */
 export function NoResultsState({ profile }: { profile: CandidateProfile }) {
-  const navigate = useNavigate();
-  const { refreshInterview } = useSession();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  async function start() {
-    setBusy(true);
-    setError(null);
-    try {
-      const a = await api<{ id: string }>(`/profiles/${encodeURIComponent(profile.id)}/attempts`, { method: 'POST' });
-      await refreshInterview().catch(() => null);
-      navigate(`/interview/${a.id}`);
-    } catch (err) {
-      setError(errorText(err, 'Не вдалося розпочати співбесіду. Спробуйте ще раз.'));
-      setBusy(false);
-    }
-  }
+  const { start, pendingId, error } = useStartAttempt();
+  const busy = pendingId === profile.id;
   return (
     <EmptyState icon={MessageSquare} title="Результатів для цього профілю ще немає"
       action={
-        <Button onClick={() => void start()} disabled={busy}>
+        <Button onClick={() => void start(profile.id)} disabled={pendingId !== null}>
           {busy && <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
           Пройти співбесіду
         </Button>
       }>
       <p>Профіль «{profile.name}» ще не має завершеної співбесіди. Після неї тут з’являться вакансії, упорядковані за вашими відповідями.</p>
-      {error && <Alert role="alert" variant="danger" className="mt-3 text-left">{error}</Alert>}
+      {error && <Alert role="alert" variant="danger" className="mt-3 text-left">{error.message}</Alert>}
     </EmptyState>
   );
 }
@@ -204,13 +191,16 @@ function CompetencySection({ competencies }: { competencies: CompetencyResult[] 
 function FilterBar({ filters, onChange }: { filters: ResultsFilters; onChange: (f: ResultsFilters) => void }) {
   const [q, setQ] = useState(filters.q);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // The debounced search must merge into the filters current when it fires, not when the key was pressed.
+  const latest = useRef(filters);
+  latest.current = filters;
   useEffect(() => setQ(filters.q), [filters.q]);
   useEffect(() => () => clearTimeout(timer.current), []);
 
   function typeQ(value: string) {
     setQ(value);
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => onChange({ ...filters, q: value, page: 1 }), 350);
+    timer.current = setTimeout(() => onChange({ ...latest.current, q: value, page: 1 }), 350);
   }
   function submit(e: FormEvent) {
     e.preventDefault();
@@ -252,41 +242,6 @@ function FilterBar({ filters, onChange }: { filters: ResultsFilters; onChange: (
       </div>
     </form>
   );
-}
-
-function Pagination({ page, pages, onPage }: { page: number; pages: number; onPage: (p: number) => void }) {
-  if (pages <= 1) return null;
-  return (
-    <nav aria-label="Сторінки результатів" className="flex flex-wrap items-center justify-center gap-1.5">
-      <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => onPage(page - 1)}>
-        <ChevronLeft className="size-4" aria-hidden="true" />Попередня
-      </Button>
-      <ul className="flex flex-wrap items-center gap-1">
-        {pageRange(page, pages).map((p, i) =>
-          p === 'gap' ? (
-            <li key={`gap-${i}`} aria-hidden="true" className="px-1 text-ink-subtle">…</li>
-          ) : (
-            <li key={p}>
-              <Button variant={p === page ? 'default' : 'ghost'} size="sm" className="min-w-11 tabular-nums"
-                aria-current={p === page ? 'page' : undefined} aria-label={`Сторінка ${p}`} onClick={() => onPage(p)}>
-                {p}
-              </Button>
-            </li>
-          ),
-        )}
-      </ul>
-      <Button variant="outline" size="sm" disabled={page >= pages} onClick={() => onPage(page + 1)}>
-        Наступна<ChevronRight className="size-4" aria-hidden="true" />
-      </Button>
-    </nav>
-  );
-}
-
-function vacancyCount(n: number): string {
-  const m10 = n % 10;
-  const m100 = n % 100;
-  const word = m10 === 1 && m100 !== 11 ? 'вакансію' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'вакансії' : 'вакансій';
-  return `Знайдено ${n} ${word}`;
 }
 
 export function ResultsScreen({ profile }: { profile: CandidateProfile }) {
