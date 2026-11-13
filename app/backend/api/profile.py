@@ -1,9 +1,12 @@
+"""Candidate metadata and editable self-ratings. Self-ratings never change LLM assessments."""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import select, delete
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
+
 from backend.db import get_db
-from backend.models import CandidateSkill, Competency, User, InterviewSession, Snapshot, MatchRun, AuthToken
+from backend.models import (CandidateSelfRating, Competency, CohortSnapshot, CoreInterview, CriterionAssessment,
+                            User)
 from backend.security import current_user
 
 router = APIRouter(prefix="/profile", tags=["candidate profile"])
@@ -17,19 +20,22 @@ class UpdateProfile(BaseModel):
     location: str = Field(default="", max_length=120)
 
 
-class UpdateSkill(BaseModel):
-    level: int | None = Field(default=None, ge=0, le=3)
-    context: str = Field(default="", max_length=1200)
+class UpdateSelfRating(BaseModel):
+    value: float | None = Field(default=None, ge=0.0, le=1.0)
+
+
+def latest_self_ratings(db: Session, user: User) -> dict[str, float | None]:
+    rows = db.scalars(select(CandidateSelfRating).where(CandidateSelfRating.user_id == user.id)
+                      .order_by(CandidateSelfRating.revision)).all()
+    return {r.action_id: r.value for r in rows}
 
 
 def profile_data(db: Session, user: User) -> dict:
-    skills = db.scalars(select(CandidateSkill).where(CandidateSkill.user_id == user.id)).all()
     return {"id": user.id, "email": user.email, "display_name": user.display_name,
             "track": user.track, "desired_title": user.desired_title,
             "years_experience": user.years_experience, "location": user.location,
-            "skills": [{"competency_id": s.competency_id, "level": s.level,
-                        "context": s.context, "source": "SELF_REPORT"} for s in skills],
-            "levels": {s.competency_id: s.level for s in skills}}
+            "self_ratings": [{"action_id": k, "value": v, "source": "SELF_REPORT", "editable": True}
+                             for k, v in latest_self_ratings(db, user).items()]}
 
 
 @router.get("")
@@ -40,42 +46,34 @@ def get_profile(db: Session = Depends(get_db), user: User = Depends(current_user
 @router.put("")
 def update_profile(data: UpdateProfile, db: Session = Depends(get_db), user: User = Depends(current_user)):
     if data.track not in ("python", "marketing", "design"):
-        raise HTTPException(422, "Unknown track")
+        raise HTTPException(422, "Невідомий професійний трек")
     for key, val in data.model_dump().items():
         setattr(user, key, val)
     db.commit()
     return profile_data(db, user)
 
 
-@router.put("/skills/{competency_id}")
-def set_skill(competency_id: str, data: UpdateSkill,
-              db: Session = Depends(get_db), user: User = Depends(current_user)):
-    comp = db.get(Competency, competency_id)
-    if not comp:
-        raise HTTPException(404, "Competency not found")
+@router.put("/self-ratings/{action_id}")
+def set_self_rating(action_id: str, data: UpdateSelfRating,
+                    db: Session = Depends(get_db), user: User = Depends(current_user)):
+    comp = db.get(Competency, action_id)
+    if comp is None:
+        raise HTTPException(404, "Професійну дію не знайдено")
     if comp.track != user.track:
-        raise HTTPException(422, "Competency belongs to another professional track")
-    record = db.get(CandidateSkill, (user.id, competency_id))
-    if record is None:
-        record = CandidateSkill(user_id=user.id, competency_id=competency_id)
-        db.add(record)
-    record.level = data.level
-    record.context = data.context
+        raise HTTPException(422, "Дія належить до іншого треку")
+    revision = (db.scalar(select(func.max(CandidateSelfRating.revision)).where(
+        CandidateSelfRating.user_id == user.id, CandidateSelfRating.action_id == action_id)) or 0) + 1
+    db.add(CandidateSelfRating(user_id=user.id, action_id=action_id, revision=revision, value=data.value))
     db.commit()
-    return {"competency_id": competency_id, "level": data.level, "context": data.context, "source": "SELF_REPORT"}
+    return {"action_id": action_id, "value": data.value, "revision": revision, "source": "SELF_REPORT",
+            "editable": True}
 
 
 @router.delete("/data", status_code=204)
 def delete_assessment_data(db: Session = Depends(get_db), user: User = Depends(current_user)):
-    """Purge user's profile evidence, frozen sets and results; keep login account."""
-    from backend.models import InterviewSession, Snapshot, MatchRun
-    # Delete dependent records in FK-safe order; cascades remove interview turns.
-    for item in db.scalars(select(MatchRun).where(MatchRun.user_id == user.id)).all():
-        db.delete(item)
-    for item in db.scalars(select(InterviewSession).where(InterviewSession.user_id == user.id)).all():
-        db.delete(item)
-    db.flush()
-    for item in db.scalars(select(Snapshot).where(Snapshot.user_id == user.id)).all():
-        db.delete(item)
-    db.execute(delete(CandidateSkill).where(CandidateSkill.user_id == user.id))
+    """Purge this user's interview, assessment, cohort and self-rating records; keep the login account."""
+    db.execute(delete(CriterionAssessment).where(CriterionAssessment.user_id == user.id))
+    db.execute(delete(CoreInterview).where(CoreInterview.user_id == user.id))
+    db.execute(delete(CohortSnapshot).where(CohortSnapshot.user_id == user.id))
+    db.execute(delete(CandidateSelfRating).where(CandidateSelfRating.user_id == user.id))
     db.commit()

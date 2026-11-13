@@ -121,3 +121,19 @@ def test_recommendations_ranked_after_scores(client, auth, cohort, llm):
     assert any(i["label"] == "RANKED" for i in items)
     assert "ймовірність працевлаштування" in client.post("/api/v1/recommendations", json={"cohort_id": cohort},
                                     headers=auth).json()["note"]
+
+
+def test_self_rating_zero_is_stored_and_null_is_unknown(client, auth):
+    action = _track_action(client, auth)
+    r = client.put(f"/api/v1/profile/self-ratings/{action}", json={"value": 0.0}, headers=auth)
+    assert r.status_code == 200 and r.json()["value"] == 0.0
+    listed = {x["action_id"]: x["value"] for x in client.get("/api/v1/profile", headers=auth).json()["self_ratings"]}
+    assert listed[action] == 0.0
+    r2 = client.put(f"/api/v1/profile/self-ratings/{action}", json={"value": None}, headers=auth)
+    assert r2.json()["value"] is None
+
+
+def _track_action(client, auth):
+    cohort = client.post("/api/v1/cohorts/auto", headers=auth).json()["cohort_id"]
+    market = client.get(f"/api/v1/cohorts/{cohort}/market", headers=auth).json()["skills"]
+    return market[0]["action_id"]
