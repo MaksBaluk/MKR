@@ -158,7 +158,7 @@ function CompetencySection({ competencies }: { competencies: CompetencyResult[] 
   const scored = competencies.filter((c) => c.score !== null).sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
   const visible = showAll ? scored : scored.slice(0, 5);
   return (
-    <Card>
+    <Card className="min-w-0">
       <CardHeader>
         <CardTitle>Ваші компетентності за співбесідою</CardTitle>
         <CardDescription>Оцінку робить автоматичний оцінювач за вашими відповідями. Змінювати можна лише власну самооцінку.</CardDescription>
@@ -385,7 +385,7 @@ export function ResultsScreen({ profile }: { profile: CandidateProfile }) {
 
       <div className="grid items-start gap-4 xl:grid-cols-2">
         <CompetencySection competencies={data.competencies} />
-        <Card>
+        <Card className="min-w-0">
           <CardContent className="pt-5 sm:pt-6">
             <MarketChart market={data.market} competencies={data.competencies} selfRatings={self.items ?? []} />
           </CardContent>

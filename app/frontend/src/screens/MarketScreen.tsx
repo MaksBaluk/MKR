@@ -42,7 +42,7 @@ export function MarketScreen({ profile }: { profile: CandidateProfile }) {
   if (!data.has_results) return <NoResultsState profile={profile} />;
   return (
     <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
-      <Card>
+      <Card className="min-w-0">
         <CardContent className="pt-5 sm:pt-6">
           <MarketChart market={data.market} competencies={data.competencies} selfRatings={self.items ?? []} />
         </CardContent>
