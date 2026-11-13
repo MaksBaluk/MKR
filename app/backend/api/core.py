@@ -10,7 +10,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from backend.api.common import default_profile, next_attempt_no
+from backend.api.common import create_attempt, default_profile
 from backend.db import get_db
 from backend.domain.core_flow import planner_state
 from backend.domain.interview_budget import can_ask_question, can_start_topic
@@ -118,10 +118,7 @@ class AnswerBody(VersionBody):
 def create_interview(data: CreateInterview, db: Session = Depends(get_db), user: User = Depends(current_user)):
     snap = _owned_cohort(db, user, data.cohort_id)
     prof = default_profile(db, user)
-    iv = CoreInterview(user_id=user.id, cohort_id=snap.id, status="ACTIVE", version=0, profile_id=prof.id,
-                       attempt_no=next_attempt_no(db, prof.id))
-    db.add(iv)
-    db.commit()
+    iv, _ = create_attempt(db, user, prof.id, snap.id)
     return {"id": iv.id, "status": iv.status, "version": iv.version}
 
 

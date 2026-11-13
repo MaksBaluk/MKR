@@ -82,3 +82,26 @@ def default_profile(db: Session, user: User) -> CandidateProfile:
 def next_attempt_no(db: Session, profile_id: str) -> int:
     from sqlalchemy import func
     return (db.scalar(select(func.max(CoreInterview.attempt_no)).where(CoreInterview.profile_id == profile_id)) or 0) + 1
+
+
+def open_attempt(db: Session, profile_id: str) -> CoreInterview | None:
+    return db.scalar(select(CoreInterview).where(CoreInterview.profile_id == profile_id,
+                                                 CoreInterview.status != "FINISHED")
+                     .order_by(CoreInterview.attempt_no.desc()))
+
+
+def create_attempt(db: Session, user: User, profile_id: str, cohort_id: str) -> tuple[CoreInterview, bool]:
+    """Insert the next attempt. A concurrent racer hits uq (profile_id, attempt_no): return its open attempt."""
+    from sqlalchemy.exc import IntegrityError
+    iv = CoreInterview(user_id=user.id, cohort_id=cohort_id, status="ACTIVE", version=0, profile_id=profile_id,
+                       attempt_no=next_attempt_no(db, profile_id))
+    db.add(iv)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        existing = open_attempt(db, profile_id)
+        if existing is None:
+            raise HTTPException(409, "Не вдалося створити спробу, повторіть запит")
+        return existing, False
+    return iv, True

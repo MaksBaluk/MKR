@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from backend.api.cohorts import _market_input, get_or_create_cohort
-from backend.api.common import next_attempt_no
+from backend.api.common import create_attempt, open_attempt
 from backend.api.core import _action_scores, _names, _revisions, attempt_scores
 from backend.api.recommendations import NOTE, rank_items
 from backend.db import get_db
@@ -131,6 +131,10 @@ def set_self_rating(profile_id: str, action_id: str, data: SelfRatingBody, db: S
 
 # ---- attempts --------------------------------------------------------------------------------------------
 
+def _open_attempt(db: Session, profile_id: str) -> CoreInterview | None:
+    return open_attempt(db, profile_id)
+
+
 def _attempt_brief(iv: CoreInterview) -> dict:
     return {"id": iv.id, "attempt_no": iv.attempt_no, "status": iv.status, "version": iv.version,
             "cohort_id": iv.cohort_id}
@@ -142,19 +146,16 @@ def start_attempt(profile_id: str, response: Response, db: Session = Depends(get
     prof = _owned_profile(db, user, profile_id)
     if prof.archived:
         raise HTTPException(409, "Профіль архівовано")
-    open_iv = db.scalar(select(CoreInterview).where(CoreInterview.profile_id == prof.id,
-                                                    CoreInterview.status != "FINISHED")
-                        .order_by(CoreInterview.attempt_no.desc()))
+    open_iv = _open_attempt(db, prof.id)
     if open_iv is not None:
         response.status_code = 200
         return _attempt_brief(open_iv)
     snap, _ = get_or_create_cohort(db, user, prof.track)
     if snap is None:
         raise HTTPException(422, "Для цього треку немає вакансій для добірки")
-    iv = CoreInterview(user_id=user.id, cohort_id=snap.id, status="ACTIVE", version=0, profile_id=prof.id,
-                       attempt_no=next_attempt_no(db, prof.id))
-    db.add(iv)
-    db.commit()
+    iv, created = create_attempt(db, user, prof.id, snap.id)
+    if not created:
+        response.status_code = 200
     return _attempt_brief(iv)
 
 

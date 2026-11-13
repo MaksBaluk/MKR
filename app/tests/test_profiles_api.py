@@ -254,3 +254,43 @@ def test_auto_cohort_unchanged_and_accepts_profile(client, auth):
     mkt = client.post(f"{API}/cohorts/auto", params={"profile_id": p["id"]}, headers=auth).json()
     assert base["vacancy_count"] > 0 and mkt["cohort_id"] != base["cohort_id"]
     assert client.post(f"{API}/cohorts/auto", params={"profile_id": "nope"}, headers=auth).status_code == 404
+
+
+def _open_count(client, auth, pid):
+    items = client.get(f"{API}/profiles/{pid}/attempts", headers=auth).json()["items"]
+    return len([i for i in items if i["status"] != "FINISHED"])
+
+
+def test_start_attempt_race_loser_gets_existing(client, auth, monkeypatch):
+    import backend.api.profiles as prof_api
+    p = mk_profile(client, auth)
+    winner = start(client, auth, p["id"]).json()
+    real = prof_api._open_attempt
+    calls = []
+    # loser's existence check ran before the winner committed: it sees nothing, then collides on insert
+    monkeypatch.setattr(prof_api, "_open_attempt", lambda db, pid: None if not calls and not calls.append(1) else real(db, pid))
+    import backend.api.common as common
+    monkeypatch.setattr(common, "next_attempt_no", lambda db, pid: 1)  # loser computed max+1 before winner committed
+    r = start(client, auth, p["id"])
+    assert r.status_code == 200 and r.json()["id"] == winner["id"]
+    assert _open_count(client, auth, p["id"]) == 1
+
+
+def test_legacy_interview_race_returns_existing(client, auth, no_llm, monkeypatch):
+    import backend.api.common as common
+    cohort = client.post(f"{API}/cohorts/auto", headers=auth).json()["cohort_id"]
+    first = client.post(f"{API}/interviews", json={"cohort_id": cohort}, headers=auth).json()
+    monkeypatch.setattr(common, "next_attempt_no", lambda db, pid: 1)  # stale number, as a racer would compute
+    second = client.post(f"{API}/interviews", json={"cohort_id": cohort}, headers=auth)
+    assert second.status_code == 201 and second.json()["id"] == first["id"]
+    pid = client.get(f"{API}/profiles", headers=auth).json()["items"][0]["id"]
+    assert _open_count(client, auth, pid) == 1
+
+
+def test_race_with_no_open_attempt_is_409_not_500(client, auth, monkeypatch):
+    import backend.api.common as common
+    p = mk_profile(client, auth)
+    a = start(client, auth, p["id"]).json()
+    client.post(f"{API}/interviews/{a['id']}/finish", json={"version": a["version"]}, headers=auth)
+    monkeypatch.setattr(common, "next_attempt_no", lambda db, pid: 1)
+    assert start(client, auth, p["id"]).status_code == 409
