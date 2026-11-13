@@ -248,7 +248,7 @@ export function AppShell({ name, email, interview, onLogout }: {
   }
 
   return (
-    <div className={cn('min-h-dvh lg:grid', collapsed ? 'lg:grid-cols-[5rem_minmax(0,1fr)]' : 'lg:grid-cols-[17.5rem_minmax(0,1fr)]')}>
+    <div className={cn(focus ? 'h-dvh overflow-hidden' : 'min-h-dvh', 'lg:grid', collapsed ? 'lg:grid-cols-[5rem_minmax(0,1fr)]' : 'lg:grid-cols-[17.5rem_minmax(0,1fr)]')}>
       <SkipLink />
 
       <aside aria-label="Етапи оцінювання" className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-surface lg:flex">
@@ -260,14 +260,9 @@ export function AppShell({ name, email, interview, onLogout }: {
         <nav aria-label="Кроки оцінювання" className="flex-1 overflow-y-auto px-3 py-5">
           <StepperNav states={states} collapsed={collapsed} />
         </nav>
-        {!collapsed && (
-          <p className="border-t border-line px-5 py-4 text-xs leading-relaxed text-ink-subtle">
-            Вакансії в каталозі синтетичні й не є актуальними пропозиціями роботодавців.
-          </p>
-        )}
       </aside>
 
-      <div className="flex min-w-0 flex-col">
+      <div className={cn('flex min-w-0 flex-col', focus && 'h-dvh min-h-0')}>
         <header className="sticky top-0 z-30 border-b border-line bg-surface/90 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
           <div className="flex h-16 items-center gap-2 px-2 sm:px-4 lg:px-6">
             <button type="button" onClick={toggleMenu} aria-label="Меню кроків"
@@ -303,9 +298,10 @@ export function AppShell({ name, email, interview, onLogout }: {
         </div>
 
         <main id="main-content" tabIndex={-1} aria-labelledby="page-title"
-          className={cn('flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:pb-10',
-            focus ? 'pb-[calc(1.25rem+env(safe-area-inset-bottom))]' : 'pb-[calc(6rem+env(safe-area-inset-bottom))]')}>
-          <div className="mx-auto w-full max-w-6xl">
+          className={cn('flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8',
+            focus ? 'flex min-h-0 flex-col pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-6' : 'pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-10')}>
+          {/* Interview (focus) layout: the page never scrolls; the chat list is the scroll container. */}
+          <div className={cn('mx-auto w-full max-w-6xl', focus && 'flex min-h-0 flex-1 flex-col')}>
             <ErrorBoundary resetKey={pathname}>
               <Suspense fallback={
                 <div aria-busy="true"><p role="status" className="sr-only">Завантаження сторінки…</p><Skeleton className="h-64" /></div>
@@ -321,7 +317,6 @@ export function AppShell({ name, email, interview, onLogout }: {
         <nav aria-label="Кроки оцінювання">
           <StepperNav states={states} onNavigate={() => setDrawer(false)} />
         </nav>
-        <p className="mt-6 text-xs leading-relaxed text-ink-subtle">Вакансії в каталозі синтетичні й не є актуальними пропозиціями роботодавців.</p>
       </Dialog>
 
       {!focus && (

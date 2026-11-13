@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { Banknote, Briefcase, MapPin, Search, SearchX, SlidersHorizontal } from 'lucide-react';
+import { MapPin, Search, SearchX, SlidersHorizontal } from 'lucide-react';
 import { api, ApiError } from '@/api';
 import { ErrorRetry } from '@/components/ErrorRetry';
 import { Pagination } from '@/components/Pagination';
@@ -246,13 +246,6 @@ export function VacanciesScreen() {
           ) : null}
 
           {data && <Pagination page={data.page} pages={pages} onPage={goPage} label="Сторінки каталогу" />}
-
-          <footer className="mt-2 flex flex-col gap-1 text-xs text-ink-subtle">
-            <p className="flex items-center gap-1.5"><Briefcase className="size-3.5" aria-hidden="true" />
-              Каталог навчальний: вакансії не є чинними пропозиціями роботодавців, відгукнутися на них не можна.</p>
-            <p className="flex items-center gap-1.5"><Banknote className="size-3.5" aria-hidden="true" />
-              «Тестова вакансія» — запис, який ми створили для перевірки застосунку; це не оголошення роботодавця.</p>
-          </footer>
         </section>
       </div>
     </div>

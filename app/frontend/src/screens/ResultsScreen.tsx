@@ -397,7 +397,6 @@ export function ResultsScreen({ profile }: { profile: CandidateProfile }) {
 
       <footer className="flex flex-col gap-1 text-xs text-ink-subtle">
         <p>Порядок вакансій детермінований і базується на ваших відповідях. «Збіг профілю» — не ймовірність працевлаштування.</p>
-        <p>«Тестова вакансія» — запис, який ми створили для перевірки застосунку; це не оголошення роботодавця.</p>
       </footer>
     </div>
   );

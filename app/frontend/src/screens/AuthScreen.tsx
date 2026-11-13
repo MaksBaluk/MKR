@@ -90,7 +90,6 @@ export function AuthScreen({ onSignedIn, notice = null }: { onSignedIn: () => vo
             ))}
           </ul>
         </div>
-        <p className="relative text-sm text-blue-100">Каталог вакансій у системі синтетичний.</p>
       </aside>
 
       <main id="main-content" tabIndex={-1} className="flex items-center justify-center px-4 py-10 sm:px-6">

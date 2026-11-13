@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { timeLabel } from '@/lib/bands';
+import { answerAlreadyAccepted, applyAnswer, idempotencyKeyFor, type AnswerResponse } from '@/lib/interviewSync';
 import { MAX_TOPICS, PANEL_TEXT as P, deriveTopics, topicsCountLabel } from '@/lib/interviewTopics';
 import type { InterviewState, Profile, TurnView } from '@/types';
 import { Bot, CheckCircle2, ChevronDown, Circle, Flag, Info, Laptop, Lightbulb, Loader2, Pause, Play, Send, Target, WifiOff } from 'lucide-react';
@@ -66,7 +67,11 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
   const [offline, setOffline] = useState(!navigator.onLine);
   const animateIds = useRef<Set<string>>(new Set());
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const endRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  // Synchronous guards: React state updates are async, so a fast double Enter/click could send twice.
+  const sendingRef = useRef(false);
+  const askingRef = useRef(false);
+  const keyCache = useRef(new Map<string, string>());
 
   async function refresh() {
     const s = await api<InterviewState>(`/interviews/${interviewId}`);
@@ -76,6 +81,8 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
   }
 
   async function askNext(version: number) {
+    if (askingRef.current) return;
+    askingRef.current = true;
     setThinking(true);
     try {
       const res = await api<{ turn: TurnView | null; version: number; done?: boolean }>(
@@ -89,7 +96,13 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
       }
       animateIds.current.add(res.turn.id);
       await refresh();
+    } catch (err) {
+      // A parallel request already moved the interview on: reload once and keep going silently.
+      if (!(err instanceof ApiError && err.status === 409)) throw err;
+      const fresh = await refresh();
+      if (fresh.status === 'FINISHED') onFinished();
     } finally {
+      askingRef.current = false;
       setThinking(false);
     }
   }
@@ -123,37 +136,52 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
   }, [pending?.id, thinking]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: 'end', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+    // Scroll only the chat list, never the page.
+    const el = listRef.current;
+    el?.scrollTo({ top: el.scrollHeight, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
   }, [state?.turns.length, thinking, optimistic]);
 
   async function send(e?: FormEvent) {
     e?.preventDefault();
     const text = draft.trim();
-    if (!pending || !state || !text || busy) return;
+    if (!pending || !state || !text || busy || thinking || sendingRef.current) return;
+    sendingRef.current = true;
+    const turnId = pending.id;
     setBusy(true);
     setError(null);
     setOptimistic(text);
     setDraft('');
     try {
-      await api(`/interviews/${interviewId}/answers`, {
-        method: 'POST',
-        json: { turn_id: pending.id, text, version: state.version, idempotency_key: crypto.randomUUID() },
-      });
+      let next: InterviewState | null = null;
+      try {
+        const res = await api<AnswerResponse>(`/interviews/${interviewId}/answers`, {
+          method: 'POST',
+          json: { turn_id: turnId, text, version: state.version, idempotency_key: idempotencyKeyFor(keyCache.current, turnId, text) },
+        });
+        next = applyAnswer(state, res);
+        setState(next);
+        setPending(null);
+      } catch (err) {
+        if (!(err instanceof ApiError && err.status === 409)) throw err;
+        // One refetch only. If our answer is already stored (double submit), carry on without a warning.
+        const fresh = await refresh();
+        if (!answerAlreadyAccepted(fresh, turnId, text)) {
+          setOptimistic(null);
+          setDraft(text);
+          setError('Розмова оновилась в іншій вкладці. Ми завантажили актуальний стан.');
+          return;
+        }
+        next = fresh;
+      }
       setOffline(false);
-      setPending(null);
-      const fresh = await refresh();
       setOptimistic(null);
-      if (fresh.status === 'ACTIVE') await askNext(fresh.version);
+      if (next.status === 'ACTIVE' && !next.pending_turn) await askNext(next.version);
     } catch (err) {
       setOptimistic(null);
-      setDraft(text);
-      if (err instanceof ApiError && err.status === 409) {
-        setError('Розмова оновилась в іншій вкладці. Ми завантажили актуальний стан.');
-        await refresh();
-      } else {
-        setError(err instanceof ApiError ? err.message : 'Не вдалося надіслати відповідь. Ваш текст збережено в полі.');
-      }
+      setDraft((d) => d || text);
+      setError(err instanceof ApiError ? err.message : 'Не вдалося надіслати відповідь. Ваш текст збережено в полі.');
     } finally {
+      sendingRef.current = false;
       setBusy(false);
     }
   }
@@ -185,8 +213,8 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
   const topicList = deriveTopics(turns);
 
   return (
-    <div className="flex flex-col gap-4">
-      <Card className="flex flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-5">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+      <Card className="flex shrink-0 flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-5">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
             <Laptop className="size-5" aria-hidden="true" />
@@ -202,15 +230,15 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
         </div>
       </Card>
       {offline && !navigator.onLine && (
-        <Alert icon={false} className="items-center">
+        <Alert icon={false} className="shrink-0 items-center">
           <WifiOff className="mr-2 inline size-4 align-[-2px]" aria-hidden="true" />
           Немає мережі. Відповідь буде надіслано, коли з’єднання відновиться.
         </Alert>
       )}
-      {error && <Alert role="alert" variant="danger">{error}</Alert>}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <Card className="flex min-h-[70vh] flex-col">
-          <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4" aria-live="polite" aria-label="Листування">
+      {error && <Alert role="alert" variant="danger" className="shrink-0">{error}</Alert>}
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)_auto] gap-3 sm:gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:grid-rows-1">
+        <Card className="flex min-h-0 flex-col overflow-hidden">
+          <div ref={listRef} className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain p-4" aria-live="polite" aria-label="Листування">
             {turns.map((t) => (
               <div key={t.id} className="flex flex-col gap-3">
                 <div className="msg-in flex items-end gap-2 motion-reduce:animate-none">
@@ -243,18 +271,17 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
               </div>
             )}
             {(thinking || busy) && <TypingIndicator />}
-            <div ref={endRef} />
           </div>
           {state?.status === 'PAUSED' && (
-            <div className="border-t border-line p-4">
+            <div className="shrink-0 border-t border-line p-4">
               <Button onClick={() => void lifecycle('resume')} disabled={busy}>
                 <Play className="size-4" aria-hidden="true" />
                 Продовжити розмову
               </Button>
             </div>
           )}
-          {pending && state?.status === 'ACTIVE' && (
-            <form onSubmit={send} className="border-t border-line p-3">
+          {state?.status === 'ACTIVE' && (
+            <form onSubmit={send} className="shrink-0 border-t border-line p-3" aria-busy={busy || thinking}>
               <div className="flex items-end gap-2 rounded-2xl border border-line bg-white p-2 focus-within:border-primary">
                 <label htmlFor="answer" className="sr-only">Ваша відповідь</label>
                 <Textarea
@@ -268,16 +295,16 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
                   placeholder="Введіть вашу відповідь…"
                   className="min-h-12 resize-none border-0 shadow-none focus-visible:outline-0"
                 />
-                <Button type="submit" size="icon" disabled={busy || !draft.trim()} aria-label="Надіслати">
-                  {busy ? <Loader2 className="size-5 animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <Send className="size-5" aria-hidden="true" />}
+                <Button type="submit" size="icon" disabled={busy || thinking || !pending || !draft.trim()} aria-label="Надіслати">
+                  {busy || thinking ? <Loader2 className="size-5 animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <Send className="size-5" aria-hidden="true" />}
                 </Button>
               </div>
-              <p className="mt-2 text-center text-xs text-ink-subtle">Enter — надіслати, Shift+Enter — новий рядок</p>
+              <p className="mt-2 hidden text-center text-xs text-ink-subtle sm:block">Enter — надіслати, Shift+Enter — новий рядок</p>
             </form>
           )}
         </Card>
 
-        <aside className="flex flex-col gap-4">
+        <aside className="flex max-h-[40dvh] min-h-0 flex-col gap-3 overflow-y-auto sm:gap-4 lg:max-h-none">
           <button
             type="button"
             className="flex items-center justify-between rounded-xl border border-line bg-white px-4 py-3 text-left font-semibold text-ink lg:hidden"

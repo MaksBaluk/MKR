@@ -18,8 +18,6 @@ import {
 } from '@/lib/vacancies';
 import type { RequirementGroup, VacancyDetail as Vacancy } from '@/types';
 
-const TEST_SOURCE_NOTE = 'Тестова вакансія — запис, який ми створили для перевірки застосунку; це не оголошення роботодавця.';
-
 function Description({ text, title }: { text: string | null; title: string }) {
   const nodes = parseDescription(text, title);
   if (nodes.length === 0) return <p className="text-sm text-ink-muted">Опису немає.</p>;
@@ -153,7 +151,6 @@ export function VacancyDetail() {
   ].filter(Boolean) as { icon: typeof MapPin; text: string }[];
   const responsibilities = missingFromDescription(v.description, v.responsibilities);
   const benefits = missingFromDescription(v.description, v.benefits);
-  const isTest = v.source_label === 'Тестова вакансія';
   const mandatory = v.requirements.filter((g) => g.kind === 'MANDATORY');
   const desired = v.requirements.filter((g) => g.kind !== 'MANDATORY');
 
@@ -197,7 +194,6 @@ export function VacancyDetail() {
               Джерело: <span className="font-medium text-ink">{v.source_label ?? 'не вказано'}</span>
               {v.fixture_version && <span className="text-ink-subtle"> · набір {v.fixture_version}</span>}
             </p>
-            {isTest && <p>{TEST_SOURCE_NOTE}</p>}
             {v.source_url ? (
               <a href={v.source_url} target="_blank" rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 self-start font-medium text-primary hover:underline">
