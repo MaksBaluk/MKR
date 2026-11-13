@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, ApiError } from '@/api';
-import { MarketChart } from '@/components/MarketChart';
+import { LazyMarketChart } from '@/components/LazyMarketChart';
 import { ScaleLegend } from '@/components/ScaleLegend';
 import { ErrorRetry } from '@/components/ErrorRetry';
 import { Card, CardContent } from '@/components/ui/card';
@@ -44,7 +44,7 @@ export function MarketScreen({ profile }: { profile: CandidateProfile }) {
     <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
       <Card className="min-w-0">
         <CardContent className="pt-5 sm:pt-6">
-          <MarketChart market={data.market} competencies={data.competencies} selfRatings={self.items ?? []} />
+          <LazyMarketChart market={data.market} competencies={data.competencies} selfRatings={self.items ?? []} />
         </CardContent>
       </Card>
       <div className="flex flex-col gap-4">

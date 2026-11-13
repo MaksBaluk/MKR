@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, ChevronLeft, ChevronRight, FileText, Loader2, MapPin, MessageSquare, Search, SearchX, Sparkles } from 'lucide-react';
 import { api, ApiError } from '@/api';
 import { InfoPopover } from '@/components/InfoPopover';
-import { MarketChart } from '@/components/MarketChart';
+import { LazyMarketChart } from '@/components/LazyMarketChart';
 import { ScaleLegend } from '@/components/ScaleLegend';
 import { SelfRatingList } from '@/components/SelfRatingList';
 import { SourceMark } from '@/components/SourceMark';
@@ -387,7 +387,7 @@ export function ResultsScreen({ profile }: { profile: CandidateProfile }) {
         <CompetencySection competencies={data.competencies} />
         <Card className="min-w-0">
           <CardContent className="pt-5 sm:pt-6">
-            <MarketChart market={data.market} competencies={data.competencies} selfRatings={self.items ?? []} />
+            <LazyMarketChart market={data.market} competencies={data.competencies} selfRatings={self.items ?? []} />
           </CardContent>
         </Card>
       </div>
@@ -442,7 +442,7 @@ export function ResultsScreen({ profile }: { profile: CandidateProfile }) {
 
       <footer className="flex flex-col gap-1 text-xs text-ink-subtle">
         <p>Порядок вакансій детермінований і базується на ваших відповідях. «Збіг профілю» — не ймовірність працевлаштування.</p>
-        <p>«Тестова вакансія» — вакансію створено для демонстрації роботи системи; вона не є реальною пропозицією роботи.</p>
+        <p>«Тестова вакансія» — запис, який ми створили для перевірки застосунку; це не оголошення роботодавця.</p>
       </footer>
     </div>
   );
