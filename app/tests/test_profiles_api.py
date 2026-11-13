@@ -35,6 +35,7 @@ def run_attempt(client, auth, attempt, answers=3, finish=True):
 
 
 def results(client, auth, pid, **params):
+    params.setdefault("fitting", "all")  # endpoint default is the fitting subset; these tests cover the whole cohort
     r = client.get(f"{API}/profiles/{pid}/results", params=params, headers=auth)
     assert r.status_code == 200, r.text
     return r.json()

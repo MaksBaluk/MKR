@@ -19,6 +19,7 @@ from backend.models import (CandidateProfile, CandidateSelfRating, CohortSnapsho
 from backend.security import current_user
 
 router = APIRouter(prefix="/profiles", tags=["profiles"])
+FIT_THRESHOLD_PERCENT = 40
 
 
 class ProfileBody(BaseModel):
@@ -195,19 +196,30 @@ def _competencies(db: Session, iv: CoreInterview) -> list[dict]:
     return out
 
 
+def _with_fit(item: dict) -> dict:
+    """Add fit flag (no failed mandatory group and enough confirmed share) and short Ukrainian reasons."""
+    reasons = [f"Підтверджено: {x}" for x in item["strengths"]] + [f"Прогалина: {x}" for x in item["gaps"]]
+    if item["unknown_count"]:
+        reasons.append(f"Не оцінено: {item['unknown_count']} вимог")
+    fits = item["z"] != 0 and item["confirmed_share"] >= FIT_THRESHOLD_PERCENT
+    return {**item, "fits": fits, "reasons": reasons or ["Недостатньо даних для пояснення"]}
+
+
 @router.get("/{profile_id}/results")
 def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(12, ge=1, le=50),
             work_mode: str = "", seniority: str = "", q: str = "",
             min_share: int | None = Query(None, ge=0, le=100),
+            fitting: Literal["fitting", "all", "nonfitting"] = "fitting",
             db: Session = Depends(get_db), user: User = Depends(current_user)):
     prof = _owned_profile(db, user, profile_id)
     iv = _latest_finished(db, prof.id)
     base = {"profile_id": prof.id, "page": page, "page_size": page_size, "note": NOTE}
     if iv is None:
-        return {"has_results": False, "attempt_id": None, "total": 0, "items": [], "competencies": [],
+        return {"has_results": False, "attempt_id": None, "total": 0, "fitting_total": 0, "all_total": 0, "items": [],
+                "competencies": [],
                 "market": [], **base}
     snap = db.get(CohortSnapshot, iv.cohort_id)
-    items = rank_items(db, prof.years_experience, snap, attempt_scores(db, iv.id))
+    items = [_with_fit(i) for i in rank_items(db, prof.years_experience, snap, attempt_scores(db, iv.id))]
     if work_mode:
         items = [i for i in items if (i["work_mode"] or "").lower() == work_mode.lower()]
     if seniority:
@@ -217,10 +229,15 @@ def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(
         items = [i for i in items if needle in (i["title"] or "").lower() or needle in (i["company"] or "").lower()]
     if min_share is not None:
         items = [i for i in items if i["confirmed_share"] >= min_share]
+    fitting_total = sum(1 for i in items if i["fits"])
+    all_total = len(items)
+    if fitting != "all":
+        items = [i for i in items if i["fits"] == (fitting == "fitting")]
     start = (page - 1) * page_size
     names = _names(db)
     market = compute_market(_market_input(_revisions(snap)))
-    return {"has_results": True, "attempt_id": iv.id, "total": len(items), "items": items[start:start + page_size],
+    return {"has_results": True, "attempt_id": iv.id, "total": len(items), "fitting_total": fitting_total,
+            "all_total": all_total, "items": items[start:start + page_size],
             "competencies": _competencies(db, iv),
             "market": [{"order": i + 1, "action_id": e.action_id, "name": names.get(e.action_id, e.action_id)}
                        for i, e in enumerate(market)], **base}
