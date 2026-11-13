@@ -1,0 +1,69 @@
+/*
+ * CompetenceMatch design tokens (light theme).
+ * Source of decisions: docs/superpowers/specs/2026-11-13-design-system.md.
+ * Every text/background pair listed in the spec was checked for WCAG AA (>= 4.5:1).
+ * Tailwind v4 turns each --color-* / --shadow-* / --font-* entry into utilities
+ * (bg-primary, text-ink-muted, shadow-card, font-sans, ...).
+ */
+@theme {
+  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Brand */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-strong: #1d4ed8;
+  --color-primary-soft: #eff4ff;
+  --color-primary-line: #c7d7fe;
+  --color-on-primary: #ffffff;
+  --color-brand-deep: #1e3a8a;
+  /* Teal accent: success-adjacent highlights (accent rule, completed steps, decorative blobs) */
+  --color-accent: #0d9488;
+  --color-accent-ink: #0f766e;
+  --color-accent-soft: #e6f6f4;
+
+  /* Neutrals */
+  --color-canvas: #f3f6fb;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f4f9;
+  --color-ink: #0f172a;
+  --color-ink-muted: #475569;
+  --color-ink-subtle: #5a677d;
+  --color-line: #e3e8f0;
+  --color-line-strong: #cbd5e1;
+  --color-ring: #2563eb;
+
+  /* Semantic status: *-ink is text/icon colour, *-soft is the tinted background */
+  --color-success: #059669;
+  --color-success-ink: #065f46;
+  --color-success-soft: #ecfdf5;
+  --color-warning: #d97706;
+  --color-warning-ink: #92400e;
+  --color-warning-soft: #fff7e6;
+  --color-danger: #dc2626;
+  --color-danger-ink: #b91c1c;
+  --color-danger-soft: #fef2f2;
+  --color-info: #2563eb;
+  --color-info-ink: #1d4ed8;
+  --color-info-soft: #eff6ff;
+
+  /* Elevation: soft, blue-tinted shadows */
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 16px -4px rgb(30 58 138 / 0.08);
+  --shadow-raised: 0 2px 4px rgb(15 23 42 / 0.05), 0 12px 32px -8px rgb(30 58 138 / 0.16);
+  --shadow-float: 0 1px 2px rgb(15 23 42 / 0.04), 0 18px 40px -12px rgb(30 58 138 / 0.22);
+  --shadow-nav: 0 -4px 16px -6px rgb(15 23 42 / 0.12);
+
+  /* Motion */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --animate-fade-up: fade-up 0.24s var(--ease-standard) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

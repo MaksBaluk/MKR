@@ -4,15 +4,22 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex max-w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-center text-sm font-semibold transition-[background-color,border-color,color,box-shadow] duration-150 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'bg-blue-600 text-white hover:bg-blue-700',
-        outline: 'border border-slate-300 bg-white text-slate-900 hover:bg-slate-50',
-        ghost: 'text-slate-700 hover:bg-slate-100',
+        default: 'bg-primary text-on-primary shadow-sm hover:bg-primary-hover',
+        outline: 'border border-line-strong bg-surface text-ink hover:border-primary-line hover:bg-primary-soft',
+        secondary: 'bg-primary-soft text-primary-strong hover:bg-primary-line/60',
+        ghost: 'text-ink-muted hover:bg-surface-muted hover:text-ink',
       },
-      size: { default: 'h-10 px-4 py-2', sm: 'h-8 px-3', icon: 'h-10 w-10' },
+      // Every size keeps a 44px hit area on touch screens (WCAG 2.5.5 / Apple HIG).
+      size: {
+        default: 'min-h-11 px-4 py-2',
+        sm: 'min-h-11 px-3 py-1.5 sm:min-h-9',
+        lg: 'min-h-12 px-6 py-2.5 text-base',
+        icon: 'size-11 shrink-0',
+      },
     },
     defaultVariants: { variant: 'default', size: 'default' },
   },

@@ -50,7 +50,7 @@ export function SelfRatingList({ track, initial, onSaved }: {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-ink-muted">
         Оцініть, наскільки впевнено ви виконуєте кожну дію. Це ваша самооцінка: вона зберігається автоматично, але не замінює
         оцінку розмови.
       </p>
@@ -61,12 +61,12 @@ export function SelfRatingList({ track, initial, onSaved }: {
           const id = `sr-${a.id}`;
           const st = state[a.id] ?? 'idle';
           return (
-            <li key={a.id} className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <li key={a.id} className="flex flex-col gap-2 rounded-xl border border-line bg-canvas p-3">
               <div className="flex items-center justify-between gap-2">
-                <label htmlFor={id} className="text-sm font-semibold text-slate-900">{a.label_uk}</label>
-                <span className="flex items-center gap-1 text-xs text-slate-500" aria-live="polite">
+                <label htmlFor={id} className="text-sm font-semibold text-ink">{a.label_uk}</label>
+                <span className="flex items-center gap-1 text-xs text-ink-subtle" aria-live="polite">
                   {st === 'saving' && <Loader2 className="size-3 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
-                  {st === 'saved' && <CheckCircle2 className="size-3 text-emerald-600" aria-hidden="true" />}
+                  {st === 'saved' && <CheckCircle2 className="size-3 text-success-ink" aria-hidden="true" />}
                   {st === 'saving' ? 'Зберігаємо…' : st === 'saved' ? 'Збережено' : ''}
                 </span>
               </div>
@@ -78,13 +78,13 @@ export function SelfRatingList({ track, initial, onSaved }: {
                 step={5}
                 value={value === null ? 0 : Math.round(value * 100)}
                 onChange={(e) => change(a.id, Number(e.target.value) / 100)}
-                className={`w-full accent-blue-600 ${value === null ? 'opacity-50' : ''}`}
+                className={`w-full accent-primary ${value === null ? 'opacity-50' : ''}`}
                 aria-valuetext={value === null ? 'не вказано' : `${Math.round(value * 100)} зі 100`}
               />
-              <div className="flex items-center justify-between text-xs text-slate-600">
+              <div className="flex items-center justify-between text-xs text-ink-muted">
                 <span>{value === null ? 'Не вказано' : `${Math.round(value * 100)} зі 100`}</span>
                 {value !== null && (
-                  <button type="button" className="underline underline-offset-2 hover:text-slate-900"
+                  <button type="button" className="underline underline-offset-2 hover:text-ink"
                     onClick={() => change(a.id, null)}>
                     Не знаю
                   </button>

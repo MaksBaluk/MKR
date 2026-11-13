@@ -1,13 +1,13 @@
 import { useId, useState, type FormEvent } from 'react';
 import { api, ApiError } from '@/api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert } from '@/components/ui/alert';
 import { SelfRatingList } from '@/components/SelfRatingList';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Field } from '@/components/ui/field';
+import { Input, Select } from '@/components/ui/input';
 import type { CohortResponse, Profile } from '@/types';
-import { LogOut, MessageSquare } from 'lucide-react';
+import { Loader2, MessageSquare } from 'lucide-react';
 
 const TRACKS = [
   { value: 'python', label: 'Python-розробка' },
@@ -15,11 +15,10 @@ const TRACKS = [
   { value: 'design', label: 'Дизайн' },
 ];
 
-export function ProfileScreen({ profile, onSaved, onStarted, onLogout }: {
+export function ProfileScreen({ profile, onSaved, onStarted }: {
   profile: Profile;
   onSaved: (p: Profile) => void;
   onStarted: (interviewId: string, cohortId: string) => void;
-  onLogout: () => void;
 }) {
   const [name, setName] = useState(profile.display_name);
   const [track, setTrack] = useState(profile.track);
@@ -62,49 +61,38 @@ export function ProfileScreen({ profile, onSaved, onStarted, onLogout }: {
   }
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-4 p-4">
-      <header className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Ваш профіль</h1>
-        <Button variant="ghost" onClick={onLogout}>
-          <LogOut className="size-4" aria-hidden="true" />
-          Вийти
-        </Button>
-      </header>
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
       <Card>
         <CardHeader>
           <CardTitle>Основні дані</CardTitle>
+          <CardDescription>За треком система добере вакансії для розмови. Обрати їх вручну до співбесіди не можна.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4 sm:grid-cols-2" onSubmit={submit} noValidate>
-            <div className="flex flex-col gap-1">
-              <Label htmlFor={ids.name}>Ім’я</Label>
-              <Input id={ids.name} value={name} onChange={(e) => setName(e.target.value)} required minLength={2} />
-            </div>
-            <div className="flex flex-col gap-1">
-              <Label htmlFor={ids.track}>Професійний трек</Label>
-              <select id={ids.track} value={track} onChange={(e) => setTrack(e.target.value)}
-                className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm">
+            <Field id={ids.name} label="Ім’я">
+              <Input id={ids.name} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required minLength={2} />
+            </Field>
+            <Field id={ids.track} label="Професійний трек">
+              <Select id={ids.track} value={track} onChange={(e) => setTrack(e.target.value)}>
                 {TRACKS.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>
                 ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-1">
-              <Label htmlFor={ids.title}>Бажана посада</Label>
-              <Input id={ids.title} value={title} onChange={(e) => setTitle(e.target.value)} />
-            </div>
-            <div className="flex flex-col gap-1">
-              <Label htmlFor={ids.years}>Років досвіду</Label>
-              <Input id={ids.years} type="number" min={0} max={70} value={years} onChange={(e) => setYears(e.target.value)} />
-            </div>
-            <div className="flex flex-col gap-1 sm:col-span-2">
-              <Label htmlFor={ids.location}>Місто або формат роботи</Label>
+              </Select>
+            </Field>
+            <Field id={ids.title} label="Бажана посада">
+              <Input id={ids.title} value={title} onChange={(e) => setTitle(e.target.value)} autoComplete="organization-title" />
+            </Field>
+            <Field id={ids.years} label="Років досвіду">
+              <Input id={ids.years} type="number" inputMode="numeric" min={0} max={70} value={years} onChange={(e) => setYears(e.target.value)} />
+            </Field>
+            <Field id={ids.location} label="Місто або формат роботи" className="sm:col-span-2">
               <Input id={ids.location} value={location} onChange={(e) => setLocation(e.target.value)} />
-            </div>
-            {error && <Alert role="alert" className="sm:col-span-2">{error}</Alert>}
+            </Field>
+            {error && <Alert role="alert" variant="danger" className="sm:col-span-2">{error}</Alert>}
             <div className="sm:col-span-2">
-              <Button type="submit" disabled={busy}>
-                <MessageSquare className="size-4" aria-hidden="true" />
+              <Button type="submit" size="lg" disabled={busy} className="w-full sm:w-auto">
+                {busy ? <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+                  : <MessageSquare className="size-4" aria-hidden="true" />}
                 {busy ? 'Готуємо розмову…' : 'Зберегти та почати розмову'}
               </Button>
             </div>
@@ -114,11 +102,12 @@ export function ProfileScreen({ profile, onSaved, onStarted, onLogout }: {
       <Card>
         <CardHeader>
           <CardTitle>Самооцінка дій</CardTitle>
+          <CardDescription>Необов’язково. Можна змінити пізніше в результатах.</CardDescription>
         </CardHeader>
         <CardContent>
           <SelfRatingList track={track} initial={initialRatings} />
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

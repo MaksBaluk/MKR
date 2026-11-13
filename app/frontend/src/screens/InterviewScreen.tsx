@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { api, ApiError } from '@/api';
-import { AppShell } from '@/components/AppShell';
 import { ScoreBar } from '@/components/ScoreBar';
 import { Alert } from '@/components/ui/alert';
+import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { timeLabel } from '@/lib/bands';
 import type { AssessmentItem, InterviewState, Profile, TurnView } from '@/types';
-import { Bot, Flag, Laptop, Lightbulb, Loader2, Pause, Play, Send, Target, User as UserIcon, WifiOff } from 'lucide-react';
+import { Bot, Flag, Laptop, Lightbulb, Loader2, Pause, Play, Send, Target, WifiOff } from 'lucide-react';
 
 const MAX_TOPICS = 10;
 const TRACK_NAMES: Record<string, string> = { python: 'Python-розробник', marketing: 'Маркетолог', design: 'Дизайнер' };
@@ -37,12 +37,12 @@ function BotText({ text, animate }: { text: string; animate: boolean }) {
 function TypingIndicator() {
   return (
     <div className="msg-in flex items-end gap-2" role="status" aria-label="Асистент друкує">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
         <Bot className="size-5" aria-hidden="true" />
       </span>
-      <div className="flex gap-1 rounded-2xl rounded-bl-sm bg-slate-100 px-4 py-3">
+      <div className="flex gap-1 rounded-2xl rounded-bl-sm bg-surface-muted px-4 py-3">
         {[0, 1, 2].map((i) => (
-          <span key={i} className="typing-dot size-2 rounded-full bg-slate-400 motion-reduce:animate-none"
+          <span key={i} className="typing-dot size-2 rounded-full bg-ink-subtle motion-reduce:animate-none"
             style={{ animationDelay: `${i * 0.16}s` }} />
         ))}
       </div>
@@ -50,12 +50,11 @@ function TypingIndicator() {
   );
 }
 
-export function InterviewScreen({ interviewId, profile, llmConfigured, onFinished, onLogout }: {
+export function InterviewScreen({ interviewId, profile, llmConfigured, onFinished }: {
   interviewId: string;
   profile: Profile;
   llmConfigured: boolean;
   onFinished: () => void;
-  onLogout: () => void;
 }) {
   const [state, setState] = useState<InterviewState | null>(null);
   const [pending, setPending] = useState<TurnView | null>(null);
@@ -193,78 +192,68 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
   const profileItems = [...latest.values()].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 5);
 
   return (
-    <AppShell
-      title="Оцінювання компетентностей"
-      name={profile.display_name}
-      onLogout={onLogout}
-      right={
-        <div className="hidden items-center gap-3 sm:flex">
-          <Progress value={(topics / MAX_TOPICS) * 100} label="Прогрес розмови" className="w-44" />
-          <span className="text-sm font-medium text-slate-600">{topics}/{MAX_TOPICS} тем</span>
+    <div className="flex flex-col gap-4">
+      <Card className="flex flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-5">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+            <Laptop className="size-5" aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs text-ink-subtle">Професія для оцінювання</p>
+            <p className="truncate font-semibold text-ink">{profile.desired_title || TRACK_NAMES[profile.track] || profile.track}</p>
+          </div>
         </div>
-      }
-    >
+        <div className="flex w-full items-center gap-3 sm:w-auto">
+          <Progress value={(topics / MAX_TOPICS) * 100} label="Прогрес розмови" className="flex-1 sm:w-44" />
+          <span className="shrink-0 text-sm font-medium tabular-nums text-ink-muted">{topics} з {MAX_TOPICS} тем</span>
+        </div>
+      </Card>
       {offline && !navigator.onLine && (
-        <Alert className="mb-3 flex items-center gap-2">
-          <WifiOff className="size-4" aria-hidden="true" />
+        <Alert icon={false} className="items-center">
+          <WifiOff className="mr-2 inline size-4 align-[-2px]" aria-hidden="true" />
           Немає мережі. Відповідь буде надіслано, коли з’єднання відновиться.
         </Alert>
       )}
-      {error && <Alert role="alert" className="mb-3">{error}</Alert>}
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+      {error && <Alert role="alert" variant="danger">{error}</Alert>}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         <Card className="flex min-h-[70vh] flex-col">
-          <div className="flex items-center justify-between gap-3 border-b border-slate-100 p-4">
-            <div className="flex items-center gap-3">
-              <span className="flex size-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                <Laptop className="size-6" aria-hidden="true" />
-              </span>
-              <div>
-                <p className="text-xs text-slate-500">Обрана професія</p>
-                <p className="font-semibold text-slate-900">{profile.desired_title || TRACK_NAMES[profile.track] || profile.track}</p>
-              </div>
-            </div>
-          </div>
           <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4" aria-live="polite" aria-label="Листування">
             {turns.map((t) => (
               <div key={t.id} className="flex flex-col gap-3">
                 <div className="msg-in flex items-end gap-2 motion-reduce:animate-none">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
                     <Bot className="size-5" aria-hidden="true" />
                   </span>
                   <div className="max-w-[80%]">
-                    <p className="rounded-2xl rounded-bl-sm bg-slate-100 px-4 py-2.5 text-[15px] leading-relaxed text-slate-900">
+                    <p className="rounded-2xl rounded-bl-sm bg-surface-muted px-4 py-2.5 text-[15px] leading-relaxed text-ink">
                       <span className="sr-only">Питання: </span>
                       <BotText text={t.question_text} animate={animateIds.current.has(t.id)} />
                     </p>
-                    <p className="mt-1 text-xs text-slate-400">{timeLabel(t.created_at)}</p>
+                    <p className="mt-1 text-xs text-ink-subtle">{timeLabel(t.created_at)}</p>
                   </div>
                 </div>
                 {t.answer_text !== null && (
                   <div className="msg-in flex items-end justify-end gap-2 motion-reduce:animate-none">
-                    <p className="max-w-[80%] rounded-2xl rounded-br-sm bg-blue-600 px-4 py-2.5 text-[15px] leading-relaxed text-white">
+                    <p className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-[15px] leading-relaxed text-on-primary">
                       <span className="sr-only">Ваша відповідь: </span>
                       {t.answer_text}
                     </p>
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
-                      <UserIcon className="size-5" aria-hidden="true" />
-                    </span>
+                    <Avatar name={profile.display_name} className="size-9 text-xs" />
                   </div>
                 )}
               </div>
             ))}
             {optimistic && (
               <div className="msg-in flex items-end justify-end gap-2 motion-reduce:animate-none">
-                <p className="max-w-[80%] rounded-2xl rounded-br-sm bg-blue-600 px-4 py-2.5 text-[15px] text-white opacity-80">{optimistic}</p>
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
-                  <UserIcon className="size-5" aria-hidden="true" />
-                </span>
+                <p className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-[15px] text-on-primary opacity-80">{optimistic}</p>
+                <Avatar name={profile.display_name} className="size-9 text-xs" />
               </div>
             )}
             {(thinking || busy) && <TypingIndicator />}
             <div ref={endRef} />
           </div>
           {state?.status === 'PAUSED' && (
-            <div className="border-t border-slate-100 p-4">
+            <div className="border-t border-line p-4">
               <Button onClick={() => void lifecycle('resume')} disabled={busy}>
                 <Play className="size-4" aria-hidden="true" />
                 Продовжити розмову
@@ -272,8 +261,8 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
             </div>
           )}
           {pending && state?.status === 'ACTIVE' && (
-            <form onSubmit={send} className="border-t border-slate-100 p-3">
-              <div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-white p-2 focus-within:border-blue-500">
+            <form onSubmit={send} className="border-t border-line p-3">
+              <div className="flex items-end gap-2 rounded-2xl border border-line bg-white p-2 focus-within:border-primary">
                 <label htmlFor="answer" className="sr-only">Ваша відповідь</label>
                 <Textarea
                   id="answer"
@@ -290,7 +279,7 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
                   {busy ? <Loader2 className="size-5 animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <Send className="size-5" aria-hidden="true" />}
                 </Button>
               </div>
-              <p className="mt-2 text-center text-xs text-slate-500">Enter — надіслати, Shift+Enter — новий рядок</p>
+              <p className="mt-2 text-center text-xs text-ink-subtle">Enter — надіслати, Shift+Enter — новий рядок</p>
             </form>
           )}
         </Card>
@@ -299,41 +288,41 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
           <Card>
             <CardHeader>
               <CardTitle>Поточний профіль</CardTitle>
-              <p className="text-sm text-slate-500">Виявлені компетентності за вашими відповідями.</p>
+              <p className="text-sm text-ink-subtle">Виявлені компетентності за вашими відповідями.</p>
             </CardHeader>
             <CardContent>
               {!llmConfigured && (
                 <Alert className="mb-3 text-xs">Автоматична оцінка зараз вимкнена, тому профіль не заповнюється.</Alert>
               )}
               {profileItems.length === 0 ? (
-                <p className="text-sm text-slate-500">Оцінки з’являться після ваших відповідей.</p>
+                <p className="text-sm text-ink-subtle">Оцінки з’являться після ваших відповідей.</p>
               ) : (
                 <ul className="flex flex-col gap-4">
-                  {profileItems.map((a) => <ScoreBar key={a.action_id} name={a.action_name} score={a.score ?? 0} />)}
+                  {profileItems.map((a) => <li key={a.action_id}><ScoreBar name={a.action_name} score={a.score ?? 0} /></li>)}
                 </ul>
               )}
             </CardContent>
           </Card>
           {pending && (
-            <Card className="border-blue-100 bg-blue-50/60">
+            <Card className="border-primary-line bg-primary-soft">
               <CardContent className="flex items-start gap-3 pt-5">
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white text-primary">
                   <Target className="size-6" aria-hidden="true" />
                 </span>
                 <div>
-                  <p className="text-xs text-blue-700">Поточна компетентність</p>
-                  <p className="text-lg font-semibold text-slate-900">{pending.action_name}</p>
-                  <p className="text-sm text-slate-600">Кілька запитань, щоб краще оцінити ваш досвід.</p>
+                  <p className="text-xs text-primary">Поточна компетентність</p>
+                  <p className="text-lg font-semibold text-ink">{pending.action_name}</p>
+                  <p className="text-sm text-ink-muted">Кілька запитань, щоб краще оцінити ваш досвід.</p>
                 </div>
               </CardContent>
             </Card>
           )}
           <Card>
             <CardContent className="flex items-start gap-3 pt-5">
-              <Lightbulb className="mt-0.5 size-5 shrink-0 text-amber-500" aria-hidden="true" />
+              <Lightbulb className="mt-0.5 size-5 shrink-0 text-warning" aria-hidden="true" />
               <div>
-                <p className="font-semibold text-slate-900">Порада</p>
-                <p className="text-sm text-slate-600">Наводьте конкретні приклади з вашого досвіду: це допомагає точніше оцінити рівень.</p>
+                <p className="font-semibold text-ink">Порада</p>
+                <p className="text-sm text-ink-muted">Наводьте конкретні приклади з вашого досвіду: це допомагає точніше оцінити рівень.</p>
               </div>
             </CardContent>
           </Card>
@@ -351,6 +340,6 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
           </div>
         </aside>
       </div>
-    </AppShell>
+    </div>
   );
 }

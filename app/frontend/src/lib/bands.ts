@@ -6,9 +6,9 @@ export interface Band {
 
 /** Policy bands from MATH_SPEC §3 collapsed to three display levels. Not statistical calibration. */
 export function bandFor(score: number): Band {
-  if (score >= 0.75) return { label: 'Високий', badge: 'success', bar: 'bg-emerald-500' };
-  if (score >= 0.5) return { label: 'Середній', badge: 'info', bar: 'bg-blue-500' };
-  return { label: 'Низький', badge: 'warning', bar: 'bg-amber-500' };
+  if (score >= 0.75) return { label: 'Високий', badge: 'success', bar: 'bg-success' };
+  if (score >= 0.5) return { label: 'Середній', badge: 'info', bar: 'bg-primary' };
+  return { label: 'Низький', badge: 'warning', bar: 'bg-warning' };
 }
 
 export function initials(name: string): string {
