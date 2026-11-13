@@ -7,7 +7,7 @@ down_revision = "0002_discovery_evidence"
 branch_labels = None
 depends_on = None
 
-NEW_TABLES = ["candidate_self_ratings", "rubrics", "rubric_criteria", "criterion_assessments", "cohort_snapshots"]
+NEW_TABLES = ["candidate_self_ratings", "rubrics", "rubric_criteria", "criterion_assessments", "cohort_snapshots", "core_interviews", "core_turns"]
 
 
 def _tables():
@@ -72,6 +72,7 @@ def upgrade():
             sa.Column("sha256", sa.String(64), nullable=False),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
         )
+    _core_tables()
 
 
 def downgrade():
@@ -79,3 +80,32 @@ def downgrade():
     for name in reversed(NEW_TABLES):
         if name in existing:
             op.drop_table(name)
+
+
+def _core_tables():
+    existing = _tables()
+    if "core_interviews" not in existing:
+        op.create_table(
+            "core_interviews",
+            sa.Column("id", sa.String(36), primary_key=True),
+            sa.Column("user_id", sa.String(36), sa.ForeignKey("users.id", ondelete="CASCADE"), index=True),
+            sa.Column("cohort_id", sa.String(36), sa.ForeignKey("cohort_snapshots.id", ondelete="CASCADE"), index=True),
+            sa.Column("status", sa.String(16), nullable=False),
+            sa.Column("version", sa.Integer(), nullable=False),
+            sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
+        )
+    if "core_turns" not in existing:
+        op.create_table(
+            "core_turns",
+            sa.Column("id", sa.String(36), primary_key=True),
+            sa.Column("interview_id", sa.String(36), sa.ForeignKey("core_interviews.id", ondelete="CASCADE"), index=True),
+            sa.Column("sequence", sa.Integer(), nullable=False),
+            sa.Column("action_id", sa.String(120), nullable=False),
+            sa.Column("question_text", sa.Text(), nullable=False),
+            sa.Column("question_source", sa.String(24), nullable=False),
+            sa.Column("answer_text", sa.Text(), nullable=True),
+            sa.Column("idempotency_key", sa.String(120), nullable=True),
+            sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
+            sa.UniqueConstraint("interview_id", "sequence", name="uq_core_turn_sequence"),
+            sa.UniqueConstraint("interview_id", "idempotency_key", name="uq_core_turn_idem"),
+        )

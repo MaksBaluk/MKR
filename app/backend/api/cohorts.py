@@ -25,9 +25,12 @@ def _vacancy_revisions(db: Session, track: str) -> list[dict]:
     for v in db.scalars(stmt).all():
         out.append({
             "id": v.id,
+            "years_min": v.years_min,
             "groups": [
                 {"id": g.id, "kind": g.kind,
-                 "alternatives": sorted(a.competency_id for a in g.alternatives)}
+                 "alternatives": sorted(
+                     ({"competency_id": a.competency_id, "required_level": a.required_level} for a in g.alternatives),
+                     key=lambda a: a["competency_id"])}
                 for g in v.groups
             ],
         })
@@ -36,7 +39,7 @@ def _vacancy_revisions(db: Session, track: str) -> list[dict]:
 
 def _market_input(revisions: list[dict]) -> list[VacancyInput]:
     return [
-        VacancyInput(r["id"], tuple(tuple(g["alternatives"]) for g in r["groups"]))
+        VacancyInput(r["id"], tuple(tuple(a["competency_id"] for a in g["alternatives"]) for g in r["groups"]))
         for r in revisions
     ]
 
@@ -54,7 +57,7 @@ def create_auto_cohort(db: Session = Depends(get_db), user: User = Depends(curre
         return {"cohort_id": existing.id, "vacancy_count": len(existing.vacancy_ids), "sha256": digest,
                 "empty": False, "policy": POLICY_ID}
     snap = CohortSnapshot(user_id=user.id, vacancy_ids=[r["id"] for r in revisions],
-                          requirement_revisions={r["id"]: r["groups"] for r in revisions},
+                          requirement_revisions={r["id"]: {"years_min": r["years_min"], "groups": r["groups"]} for r in revisions},
                           policy_id=POLICY_ID, sha256=digest)
     db.add(snap)
     db.commit()
@@ -67,7 +70,7 @@ def cohort_market(cohort_id: str, db: Session = Depends(get_db), user: User = De
     snap = db.scalar(select(CohortSnapshot).where(CohortSnapshot.id == cohort_id, CohortSnapshot.user_id == user.id))
     if snap is None:
         raise HTTPException(404, "Cohort not found")
-    revisions = [{"id": vid, "groups": snap.requirement_revisions[vid]} for vid in snap.vacancy_ids]
+    revisions = [{"id": vid, **snap.requirement_revisions[vid]} for vid in snap.vacancy_ids]
     entries = compute_market(_market_input(revisions))
     names = {c.id: c.label_uk for c in db.scalars(select(Competency)).all()}
     # Public response: ordered names only — no F/I values, counts or percentages.

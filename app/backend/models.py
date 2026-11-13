@@ -275,3 +275,29 @@ class CohortSnapshot(Base):
     policy_id: Mapped[str] = mapped_column(String(64), nullable=False)
     sha256: Mapped[str] = mapped_column(String(64), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class CoreInterview(Base):
+    """One adaptive interview over a frozen cohort. `version` guards concurrent writes."""
+    __tablename__ = "core_interviews"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    cohort_id: Mapped[str] = mapped_column(ForeignKey("cohort_snapshots.id", ondelete="CASCADE"), index=True)
+    status: Mapped[str] = mapped_column(String(16), default="ACTIVE")  # ACTIVE | PAUSED | FINISHED
+    version: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class CoreTurn(Base):
+    __tablename__ = "core_turns"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    interview_id: Mapped[str] = mapped_column(ForeignKey("core_interviews.id", ondelete="CASCADE"), index=True)
+    sequence: Mapped[int] = mapped_column(Integer, nullable=False)
+    action_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    question_text: Mapped[str] = mapped_column(Text, nullable=False)
+    question_source: Mapped[str] = mapped_column(String(24), nullable=False)  # LLM_INTERVIEWER | FALLBACK_UNGRADED
+    answer_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    idempotency_key: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    __table_args__ = (UniqueConstraint("interview_id", "sequence", name="uq_core_turn_sequence"),
+                      UniqueConstraint("interview_id", "idempotency_key", name="uq_core_turn_idem"))
