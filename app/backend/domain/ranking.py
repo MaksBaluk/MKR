@@ -21,6 +21,7 @@ class VacancyRanking:
     has_mandatory: bool
     has_preferred: bool
     label: Label
+    confirmed_share: float = 0.0  # mean lower bound over all groups; display only, not a probability
 
 
 def z_status(mandatory_group_statuses: Sequence[str]) -> Literal[0, 1, 2]:

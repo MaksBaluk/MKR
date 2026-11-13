@@ -18,6 +18,7 @@ from backend.domain.planner import choose_next
 from backend.models import (CohortSnapshot, CoreInterview, CoreTurn, Competency, CriterionAssessment, Rubric,
                             User)
 from backend.providers.llm import get_transport
+from backend.providers.questions import next_question as bank_question
 from backend.providers.roles import LLMError, evaluator_assess, interviewer_question
 from backend.security import current_user
 
@@ -57,9 +58,15 @@ def _label(db: Session, action_id: str) -> str:
     return c.label_uk if c else action_id
 
 
-def _turn_dict(t: CoreTurn) -> dict:
-    return {"id": t.id, "sequence": t.sequence, "action_id": t.action_id, "question_text": t.question_text,
+def _names(db: Session) -> dict[str, str]:
+    return {c.id: c.label_uk for c in db.scalars(select(Competency)).all()}
+
+
+def _turn_dict(t: CoreTurn, names: dict[str, str] | None = None) -> dict:
+    return {"id": t.id, "sequence": t.sequence, "action_id": t.action_id,
+            "action_name": (names or {}).get(t.action_id, t.action_id), "question_text": t.question_text,
             "question_source": t.question_source, "answer_text": t.answer_text,
+            "created_at": t.created_at.isoformat() if t.created_at else None,
             "graded": t.question_source == "LLM_INTERVIEWER"}
 
 
@@ -110,9 +117,11 @@ def get_interview(interview_id: str, db: Session = Depends(get_db), user: User =
     iv = _owned_interview(db, user, interview_id)
     turns = db.scalars(select(CoreTurn).where(CoreTurn.interview_id == iv.id).order_by(CoreTurn.sequence)).all()
     pending = next((t for t in turns if t.answer_text is None), None)
+    names = _names(db)
     return {"id": iv.id, "status": iv.status, "version": iv.version,
-            "turns": [_turn_dict(t) for t in turns],
-            "pending_turn": _turn_dict(pending) if pending else None}
+            "turns": [_turn_dict(t, names) for t in turns],
+            "pending_turn": _turn_dict(pending, names) if pending else None,
+            "topics_used": len({t.action_id for t in turns})}
 
 
 @router.post("/interviews/{interview_id}/next-question")
@@ -126,7 +135,7 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     turns = db.scalars(select(CoreTurn).where(CoreTurn.interview_id == iv.id).order_by(CoreTurn.sequence)).all()
     pending = next((t for t in turns if t.answer_text is None), None)
     if pending is not None:
-        return {"turn": _turn_dict(pending), "version": iv.version}  # never regenerate a shown question
+        return {"turn": _turn_dict(pending, _names(db)), "version": iv.version}  # never regenerate a shown question
     snap = db.get(CohortSnapshot, iv.cohort_id)
     revisions = _revisions(snap)
     state, weights = planner_state(revisions, latest_scores(db, user))
@@ -137,8 +146,17 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     mass = {e.action_id: e.mass for e in compute_market([
         VacancyInput(r["id"], tuple(tuple(a["competency_id"] for a in g["alternatives"]) for g in r["groups"]))
         for r in revisions])}
-    available = sorted({a for alts in state.open_alternatives.values() for a in alts
-                        if can_ask_question(shown.get(a, 0)) and (a in used or can_start_topic(len(used)))})
+    latest_in_session: dict[str, float | None] = {}
+    for row in db.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == iv.id)
+                          .order_by(CriterionAssessment.revision)).all():
+        latest_in_session[row.action_id] = row.score
+    # A topic is re-asked only when the Evaluator found insufficient evidence (null score).
+    def eligible(a: str) -> bool:
+        if a not in used:
+            return can_start_topic(len(used))
+        return can_ask_question(shown[a]) and a in latest_in_session and latest_in_session[a] is None
+
+    available = sorted({a for alts in state.open_alternatives.values() for a in alts if eligible(a)})
     action = choose_next(state, weights, available, mass)
     if action is None:
         return {"turn": None, "version": iv.version, "done": True}
@@ -154,13 +172,17 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         except LLMError:
             question = None
     if question is None:
-        question = f"Розкажіть про ваш практичний досвід: {label}. Наведіть конкретний приклад."
+        banked = bank_question(action, 0)
+        if banked is None or banked.get("kind") != "FREE_TEXT":
+            banked = next((q for q in (bank_question(action, i) for i in range(6))
+                           if q and q.get("kind") == "FREE_TEXT"), None)
+        question = banked["text"] if banked else f"Розкажіть про ваш практичний досвід: {label}. Наведіть конкретний приклад."
     turn = CoreTurn(interview_id=iv.id, sequence=len(turns) + 1, action_id=action, question_text=question,
                     question_source=source)
     iv.version += 1
     db.add(turn)
     db.commit()
-    return {"turn": _turn_dict(turn), "version": iv.version, "done": False}
+    return {"turn": _turn_dict(turn, _names(db)), "version": iv.version, "done": False}
 
 
 def _assess_action(db: Session, user: User, iv: CoreInterview, action_id: str) -> str:
@@ -200,7 +222,7 @@ def submit_answer(interview_id: str, data: AnswerBody, db: Session = Depends(get
     replay = db.scalar(select(CoreTurn).where(CoreTurn.interview_id == iv.id,
                                               CoreTurn.idempotency_key == data.idempotency_key))
     if replay is not None:
-        return {"turn": _turn_dict(replay), "version": iv.version, "replayed": True}
+        return {"turn": _turn_dict(replay, _names(db)), "version": iv.version, "replayed": True}
     if data.version != iv.version:
         raise HTTPException(409, "Стан інтерв'ю змінився, оновіть сторінку")
     turn = db.scalar(select(CoreTurn).where(CoreTurn.id == data.turn_id, CoreTurn.interview_id == iv.id))
@@ -218,7 +240,8 @@ def submit_answer(interview_id: str, data: AnswerBody, db: Session = Depends(get
         raise HTTPException(409, "Відповідь уже збережено в іншому запиті")
     status = _assess_action(db, user, iv, turn.action_id)
     db.commit()
-    return {"turn": _turn_dict(turn), "version": iv.version, "replayed": False, "assessment_status": status}
+    return {"turn": _turn_dict(turn, _names(db)), "version": iv.version, "replayed": False,
+            "assessment_status": status}
 
 
 @router.post("/interviews/{interview_id}/{action}")
@@ -247,6 +270,8 @@ def list_assessments(interview_id: str | None = None, db: Session = Depends(get_
     if interview_id:
         query = query.where(CriterionAssessment.session_id == interview_id)
     rows = db.scalars(query.order_by(CriterionAssessment.created_at, CriterionAssessment.revision)).all()
-    return {"items": [{"interview_id": r.session_id, "action_id": r.action_id, "criterion_id": r.criterion_id,
+    names = _names(db)
+    return {"items": [{"interview_id": r.session_id, "action_id": r.action_id,
+                       "action_name": names.get(r.action_id, r.action_id), "criterion_id": r.criterion_id,
                        "score": r.score, "reason": r.reason, "evidence": r.evidence, "revision": r.revision,
                        "source": "LLM_EVALUATOR", "editable": False} for r in rows]}

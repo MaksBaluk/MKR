@@ -87,5 +87,29 @@ def rank_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], user_year
     w_p = mean([u - l for u, l in zip(p_U, p_L)])
     any_score = any(scores.get(a["competency_id"]) is not None for g in groups for a in g["alternatives"])
     x = experience_status(user_years, vacancy["years_min"], True)
+    share = mean(m_L + p_L)
     return VacancyRanking(vacancy["id"], z_status(m_status), x, l_m, l_p, w_m, w_p,
-                          bool(m_L), bool(p_L), "RANKED" if any_score else "LOW_INFORMATION")
+                          bool(m_L), bool(p_L), "RANKED" if any_score else "LOW_INFORMATION", share)
+
+
+def explain_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], names: Mapping[str, str],
+                    limit: int = 3) -> dict:
+    """Human-readable strengths, gaps and unknown count from the same group evaluation as the ranking."""
+    strengths: list[str] = []
+    gaps: list[str] = []
+    unknown = 0
+    tags: list[str] = []
+    for g in vacancy["groups"]:
+        label = " / ".join(names.get(a["competency_id"], a["competency_id"]) for a in g["alternatives"])
+        for a in g["alternatives"]:
+            n = names.get(a["competency_id"], a["competency_id"])
+            if n not in tags:
+                tags.append(n)
+        ev = eval_group(g["alternatives"], scores)
+        if ev.status == "SATISFIED":
+            strengths.append(label)
+        elif ev.status == "FAILED":
+            gaps.append(label)
+        else:
+            unknown += 1
+    return {"strengths": strengths[:limit], "gaps": gaps[:limit], "unknown_count": unknown, "tags": tags[:5]}

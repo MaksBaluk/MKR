@@ -150,3 +150,25 @@ def test_finished_interview_not_active(client, auth, interview):
     assert client.get("/api/v1/interviews/active", headers=auth).json()["interview"] is None
     done = client.get("/api/v1/interviews/latest-finished", headers=auth).json()["interview"]
     assert done["id"] == interview["id"]
+
+
+def test_ungraded_answer_moves_to_next_topic(client, auth, interview):
+    q1 = _next(client, auth, interview, 0).json()
+    ans = client.post(f"/api/v1/interviews/{interview['id']}/answers", headers=auth, json={
+        "turn_id": q1["turn"]["id"], "text": "Робив сервіс.", "version": q1["version"],
+        "idempotency_key": "answer-key-0010"}).json()
+    q2 = _next(client, auth, interview, ans["version"]).json()
+    assert q2["turn"]["action_id"] != q1["turn"]["action_id"]
+
+
+def test_fallback_question_comes_from_bank_and_has_action_name(client, auth, interview):
+    turn = _next(client, auth, interview, 0).json()["turn"]
+    assert turn["action_name"] and "Розкажіть про ваш практичний досвід" not in turn["question_text"]
+
+
+def test_recommendations_top_five_with_explanations(client, auth, cohort, no_llm):
+    body = client.post("/api/v1/recommendations", json={"cohort_id": cohort}, headers=auth).json()
+    assert len(body["items"]) == 5 and body["total"] > 5
+    first = body["items"][0]
+    assert 0 <= first["confirmed_share"] <= 100
+    assert first["tags"] and "strengths" in first and "gaps" in first and "unknown_count" in first
