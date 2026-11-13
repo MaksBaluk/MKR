@@ -1,0 +1,722 @@
+[
+  {
+    "id": "python-core",
+    "label": "Python",
+    "label_uk": "Python",
+    "track": "python",
+    "summary": "Писати підтримуваний Python-код з обробкою помилок та типізацією.",
+    "aliases": [
+      "python",
+      "python"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "fastapi",
+    "label": "FastAPI",
+    "label_uk": "FastAPI",
+    "track": "python",
+    "summary": "Створювати HTTP API з валідацією запитів через FastAPI.",
+    "aliases": [
+      "fastapi",
+      "fastapi"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "django",
+    "label": "Django",
+    "label_uk": "Django",
+    "track": "python",
+    "summary": "Розробляти вебзастосунки з Django ORM та permissions.",
+    "aliases": [
+      "django",
+      "django"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "postgresql",
+    "label": "PostgreSQL",
+    "label_uk": "PostgreSQL",
+    "track": "python",
+    "summary": "Проєктувати індекси, транзакції та запити PostgreSQL.",
+    "aliases": [
+      "postgresql",
+      "postgresql"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "sql",
+    "label": "SQL",
+    "label_uk": "SQL",
+    "track": "python",
+    "summary": "Писати JOIN, GROUP BY та агрегувальні SQL-запити.",
+    "aliases": [
+      "sql",
+      "sql"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "sqlalchemy",
+    "label": "SQLAlchemy",
+    "label_uk": "SQLAlchemy",
+    "track": "python",
+    "summary": "Працювати з транзакціями та моделями SQLAlchemy 2.",
+    "aliases": [
+      "sqlalchemy",
+      "sqlalchemy"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "docker",
+    "label": "Docker",
+    "label_uk": "Docker",
+    "track": "python",
+    "summary": "Створювати мінімальні Docker-образи й керувати контейнерами.",
+    "aliases": [
+      "docker",
+      "docker"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "aws",
+    "label": "AWS",
+    "label_uk": "AWS",
+    "track": "python",
+    "summary": "Розгортати сервіси у хмарі AWS з контрольованими правами.",
+    "aliases": [
+      "aws",
+      "aws"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "redis",
+    "label": "Redis",
+    "label_uk": "Redis",
+    "track": "python",
+    "summary": "Використовувати Redis як кеш або брокер повідомлень.",
+    "aliases": [
+      "redis",
+      "redis"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "celery",
+    "label": "Celery",
+    "label_uk": "Celery",
+    "track": "python",
+    "summary": "Виконувати надійні фонові задачі у Celery.",
+    "aliases": [
+      "celery",
+      "celery"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "pytest",
+    "label": "Pytest",
+    "label_uk": "Pytest",
+    "track": "python",
+    "summary": "Писати unit й інтеграційні тести на pytest.",
+    "aliases": [
+      "pytest",
+      "pytest"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "git",
+    "label": "Git",
+    "label_uk": "Git",
+    "track": "python",
+    "summary": "Керувати гілками, pull requests і вирішувати merge conflicts.",
+    "aliases": [
+      "git",
+      "git"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "ci-cd",
+    "label": "CI/CD",
+    "label_uk": "CI/CD",
+    "track": "python",
+    "summary": "Автоматизувати перевірки, збірки та деплой у CI/CD.",
+    "aliases": [
+      "ci/cd",
+      "ci/cd"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "rest-api",
+    "label": "REST API",
+    "label_uk": "REST API",
+    "track": "python",
+    "summary": "Проєктувати HTTP API, статуси та контракт помилок.",
+    "aliases": [
+      "rest api",
+      "rest api"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "async-python",
+    "label": "Async Python",
+    "label_uk": "Асинхронний Python",
+    "track": "python",
+    "summary": "Використовувати asyncio для I/O-bound задач.",
+    "aliases": [
+      "async python",
+      "асинхронний python"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "linux",
+    "label": "Linux",
+    "label_uk": "Linux",
+    "track": "python",
+    "summary": "Працювати з сервісами, мережею та журналами Linux.",
+    "aliases": [
+      "linux",
+      "linux"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "kubernetes",
+    "label": "Kubernetes",
+    "label_uk": "Kubernetes",
+    "track": "python",
+    "summary": "Працювати з deployments, services і probes Kubernetes.",
+    "aliases": [
+      "kubernetes",
+      "kubernetes"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "app-security",
+    "label": "App security",
+    "label_uk": "Безпека застосунку",
+    "track": "python",
+    "summary": "Застосовувати авторизацію, валідацію та управління секретами.",
+    "aliases": [
+      "app security",
+      "безпека застосунку"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "observability",
+    "label": "Observability",
+    "label_uk": "Спостережуваність",
+    "track": "python",
+    "summary": "Налаштовувати метрики, логи та трасування сервісів.",
+    "aliases": [
+      "observability",
+      "спостережуваність"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "kafka",
+    "label": "Kafka",
+    "label_uk": "Apache Kafka",
+    "track": "python",
+    "summary": "Створювати інтеграції з потоками подій і consumer groups.",
+    "aliases": [
+      "kafka",
+      "apache kafka"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "ga4",
+    "label": "Google Analytics 4",
+    "label_uk": "Google Analytics 4",
+    "track": "marketing",
+    "summary": "Налаштовувати події, конверсії та звіти GA4.",
+    "aliases": [
+      "google analytics 4",
+      "google analytics 4"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "google-ads",
+    "label": "Google Ads",
+    "label_uk": "Google Ads",
+    "track": "marketing",
+    "summary": "Оптимізувати кампанії пошукової та медійної реклами.",
+    "aliases": [
+      "google ads",
+      "google ads"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "meta-ads",
+    "label": "Meta Ads",
+    "label_uk": "Meta Ads",
+    "track": "marketing",
+    "summary": "Керувати кампаніями Meta, аудиторіями та creative testing.",
+    "aliases": [
+      "meta ads",
+      "meta ads"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "seo",
+    "label": "SEO",
+    "label_uk": "Пошукова оптимізація",
+    "track": "marketing",
+    "summary": "Покращувати технічну й контентну видимість сайту.",
+    "aliases": [
+      "seo",
+      "пошукова оптимізація"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "content-strategy",
+    "label": "Content strategy",
+    "label_uk": "Контент-стратегія",
+    "track": "marketing",
+    "summary": "Формувати редакційний план і контентні гіпотези.",
+    "aliases": [
+      "content strategy",
+      "контент-стратегія"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "email-marketing",
+    "label": "Email marketing",
+    "label_uk": "Email-маркетинг",
+    "track": "marketing",
+    "summary": "Створювати сегментовані email-кампанії.",
+    "aliases": [
+      "email marketing",
+      "email-маркетинг"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "crm",
+    "label": "CRM",
+    "label_uk": "CRM",
+    "track": "marketing",
+    "summary": "Керувати CRM-даними, лідами й конверсійними етапами.",
+    "aliases": [
+      "crm",
+      "crm"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "segmentation",
+    "label": "Customer segmentation",
+    "label_uk": "Сегментація клієнтів",
+    "track": "marketing",
+    "summary": "Розділяти аудиторії за поведінкою й цінністю.",
+    "aliases": [
+      "customer segmentation",
+      "сегментація клієнтів"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "cro",
+    "label": "Conversion optimization",
+    "label_uk": "Оптимізація конверсії",
+    "track": "marketing",
+    "summary": "Покращувати конверсію воронки на основі експериментів.",
+    "aliases": [
+      "conversion optimization",
+      "оптимізація конверсії"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "ab-testing",
+    "label": "A/B testing",
+    "label_uk": "A/B-тестування",
+    "track": "marketing",
+    "summary": "Проєктувати контрольовані маркетингові експерименти.",
+    "aliases": [
+      "a/b testing",
+      "a/b-тестування"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "gtm",
+    "label": "Google Tag Manager",
+    "label_uk": "Google Tag Manager",
+    "track": "marketing",
+    "summary": "Конфігурувати теги й тригери вимірювання.",
+    "aliases": [
+      "google tag manager",
+      "google tag manager"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "looker-studio",
+    "label": "Looker Studio",
+    "label_uk": "Looker Studio",
+    "track": "marketing",
+    "summary": "Будувати маркетингові дашборди й blended data.",
+    "aliases": [
+      "looker studio",
+      "looker studio"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "excel",
+    "label": "Excel / Sheets",
+    "label_uk": "Excel / Google Sheets",
+    "track": "marketing",
+    "summary": "Аналізувати дані у таблицях, формулах і зведених таблицях.",
+    "aliases": [
+      "excel / sheets",
+      "excel / google sheets"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "copywriting",
+    "label": "Copywriting",
+    "label_uk": "Копірайтинг",
+    "track": "marketing",
+    "summary": "Створювати тексти з чіткою пропозицією цінності.",
+    "aliases": [
+      "copywriting",
+      "копірайтинг"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "brand-strategy",
+    "label": "Brand strategy",
+    "label_uk": "Бренд-стратегія",
+    "track": "marketing",
+    "summary": "Формувати позиціонування та ціннісну пропозицію бренду.",
+    "aliases": [
+      "brand strategy",
+      "бренд-стратегія"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "performance-marketing",
+    "label": "Performance marketing",
+    "label_uk": "Performance-маркетинг",
+    "track": "marketing",
+    "summary": "Оптимізувати CAC, ROAS і бюджет за каналами.",
+    "aliases": [
+      "performance marketing",
+      "performance-маркетинг"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "attribution",
+    "label": "Marketing attribution",
+    "label_uk": "Маркетингова атрибуція",
+    "track": "marketing",
+    "summary": "Оцінювати внесок каналів у конверсії.",
+    "aliases": [
+      "marketing attribution",
+      "маркетингова атрибуція"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "marketing-automation",
+    "label": "Marketing automation",
+    "label_uk": "Маркетингова автоматизація",
+    "track": "marketing",
+    "summary": "Будувати тригерні сценарії й обробляти lifecycle-комунікації.",
+    "aliases": [
+      "marketing automation",
+      "маркетингова автоматизація"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "social-media",
+    "label": "Social media",
+    "label_uk": "Соціальні мережі",
+    "track": "marketing",
+    "summary": "Планувати контент і аналізувати engagement.",
+    "aliases": [
+      "social media",
+      "соціальні мережі"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "market-research",
+    "label": "Market research",
+    "label_uk": "Дослідження ринку",
+    "track": "marketing",
+    "summary": "Проводити конкурентний і користувацький аналіз.",
+    "aliases": [
+      "market research",
+      "дослідження ринку"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "figma",
+    "label": "Figma",
+    "label_uk": "Figma",
+    "track": "design",
+    "summary": "Проєктувати компоненти й макети інтерфейсів у Figma.",
+    "aliases": [
+      "figma",
+      "figma"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "ui-design",
+    "label": "UI design",
+    "label_uk": "UI-дизайн",
+    "track": "design",
+    "summary": "Створювати ієрархію, стани та макети UI.",
+    "aliases": [
+      "ui design",
+      "ui-дизайн"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "ux-research",
+    "label": "UX research",
+    "label_uk": "UX-дослідження",
+    "track": "design",
+    "summary": "Досліджувати потреби користувачів і перевіряти гіпотези.",
+    "aliases": [
+      "ux research",
+      "ux-дослідження"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "wireframing",
+    "label": "Wireframing",
+    "label_uk": "Вайрфреймінг",
+    "track": "design",
+    "summary": "Моделювати структуру екранів без передчасного декору.",
+    "aliases": [
+      "wireframing",
+      "вайрфреймінг"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "prototyping",
+    "label": "Prototyping",
+    "label_uk": "Прототипування",
+    "track": "design",
+    "summary": "Створювати інтерактивні прототипи для UX-перевірки.",
+    "aliases": [
+      "prototyping",
+      "прототипування"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "design-systems",
+    "label": "Design systems",
+    "label_uk": "Дизайн-системи",
+    "track": "design",
+    "summary": "Підтримувати компоненти, tokens і UI guidelines.",
+    "aliases": [
+      "design systems",
+      "дизайн-системи"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "accessibility",
+    "label": "Accessibility",
+    "label_uk": "Доступність інтерфейсів",
+    "track": "design",
+    "summary": "Перевіряти клавіатурну доступність, контраст і семантику.",
+    "aliases": [
+      "accessibility",
+      "доступність інтерфейсів"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "typography",
+    "label": "Typography",
+    "label_uk": "Типографіка",
+    "track": "design",
+    "summary": "Будувати читабельні типографічні шкали й сітки.",
+    "aliases": [
+      "typography",
+      "типографіка"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "visual-design",
+    "label": "Visual design",
+    "label_uk": "Візуальний дизайн",
+    "track": "design",
+    "summary": "Створювати композицію, колір і графічну ієрархію.",
+    "aliases": [
+      "visual design",
+      "візуальний дизайн"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "illustrator",
+    "label": "Adobe Illustrator",
+    "label_uk": "Adobe Illustrator",
+    "track": "design",
+    "summary": "Створювати векторні ілюстрації, іконки та графіку.",
+    "aliases": [
+      "adobe illustrator",
+      "adobe illustrator"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "photoshop",
+    "label": "Adobe Photoshop",
+    "label_uk": "Adobe Photoshop",
+    "track": "design",
+    "summary": "Обробляти растрові зображення та цифрові матеріали.",
+    "aliases": [
+      "adobe photoshop",
+      "adobe photoshop"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "usability-testing",
+    "label": "Usability testing",
+    "label_uk": "Юзабіліті-тестування",
+    "track": "design",
+    "summary": "Проводити тести задач і аналізувати спостереження.",
+    "aliases": [
+      "usability testing",
+      "юзабіліті-тестування"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "interaction-design",
+    "label": "Interaction design",
+    "label_uk": "Дизайн взаємодії",
+    "track": "design",
+    "summary": "Проєктувати мікровзаємодії та feedback states.",
+    "aliases": [
+      "interaction design",
+      "дизайн взаємодії"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "responsive-design",
+    "label": "Responsive design",
+    "label_uk": "Адаптивний дизайн",
+    "track": "design",
+    "summary": "Створювати макети для різних розмірів екрана.",
+    "aliases": [
+      "responsive design",
+      "адаптивний дизайн"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "html-css",
+    "label": "HTML/CSS",
+    "label_uk": "HTML та CSS",
+    "track": "design",
+    "summary": "Співпрацювати з frontend у межах семантичного HTML та CSS.",
+    "aliases": [
+      "html/css",
+      "html та css"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "information-architecture",
+    "label": "Information architecture",
+    "label_uk": "Інформаційна архітектура",
+    "track": "design",
+    "summary": "Групувати інформацію, навігацію та таксономії.",
+    "aliases": [
+      "information architecture",
+      "інформаційна архітектура"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "stakeholder-communication",
+    "label": "Stakeholder communication",
+    "label_uk": "Комунікація зі стейкхолдерами",
+    "track": "design",
+    "summary": "Аргументувати дизайн-рішення і вести дизайн-рев'ю.",
+    "aliases": [
+      "stakeholder communication",
+      "комунікація зі стейкхолдерами"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "motion-design",
+    "label": "Motion design",
+    "label_uk": "Моушн-дизайн",
+    "track": "design",
+    "summary": "Створювати змістовні UI-анімації та переходи.",
+    "aliases": [
+      "motion design",
+      "моушн-дизайн"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "branding",
+    "label": "Brand identity",
+    "label_uk": "Айдентика бренду",
+    "track": "design",
+    "summary": "Розробляти логотип, стилі й правила айдентики.",
+    "aliases": [
+      "brand identity",
+      "айдентика бренду"
+    ],
+    "catalog_version": "local-curated-v1"
+  },
+  {
+    "id": "product-analytics",
+    "label": "Product analytics",
+    "label_uk": "Продуктова аналітика",
+    "track": "design",
+    "summary": "Інтерпретувати продуктові метрики під час дизайн-рішень.",
+    "aliases": [
+      "product analytics",
+      "продуктова аналітика"
+    ],
+    "catalog_version": "local-curated-v1"
+  }
+]

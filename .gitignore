@@ -1,0 +1,15 @@
+.env.local
+*.pyc
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/
+node_modules/
+frontend/dist/
+app/frontend/dist/
+*.sqlite3
+*.db
+.coverage
+.DS_Store
+app/.env
+app/DEMO_CREDENTIALS.txt

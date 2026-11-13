@@ -1,0 +1,217 @@
+"""Relational entities. Immutable vacancy snapshots store revision-safe JSON copies."""
+from datetime import datetime, timezone
+from uuid import uuid4
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, Index
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from .db import Base
+
+
+def uid() -> str:
+    return str(uuid4())
+
+
+def now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    display_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(256), nullable=False)
+    track: Mapped[str] = mapped_column(String(32), default="python", nullable=False)
+    desired_title: Mapped[str] = mapped_column(String(160), default="")
+    years_experience: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    location: Mapped[str] = mapped_column(String(120), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class AuthToken(Base):
+    __tablename__ = "auth_tokens"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class Competency(Base):
+    __tablename__ = "competencies"
+    id: Mapped[str] = mapped_column(String(90), primary_key=True)
+    label: Mapped[str] = mapped_column(String(120), nullable=False)
+    label_uk: Mapped[str] = mapped_column(String(120), nullable=False)
+    track: Mapped[str] = mapped_column(String(32), index=True)
+    summary: Mapped[str] = mapped_column(Text, default="")
+    aliases: Mapped[list] = mapped_column(JSON, default=list)
+    catalog_version: Mapped[str] = mapped_column(String(40), default="local-curated-v1")
+
+
+class Vacancy(Base):
+    __tablename__ = "vacancies"
+    id: Mapped[str] = mapped_column(String(90), primary_key=True)
+    track: Mapped[str] = mapped_column(String(32), index=True)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    company: Mapped[str] = mapped_column(String(160), nullable=False)
+    seniority: Mapped[str] = mapped_column(String(30), index=True)
+    years_min: Mapped[int] = mapped_column(Integer)
+    years_max: Mapped[int | None] = mapped_column(Integer)
+    location: Mapped[str] = mapped_column(String(90))
+    work_mode: Mapped[str] = mapped_column(String(24))
+    employment: Mapped[str] = mapped_column(String(70), default="Full-time")
+    salary_min: Mapped[int | None] = mapped_column(Integer)
+    salary_max: Mapped[int | None] = mapped_column(Integer)
+    currency: Mapped[str] = mapped_column(String(6), default="USD")
+    summary: Mapped[str] = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text)
+    responsibilities: Mapped[list] = mapped_column(JSON, default=list)
+    benefits: Mapped[list] = mapped_column(JSON, default=list)
+    stack: Mapped[list] = mapped_column(JSON, default=list)
+    source_type: Mapped[str] = mapped_column(String(30), default="DEMO_CURATED")
+    source_url: Mapped[str | None] = mapped_column(String(600), nullable=True)
+    fixture_version: Mapped[str] = mapped_column(String(32), default="fixtures-v1")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    groups: Mapped[list["RequirementGroup"]] = relationship(
+        back_populates="vacancy", cascade="all,delete-orphan", order_by="RequirementGroup.sort_order"
+    )
+
+
+class RequirementGroup(Base):
+    __tablename__ = "requirement_groups"
+    id: Mapped[str] = mapped_column(String(120), primary_key=True)
+    vacancy_id: Mapped[str] = mapped_column(ForeignKey("vacancies.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[str] = mapped_column(String(24), nullable=False)  # MANDATORY | DESIRED
+    label: Mapped[str] = mapped_column(String(240))
+    excerpt: Mapped[str] = mapped_column(Text)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    vacancy: Mapped[Vacancy] = relationship(back_populates="groups")
+    alternatives: Mapped[list["RequirementAlternative"]] = relationship(
+        back_populates="group", cascade="all,delete-orphan", order_by="RequirementAlternative.id"
+    )
+
+
+class RequirementAlternative(Base):
+    __tablename__ = "requirement_alternatives"
+    id: Mapped[str] = mapped_column(String(150), primary_key=True)
+    group_id: Mapped[str] = mapped_column(ForeignKey("requirement_groups.id", ondelete="CASCADE"), index=True)
+    competency_id: Mapped[str] = mapped_column(ForeignKey("competencies.id"), index=True)
+    required_level: Mapped[int] = mapped_column(Integer)
+    normalization_status: Mapped[str] = mapped_column(String(25), default="ACCEPTED_CURATED")
+    group: Mapped[RequirementGroup] = relationship(back_populates="alternatives")
+
+
+class CandidateSkill(Base):
+    __tablename__ = "candidate_skills"
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    competency_id: Mapped[str] = mapped_column(ForeignKey("competencies.id"), primary_key=True)
+    level: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    context: Mapped[str] = mapped_column(Text, default="")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
+
+
+class Snapshot(Base):
+    __tablename__ = "snapshots"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    name: Mapped[str] = mapped_column(String(180))
+    track: Mapped[str] = mapped_column(String(32))
+    status: Mapped[str] = mapped_column(String(20), default="FROZEN")
+    frozen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    vacancy_payload: Mapped[list] = mapped_column(JSON, nullable=False)
+    cohort_policy: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+
+class InterviewSession(Base):
+    __tablename__ = "interview_sessions"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    snapshot_id: Mapped[str] = mapped_column(ForeignKey("snapshots.id", ondelete="CASCADE"), index=True)
+    mode: Mapped[str] = mapped_column(String(12), default="ADAPTIVE")
+    status: Mapped[str] = mapped_column(String(30), default="READY")
+    question_budget: Mapped[int] = mapped_column(Integer, default=8)
+    used_questions: Mapped[int] = mapped_column(Integer, default=0)
+    state_version: Mapped[int] = mapped_column(Integer, default=0)
+    baseline_profile: Mapped[dict] = mapped_column(JSON, nullable=False)
+    static_plan: Mapped[list] = mapped_column(JSON, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    turns: Mapped[list["InterviewTurn"]] = relationship(
+        back_populates="session", cascade="all,delete-orphan", order_by="InterviewTurn.sequence"
+    )
+
+
+class InterviewTurn(Base):
+    __tablename__ = "interview_turns"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    session_id: Mapped[str] = mapped_column(ForeignKey("interview_sessions.id", ondelete="CASCADE"), index=True)
+    sequence: Mapped[int] = mapped_column(Integer)
+    competency_id: Mapped[str] = mapped_column(ForeignKey("competencies.id"))
+    question_id: Mapped[str] = mapped_column(String(120))
+    question_text: Mapped[str] = mapped_column(Text)
+    question_kind: Mapped[str] = mapped_column(String(22))
+    question_options: Mapped[list] = mapped_column(JSON, default=list)
+    correct_option: Mapped[str | None] = mapped_column(String(12), nullable=True)
+    question_mode: Mapped[str] = mapped_column(String(16), default="DISCOVER")
+    question_source: Mapped[str] = mapped_column(String(18), default="CURATED_BANK")
+    priority: Mapped[list] = mapped_column(JSON, default=list)
+    status: Mapped[str] = mapped_column(String(30), default="UNANSWERED")
+    answer_option: Mapped[str | None] = mapped_column(String(12), nullable=True)
+    answer_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    assessment_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    llm_proposal: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    idempotency_key: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    delivered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    answered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    session: Mapped[InterviewSession] = relationship(back_populates="turns")
+    __table_args__ = (UniqueConstraint("session_id", "sequence"),)
+
+
+class MatchRun(Base):
+    __tablename__ = "match_runs"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    snapshot_id: Mapped[str] = mapped_column(ForeignKey("snapshots.id", ondelete="CASCADE"), index=True)
+    interview_id: Mapped[str | None] = mapped_column(ForeignKey("interview_sessions.id", ondelete="SET NULL"), nullable=True)
+    matcher_version: Mapped[str] = mapped_column(String(32), default="matcher-v1")
+    profile_payload: Mapped[dict] = mapped_column(JSON, nullable=False)
+    results_payload: Mapped[list] = mapped_column(JSON, nullable=False)
+    profile_version_id: Mapped[str | None] = mapped_column(
+        ForeignKey("profile_versions.id", ondelete="SET NULL"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class ProfileVersion(Base):
+    """Immutable P0 (baseline) / P1 (post-interview) effective profile with provenance."""
+    __tablename__ = "profile_versions"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[str] = mapped_column(String(4), nullable=False)  # P0 | P1
+    interview_id: Mapped[str | None] = mapped_column(
+        ForeignKey("interview_sessions.id", ondelete="CASCADE"), nullable=True, index=True)
+    levels: Mapped[dict] = mapped_column(JSON, nullable=False)
+    provenance: Mapped[dict] = mapped_column(JSON, nullable=False)
+    evidence_refs: Mapped[list] = mapped_column(JSON, default=list)
+    sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    __table_args__ = (UniqueConstraint("user_id", "interview_id", "kind", name="uq_profile_version_kind"),)
+
+
+class EvidenceItem(Base):
+    """One graded answer. Only CONFIRMED items may change effective levels."""
+    __tablename__ = "evidence_items"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    interview_id: Mapped[str] = mapped_column(ForeignKey("interview_sessions.id", ondelete="CASCADE"), index=True)
+    turn_id: Mapped[str] = mapped_column(ForeignKey("interview_turns.id", ondelete="CASCADE"), unique=True)
+    competency_id: Mapped[str] = mapped_column(ForeignKey("competencies.id"))
+    level: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    provenance: Mapped[str] = mapped_column(String(20), nullable=False)  # LLM_PROPOSAL | HUMAN_REVIEW | OBJECTIVE_TASK
+    status: Mapped[str] = mapped_column(String(12), nullable=False)  # PROPOSED | CONFIRMED | REJECTED
+    rubric_version: Mapped[str] = mapped_column(String(32), default="rubric-v1")
+    excerpt: Mapped[str] = mapped_column(Text, default="")
+    confidence: Mapped[str] = mapped_column(String(8), default="LOW")
+    uncertainty: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+Index("ix_vacancy_track_active", Vacancy.track, Vacancy.is_active)

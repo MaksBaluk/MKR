@@ -1,0 +1,2102 @@
+{
+  "python-core": [
+    {
+      "id": "python-core-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Як безпечно закрити файловий ресурс у Python?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Викликати del"
+        },
+        {
+          "id": "b",
+          "text": "Використати with open(...) as f"
+        },
+        {
+          "id": "c",
+          "text": "Покластися на збирач сміття"
+        },
+        {
+          "id": "d",
+          "text": "Перезапустити процес"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "python-core-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Опишіть випадок, коли ви розбирали складну помилку в Python, і як перевірили виправлення.",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "fastapi": [
+    {
+      "id": "fastapi-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що забезпечує Pydantic-модель у FastAPI endpoint?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Обов'язкову чергу задач"
+        },
+        {
+          "id": "b",
+          "text": "Автоматичне резервне копіювання"
+        },
+        {
+          "id": "c",
+          "text": "Перевірку структури та типів вхідних даних"
+        },
+        {
+          "id": "d",
+          "text": "Балансування навантаження"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "fastapi-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як би ви реалізували версіонований endpoint із перевіркою вхідних даних?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "django": [
+    {
+      "id": "django-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Як у Django зменшити N+1 запити для ForeignKey?",
+      "options": [
+        {
+          "id": "a",
+          "text": "select_related()"
+        },
+        {
+          "id": "b",
+          "text": "sleep()"
+        },
+        {
+          "id": "c",
+          "text": "raw_input()"
+        },
+        {
+          "id": "d",
+          "text": "order_by('?')"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "django-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Опишіть, як обмежити доступ до Django view на рівні користувача.",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "postgresql": [
+    {
+      "id": "postgresql-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що допоможе проаналізувати план виконання SQL-запиту?",
+      "options": [
+        {
+          "id": "a",
+          "text": "VACUUM FULL для кожного запиту"
+        },
+        {
+          "id": "b",
+          "text": "DROP INDEX"
+        },
+        {
+          "id": "c",
+          "text": "EXPLAIN ANALYZE"
+        },
+        {
+          "id": "d",
+          "text": "pg_dump"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "postgresql-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Поясніть, як ви діагностуєте повільний запит і вибираєте індекс.",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "sql": [
+    {
+      "id": "sql-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який JOIN повертає всі рядки лівої таблиці, навіть без збігів?",
+      "options": [
+        {
+          "id": "a",
+          "text": "INNER JOIN"
+        },
+        {
+          "id": "b",
+          "text": "LEFT JOIN"
+        },
+        {
+          "id": "c",
+          "text": "CROSS JOIN"
+        },
+        {
+          "id": "d",
+          "text": "SELF JOIN"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "sql-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Наведіть приклад агрегування даних із декількох таблиць за допомогою JOIN.",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "sqlalchemy": [
+    {
+      "id": "sqlalchemy-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що є коректною практикою керування сесією SQLAlchemy?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Одна глобальна Session на всі запити"
+        },
+        {
+          "id": "b",
+          "text": "Ніколи не робити rollback"
+        },
+        {
+          "id": "c",
+          "text": "Відкривати і закривати Session у межах unit of work"
+        },
+        {
+          "id": "d",
+          "text": "Перетворювати запити на рядки"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "sqlalchemy-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як гарантувати атомарність змін двох таблиць через SQLAlchemy?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "docker": [
+    {
+      "id": "docker-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що найкраще скорочує розмір production Docker-образу?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Multi-stage build"
+        },
+        {
+          "id": "b",
+          "text": "COPY усієї директорії з node_modules"
+        },
+        {
+          "id": "c",
+          "text": "Запуск від root"
+        },
+        {
+          "id": "d",
+          "text": "Вимкнення healthcheck"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "docker-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як би ви організували локальний запуск API, бази даних та міграцій у Docker Compose?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "aws": [
+    {
+      "id": "aws-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який принцип застосовують до IAM-ролей?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Доступ AdministratorAccess для всіх"
+        },
+        {
+          "id": "b",
+          "text": "Принцип мінімальних привілеїв"
+        },
+        {
+          "id": "c",
+          "text": "Зберігати секрети в коді"
+        },
+        {
+          "id": "d",
+          "text": "Вимкнути CloudTrail"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "aws-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як організувати деплой API на AWS із приватним сховищем секретів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "redis": [
+    {
+      "id": "redis-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Як уникнути нескінченно застарілого кешу для змінних даних?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Ніколи не інвалідовувати ключі"
+        },
+        {
+          "id": "b",
+          "text": "Зберігати все без TTL"
+        },
+        {
+          "id": "c",
+          "text": "Встановити TTL та стратегію інвалідації"
+        },
+        {
+          "id": "d",
+          "text": "Використовувати випадкові ключі"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "redis-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як би ви реалізували кешування частих GET-запитів та інвалідацію?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "celery": [
+    {
+      "id": "celery-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Яка властивість особливо важлива для задач, що можуть повторно виконуватися?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Ідемпотентність"
+        },
+        {
+          "id": "b",
+          "text": "Відсутність логування"
+        },
+        {
+          "id": "c",
+          "text": "Глобальна mutable-змінна"
+        },
+        {
+          "id": "d",
+          "text": "Нескінченні retries без пауз"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "celery-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Опишіть обробку повторного виконання фонового завдання та dead-letter підхід.",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "pytest": [
+    {
+      "id": "pytest-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що дає fixture у pytest?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Продакшн міграцію"
+        },
+        {
+          "id": "b",
+          "text": "Повторно використовувану підготовку і teardown тестових даних"
+        },
+        {
+          "id": "c",
+          "text": "Автоматичний хостинг"
+        },
+        {
+          "id": "d",
+          "text": "Шифрування всіх тестів"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "pytest-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як тестувати API із тимчасовою БД, не змінюючи продукційні дані?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "git": [
+    {
+      "id": "git-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Яка дія зберігає історію і створює новий коміт, що скасовує зміни?",
+      "options": [
+        {
+          "id": "a",
+          "text": "git reset --hard"
+        },
+        {
+          "id": "b",
+          "text": "git clean -fd"
+        },
+        {
+          "id": "c",
+          "text": "git revert"
+        },
+        {
+          "id": "d",
+          "text": "rm -rf .git"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "git-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Опишіть як ви вирішували конфлікт злиття й перевіряли коректність результату.",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "ci-cd": [
+    {
+      "id": "ci-cd-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який етап найкраще запускати перед deployment?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Видалення тестів"
+        },
+        {
+          "id": "b",
+          "text": "Зміна секретів у репозиторії"
+        },
+        {
+          "id": "c",
+          "text": "Ручне копіювання node_modules"
+        },
+        {
+          "id": "d",
+          "text": "Тести та перевірку артефакту збірки"
+        }
+      ],
+      "correct_option": "d",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "ci-cd-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Якими були б стадії pipeline від pull request до безпечного release?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "rest-api": [
+    {
+      "id": "rest-api-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який HTTP-статус відповідає успішному створенню ресурсу?",
+      "options": [
+        {
+          "id": "a",
+          "text": "201 Created"
+        },
+        {
+          "id": "b",
+          "text": "404 Not Found"
+        },
+        {
+          "id": "c",
+          "text": "401 Unauthorized"
+        },
+        {
+          "id": "d",
+          "text": "503 Service Unavailable"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "rest-api-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як спроєктувати pagination, idempotency й обробку помилок у REST API?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "async-python": [
+    {
+      "id": "async-python-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що не слід запускати безпосередньо в asyncio event loop?",
+      "options": [
+        {
+          "id": "a",
+          "text": "await asyncio.sleep(0)"
+        },
+        {
+          "id": "b",
+          "text": "Тривалий блокуючий CPU-bound цикл"
+        },
+        {
+          "id": "c",
+          "text": "Асинхронний HTTP-запит"
+        },
+        {
+          "id": "d",
+          "text": "await task"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "async-python-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як діагностувати блокування event loop у високонавантаженому API?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "linux": [
+    {
+      "id": "linux-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Яка команда зазвичай показує журнали systemd-сервісу?",
+      "options": [
+        {
+          "id": "a",
+          "text": "journalctl -u service"
+        },
+        {
+          "id": "b",
+          "text": "git status"
+        },
+        {
+          "id": "c",
+          "text": "npm build"
+        },
+        {
+          "id": "d",
+          "text": "psql --version"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "linux-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як знайти причину падіння сервісу після рестарту на Linux?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "kubernetes": [
+    {
+      "id": "kubernetes-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Для чого readinessProbe у Kubernetes?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Видалити Pod назавжди"
+        },
+        {
+          "id": "b",
+          "text": "Автоматично додати секрети"
+        },
+        {
+          "id": "c",
+          "text": "Визначити готовність Pod приймати трафік"
+        },
+        {
+          "id": "d",
+          "text": "Змінити мову контейнера"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "kubernetes-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як провести безпечний rolling update із rollback?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "app-security": [
+    {
+      "id": "app-security-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Як запобігати SQL injection при роботі з БД?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Формувати SQL через конкатенацію"
+        },
+        {
+          "id": "b",
+          "text": "Використовувати параметризовані запити"
+        },
+        {
+          "id": "c",
+          "text": "Відключати логування"
+        },
+        {
+          "id": "d",
+          "text": "Шифрувати CSS"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "app-security-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як захистити API від IDOR та витоку персональних даних?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "observability": [
+    {
+      "id": "observability-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що дає correlation/request ID у логах?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Стискає Docker-образ"
+        },
+        {
+          "id": "b",
+          "text": "Підвищує частоту CPU"
+        },
+        {
+          "id": "c",
+          "text": "Дозволяє пов'язати події одного запиту"
+        },
+        {
+          "id": "d",
+          "text": "Замінює авторизацію"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "observability-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Які метрики, логи й алерти додати для критичного API endpoint?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "kafka": [
+    {
+      "id": "kafka-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Для чого consumer group у Kafka?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Розподілити partitions між учасниками групи"
+        },
+        {
+          "id": "b",
+          "text": "Зберігати паролі"
+        },
+        {
+          "id": "c",
+          "text": "Змінити формат HTTP"
+        },
+        {
+          "id": "d",
+          "text": "Заборонити retry"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "kafka-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як забезпечити ідемпотентну обробку повідомлень у consumer?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "ga4": [
+    {
+      "id": "ga4-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Яка базова одиниця вимірювання поведінки в GA4?",
+      "options": [
+        {
+          "id": "a",
+          "text": "CSS selector"
+        },
+        {
+          "id": "b",
+          "text": "Event"
+        },
+        {
+          "id": "c",
+          "text": "Docker image"
+        },
+        {
+          "id": "d",
+          "text": "SQL transaction"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "ga4-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як налаштувати в GA4 вимірювання ключової дії користувача й перевірити коректність події?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "google-ads": [
+    {
+      "id": "google-ads-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що впливає на Ad Rank у пошуковій рекламі?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Лише кількість підписників"
+        },
+        {
+          "id": "b",
+          "text": "Лише колір банера"
+        },
+        {
+          "id": "c",
+          "text": "Ставка та якість реклами"
+        },
+        {
+          "id": "d",
+          "text": "Число тегів у CRM"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "google-ads-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як діагностувати зниження ROAS у Google Ads кампанії?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "meta-ads": [
+    {
+      "id": "meta-ads-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що найкраще допомагає порівняти два рекламні креативи?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Контрольований A/B тест"
+        },
+        {
+          "id": "b",
+          "text": "Одночасна зміна бюджету й аудиторії"
+        },
+        {
+          "id": "c",
+          "text": "Один показ оголошення"
+        },
+        {
+          "id": "d",
+          "text": "Вибір за особистим смаком"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "meta-ads-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Опишіть, як перевіряти гіпотезу про аудиторію в Meta Ads із контролем бюджету.",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "seo": [
+    {
+      "id": "seo-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який інструмент допоможе знайти проблеми індексації сайту в Google?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Photoshop"
+        },
+        {
+          "id": "b",
+          "text": "Search Console"
+        },
+        {
+          "id": "c",
+          "text": "Docker Compose"
+        },
+        {
+          "id": "d",
+          "text": "Figma"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "seo-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як пріоритизувати технічні SEO-помилки після аудиту великого сайту?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "content-strategy": [
+    {
+      "id": "content-strategy-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що має передувати контент-плану?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Випадкове копіювання конкурентів"
+        },
+        {
+          "id": "b",
+          "text": "Публікація без метрик"
+        },
+        {
+          "id": "c",
+          "text": "Визначення аудиторій, цілей та інтересів"
+        },
+        {
+          "id": "d",
+          "text": "Заміна аналітики лайками"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "content-strategy-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як сформувати 3-місячну контент-стратегію для B2B SaaS?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "email-marketing": [
+    {
+      "id": "email-marketing-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що найкраще підтримує доставлюваність email?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Купівля сумнівної бази"
+        },
+        {
+          "id": "b",
+          "text": "Відсутність opt-out"
+        },
+        {
+          "id": "c",
+          "text": "Одна тема для всіх"
+        },
+        {
+          "id": "d",
+          "text": "Дозвіл користувача, SPF/DKIM і гігієна бази"
+        }
+      ],
+      "correct_option": "d",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "email-marketing-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як запустити lifecycle-серію welcome листів і оцінити результат?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "crm": [
+    {
+      "id": "crm-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Чому важлива дедуплікація лідів у CRM?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Зменшує хибні метрики й дубльовані контакти"
+        },
+        {
+          "id": "b",
+          "text": "Автоматично підвищує CPC"
+        },
+        {
+          "id": "c",
+          "text": "Видаляє всіх клієнтів"
+        },
+        {
+          "id": "d",
+          "text": "Замінює sales team"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "crm-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як побудувати якісний funnel-звіт на даних CRM?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "segmentation": [
+    {
+      "id": "segmentation-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який приклад є поведінковою сегментацією?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Усі користувачі однією групою"
+        },
+        {
+          "id": "b",
+          "text": "Покупці з повторною оплатою за 30 днів"
+        },
+        {
+          "id": "c",
+          "text": "Поділ лише за алфавітом"
+        },
+        {
+          "id": "d",
+          "text": "Довільне призначення груп"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "segmentation-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як побудувати RFM-сегментацію й адаптувати кампанії до сегментів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "cro": [
+    {
+      "id": "cro-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який показник вимірює конверсію landing page?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Кількість шрифтів"
+        },
+        {
+          "id": "b",
+          "text": "Число CSS файлів"
+        },
+        {
+          "id": "c",
+          "text": "Частка відвідувачів, що виконали ціль"
+        },
+        {
+          "id": "d",
+          "text": "Середня довжина URL"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "cro-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як знайти вузьке місце checkout funnel і перевірити покращення?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "ab-testing": [
+    {
+      "id": "ab-testing-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Чому не можна завершувати A/B тест після першого позитивного дня?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Це завжди дорожче"
+        },
+        {
+          "id": "b",
+          "text": "Немає кнопки зупинки"
+        },
+        {
+          "id": "c",
+          "text": "Потрібно розрізати логи"
+        },
+        {
+          "id": "d",
+          "text": "Результат може бути випадковим через вибіркову похибку"
+        }
+      ],
+      "correct_option": "d",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "ab-testing-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як оцінити power та guardrail metrics для тесту сторінки тарифів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "gtm": [
+    {
+      "id": "gtm-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що визначає, коли тег у GTM має спрацювати?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Trigger"
+        },
+        {
+          "id": "b",
+          "text": "Container icon"
+        },
+        {
+          "id": "c",
+          "text": "План медіабюджету"
+        },
+        {
+          "id": "d",
+          "text": "Категорія шрифту"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "gtm-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як налаштувати відстеження submit форми через GTM і уникнути дублювання подій?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "looker-studio": [
+    {
+      "id": "looker-studio-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що важливо при зведенні даних із двох джерел у dashboard?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Колір логотипу"
+        },
+        {
+          "id": "b",
+          "text": "Сумісність ключів та grain показників"
+        },
+        {
+          "id": "c",
+          "text": "Розмір банера"
+        },
+        {
+          "id": "d",
+          "text": "Кількість коментарів"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "looker-studio-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як створити звіт CAC, ROAS і конверсій з кількох каналів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "excel": [
+    {
+      "id": "excel-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Для чого використовують pivot table?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Для монтажу відео"
+        },
+        {
+          "id": "b",
+          "text": "Для хостингу сайту"
+        },
+        {
+          "id": "c",
+          "text": "Для агрегування й групування даних"
+        },
+        {
+          "id": "d",
+          "text": "Для шифрування пошти"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "excel-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як автоматизувати тижневу звітність за рекламними кампаніями в Sheets?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "copywriting": [
+    {
+      "id": "copywriting-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що найкраще робить CTA зрозумілим?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Довгий технічний опис"
+        },
+        {
+          "id": "b",
+          "text": "Приховування дії"
+        },
+        {
+          "id": "c",
+          "text": "Відсутність контексту"
+        },
+        {
+          "id": "d",
+          "text": "Конкретна дія та очікувана користь"
+        }
+      ],
+      "correct_option": "d",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "copywriting-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як адаптувати tone of voice для різних каналів й аудиторій?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "brand-strategy": [
+    {
+      "id": "brand-strategy-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що описує brand positioning?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Місце бренду в свідомості цільової аудиторії"
+        },
+        {
+          "id": "b",
+          "text": "Лише RGB палітру"
+        },
+        {
+          "id": "c",
+          "text": "Число серверів"
+        },
+        {
+          "id": "d",
+          "text": "Формат CSV"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "brand-strategy-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як дослідити відмінність бренду на конкурентному ринку?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "performance-marketing": [
+    {
+      "id": "performance-marketing-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що означає ROAS?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Кількість нових логотипів"
+        },
+        {
+          "id": "b",
+          "text": "Дохід від реклами, поділений на витрати на рекламу"
+        },
+        {
+          "id": "c",
+          "text": "Частку відписок"
+        },
+        {
+          "id": "d",
+          "text": "Час завантаження сайту"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "performance-marketing-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як розподілити бюджет між каналами з різним CAC та LTV?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "attribution": [
+    {
+      "id": "attribution-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який ризик має last-click атрибуція?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Вона використовує SQL"
+        },
+        {
+          "id": "b",
+          "text": "Вона не дозволяє міряти конверсії"
+        },
+        {
+          "id": "c",
+          "text": "Недооцінює ранні точки контакту"
+        },
+        {
+          "id": "d",
+          "text": "Вона вимагає Docker"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "attribution-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як оцінити роль верхньої частини воронки при довгому циклі B2B-продажу?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "marketing-automation": [
+    {
+      "id": "marketing-automation-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що є коректним тригером автоматизованої кампанії?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Нова версія IDE"
+        },
+        {
+          "id": "b",
+          "text": "Будь-який випадковий час"
+        },
+        {
+          "id": "c",
+          "text": "Зміна кольору кнопки"
+        },
+        {
+          "id": "d",
+          "text": "Подія покинутого кошика після згоди на комунікацію"
+        }
+      ],
+      "correct_option": "d",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "marketing-automation-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як зробити автоматизацію, яка не надсилає клієнту дублікати повідомлень?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "social-media": [
+    {
+      "id": "social-media-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Яку метрику краще врахувати разом із охопленням?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Взаємодії відносно охоплення"
+        },
+        {
+          "id": "b",
+          "text": "Лише кількість хештегів"
+        },
+        {
+          "id": "c",
+          "text": "Число файлів у репозиторії"
+        },
+        {
+          "id": "d",
+          "text": "Погоду"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "social-media-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як побудувати тижневий контент-план для запуску B2C продукту?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "market-research": [
+    {
+      "id": "market-research-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що допомагає зменшити bias у користувацькому опитуванні?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Лише позитивні питання"
+        },
+        {
+          "id": "b",
+          "text": "Нейтральні формулювання та репрезентативна вибірка"
+        },
+        {
+          "id": "c",
+          "text": "Виключення негативних відповідей"
+        },
+        {
+          "id": "d",
+          "text": "Один респондент"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "market-research-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як перевірити попит на новий продукт до запуску великої кампанії?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "figma": [
+    {
+      "id": "figma-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що допомагає оновити однаковий елемент на багатьох екранах Figma?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Експорт кожного PNG вручну"
+        },
+        {
+          "id": "b",
+          "text": "Видалення стилів"
+        },
+        {
+          "id": "c",
+          "text": "Головний компонент та інстанси"
+        },
+        {
+          "id": "d",
+          "text": "Один величезний текстовий шар"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "figma-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як організувати бібліотеку компонентів Figma для кількох продуктів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "ui-design": [
+    {
+      "id": "ui-design-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що забезпечує чітка візуальна ієрархія?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Відсутність заголовків"
+        },
+        {
+          "id": "b",
+          "text": "Випадкові шрифти"
+        },
+        {
+          "id": "c",
+          "text": "Всі кнопки одного акценту"
+        },
+        {
+          "id": "d",
+          "text": "Зрозумілий порядок сприйняття інформації"
+        }
+      ],
+      "correct_option": "d",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "ui-design-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як би ви спроєктували помилки і стани завантаження у формі?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "ux-research": [
+    {
+      "id": "ux-research-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що є прикладом відкритого нейтрального запитання на UX-інтерв'ю?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Розкажіть, як ви востаннє виконували це завдання"
+        },
+        {
+          "id": "b",
+          "text": "Вам сподобалась наша чудова функція?"
+        },
+        {
+          "id": "c",
+          "text": "Ви точно натиснули цю кнопку, так?"
+        },
+        {
+          "id": "d",
+          "text": "Ви ж не користуєтесь конкурентами?"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "ux-research-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як сформувати план інтерв'ю користувачів для незрозумілого сценарію оплати?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "wireframing": [
+    {
+      "id": "wireframing-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Яка головна мета low-fidelity wireframe?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Затвердити точний колір тіней"
+        },
+        {
+          "id": "b",
+          "text": "Перевірити структуру та потік взаємодії"
+        },
+        {
+          "id": "c",
+          "text": "Створити production CSS"
+        },
+        {
+          "id": "d",
+          "text": "Підписати юридичний контракт"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "wireframing-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Опишіть структуру wireframe onboarding flow для нового сервісу.",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "prototyping": [
+    {
+      "id": "prototyping-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який прототип доречний для тестування переходів між екранами?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Тільки PDF з текстом"
+        },
+        {
+          "id": "b",
+          "text": "Фінансовий звіт"
+        },
+        {
+          "id": "c",
+          "text": "Клікабельний інтерактивний прототип"
+        },
+        {
+          "id": "d",
+          "text": "Список SQL міграцій"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "prototyping-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як створити тестовий прототип складного checkout flow?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "design-systems": [
+    {
+      "id": "design-systems-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Навіщо потрібні design tokens?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Для роботи Docker"
+        },
+        {
+          "id": "b",
+          "text": "Щоб приховати дизайн"
+        },
+        {
+          "id": "c",
+          "text": "Щоб замінити всі user tests"
+        },
+        {
+          "id": "d",
+          "text": "Для спільних значень кольорів, типографіки та відступів"
+        }
+      ],
+      "correct_option": "d",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "design-systems-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як організувати зміну spacing scale без регресій у всьому продукті?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "accessibility": [
+    {
+      "id": "accessibility-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що важливо для керування інтерфейсом без миші?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Видимий keyboard focus та правильний tab order"
+        },
+        {
+          "id": "b",
+          "text": "Приховати всі labels"
+        },
+        {
+          "id": "c",
+          "text": "Клік лише через hover"
+        },
+        {
+          "id": "d",
+          "text": "Відключити клавішу Enter"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "accessibility-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як перевірити форму на відповідність базовим вимогам WCAG?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "typography": [
+    {
+      "id": "typography-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що найбільше покращує читабельність довгого тексту?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Мінімальний міжрядковий інтервал"
+        },
+        {
+          "id": "b",
+          "text": "Оптимальна довжина рядка та line-height"
+        },
+        {
+          "id": "c",
+          "text": "Повсюдні великі літери"
+        },
+        {
+          "id": "d",
+          "text": "Чотири шрифти на кожен рядок"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "typography-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як обрати шрифтову шкалу для складного B2B dashboard?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "visual-design": [
+    {
+      "id": "visual-design-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який принцип допомагає об'єднати пов'язані елементи?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Випадковий відступ"
+        },
+        {
+          "id": "b",
+          "text": "Дублювання контенту"
+        },
+        {
+          "id": "c",
+          "text": "Близькість (proximity)"
+        },
+        {
+          "id": "d",
+          "text": "Зміна назви файлу"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "visual-design-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як спростити перевантажений dashboard, не приховавши важливі дані?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "illustrator": [
+    {
+      "id": "illustrator-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Яка головна властивість векторної графіки?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Залежність від JPEG стиснення"
+        },
+        {
+          "id": "b",
+          "text": "Лише растрові пікселі"
+        },
+        {
+          "id": "c",
+          "text": "Відсутність масштабування"
+        },
+        {
+          "id": "d",
+          "text": "Масштабування без втрати чіткості"
+        }
+      ],
+      "correct_option": "d",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "illustrator-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як підготувати набір адаптивних іконок до експорту для вебу?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "photoshop": [
+    {
+      "id": "photoshop-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що дозволяє редагувати фото без знищення вихідного шару?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Adjustment layers / smart objects"
+        },
+        {
+          "id": "b",
+          "text": "Flatten Image перед кожною зміною"
+        },
+        {
+          "id": "c",
+          "text": "Видалення оригіналу"
+        },
+        {
+          "id": "d",
+          "text": "Переіменування JPEG"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "photoshop-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як оптимізувати зображення hero-banner для швидкого завантаження?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "usability-testing": [
+    {
+      "id": "usability-testing-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який показник корисний у task-based usability test?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Число CSS класів"
+        },
+        {
+          "id": "b",
+          "text": "Task success rate"
+        },
+        {
+          "id": "c",
+          "text": "Кількість кольорів"
+        },
+        {
+          "id": "d",
+          "text": "Час роботи сервера"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "usability-testing-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як провести модераторський тест нового сценарію створення замовлення?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "interaction-design": [
+    {
+      "id": "interaction-design-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Яка основна мета feedback після натискання кнопки?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Додати анімацію без сенсу"
+        },
+        {
+          "id": "b",
+          "text": "Збільшити відстань між елементами"
+        },
+        {
+          "id": "c",
+          "text": "Показати користувачу стан та результат дії"
+        },
+        {
+          "id": "d",
+          "text": "Змінити мову ОС"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "interaction-design-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як спроєктувати взаємодію з помилками і retry у багатокроковому процесі?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "responsive-design": [
+    {
+      "id": "responsive-design-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Яка практика найкраще підтримує responsive design?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Фіксована ширина 1440px для всіх"
+        },
+        {
+          "id": "b",
+          "text": "Приховування основного контенту на мобільному"
+        },
+        {
+          "id": "c",
+          "text": "Лише desktop screenshot"
+        },
+        {
+          "id": "d",
+          "text": "Гнучка сітка та зміна композиції на breakpoints"
+        }
+      ],
+      "correct_option": "d",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "responsive-design-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як переробити складну таблицю для смартфона без втрати доступності?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "html-css": [
+    {
+      "id": "html-css-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який елемент HTML семантично позначає кнопку дії?",
+      "options": [
+        {
+          "id": "a",
+          "text": "button"
+        },
+        {
+          "id": "b",
+          "text": "div з onClick без клавіатури"
+        },
+        {
+          "id": "c",
+          "text": "span без ролі"
+        },
+        {
+          "id": "d",
+          "text": "img"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "html-css-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як описати розробнику дизайн станів focus/hover/disabled?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "information-architecture": [
+    {
+      "id": "information-architecture-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що допомагає перевірити категоризацію навігації?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Фарбування банерів"
+        },
+        {
+          "id": "b",
+          "text": "Card sorting / tree testing"
+        },
+        {
+          "id": "c",
+          "text": "Видалення breadcrumbs"
+        },
+        {
+          "id": "d",
+          "text": "Збільшення логотипу"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "information-architecture-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як реструктурувати меню продукту з 40 розділами?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "stakeholder-communication": [
+    {
+      "id": "stakeholder-communication-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Як коректно аргументувати дизайн-рішення?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Тільки особистим смаком"
+        },
+        {
+          "id": "b",
+          "text": "Лише досвідом менеджера"
+        },
+        {
+          "id": "c",
+          "text": "Даними, потребами користувачів і trade-offs"
+        },
+        {
+          "id": "d",
+          "text": "Наявністю дорогого плагіна"
+        }
+      ],
+      "correct_option": "c",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "stakeholder-communication-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як узгодити суперечливі запити бізнесу й користувачів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "motion-design": [
+    {
+      "id": "motion-design-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що варто забезпечити для користувача з prefers-reduced-motion?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Удвічі більше анімацій"
+        },
+        {
+          "id": "b",
+          "text": "Безкінечний autoplay"
+        },
+        {
+          "id": "c",
+          "text": "Автоматичне відео"
+        },
+        {
+          "id": "d",
+          "text": "Зменшення або вимкнення необов'язкового руху"
+        }
+      ],
+      "correct_option": "d",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "motion-design-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як використати анімацію для пояснення зміни стану, не відволікаючи користувача?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "branding": [
+    {
+      "id": "branding-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Що потрібно перевірити при створенні логотипу?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Роботу у різних масштабах і монохромі"
+        },
+        {
+          "id": "b",
+          "text": "Лише вигляд на моніторі дизайнера"
+        },
+        {
+          "id": "c",
+          "text": "Тільки кількість gradients"
+        },
+        {
+          "id": "d",
+          "text": "Залежність від платного шрифту"
+        }
+      ],
+      "correct_option": "a",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "branding-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як побудувати компактний брендгайд для цифрового продукту?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ],
+  "product-analytics": [
+    {
+      "id": "product-analytics-mcq-v1",
+      "kind": "MULTIPLE_CHOICE",
+      "text": "Який показник допомагає оцінити успіх нового onboarding?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Розмір Figma файлу"
+        },
+        {
+          "id": "b",
+          "text": "Частка користувачів, що завершили ключовий сценарій"
+        },
+        {
+          "id": "c",
+          "text": "Кількість шрифтів"
+        },
+        {
+          "id": "d",
+          "text": "Розмір PNG"
+        }
+      ],
+      "correct_option": "b",
+      "rubric_version": "demo-task-v1"
+    },
+    {
+      "id": "product-analytics-scenario-v1",
+      "kind": "FREE_TEXT",
+      "text": "Як виміряти ефект редизайну на активацію й retention?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "human-review-v1"
+    }
+  ]
+}
