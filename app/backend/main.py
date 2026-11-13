@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from .config import get_settings
 from .db import engine
-from .api import auth, catalog, profile, cohorts, core, recommendations
+from .api import auth, catalog, profile, profiles, cohorts, core, recommendations
 from .providers import llm
 
 settings = get_settings()
@@ -34,5 +34,5 @@ def safe_config():
     return {"catalog": "local-curated-v1", "fixture_source": "DEMO_CURATED", "llm": llm.status()}
 
 
-for router in (auth.router, catalog.router, profile.router, cohorts.router, core.router, recommendations.router):
+for router in (auth.router, catalog.router, profile.router, profiles.router, cohorts.router, core.router, recommendations.router):
     app.include_router(router, prefix="/api/v1")

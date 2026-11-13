@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
+from backend.api.common import make_default_profile
 from backend.config import get_settings
 from backend.db import get_db
 from backend.models import AuthToken, User
@@ -37,6 +38,8 @@ def register(data: RegisterInput, db: Session = Depends(get_db)):
         raise HTTPException(409, "Email already registered")
     user = User(email=email, display_name=data.display_name.strip(), password_hash=hash_password(data.password))
     db.add(user)
+    db.flush()
+    make_default_profile(db, user)
     db.commit()
     return {"token": new_token(db, user), "user": user_dict(user)}
 

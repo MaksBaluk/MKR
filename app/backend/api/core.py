@@ -10,6 +10,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from backend.api.common import default_profile, next_attempt_no
 from backend.db import get_db
 from backend.domain.core_flow import planner_state
 from backend.domain.interview_budget import can_ask_question, can_start_topic
@@ -62,6 +63,13 @@ def latest_scores(db: Session, user: User) -> dict[str, float | None]:
     return _action_scores(rows)
 
 
+def attempt_scores(db: Session, interview_id: str) -> dict[str, float | None]:
+    """Action scores from one attempt only."""
+    rows = db.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == interview_id)
+                      .order_by(CriterionAssessment.created_at, CriterionAssessment.revision)).all()
+    return _action_scores(rows)
+
+
 def _seeded_rubric(db: Session, action_id: str) -> Rubric | None:
     return db.scalar(select(Rubric).where(Rubric.action_id == action_id, Rubric.version == "v1",
                                           Rubric.source == "CURATED"))
@@ -109,7 +117,9 @@ class AnswerBody(VersionBody):
 @router.post("/interviews", status_code=201)
 def create_interview(data: CreateInterview, db: Session = Depends(get_db), user: User = Depends(current_user)):
     snap = _owned_cohort(db, user, data.cohort_id)
-    iv = CoreInterview(user_id=user.id, cohort_id=snap.id, status="ACTIVE", version=0)
+    prof = default_profile(db, user)
+    iv = CoreInterview(user_id=user.id, cohort_id=snap.id, status="ACTIVE", version=0, profile_id=prof.id,
+                       attempt_no=next_attempt_no(db, prof.id))
     db.add(iv)
     db.commit()
     return {"id": iv.id, "status": iv.status, "version": iv.version}
@@ -160,7 +170,7 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         return {"turn": _turn_dict(pending, _names(db)), "version": iv.version}  # never regenerate a shown question
     snap = db.get(CohortSnapshot, iv.cohort_id)
     revisions = _revisions(snap)
-    state, weights = planner_state(revisions, latest_scores(db, user))
+    state, weights = planner_state(revisions, attempt_scores(db, iv.id))
     shown: dict[str, int] = {}
     for t in turns:
         shown[t.action_id] = shown.get(t.action_id, 0) + 1

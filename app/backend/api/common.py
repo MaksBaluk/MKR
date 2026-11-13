@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from backend.models import (Vacancy, Snapshot, InterviewSession, MatchRun)
+from backend.models import (CandidateProfile, CoreInterview, User, Vacancy, Snapshot, InterviewSession, MatchRun)
 
 
 def require_snapshot(db: Session, user_id: str, snapshot_id: str) -> Snapshot:
@@ -60,3 +60,25 @@ def serialize_snapshot(s: Snapshot, *, with_vacancies: bool = False) -> dict:
     if with_vacancies:
         payload["vacancies"] = s.vacancy_payload
     return payload
+
+
+def make_default_profile(db: Session, user: User) -> CandidateProfile:
+    prof = CandidateProfile(user_id=user.id, track=user.track, name="Основний профіль",
+                            desired_title=user.desired_title or "", years_experience=user.years_experience,
+                            location=user.location or "")
+    db.add(prof)
+    db.flush()
+    return prof
+
+
+def default_profile(db: Session, user: User) -> CandidateProfile:
+    """Oldest non-archived profile of the user; created on demand."""
+    prof = db.scalar(select(CandidateProfile).where(CandidateProfile.user_id == user.id,
+                                                    CandidateProfile.archived.is_(False))
+                     .order_by(CandidateProfile.created_at, CandidateProfile.id))
+    return prof or make_default_profile(db, user)
+
+
+def next_attempt_no(db: Session, profile_id: str) -> int:
+    from sqlalchemy import func
+    return (db.scalar(select(func.max(CoreInterview.attempt_no)).where(CoreInterview.profile_id == profile_id)) or 0) + 1

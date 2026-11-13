@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from backend.db import get_db
 from backend.domain.market import VacancyInput, compute_market
-from backend.models import Competency, CohortSnapshot, RequirementGroup, User, Vacancy
+from backend.models import CandidateProfile, Competency, CohortSnapshot, RequirementGroup, User, Vacancy
 from backend.security import current_user
 
 router = APIRouter(prefix="/cohorts", tags=["cohorts"])
@@ -28,6 +28,7 @@ def _vacancy_revisions(db: Session, track: str) -> list[dict]:
             "years_min": v.years_min,
             "title": v.title,
             "company": v.company,
+            "seniority": v.seniority,
             "location": v.location,
             "work_mode": v.work_mode,
             "groups": [
@@ -48,25 +49,40 @@ def _market_input(revisions: list[dict]) -> list[VacancyInput]:
     ]
 
 
-@router.post("/auto", status_code=201)
-def create_auto_cohort(db: Session = Depends(get_db), user: User = Depends(current_user)):
-    revisions = _vacancy_revisions(db, user.track)
+def get_or_create_cohort(db: Session, user: User, track: str) -> tuple[CohortSnapshot | None, str | None]:
+    """Idempotent frozen cohort of all active vacancies of a track; (None, None) when the track has none."""
+    revisions = _vacancy_revisions(db, track)
     if not revisions:
-        return {"cohort_id": None, "vacancy_count": 0, "sha256": None, "empty": True, "policy": POLICY_ID}
+        return None, None
     canonical = json.dumps(revisions, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     digest = hashlib.sha256(canonical.encode()).hexdigest()
     existing = db.scalar(select(CohortSnapshot).where(
         CohortSnapshot.user_id == user.id, CohortSnapshot.sha256 == digest, CohortSnapshot.policy_id == POLICY_ID))
     if existing is not None:
-        return {"cohort_id": existing.id, "vacancy_count": len(existing.vacancy_ids), "sha256": digest,
-                "empty": False, "policy": POLICY_ID}
+        return existing, digest
+    keys = ("years_min", "title", "company", "seniority", "location", "work_mode", "groups")
     snap = CohortSnapshot(user_id=user.id, vacancy_ids=[r["id"] for r in revisions],
-                          requirement_revisions={r["id"]: {k: r[k] for k in ("years_min", "title", "company", "location", "work_mode", "groups")}
-                                                 for r in revisions},
+                          requirement_revisions={r["id"]: {k: r[k] for k in keys} for r in revisions},
                           policy_id=POLICY_ID, sha256=digest)
     db.add(snap)
     db.commit()
-    return {"cohort_id": snap.id, "vacancy_count": len(revisions), "sha256": digest,
+    return snap, digest
+
+
+@router.post("/auto", status_code=201)
+def create_auto_cohort(profile_id: str | None = None, db: Session = Depends(get_db),
+                       user: User = Depends(current_user)):
+    track = user.track
+    if profile_id is not None:
+        prof = db.scalar(select(CandidateProfile).where(CandidateProfile.id == profile_id,
+                                                        CandidateProfile.user_id == user.id))
+        if prof is None:
+            raise HTTPException(404, "Профіль не знайдено")
+        track = prof.track
+    snap, digest = get_or_create_cohort(db, user, track)
+    if snap is None:
+        return {"cohort_id": None, "vacancy_count": 0, "sha256": None, "empty": True, "policy": POLICY_ID}
+    return {"cohort_id": snap.id, "vacancy_count": len(snap.vacancy_ids), "sha256": digest,
             "empty": False, "policy": POLICY_ID}
 
 

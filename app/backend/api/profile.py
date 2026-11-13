@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
+from backend.api.common import default_profile
 from backend.db import get_db
 from backend.models import (CandidateSelfRating, Competency, CohortSnapshot, CoreInterview, CriterionAssessment,
                             User)
@@ -25,8 +26,11 @@ class UpdateSelfRating(BaseModel):
 
 
 def latest_self_ratings(db: Session, user: User) -> dict[str, float | None]:
-    rows = db.scalars(select(CandidateSelfRating).where(CandidateSelfRating.user_id == user.id)
-                      .order_by(CandidateSelfRating.revision)).all()
+    pid = default_profile(db, user).id
+    rows = db.scalars(select(CandidateSelfRating).where(
+        CandidateSelfRating.user_id == user.id,
+        (CandidateSelfRating.profile_id == pid) | CandidateSelfRating.profile_id.is_(None))
+        .order_by(CandidateSelfRating.revision)).all()
     return {r.action_id: r.value for r in rows}
 
 
@@ -49,6 +53,9 @@ def update_profile(data: UpdateProfile, db: Session = Depends(get_db), user: Use
         raise HTTPException(422, "Невідомий професійний трек")
     for key, val in data.model_dump().items():
         setattr(user, key, val)
+    prof = default_profile(db, user)  # legacy route mirrors into the default profile
+    prof.track, prof.desired_title = data.track, data.desired_title
+    prof.years_experience, prof.location = data.years_experience, data.location
     db.commit()
     return profile_data(db, user)
 
@@ -63,7 +70,8 @@ def set_self_rating(action_id: str, data: UpdateSelfRating,
         raise HTTPException(422, "Дія належить до іншого треку")
     revision = (db.scalar(select(func.max(CandidateSelfRating.revision)).where(
         CandidateSelfRating.user_id == user.id, CandidateSelfRating.action_id == action_id)) or 0) + 1
-    db.add(CandidateSelfRating(user_id=user.id, action_id=action_id, revision=revision, value=data.value))
+    db.add(CandidateSelfRating(user_id=user.id, action_id=action_id, revision=revision, value=data.value,
+                               profile_id=default_profile(db, user).id))
     db.commit()
     return {"action_id": action_id, "value": data.value, "revision": revision, "source": "SELF_REPORT",
             "editable": True}
