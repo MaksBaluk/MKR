@@ -1,17 +1,22 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { BarChart3, Briefcase, Compass, Construction, Loader2, MessageSquare, PieChart, RefreshCw, UsersRound } from 'lucide-react';
+import { BarChart3, Briefcase, Compass, Construction, Loader2, MessageSquare, RefreshCw, UsersRound } from 'lucide-react';
 import { AppShell, SkipLink } from '@/components/AppShell';
+import { ErrorRetry } from '@/components/ErrorRetry';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ActiveProfileProvider, useActiveProfile } from '@/lib/activeProfile';
 import { landingPath, safeReturnPath } from '@/lib/navigation';
 import { AuthScreen } from '@/screens/AuthScreen';
 import { InterviewScreen } from '@/screens/InterviewScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { WelcomeScreen } from '@/screens/WelcomeScreen';
+import { MarketScreen } from '@/screens/MarketScreen';
 import { ResultsScreen } from '@/screens/ResultsScreen';
+import type { CandidateProfile } from '@/types';
 import { useSession } from '@/session';
 
 function FullScreenLoader() {
@@ -74,8 +79,10 @@ function AuthenticatedLayout() {
   if (status === 'anonymous' || !session.profile)
     return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />;
   return (
-    <AppShell name={session.profile.display_name} email={session.profile.email} interview={session.interview}
-      onLogout={() => { session.signOut(); navigate('/login', { replace: true }); }} />
+    <ActiveProfileProvider>
+      <AppShell name={session.profile.display_name} email={session.profile.email} interview={session.interview}
+        onLogout={() => { session.signOut(); navigate('/login', { replace: true }); }} />
+    </ActiveProfileProvider>
   );
 }
 
@@ -119,21 +126,42 @@ function ProfilePage() {
   );
 }
 
-function ResultsPage() {
-  const { interview, reloadProfile } = useSession();
-  if (interview?.status === 'finished') return <ResultsScreen cohortId={interview.cohort_id} onProfileChanged={() => void reloadProfile()} />;
-  if (interview?.status === 'active')
+/** Resolves the active candidate profile, then renders the page for it. */
+function WithActiveProfile({ render }: { render: (p: CandidateProfile) => ReactNode }) {
+  const { status, active, error, reload } = useActiveProfile();
+  if (status === 'loading')
     return (
-      <EmptyState icon={MessageSquare} title="Розмова ще триває"
-        action={<Button asChild><Link to={`/interview/${interview.id}`}>Продовжити розмову</Link></Button>}>
-        Результати з’являться, щойно ви завершите співбесіду.
+      <div aria-busy="true">
+        <p role="status" className="sr-only">Завантаження профілю…</p>
+        <Skeleton className="h-40" />
+      </div>
+    );
+  if (status === 'error')
+    return (
+      <ErrorRetry message={error} onRetry={() => void reload()} />
+    );
+  if (!active)
+    return (
+      <EmptyState icon={UsersRound} title="Профілю ще немає"
+        action={<Button asChild><Link to="/profile">Заповнити профіль</Link></Button>}>
+        Створіть профіль кандидата, щоб пройти співбесіду й побачити результати.
       </EmptyState>
     );
+  return <>{render(active)}</>;
+}
+
+function ResultsPage() {
+  const { interview } = useSession();
   return (
-    <EmptyState icon={BarChart3} title="Результатів ще немає"
-      action={<Button asChild><Link to="/">Почати оцінювання</Link></Button>}>
-      Заповніть профіль і пройдіть коротку розмову. Після неї тут з’являться вакансії, упорядковані за вашими відповідями.
-    </EmptyState>
+    <div className="flex flex-col gap-4">
+      {interview?.status === 'active' && (
+        <Alert role="note" variant="info" className="flex flex-wrap items-center justify-between gap-3">
+          <span>У вас є незавершена співбесіда. Нові результати з’являться після її завершення.</span>
+          <Button asChild size="sm" variant="outline"><Link to={`/interview/${interview.id}`}>Продовжити розмову</Link></Button>
+        </Alert>
+      )}
+      <WithActiveProfile render={(p) => <ResultsScreen key={p.id} profile={p} />} />
+    </div>
   );
 }
 
@@ -164,7 +192,8 @@ export function AppRoutes() {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="profiles" element={<ComingSoonPage section="Профілі" icon={UsersRound} />} />
         <Route path="vacancies" element={<ComingSoonPage section="Вакансії" icon={Briefcase} />} />
-        <Route path="market" element={<ComingSoonPage section="Профіль ринку" icon={PieChart} />} />
+        <Route path="vacancies/:id" element={<ComingSoonPage section="Деталі вакансії" icon={Briefcase} />} />
+        <Route path="market" element={<WithActiveProfile render={(p) => <MarketScreen key={p.id} profile={p} />} />} />
         <Route path="results" element={<ResultsPage />} />
         <Route path="interview/:id" element={<InterviewPage />} />
         <Route path="*" element={<NotFoundPage />} />

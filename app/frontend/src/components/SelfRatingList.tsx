@@ -10,10 +10,12 @@ interface Competency {
 
 type SaveState = 'idle' | 'saving' | 'saved';
 
-export function SelfRatingList({ track, initial, onSaved }: {
+export function SelfRatingList({ track, initial, onSaved, profileId }: {
   track: string;
   initial: Record<string, number | null>;
   onSaved?: () => void;
+  /** Save to this candidate profile; without it the legacy account-level endpoint (default profile) is used. */
+  profileId?: string;
 }) {
   const [actions, setActions] = useState<Competency[]>([]);
   const [values, setValues] = useState<Record<string, number | null>>(initial);
@@ -33,7 +35,8 @@ export function SelfRatingList({ track, initial, onSaved }: {
     setState((s) => ({ ...s, [actionId]: 'saving' }));
     setError(null);
     try {
-      await api(`/profile/self-ratings/${actionId}`, { method: 'PUT', json: { value } });
+      const base = profileId ? `/profiles/${encodeURIComponent(profileId)}/self-ratings` : '/profile/self-ratings';
+      await api(`${base}/${actionId}`, { method: 'PUT', json: { value } });
       setState((s) => ({ ...s, [actionId]: 'saved' }));
       onSaved?.();
     } catch (err) {

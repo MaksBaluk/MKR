@@ -72,4 +72,57 @@ export interface RankedItem {
   gaps: string[];
   unknown_count: number;
   tags: string[];
+  /** «Djinni» for original fixtures, «Тестова вакансія» for generated ones; null if the vacancy row is gone. */
+  source_label: string | null;
+  groups_total: number;
+  /** Requirement groups with at least one assessed alternative. */
+  groups_assessed: number;
+}
+
+export interface ResultVacancy extends RankedItem {
+  title: string;
+  company: string;
+  location: string;
+  work_mode: string | null;
+  seniority: string | null;
+  years_min: number | null;
+}
+
+export interface CompetencyResult {
+  action_id: string;
+  action_name: string;
+  score: number | null;
+  reason: string;
+  evidence: { turn_id: string; exact_excerpt: string }[];
+}
+
+export interface ProfileResults {
+  has_results: boolean;
+  attempt_id: string | null;
+  profile_id: string;
+  total: number;
+  page: number;
+  page_size: number;
+  items: ResultVacancy[];
+  competencies: CompetencyResult[];
+  market: MarketSkill[];
+  note: string;
+}
+
+export interface CandidateProfile {
+  id: string;
+  name: string;
+  track: string;
+  desired_title: string;
+  years_experience: number | null;
+  location: string;
+  archived: boolean;
+  attempts_count: number;
+  latest_finished_attempt_id: string | null;
+  created_at: string | null;
+}
+
+export interface SelfRatingValue {
+  action_id: string;
+  value: number | null;
 }
