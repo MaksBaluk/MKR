@@ -22,11 +22,19 @@ from backend.providers.questions import next_question as bank_question
 
 log = logging.getLogger("competencematch.llm")
 
-ALLOWLIST = ("FastAPI", "Django", "PostgreSQL", "Docker", "AWS", "CI/CD", "Kafka", "Redis", "Celery", "pytest", "SQL",
-             "REST", "API", "Git", "Linux", "Kubernetes", "SQLAlchemy", "Python", "Figma", "SEO", "SMM", "UX", "UI",
-             "GA4", "CRM")
+ALLOWLIST = ("FastAPI", "Django", "PostgreSQL", "Docker Compose", "Docker", "AWS", "CI/CD", "Kafka", "Redis", "Celery",
+             "pytest", "SQL", "REST", "API", "Git", "Linux", "Kubernetes", "SQLAlchemy", "Python", "Figma", "SEO",
+             "SMM", "UX", "UI", "GA4", "CRM", "Terraform", "Ansible", "Excel", "Jira", "React", "Google Analytics",
+             "Notion", "Slack", "GitHub", "GitLab", "Nginx", "Grafana", "Prometheus", "Elasticsearch", "RabbitMQ",
+             "Flask", "Pydantic", "Alembic", "TypeScript", "JavaScript", "HTML", "CSS", "JSON", "HTTP", "gRPC",
+             "GraphQL", "SaaS", "B2B", "KPI", "ROI", "CTR", "CPA", "A/B", "Adobe", "Photoshop", "Illustrator",
+             "Sketch", "WCAG")
 _ALLOW_RE = re.compile("|".join(re.escape(w) for w in sorted(ALLOWLIST, key=len, reverse=True)), re.I)
-_SCORE_RE = re.compile(r"\d\s*[.,]\s*\d|%|рубрик|критері|(?:оцінк|бал|рівен|рівня|рівні)\w*\s*:?\s*\d", re.I)
+# Real leaks only: a 0.x decimal (not a version like 3.11), score words followed by a number, "рівень:", rubric.
+_SCORE_RE = re.compile(r"(?<![\d.])0[.,]\d+(?!\d)|\b(?:оцінк\w*|балів|бали|бал)\s*:?\s*\d|\bрівен[ья]\s*:|\bрубрик", re.I)
+_PERCENT_SCORE_RE = re.compile(r"\b(?:оцінк|рівен|рівн|бал(?:и|ів)?\b|рубрик|відсот)", re.I)
+_ABBREV_RE = re.compile(r"\b(напр|тощо|т\.\s?д|т\.\s?п|ін|див|пор|тис|грн)\.", re.I)
+REFUSAL = "Я можу обговорювати лише професійну тему цієї розмови."
 
 
 class AskState(TypedDict, total=False):
@@ -79,13 +87,14 @@ def validate_question(text: str, off_topic: bool) -> str | None:
     """Return a rejection reason, or None when the question is acceptable."""
     if not text.strip():
         return "EMPTY"
-    sentences = [s for s in re.split(r"(?<=[.!?…])\s+", text.strip()) if s.strip()]
+    flat = _ABBREV_RE.sub(lambda m: m.group(0).replace(".", "").replace(" ", ""), text.strip())
+    sentences = [s for s in re.split(r"(?<=[.!?…])\s+", flat) if s.strip()]
     if len(sentences) > (3 if off_topic else 2):
         return "TOO_LONG"
     letters = [c for c in _ALLOW_RE.sub("", text) if c.isalpha()]
     if not letters or sum("Ѐ" <= c <= "ӿ" for c in letters) / len(letters) < 0.7:
         return "NOT_UKRAINIAN"
-    if _SCORE_RE.search(text):
+    if _SCORE_RE.search(text) or ("%" in text and _PERCENT_SCORE_RE.search(text)):
         return "LEAKS_SCORING"
     return None
 
@@ -124,7 +133,10 @@ def _build_ask(model):
         return {"source": "LLM_INTERVIEWER"}
 
     def fallback(s: AskState) -> dict:
-        return {"question": _bank_text(s["action_id"], s["action_name"]), "source": "FALLBACK_UNGRADED"}
+        text = _bank_text(s["action_id"], s["action_name"])
+        if s.get("off_topic_detected"):
+            text = f"{REFUSAL} {text}"
+        return {"question": text, "source": "FALLBACK_UNGRADED"}
 
     g = StateGraph(AskState)
     g.add_node("write_question", write_question)

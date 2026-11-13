@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from backend.agents.graphs import run_answer, run_ask, validate_question
+from backend.agents.graphs import REFUSAL, run_answer, run_ask, validate_question
 from backend.api.core import criteria_for, latest_scores
 from backend.models import CriterionAssessment, Rubric, RubricCriterion, User
 
@@ -189,3 +189,35 @@ def test_action_score_is_mean_of_non_null_latest_criteria(db):
         add("b", None, 2)
         s.commit()
         assert latest_scores(s, u)[ACTION] is None
+
+
+@pytest.mark.parametrize("ok", [
+    "Які критерії ви використовуєте для вибору індексу?",
+    "Як би ви планували міграцію на Python 3.11?",
+    "Опишіть кроки 1, 2 і 3 вашого розгортання. Що ви б перевірили насамперед?",
+    "Як ви організуєте балансування 2 серверів?",
+    "Як налаштуєте Terraform та Nginx, напр. для staging, тощо? Що перевірите першим?",
+])
+def test_legitimate_questions_pass_validator(ok):
+    assert validate_question(ok, False) is None
+
+
+@pytest.mark.parametrize("leak", [
+    "Ваша оцінка 0.7. Що ви б зробили?",
+    "Який ваш рівень: високий чи середній?",
+    "Ви отримали бал 3. Як це покращити?",
+    "Згідно з рубрикою, як би ви діяли?",
+    "Ваша оцінка зараз 70%, як її підвищити?",
+])
+def test_leaking_questions_rejected(leak):
+    assert validate_question(leak, False) is not None
+
+
+def test_fallback_has_fixed_refusal_only_when_off_topic():
+    r = _ask(None, off_topic=True)
+    plain = _ask(None)
+    assert r.source == "FALLBACK_UNGRADED" and r.question_text == f"{REFUSAL} {plain.question_text}"
+    assert not plain.question_text.startswith(REFUSAL)
+    assert validate_question(r.question_text, True) is None
+    m = FakeModel("Перше. Друге. Третє. Четверте?")
+    assert _ask(m, off_topic=True).question_text.startswith(REFUSAL)
