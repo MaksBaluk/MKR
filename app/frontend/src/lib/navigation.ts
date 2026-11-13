@@ -84,8 +84,7 @@ export function stepStates(pathname: string, interview: SessionInterview | null)
         to = '/';
         break;
       case 'profile':
-        if (stage === 'none') to = '/profile';
-        else reason = 'Профіль зафіксовано для поточної співбесіди';
+        to = '/profile'; // always reachable, also while an interview is open or finished
         break;
       case 'interview':
         if (stage === 'active' && interview) to = `/interview/${interview.id}`;
@@ -127,9 +126,10 @@ export function resumePath(interview: SessionInterview | null): string {
 }
 
 /**
- * Resolve the landing path after boot. A deep link (anything other than `/`) is kept;
- * the bare root resumes the candidate's current stage like the pre-router app did.
+ * Where to land after sign-in. Never drops the candidate straight into an interview:
+ * an interview return path falls back to the welcome step, which offers «Продовжити співбесіду»
+ * (via `resumePath`). Other app paths are kept.
  */
-export function landingPath(requested: string, interview: SessionInterview | null): string {
-  return requested === '/' ? resumePath(interview) : requested;
+export function landingPath(requested: string): string {
+  return requested.startsWith('/interview/') ? '/' : requested;
 }

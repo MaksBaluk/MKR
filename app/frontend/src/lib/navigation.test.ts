@@ -45,9 +45,9 @@ describe('stepStates', () => {
     expect(s.welcome.status).toBe('done');
     expect(s.profile.status).toBe('current');
   });
-  test('active interview: profile frozen, interview opens, results still locked', () => {
+  test('active interview: profile done but still linked, interview opens, results still locked', () => {
     const s = byKey(stepStates('/', active));
-    expect(s.profile).toMatchObject({ status: 'done', to: null });
+    expect(s.profile).toMatchObject({ status: 'done', to: '/profile', reason: null });
     expect(s.interview).toMatchObject({ status: 'available', to: '/interview/i1' });
     expect(s.results.status).toBe('locked');
     expect(s.market.status).toBe('locked');
@@ -56,6 +56,7 @@ describe('stepStates', () => {
   test('finished interview unlocks results, vacancies and market', () => {
     const s = byKey(stepStates('/results', finished));
     expect(s.interview).toMatchObject({ status: 'done', to: null });
+    expect(s.profile).toMatchObject({ status: 'done', to: '/profile' });
     expect(s.results.status).toBe('current');
     expect(s.vacancies).toMatchObject({ status: 'available', to: '/vacancies' });
     expect(s.market.to).toBe('/market');
@@ -90,9 +91,11 @@ describe('resume after boot', () => {
     expect(resumePath(finished)).toBe('/results');
     expect(resumePath(null)).toBe('/');
   });
-  test('landingPath resumes only from the root and keeps deep links', () => {
-    expect(landingPath('/', active)).toBe('/interview/i1');
-    expect(landingPath('/vacancies', active)).toBe('/vacancies');
-    expect(landingPath('/', null)).toBe('/');
+  test('landingPath after login never enters the interview; resume stays a button', () => {
+    expect(landingPath('/')).toBe('/');
+    expect(landingPath('/interview/i1')).toBe('/');
+    expect(landingPath('/interview/i1?x=1')).toBe('/');
+    expect(landingPath('/vacancies?page=2')).toBe('/vacancies?page=2');
+    expect(landingPath('/profile')).toBe('/profile');
   });
 });

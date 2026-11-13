@@ -52,7 +52,8 @@ function BootError({ message, onRetry }: { message: string; onRetry: () => void 
 function LoginPage() {
   const { status, boot, sessionExpired } = useSession();
   const location = useLocation();
-  const from = safeReturnPath((location.state as { from?: unknown } | null)?.from);
+  // After sign-in land on welcome/profile, never straight in an interview (resume is a button there).
+  const from = landingPath(safeReturnPath((location.state as { from?: unknown } | null)?.from));
   useEffect(() => {
     document.title = 'Вхід · CompetenceMatch';
   }, []);
@@ -71,14 +72,12 @@ function AuthenticatedLayout() {
   const session = useSession();
   const location = useLocation();
   const navigate = useNavigate();
-  const { status, justBooted, consumeBoot, interview } = session;
+  const { status, justBooted, consumeBoot } = session;
 
   useEffect(() => {
     if (status !== 'ready' || !justBooted) return;
-    consumeBoot();
-    const target = landingPath(location.pathname, interview);
-    if (target !== location.pathname) navigate(target, { replace: true });
-  }, [status, justBooted, consumeBoot, interview, location.pathname, navigate]);
+    consumeBoot(); // boot keeps the current URL: the root stays on the welcome step, deep links stay put
+  }, [status, justBooted, consumeBoot]);
 
   if (status === 'loading') return <FullScreenLoader />;
   if (status === 'error') return <BootError message={session.error ?? 'Не вдалося завантажити дані.'} onRetry={() => void session.boot()} />;
@@ -146,7 +145,12 @@ function ProfilePage() {
   if (interview?.status === 'active')
     return (
       <EmptyState icon={MessageSquare} title="Профіль уже використано в розмові"
-        action={<Button asChild><Link to={`/interview/${interview.id}`}>Продовжити розмову</Link></Button>}>
+        action={
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button asChild><Link to={`/interview/${interview.id}`}>Продовжити співбесіду</Link></Button>
+            <Button asChild variant="outline"><Link to="/profiles">Усі профілі</Link></Button>
+          </div>
+        }>
         Дані профілю зафіксовано для поточної співбесіди. Самооцінку можна змінити в результатах.
       </EmptyState>
     );
