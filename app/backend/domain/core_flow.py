@@ -98,8 +98,11 @@ def explain_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], names:
     strengths: list[str] = []
     gaps: list[str] = []
     unknown = 0
+    assessed = 0
     tags: list[str] = []
     for g in vacancy["groups"]:
+        if any(scores.get(a["competency_id"]) is not None for a in g["alternatives"]):
+            assessed += 1
         label = " / ".join(names.get(a["competency_id"], a["competency_id"]) for a in g["alternatives"])
         for a in g["alternatives"]:
             n = names.get(a["competency_id"], a["competency_id"])
@@ -112,4 +115,5 @@ def explain_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], names:
             gaps.append(label)
         else:
             unknown += 1
-    return {"strengths": strengths[:limit], "gaps": gaps[:limit], "unknown_count": unknown, "tags": tags[:5]}
+    return {"strengths": strengths[:limit], "gaps": gaps[:limit], "unknown_count": unknown, "tags": tags[:5],
+            "groups_total": len(vacancy["groups"]), "groups_assessed": assessed}

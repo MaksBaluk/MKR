@@ -294,3 +294,38 @@ def test_race_with_no_open_attempt_is_409_not_500(client, auth, monkeypatch):
     client.post(f"{API}/interviews/{a['id']}/finish", json={"version": a["version"]}, headers=auth)
     monkeypatch.setattr(common, "next_attempt_no", lambda db, pid: 1)
     assert start(client, auth, p["id"]).status_code == 409
+
+
+def test_results_items_have_source_and_group_counts(client, auth, finished, db):
+    from backend.models import Vacancy
+    items = results(client, auth, finished["id"], page_size=50)["items"]
+    with db() as s:
+        kinds = {v.id: v.source_type for v in s.query(Vacancy).all()}
+    assert items
+    for i in items:
+        assert i["source_label"] == ("Тестова вакансія" if kinds[i["vacancy_id"]] == "SYNTHETIC_GENERATED" else "Djinni")
+        assert isinstance(i["groups_total"], int) and isinstance(i["groups_assessed"], int)
+        assert i["groups_total"] >= i["groups_assessed"] >= 0 and i["groups_total"] > 0
+    labels = {i["source_label"] for i in items}
+    assert {"Djinni", "Тестова вакансія"} <= labels, labels
+    assert any(i["groups_assessed"] > 0 for i in items)
+
+
+def test_explain_vacancy_counts_assessed_groups():
+    from backend.domain.core_flow import explain_vacancy
+    vac = {"groups": [
+        {"kind": "MANDATORY", "alternatives": [{"competency_id": "a", "required_level": 0.5},
+                                               {"competency_id": "b", "required_level": 0.5}]},
+        {"kind": "MANDATORY", "alternatives": [{"competency_id": "c", "required_level": 0.5}]},
+        {"kind": "DESIRED", "alternatives": [{"competency_id": "d", "required_level": 0.5}]}]}
+    out = explain_vacancy(vac, {"a": None, "b": 0.0, "c": None}, {})
+    assert out["groups_total"] == 3 and out["groups_assessed"] == 1
+
+
+def test_legacy_recommendations_have_source_and_group_counts(client, auth, finished):
+    cohort = client.post(f"{API}/cohorts/auto", headers=auth).json()["cohort_id"]
+    r = client.post(f"{API}/recommendations", json={"cohort_id": cohort}, headers=auth)
+    assert r.status_code == 200, r.text
+    for i in r.json()["items"]:
+        assert i["source_label"] in {"Djinni", "Тестова вакансія"}
+        assert i["groups_total"] >= i["groups_assessed"] >= 0
