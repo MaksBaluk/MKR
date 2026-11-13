@@ -11,6 +11,8 @@ dependencies = [
   "alembic>=1.13,<2",
   "pydantic-settings>=2.5,<3",
   "httpx>=0.27,<1",
+  "langgraph>=1.2.21",
+  "langchain-openai>=1.7.4",
 ]
 
 [dependency-groups]
