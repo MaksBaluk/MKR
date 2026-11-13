@@ -70,17 +70,37 @@ def attempt_scores(db: Session, interview_id: str) -> dict[str, float | None]:
     return _action_scores(rows)
 
 
+SEEDED_SOURCES = ("CURATED", "CURATED_TEMPLATE", "REVIEWED")
+BAND_LABELS = {"0-0.25": "[0,0.25)", "0.25-0.5": "[0.25,0.5)", "0.5-0.75": "[0.5,0.75)", "0.75-0.9": "[0.75,0.9)",
+               "0.9-1": "[0.9,1]"}
+
+
 def _seeded_rubric(db: Session, action_id: str) -> Rubric | None:
     return db.scalar(select(Rubric).where(Rubric.action_id == action_id, Rubric.version == "v1",
-                                          Rubric.source == "CURATED"))
+                                          Rubric.source.in_(SEEDED_SOURCES)))
+
+
+def _seeded_criteria(db: Session, action_id: str) -> list[RubricCriterion]:
+    rubric = _seeded_rubric(db, action_id)
+    if rubric is None:
+        return []
+    return list(db.scalars(select(RubricCriterion).where(RubricCriterion.rubric_id == rubric.id)
+                           .order_by(RubricCriterion.criterion_id)).all())
 
 
 def criteria_for(db: Session, action_id: str) -> list[str]:
-    """Criterion ids of the seeded rubric, else the action itself."""
-    rubric = _seeded_rubric(db, action_id)
-    ids = sorted(db.scalars(select(RubricCriterion.criterion_id).where(RubricCriterion.rubric_id == rubric.id)).all()) \
-        if rubric else []
-    return ids or [action_id]
+    """Criterion ids of the seeded rubric (sorted), else the action itself."""
+    return [c.criterion_id for c in _seeded_criteria(db, action_id)] or [action_id]
+
+
+def criterion_bands(db: Session, action_id: str) -> dict[str, str] | None:
+    """Per-criterion title + five anchored bands for the Evaluator; None keeps the default policy bands."""
+    out = {}
+    for c in _seeded_criteria(db, action_id):
+        bands = (c.anchors or {}).get("bands") or {}
+        text = " ".join(f"{BAND_LABELS.get(k, k)} {v}" for k, v in bands.items())
+        out[c.criterion_id] = f"{(c.anchors or {}).get('title', c.criterion_id)}. {text}".strip()
+    return out or None
 
 
 def _label(db: Session, action_id: str) -> str:
@@ -218,7 +238,8 @@ def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -
     rubric = _seeded_rubric(db, action_id)
     version = "v1" if rubric else "auto-1"
     result = run_answer({"action_id": action_id, "rubric_version": version, "allowed_criterion_ids": criteria,
-                         "turns": {t.id: t.answer_text for t in turns}}, model)
+                         "bands": criterion_bands(db, action_id), "turns": {t.id: t.answer_text for t in turns}},
+                        model)
     if result.status != "ACCEPTED":
         return "UNGRADED"
     if rubric is None:

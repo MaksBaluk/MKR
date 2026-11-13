@@ -163,7 +163,8 @@ def test_detail_404(client, db):
 
 
 def test_source_label(client, db):
-    assert get(client, q="python")["items"][0]["source_label"] == "Djinni"
+    assert client.get(f"{URL}/python-01").json()["source_label"] == "Djinni"
+    assert client.get(f"{URL}/python-31").json()["source_label"] == "Тестова вакансія"
     with db() as s:
         s.add(Vacancy(id="synth-1", track="python", title="Synthetic", company="Fake", seniority="JUNIOR",
                       years_min=0, location="Київ", work_mode="OFFICE", summary="s", description="d",

@@ -32,6 +32,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "python-core-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Колега надіслав на рев'ю функцію на 200 рядків із вкладеними умовами та без анотацій типів. Які зміни ви запропонуєте першими і чому?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "python-core-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Сервіс зрідка падає з KeyError під час обробки вхідного JSON. Як ви знайдете причину та зробите обробку даних надійнішою?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "python-core-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Скрипт обробляє файл на кілька гігабайтів і вичерпує пам'ять. Як ви переробите код, щоб він обробляв дані потоком?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "python-core-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви організуєте структуру невеликого Python-пакета, щоб його було зручно тестувати, типізувати й повторно використовувати в інших сервісах?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "fastapi": [
@@ -67,6 +99,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "fastapi-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно додати ендпоінт створення замовлення, який приймає вкладені дані та повертає зрозумілі помилки валідації. Як ви опишете схеми й обробку помилок?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "fastapi-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після релізу асинхронний FastAPI-сервіс почав відповідати з великою затримкою під навантаженням. Що ви перевірите насамперед і як шукатимете блокувальні виклики?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "fastapi-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви організуєте залежності для доступу до бази даних і поточного користувача, щоб їх було легко підмінити в тестах?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "fastapi-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Мобільний клієнт не може оновитися одразу, а контракт відповіді потрібно змінити. Як ви внесете зміни в API, не зламавши старі версії застосунку?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "django": [
@@ -102,6 +166,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "django-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Сторінка списку замовлень в адмінці відкривається десять секунд. Як ви знайдете причину і які засоби Django ORM застосуєте?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "django-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Користувач може переглянути чужий рахунок, підставивши інший ідентифікатор в URL. Як ви це виправите і як переконаєтеся, що подібна помилка не повториться?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "django-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно перейменувати поле у великій таблиці, з якою постійно працює сервіс. Як ви сплануєте міграції, щоб уникнути простою?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "django-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Бізнес-логіка розрахунку знижок розкидана між views, моделями та сигналами. Як ви її впорядкуєте і чому саме так?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "postgresql": [
@@ -137,6 +233,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "postgresql-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Запит пошуку клієнтів за email і статусом виконується кілька секунд на таблиці з мільйонами рядків. Як ви проаналізуєте план виконання і який індекс оберете?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "postgresql-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Два запити одночасно списують кошти з одного рахунку, і баланс іноді стає від'ємним. Як ви забезпечите коректність у PostgreSQL?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "postgresql-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно додати індекс і нову обов'язкову колонку до таблиці, у яку постійно записуються дані. Як ви проведете цю зміну без блокування роботи сервісу?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "postgresql-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Таблиця подій швидко росте, а звіти за останній місяць сповільнюються. Які варіанти зміни схеми чи зберігання даних ви розглянете?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "sql": [
@@ -172,6 +300,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "sql-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Звіт про продажі за регіонами показує суму, більшу ніж у бухгалтерії. Як ви шукатимете помилку в SQL-запиті?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "sql-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно для кожного клієнта знайти три останні замовлення та накопичену суму покупок. Як ви напишете такий запит і чому оберете саме цей підхід?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "sql-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви поясните молодшому колезі різницю між WHERE і HAVING та між INNER і LEFT JOIN на прикладі з реального звіту?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "sql-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Аналітичний запит із кількома підзапитами виконується хвилинами. Що ви зробите, щоб його прискорити, і як перевірите, що результат не змінився?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "sqlalchemy": [
@@ -207,6 +367,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "sqlalchemy-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Ендпоінт, що повертає список проєктів із задачами, виконує сотні SQL-запитів. Як ви це виявите та виправите в SQLAlchemy?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "sqlalchemy-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Під час одночасних запитів створюються дублікати записів, попри перевірку перед вставленням. Як ви розв'яжете цю проблему?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "sqlalchemy-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви організуєте керування сесією SQLAlchemy у вебзастосунку, щоб транзакції не змішувалися між запитами?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "sqlalchemy-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Команда переходить зі старого стилю SQLAlchemy на 2.0. Що ви зміните в моделях і запитах і як убезпечите перехід тестами?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "docker": [
@@ -242,6 +434,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "docker-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Образ Python-сервісу важить понад гігабайт і збирається десять хвилин. Як ви його оптимізуєте?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "docker-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Контейнер у продакшні перезапускається кожні кілька хвилин, а локально все працює. Як ви діагностуватимете проблему?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "docker-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Під час аудиту з'ясувалося, що в образ потрапив файл .env із ключами доступу. Що ви зробите одразу і як зміните процес збирання?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "docker-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Нові розробники витрачають день на налаштування локального середовища з базою, чергою та кешем. Як ви спростите це за допомогою контейнерів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "aws": [
@@ -277,6 +501,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "aws-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Ключ доступу з повними правами адміністратора опинився в публічному репозиторії. Які дії ви виконаєте і що зміните в керуванні доступами?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "aws-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно розгорнути невеликий API з нерівномірним навантаженням і обмеженим бюджетом. Які сервіси AWS ви розглянете і як оберете між ними?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "aws-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Рахунок за AWS за місяць зріс удвічі без помітного зростання трафіку. Як ви шукатимете причину?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "aws-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви організуєте розгортання сервісу в середовища dev, staging і production так, щоб конфігурація та секрети не змішувалися?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "redis": [
@@ -312,6 +568,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "redis-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після додавання кешу користувачі інколи бачать застарілі ціни товарів. Як ви налаштуєте інвалідацію кешу?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "redis-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Під час розпродажу ключ із популярним товаром спричиняє лавину запитів до бази після закінчення TTL. Як ви запобігатимете такій ситуації?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "redis-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно обмежити кількість запитів до API для кожного клієнта. Як ви реалізуєте це на Redis і які структури даних оберете?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "redis-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Redis став недоступним на кілька хвилин. Як має поводитися ваш застосунок і як ви перевірите цю поведінку заздалегідь?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "celery": [
@@ -347,6 +635,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "celery-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після перезапуску воркерів частина клієнтів отримала той самий лист двічі. Як ви зробите задачі безпечними для повторного виконання?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "celery-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Генерація звітів триває до двадцяти хвилин і блокує інші задачі в черзі. Як ви переорганізуєте черги та воркери?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "celery-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Задача звертається до зовнішнього API, який періодично повертає помилку 503. Як ви налаштуєте повторні спроби й обробку остаточних збоїв?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "celery-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви налаштуєте моніторинг Celery, щоб дізнаватися про проблеми з чергою раніше за користувачів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "pytest": [
@@ -382,6 +702,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "pytest-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Тести в CI падають випадково приблизно один раз на десять запусків. Як ви знайдете причину нестабільності?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "pytest-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно протестувати функцію, яка звертається до платіжного шлюзу й записує дані в базу. Що ви замокуєте, а що перевірятимете інтеграційно, і чому?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "pytest-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Набір тестів виконується двадцять хвилин, і розробники перестали запускати його локально. Як ви його прискорите?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "pytest-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви організуєте фікстури й параметризацію, щоб перевірити валідацію форми з десятками варіантів вхідних даних?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "git": [
@@ -417,6 +769,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "git-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Під час злиття гілки виник конфлікт у файлі, який паралельно змінювали двоє розробників. Як ви його розв'яжете і як переконаєтеся, що нічого не втрачено?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "git-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після релізу з'явилася регресія, але невідомо, який із сорока комітів її спричинив. Як ви знайдете проблемний коміт?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "git-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Ви випадково виконали reset і втратили кілька локальних комітів. Як ви їх відновите?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "git-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Яку стратегію роботи з гілками ви запропонуєте команді з шести розробників, що випускає реліз щотижня, і чому?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "ci-cd": [
@@ -452,6 +836,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "ci-cd-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Pipeline виконується сорок хвилин, і команда зливає зміни, не чекаючи результатів. Як ви скоротите час і повернете довіру до перевірок?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ci-cd-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після автоматичного деплою сервіс почав повертати помилки 500 частині користувачів. Як має бути влаштований процес, щоб такий реліз можна було швидко відкотити?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ci-cd-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви організуєте реліз, що містить міграцію бази даних, несумісну зі старою версією коду?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ci-cd-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви зберігатимете й передаватимете секрети в pipeline, щоб вони не потрапили в журнали збирання?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "rest-api": [
@@ -487,6 +903,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "rest-api-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Мобільний застосунок через нестабільну мережу інколи двічі надсилає запит на оплату. Як ви спроєктуєте API, щоб уникнути подвійного списання?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "rest-api-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Клієнти скаржаться, що помилки мають різний формат у різних ендпоінтах. Як ви уніфікуєте контракт помилок і впровадите зміни без збоїв для клієнтів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "rest-api-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Список транзакцій налічує мільйони записів, а нові додаються щосекунди. Як ви реалізуєте пагінацію, щоб клієнт не пропускав і не дублював записи?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "rest-api-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви захистите API від перебору ідентифікаторів і надмірної кількості запитів від одного клієнта?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "async-python": [
@@ -522,6 +970,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "async-python-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Асинхронний сервіс надсилає сотні запитів до зовнішнього API, і той почав блокувати вас за перевищення ліміту. Як ви обмежите паралельність?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "async-python-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "У коді на asyncio використовується синхронна бібліотека для роботи з файлами, і затримка зросла для всіх запитів. Як ви виявите й виправите проблему?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "async-python-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Коли користувач закриває з'єднання, фонові корутини продовжують працювати й витрачати ресурси. Як ви організуєте коректне скасування?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "async-python-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви протестуєте асинхронну функцію, яка паралельно звертається до трьох сервісів і має таймаут?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "linux": [
@@ -557,6 +1037,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "linux-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Сервіс на сервері перестав відповідати, хоча SSH-підключення працює. Які команди ви виконаєте і в якій послідовності?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "linux-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Диск на сервері заповнився, і застосунок не може записувати журнали. Як ви знайдете причину й запобіжите повторенню?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "linux-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Застосунок не може під'єднатися до бази даних на сусідньому сервері, хоча база працює. Як ви перевірятимете мережеве з'єднання?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "linux-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви налаштуєте Python-сервіс як системну службу, щоб він автоматично перезапускався й не працював від root?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "kubernetes": [
@@ -592,6 +1104,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "kubernetes-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Новий под після деплою постійно перебуває в стані CrashLoopBackOff. Як ви з'ясуєте причину?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "kubernetes-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Під час розгортання нової версії частина запитів завершується помилками. Що ви зміните в налаштуваннях Deployment і проб?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "kubernetes-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Сервіс періодично отримує OOMKilled під час пікового навантаження. Як ви підберете ресурси та налаштуєте масштабування?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "kubernetes-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви обмежите доступ сервісів у кластері до секретів і один до одного?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "app-security": [
@@ -627,6 +1171,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "app-security-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Під час пентесту з'ясувалося, що зміною ідентифікатора в запиті можна отримати чужі документи. Як ви виправите вразливість і перевірите інші ендпоінти?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "app-security-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "У журналах застосунку знайшли паролі та токени користувачів. Які кроки ви виконаєте одразу і що зміните в коді?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "app-security-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Сканер залежностей повідомив про критичну вразливість у бібліотеці, яку використовують десять сервісів. Як ви організуєте оновлення?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "app-security-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно додати завантаження файлів користувачами. Які загрози ви врахуєте і як захистите систему?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "observability": [
@@ -662,6 +1238,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "observability-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Користувачі скаржаться на повільну роботу, але середній час відповіді в нормі. Що можуть приховувати такі метрики і що ви додасте?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "observability-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Черговий інженер отримує десятки алертів за ніч, і більшість із них не потребує дій. Як ви переглянете систему алертів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "observability-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Запит проходить через п'ять сервісів, і важко зрозуміти, де він затримується. Як ви налаштуєте трасування?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "observability-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви організуєте журналювання, щоб за ідентифікатором запиту знаходити всі пов'язані події та не зберігати персональні дані?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "kafka": [
@@ -697,6 +1305,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "kafka-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Споживач подій про оплату впав посеред обробки пакета повідомлень. Як ви забезпечите, щоб жодну оплату не було втрачено чи враховано двічі?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "kafka-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Відставання споживачів постійно зростає в години пік. Як ви діагностуєте проблему і що зміните?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "kafka-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Одне пошкоджене повідомлення блокує обробку всієї партиції. Як ви влаштуєте обробку таких повідомлень?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "kafka-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно додати нове поле в подію, яку читають чотири різні команди. Як ви зміните схему без збоїв у споживачів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "ga4": [
@@ -732,6 +1372,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "ga4-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після запуску нового сайту кількість конверсій у GA4 упала вдвічі, а продажі не змінилися. Як ви шукатимете причину?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ga4-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Продуктова команда просить відстежувати весь шлях користувача в застосунку. Як ви складете план вимірювання і які події визначите ключовими?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ga4-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Дані GA4 про покупки розходяться з CRM. Які причини розбіжностей ви перевірите і як поясните їх команді?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ga4-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Керівник просить коротко підсумувати, що змінилося в поведінці користувачів за квартал. Як ви підготуєте висновки на основі звітів GA4?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "google-ads": [
@@ -767,6 +1439,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "google-ads-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Вартість конверсії в пошукових кампаніях за місяць зросла на третину. Як ви проаналізуєте причини і що зміните?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "google-ads-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Клієнт хоче перейти з ручних ставок на автоматичну стратегію з цільовою рентабельністю. Що ви перевірите перед переходом і як його організуєте?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "google-ads-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Брендова кампанія показує чудову рентабельність, а небрендова збиткова. Як ви оціните реальний внесок кожної і як розподілите бюджет?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "google-ads-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви побудуєте структуру кампаній для інтернет-магазину з тисячами товарів і кількома категоріями з різною маржею?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "meta-ads": [
@@ -802,6 +1506,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "meta-ads-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після двох тижнів успішної кампанії вартість результату різко зросла, а частота показів досягла шести. Що ви зробите?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "meta-ads-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви організуєте тестування креативів, щоб можна було зрозуміти, яка саме зміна вплинула на результат?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "meta-ads-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Meta показує вдвічі більше покупок, ніж аналітика сайту. Як ви поясните розбіжність і на які дані спиратиметеся, ухвалюючи рішення?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "meta-ads-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Бюджет кампанії потрібно збільшити втричі за тиждень до розпродажу. Як ви масштабуватимете її, не втративши ефективності?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "seo": [
@@ -837,6 +1573,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "seo-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після переїзду сайту на новий домен органічний трафік упав на сорок відсотків. Як ви знайдете причини й відновите видимість?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "seo-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Блог має сотні статей, але більшість із них не отримує органічного трафіку. Як ви проведете аудит і що зробите з такими сторінками?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "seo-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Сторінки категорій інтернет-магазину погано індексуються через фільтри, що генерують тисячі URL. Як ви розв'яжете цю проблему?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "seo-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви покажете керівництву внесок SEO у продажі, якщо ефект від змін з'являється лише через кілька місяців?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "content-strategy": [
@@ -872,6 +1640,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "content-strategy-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Компанія виходить на новий ринок, де бренд ніхто не знає. Як ви сформуєте контент-стратегію на перші пів року?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "content-strategy-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Блог регулярно публікує матеріали, але відділ продажів каже, що вони не допомагають закривати угоди. Як ви це зміните?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "content-strategy-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Двоє авторів не встигають виконувати контент-план для п'яти каналів. Як ви розставите пріоритети?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "content-strategy-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви визначите, які контентні гіпотези перевіряти першими, і як оціните результат кожної з них?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "email-marketing": [
@@ -907,6 +1707,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "email-marketing-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після імпорту нової бази контактів різко зросла частка листів, що потрапляють у спам. Що ви зробите?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "email-marketing-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Відкриття листів зросли, а кліки й продажі ні. Як ви інтерпретуєте ці дані?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "email-marketing-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно запустити серію листів для клієнтів, які не купували понад пів року. Як ви сегментуєте базу і що запропонуєте різним групам?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "email-marketing-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви сплануєте A/B-тест розсилки, щоб результат був надійним і відображав вплив на дохід, а не лише на відкриття?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "crm": [
@@ -942,6 +1774,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "crm-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "У CRM тисячі дублікатів контактів і лідів без джерела. Як ви наведете лад у даних і запобіжите повторенню проблеми?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "crm-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Відділ продажів скаржиться на низьку якість лідів із маркетингу. Як ви визначите критерії кваліфікації і домовитеся про них?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "crm-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Ліди з рекламних форм потрапляють у CRM із запізненням і без UTM-міток. Як ви налаштуєте інтеграцію?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "crm-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Які звіти з CRM ви підготуєте, щоб керівник бачив, на якому етапі воронки втрачаються угоди?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "segmentation": [
@@ -977,6 +1841,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "segmentation-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "У вас є дані про покупки клієнтів інтернет-магазину за два роки. Як ви сегментуєте базу і які сегменти візьмете в роботу першими?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "segmentation-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Маркетинг надсилає однакові пропозиції всім клієнтам. Як ви доведете, що сегментовані комунікації дають кращий результат?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "segmentation-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Склад сегмента лояльних клієнтів з часом змінюється, і кампанії для нього слабшають. Як ви налаштуєте оновлення сегментів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "segmentation-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви визначите, яка знижка доречна для різних сегментів, щоб не віддавати маржу тим, хто купив би й без неї?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "cro": [
@@ -1012,6 +1908,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "cro-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Конверсія сторінки оформлення замовлення на мобільних удвічі нижча, ніж на десктопі. Як ви шукатимете причину?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "cro-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Команда має двадцять ідей покращення лендингу. Як ви визначите, що тестувати першим?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "cro-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після спрощення форми реєстрації кількість заявок зросла, але відділ продажів отримує більше нецільових лідів. Як ви оціните результат цієї зміни?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "cro-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви сформулюєте гіпотезу для зміни на сторінці тарифів і які метрики оберете для її перевірки?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "ab-testing": [
@@ -1047,6 +1975,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "ab-testing-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Через три дні після старту тесту нова версія сторінки показує значне покращення, і менеджер хоче зупинити тест. Що ви йому відповісте?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ab-testing-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви визначите тривалість тесту й потрібний обсяг трафіку для сторінки з невеликою кількістю конверсій?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ab-testing-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "У тестовій групі опинилося помітно більше користувачів, ніж у контрольній, хоча розподіл мав бути рівним. Що це означає і що ви зробите?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ab-testing-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Тест не показав статистично значущої різниці. Як ви представите цей результат команді і що запропонуєте далі?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "gtm": [
@@ -1082,6 +2042,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "gtm-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після оновлення сайту частина подій перестала надходити в аналітику. Як ви знайдете проблему за допомогою GTM?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "gtm-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "У контейнері GTM понад сотня тегів, доданих різними підрядниками, і ніхто не знає, які з них потрібні. Як ви проведете аудит?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "gtm-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно відстежувати додавання товару в кошик на сайті з динамічним завантаженням сторінок. Як ви налаштуєте це через dataLayer?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "gtm-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви налаштуєте теги так, щоб вони враховували згоду користувача на файли cookie відповідно до вимог GDPR?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "looker-studio": [
@@ -1117,6 +2109,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "looker-studio-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Керівництво просить один дашборд для щотижневої наради про маркетинг. Які показники ви включите і як структуруєте звіт?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "looker-studio-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Коефіцієнт конверсії в дашборді не збігається з даними в GA4. Як ви шукатимете помилку?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "looker-studio-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Дашборд із даними з п'яти джерел завантажується понад хвилину. Як ви його прискорите?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "looker-studio-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно об'єднати витрати з рекламних кабінетів і дохід із CRM в одному звіті. Як ви це зробите і на які пастки зважатимете?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "excel": [
@@ -1152,6 +2176,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "excel-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Вам надіслали вивантаження з CRM на десять тисяч рядків із дублікатами та різними форматами дат. Як ви підготуєте дані до аналізу?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "excel-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно порівняти витрати й дохід за каналами по місяцях. Як ви побудуєте зведену таблицю і перевірите підсумки?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "excel-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Колеги постійно ламають формули у спільній таблиці бюджету. Як ви організуєте таблицю, щоб уникнути помилок?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "excel-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви об'єднаєте дані з двох таблиць, у яких ідентифікатори клієнтів записано по-різному?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "copywriting": [
@@ -1187,6 +2243,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "copywriting-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно написати текст лендингу для сервісу, який аудиторія вважає складним. З чого ви почнете і як сформулюєте головне повідомлення?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "copywriting-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Той самий продукт треба прорекламувати в пошуковій рекламі, email-розсилці та соцмережах. Чим відрізнятимуться ваші тексти?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "copywriting-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Юрист заборонив використовувати в рекламі формулювання «найкращий на ринку». Як ви переконливо подасте переваги продукту без таких тверджень?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "copywriting-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви визначите, який із трьох варіантів заголовка спрацював краще, і на які метрики зважатимете?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "brand-strategy": [
@@ -1222,6 +2310,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "brand-strategy-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Компанія має три продукти з різними назвами та стилем, і клієнти не розуміють, що це один бренд. Як ви підійдете до цієї проблеми?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "brand-strategy-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Керівництво хоче змінити позиціонування бренду після появи конкурента з дешевшим продуктом. Які дослідження ви проведете перед ухваленням рішення?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "brand-strategy-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Регіональні команди створюють матеріали, що не відповідають бренд-гайдам. Як ви забезпечите послідовність комунікацій?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "brand-strategy-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви оцінюватимете, чи працює нова бренд-стратегія, через рік після її запуску?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "performance-marketing": [
@@ -1257,6 +2377,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "performance-marketing-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Вартість залучення клієнта зросла, але компанія хоче зберегти темпи зростання. Як ви переглянете розподіл бюджету між каналами?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "performance-marketing-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви визначите допустиму вартість залучення клієнта для сервісу з щомісячною підпискою?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "performance-marketing-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Кампанії показують чудову рентабельність у звітах, але загальний дохід компанії не зростає. Як ви поясните цю ситуацію?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "performance-marketing-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви організуєте щотижневий цикл оптимізації кампаній у кількох каналах, щоб рішення були послідовними?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "attribution": [
@@ -1292,6 +2444,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "attribution-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Кожна рекламна система приписує собі більшість продажів, і в сумі виходить більше, ніж фактична кількість замовлень. Як ви поясните це керівництву?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "attribution-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви перевірите, чи справді медійна реклама приводить нових клієнтів, а не лише охоплює тих, хто купив би й так?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "attribution-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після впровадження банера згоди на cookie частина конверсій зникла зі звітів. Як ви оцінюватимете канали в таких умовах?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "attribution-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви оберете модель атрибуції для B2B-продукту з довгим циклом угоди та кількома особами, які ухвалюють рішення?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "marketing-automation": [
@@ -1327,6 +2511,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "marketing-automation-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно запустити сценарій для користувачів, які зареєструвалися, але не завершили налаштування продукту. Як ви його спроєктуєте?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "marketing-automation-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Клієнт отримав три листи з різних сценаріїв за один день і поскаржився. Як ви налаштуєте правила, щоб цього уникнути?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "marketing-automation-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви доведете, що автоматизований сценарій повернення клієнтів справді приносить додатковий дохід?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "marketing-automation-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Інтеграція між продуктом і платформою автоматизації час від часу передає застарілі дані. Як ви виявлятимете такі збої?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "social-media": [
@@ -1362,6 +2578,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "social-media-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Публікація бренду викликала хвилю негативних коментарів. Що ви робитимете в перші години?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "social-media-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Охоплення в Instagram падає третій місяць поспіль. Як ви проаналізуєте причини і що зміните в контент-плані?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "social-media-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Команді вистачає ресурсу лише на дві соцмережі. Як ви оберете, на яких платформах зосередитися?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "social-media-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви покажете керівництву, що активність у соцмережах впливає на продажі?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "market-research": [
@@ -1397,6 +2645,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "market-research-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Компанія планує запустити продукт у Польщі. Як ви оціните потенціал ринку та конкурентів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "market-research-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Опитування показало, що клієнти дуже хочуть нову функцію, але після запуску нею майже ніхто не користується. Що могло піти не так у дослідженні?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "market-research-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Вам потрібно за два тижні з'ясувати, чому клієнти обирають конкурента. Яке дослідження ви проведете?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "market-research-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви подасте результати дослідження керівництву, щоб вони вплинули на рішення, а не залишилися звітом у папці?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "figma": [
@@ -1432,6 +2712,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "figma-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "У файлі команди десятки копій кнопок із різними відступами й кольорами. Як ви перебудуєте компоненти, щоб уникнути цього надалі?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "figma-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Розробники скаржаться, що в макетах важко знайти актуальну версію екрана. Як ви організуєте файли та передачу макетів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "figma-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви побудуєте компонент картки товару, що має працювати з назвами різної довжини, із зображенням і без нього?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "figma-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Над одним файлом одночасно працюють три дизайнери. Як ви організуєте спільну роботу, щоб зміни не конфліктували?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "ui-design": [
@@ -1467,6 +2779,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "ui-design-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Користувачі не помічають головної кнопки на сторінці оформлення замовлення. Як ви переглянете візуальну ієрархію екрана?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ui-design-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви спроєктуєте таблицю з великою кількістю даних, щоб нею було зручно користуватися і на ноутбуці, і на великому моніторі?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ui-design-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Розробники реалізували екран, але він помітно відрізняється від макета. Як ви проведете рев'ю і домовитеся про виправлення?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ui-design-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Які стани, крім основного, ви передбачите для форми оплати і чому вони важливі?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "ux-research": [
@@ -1502,6 +2846,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "ux-research-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Продуктова команда хоче додати нову функцію, бо її попросив великий клієнт. Як ви перевірите, чи потрібна вона іншим користувачам?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ux-research-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "У вас є тиждень і бюджет на п'ять інтерв'ю. Як ви сплануєте дослідження, щоб отримати корисні висновки?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ux-research-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після інтерв'ю у вас три десятки сторінок нотаток. Як ви перетворите їх на інсайти, з якими працюватиме команда?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "ux-research-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Результати дослідження суперечать думці керівника продукту. Як ви представите їх і що зробите, щоб вас почули?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "wireframing": [
@@ -1537,6 +2913,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "wireframing-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно спроєктувати особистий кабінет із десятьма розділами. З чого ви почнете роботу над вайрфреймами?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "wireframing-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Під час обговорення вайрфреймів стейкхолдери сперечаються про кольори та шрифти. Як ви повернете розмову до структури?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "wireframing-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви вирішите, коли достатньо простих вайрфреймів, а коли вже потрібен детальний макет?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "wireframing-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви перевірите, що запропонована структура сторінки зрозуміла користувачам, ще до візуального дизайну?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "prototyping": [
@@ -1572,6 +2980,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "prototyping-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно перевірити новий процес онбордингу до початку розробки. Який прототип ви створите і що саме він має перевірити?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "prototyping-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Під час тестування учасники зупинялися на екранах, які в прототипі не реагували на їхні дії. Як ви зміните прототип?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "prototyping-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Розробники кажуть, що анімований перехід із прототипу неможливо реалізувати в поточні терміни. Що ви робитимете далі?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "prototyping-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви підготуєте реалістичні дані для прототипу, щоб тестування давало достовірні результати?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "design-systems": [
@@ -1607,6 +3047,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "design-systems-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Три продуктові команди створили власні версії компонента вибору дати. Як ви вирішите, яка з них потрапить у дизайн-систему?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "design-systems-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Дизайн-системою мало користуються, бо командам швидше малювати власні компоненти. Як ви зміните ситуацію?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "design-systems-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно додати темну тему до продукту із сотнею екранів. Як ви організуєте токени, щоб це стало можливим?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "design-systems-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви керуватимете змінами в компоненті, який уже використовують у десятках місць, щоб нічого не зламати?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "accessibility": [
@@ -1642,6 +3114,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "accessibility-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Аудит показав, що форму реєстрації неможливо заповнити лише з клавіатури. Які зміни ви внесете в макет і специфікацію?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "accessibility-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Бренд-команда наполягає на світло-сірому тексті на білому тлі. Як ви аргументуєте зміну і який компроміс запропонуєте?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "accessibility-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви перевірите доступність нового екрана до передачі в розробку і після реалізації?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "accessibility-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви спроєктуєте повідомлення про помилки у формі, щоб їх розуміли користувачі скрінрідерів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "typography": [
@@ -1677,6 +3181,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "typography-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Інтерфейс перекладають українською, і довгі слова не вміщуються в кнопки та заголовки. Як ви розв'яжете це засобами типографіки?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "typography-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Користувачі скаржаться, що довгі статті на сайті важко читати. Які параметри тексту ви переглянете?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "typography-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви побудуєте типографічну шкалу для продукту, що працює на мобільних, планшетах і десктопах?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "typography-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви оберете шрифт для нового продукту, якщо він має підтримувати кирилицю, латиницю та цифри в таблицях?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "visual-design": [
@@ -1712,6 +3248,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "visual-design-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Сторінка виглядає перевантаженою, хоча кожен елемент на ній потрібен. Як ви покращите композицію?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "visual-design-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно розробити палітру статусів (успіх, попередження, помилка), яка працює і у світлій, і в темній темі. Як ви це зробите?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "visual-design-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Кілька команд використовують різні стилі ілюстрацій та іконок. Як ви створите єдину візуальну мову?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "visual-design-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Стейкхолдер каже, що новий дизайн «не чіпляє». Як ви з'ясуєте, що саме його не влаштовує, і як захистите свої рішення?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "illustrator": [
@@ -1747,6 +3315,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "illustrator-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно створити набір із сорока іконок для продукту. Як ви забезпечите їхню цілісність?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "illustrator-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Векторна ілюстрація після експорту в SVG важить кілька мегабайтів і повільно завантажується. Що ви зробите?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "illustrator-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Логотип, створений для екрана, потрібно надрукувати на банері та сувенірах. Що ви перевірите перед передачею файлів у друк?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "illustrator-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви побудуєте складну векторну ілюстрацію так, щоб її було легко редагувати іншим дизайнерам?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "photoshop": [
@@ -1782,6 +3382,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "photoshop-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Для каталогу потрібно обробити двісті фотографій товарів, знятих у різних умовах. Як ви забезпечите однаковий вигляд?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "photoshop-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Зображення на сайті виглядають розмитими на сучасних екранах і водночас важать забагато. Як ви підготуєте їх правильно?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "photoshop-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Замовник просить використати для рекламної кампанії фото, знайдене через пошук в інтернеті. Як ви відреагуєте?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "photoshop-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви організуєте файл зі складним колажем, щоб правки клієнта можна було вносити швидко й без втрати якості?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "usability-testing": [
@@ -1817,6 +3449,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "usability-testing-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно перевірити новий процес оформлення замовлення за тиждень. Як ви сплануєте тестування і скільки учасників залучите?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "usability-testing-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Під час сесії учасник просить підказати, куди натиснути. Як ви вчините і чому?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "usability-testing-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Тестування виявило двадцять проблем, а команда встигне виправити лише п'ять до релізу. Як ви визначите пріоритети?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "usability-testing-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви представите результати тестування команді, щоб розробники й менеджери зрозуміли проблеми користувачів?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "interaction-design": [
@@ -1852,6 +3516,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "interaction-design-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Користувачі випадково видаляють важливі записи одним натисканням. Як ви зміните взаємодію?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "interaction-design-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Формування звіту триває до хвилини. Як ви спроєктуєте поведінку інтерфейсу під час очікування?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "interaction-design-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Команда хоче додати анімацію до кожної дії в застосунку. Як ви визначите, де вона корисна, а де заважає?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "interaction-design-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви спроєктуєте сценарій, у якому користувача можуть перервати посередині заповнення довгої форми?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "responsive-design": [
@@ -1887,6 +3583,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "responsive-design-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Таблиця з десятьма колонками погано виглядає на телефоні. Які варіанти адаптації ви розглянете?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "responsive-design-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "На планшетах у горизонтальній орієнтації макет ламається, хоча на телефонах і десктопах усе гаразд. Як ви знайдете причину і зміните підхід?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "responsive-design-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви передасте розробникам адаптивну поведінку сторінки, якщо маєте макети лише для трьох ширин екрана?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "responsive-design-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Користувачі збільшують розмір шрифту в налаштуваннях системи, і інтерфейс розвалюється. Як ви врахуєте це в дизайні?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "html-css": [
@@ -1922,6 +3650,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "html-css-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Картки товарів у макеті мають вирівнюватися за висотою в сітці з різною кількістю колонок. Як ви поясните розробнику реалізацію на CSS Grid?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "html-css-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Розробник зробив кнопку з div, і її неможливо активувати з клавіатури. Як ви поясните, чому це важливо, і що запропонуєте?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "html-css-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви підготуєте дизайн-токени, щоб розробники могли використовувати їх як CSS-змінні?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "html-css-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви перевірятимете верстку нового компонента перед релізом і на що зважатимете?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "information-architecture": [
@@ -1957,6 +3717,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "information-architecture-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "У меню сайту вісімнадцять пунктів, і користувачі не можуть знайти потрібний розділ. Як ви переглянете навігацію?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "information-architecture-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви проведете сортування карток для інтернет-магазину з широким асортиментом і що робитимете з результатами?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "information-architecture-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Різні команди називають той самий розділ по-різному в продукті та документації. Як ви наведете лад у термінах?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "information-architecture-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Продукт швидко зростає, і щокварталу з'являються нові розділи. Як ви спроєктуєте структуру, що витримає таке зростання?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "stakeholder-communication": [
@@ -1992,6 +3784,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "stakeholder-communication-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Керівник продукту просить додати на головний екран ще три банери, хоча дослідження показують перевантаження. Як ви проведете цю розмову?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "stakeholder-communication-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Два стейкхолдери дають суперечливі правки до одного макета. Як ви дійдете до рішення?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "stakeholder-communication-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви організуєте дизайн-рев'ю, щоб отримати корисний зворотний зв'язок, а не обговорення смаків?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "stakeholder-communication-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Терміни проєкту скоротили вдвічі. Як ви повідомите про наслідки для якості дизайну та узгодите новий обсяг робіт?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "motion-design": [
@@ -2027,6 +3851,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "motion-design-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Потрібно спроєктувати анімацію переходу від списку до детальної картки. Як ви визначите тривалість і характер руху?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "motion-design-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Користувач із вестибулярними розладами скаржиться на дискомфорт від анімацій. Що ви зміните?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "motion-design-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви передасте розробникам складну анімацію, щоб реалізація відповідала задуму й не гальмувала на слабких пристроях?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "motion-design-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви створите систему анімацій для продукту, щоб рух був послідовним у роботі всіх команд?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "branding": [
@@ -2062,6 +3918,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "branding-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Стартап просить новий логотип за тиждень, але ще не визначився з позиціонуванням. Як ви підійдете до задачі?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "branding-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після ребрендингу підрядники й надалі використовують старі кольори та неправильні пропорції логотипа. Як ви це виправите?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "branding-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви перевірите, що нова айдентика однаково добре працює в мобільному застосунку, на вивісці та в соцмережах?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "branding-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви представите клієнтові три концепції айдентики, щоб він ухвалив рішення на основі аргументів, а не лише смаку?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ],
   "product-analytics": [
@@ -2097,6 +3985,38 @@
       "options": [],
       "correct_option": null,
       "rubric_version": "human-review-v1"
+    },
+    {
+      "id": "product-analytics-ft-1-v2",
+      "kind": "FREE_TEXT",
+      "text": "Після редизайну онбордингу зменшилася частка користувачів, які завершують реєстрацію. Як ви з'ясуєте причину за допомогою даних?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "product-analytics-ft-2-v2",
+      "kind": "FREE_TEXT",
+      "text": "Які метрики ви визначите для оцінювання нової функції спільного редагування ще до її запуску?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "product-analytics-ft-3-v2",
+      "kind": "FREE_TEXT",
+      "text": "Дані показують, що користувачі темної теми активніші за інших. Чи варто зробити її стандартною і як ви дійдете висновку?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
+    },
+    {
+      "id": "product-analytics-ft-4-v2",
+      "kind": "FREE_TEXT",
+      "text": "Як ви домовитеся з аналітиками й розробниками про відстеження подій для нового сценарію?",
+      "options": [],
+      "correct_option": null,
+      "rubric_version": "v1"
     }
   ]
 }

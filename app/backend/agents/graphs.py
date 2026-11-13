@@ -53,6 +53,7 @@ class AnswerState(TypedDict, total=False):
     action_id: str
     rubric_version: str
     allowed_criterion_ids: list[str]
+    bands: dict[str, str] | None  # per-criterion anchored bands of a seeded rubric
     turns: dict[str, str]
     attempt: int
     output: EvaluatorOutput | None
@@ -169,7 +170,8 @@ def _build_answer(model):
         if model is None:
             return {"status": "UNGRADED", "reason": "NO_MODEL", "retryable": False, "output": None}
         user = format_evaluator_input(action_id=s["action_id"], rubric_version=s["rubric_version"],
-                                      allowed_criterion_ids=s["allowed_criterion_ids"], bands=None, turns=s["turns"])
+                                      allowed_criterion_ids=s["allowed_criterion_ids"], bands=s.get("bands"),
+                                      turns=s["turns"])
         try:
             raw = _text(model.invoke([SystemMessage(EVALUATOR_SYSTEM), HumanMessage(user)]))
         except Exception as exc:  # noqa: BLE001 - timeouts/connection errors are not retried

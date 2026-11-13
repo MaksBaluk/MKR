@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from .db import SessionLocal
 from .config import get_settings
 from .security import hash_password
-from .models import (Competency, Vacancy, RequirementGroup, RequirementAlternative, User)
+from .models import (Competency, Vacancy, RequirementGroup, RequirementAlternative, Rubric, RubricCriterion, User)
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 
@@ -20,7 +20,8 @@ def seed_database(db: Session, *, demo_mode: bool | None = None, demo_password: 
     demo_password = settings.demo_password if demo_password is None else demo_password
     if demo_mode and (not demo_password or len(demo_password) < 10):
         raise ValueError("DEMO_PASSWORD must have at least 10 characters in DEMO_MODE")
-    counts = {"competencies_added": 0, "vacancies_added": 0, "demo_user_added": 0}
+    counts = {"competencies_added": 0, "vacancies_added": 0, "rubrics_added": 0, "rubric_criteria_added": 0,
+              "demo_user_added": 0}
     for record in read_fixture("competencies.json"):
         if db.get(Competency, record["id"]) is None:
             db.add(Competency(**record))
@@ -42,6 +43,7 @@ def seed_database(db: Session, *, demo_mode: bool | None = None, demo_password: 
             vacancy.groups.append(group_model)
         db.add(vacancy)
         counts["vacancies_added"] += 1
+    seed_rubrics(db, counts)
     if demo_mode:
         email = settings.demo_email.lower()
         from sqlalchemy import select
@@ -53,6 +55,23 @@ def seed_database(db: Session, *, demo_mode: bool | None = None, demo_password: 
             counts["demo_user_added"] = 1
     db.commit()
     return counts
+
+
+def seed_rubrics(db: Session, counts: dict) -> None:
+    """Curated-template starter rubrics; an existing (action_id, version) rubric is never modified."""
+    from sqlalchemy import select
+    existing = {(r.action_id, r.version) for r in db.scalars(select(Rubric)).all()}
+    for record in read_fixture("rubrics.json")["rubrics"]:
+        if (record["action_id"], record["version"]) in existing:
+            continue
+        rubric = Rubric(action_id=record["action_id"], version=record["version"], source=record["source"])
+        db.add(rubric)
+        db.flush()
+        for c in record["criteria"]:
+            db.add(RubricCriterion(rubric_id=rubric.id, criterion_id=c["criterion_id"], weight=float(c["weight"]),
+                                   anchors={"title": c["title"], "bands": c["anchors"]}))
+            counts["rubric_criteria_added"] += 1
+        counts["rubrics_added"] += 1
 
 
 def main():
