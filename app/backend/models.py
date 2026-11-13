@@ -215,3 +215,63 @@ class EvidenceItem(Base):
 
 
 Index("ix_vacancy_track_active", Vacancy.track, Vacancy.is_active)
+
+
+class CandidateSelfRating(Base):
+    """Editable self-rating per professional action. value NULL means unknown; 0 is a real rating."""
+    __tablename__ = "candidate_self_ratings"
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    action_id: Mapped[str] = mapped_column(String(120), primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer, primary_key=True)
+    value: Mapped[float | None] = mapped_column(nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class Rubric(Base):
+    __tablename__ = "rubrics"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    action_id: Mapped[str] = mapped_column(String(120), index=True)
+    version: Mapped[str] = mapped_column(String(32), nullable=False)
+    source: Mapped[str] = mapped_column(String(16), nullable=False)  # CURATED | LLM_PROPOSED | REVIEWED
+    __table_args__ = (UniqueConstraint("action_id", "version", name="uq_rubric_action_version"),)
+
+
+class RubricCriterion(Base):
+    __tablename__ = "rubric_criteria"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    rubric_id: Mapped[str] = mapped_column(ForeignKey("rubrics.id", ondelete="CASCADE"), index=True)
+    criterion_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    weight: Mapped[float] = mapped_column(nullable=False, default=1.0)
+    anchors: Mapped[dict] = mapped_column(JSON, nullable=False)
+    __table_args__ = (UniqueConstraint("rubric_id", "criterion_id", name="uq_rubric_criterion"),)
+
+
+class CriterionAssessment(Base):
+    """Append-only Evaluator revision for one action series. score NULL means insufficient evidence."""
+    __tablename__ = "criterion_assessments"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    session_id: Mapped[str] = mapped_column(ForeignKey("interview_sessions.id", ondelete="CASCADE"), index=True)
+    action_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    criterion_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    rubric_id: Mapped[str] = mapped_column(ForeignKey("rubrics.id"), nullable=False)
+    score: Mapped[float | None] = mapped_column(nullable=True)
+    reason: Mapped[str] = mapped_column(Text, default="")
+    evidence: Mapped[list] = mapped_column(JSON, default=list)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    __table_args__ = (
+        UniqueConstraint("session_id", "action_id", "criterion_id", "revision", name="uq_assessment_revision"),
+    )
+
+
+class CohortSnapshot(Base):
+    """Frozen cohort: ordered vacancy IDs, requirement revisions, policy and SHA-256."""
+    __tablename__ = "cohort_snapshots"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    vacancy_ids: Mapped[list] = mapped_column(JSON, nullable=False)
+    requirement_revisions: Mapped[dict] = mapped_column(JSON, nullable=False)
+    policy_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
