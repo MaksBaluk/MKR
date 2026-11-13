@@ -27,6 +27,20 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
+class CandidateProfile(Base):
+    """A candidate's named profile (track, target title, experience). Interview attempts belong to a profile."""
+    __tablename__ = "candidate_profiles"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    track: Mapped[str] = mapped_column(String(32))
+    name: Mapped[str] = mapped_column(String(120))
+    desired_title: Mapped[str] = mapped_column(String(160), default="")
+    years_experience: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    location: Mapped[str] = mapped_column(String(120), default="")
+    archived: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
 class AuthToken(Base):
     __tablename__ = "auth_tokens"
     token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
@@ -225,6 +239,9 @@ class CandidateSelfRating(Base):
     revision: Mapped[int] = mapped_column(Integer, primary_key=True)
     value: Mapped[float | None] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    profile_id: Mapped[str | None] = mapped_column(
+        ForeignKey("candidate_profiles.id", ondelete="CASCADE"), nullable=True, index=True)
+    __table_args__ = (UniqueConstraint("profile_id", "action_id", "revision", name="uq_self_rating_profile_action_rev"),)
 
 
 class Rubric(Base):
@@ -286,6 +303,10 @@ class CoreInterview(Base):
     status: Mapped[str] = mapped_column(String(16), default="ACTIVE")  # ACTIVE | PAUSED | FINISHED
     version: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    profile_id: Mapped[str | None] = mapped_column(
+        ForeignKey("candidate_profiles.id", ondelete="CASCADE"), nullable=True, index=True)
+    attempt_no: Mapped[int] = mapped_column(Integer, default=1, server_default="1", nullable=False)
+    __table_args__ = (UniqueConstraint("profile_id", "attempt_no", name="uq_attempt_profile_no"),)
 
 
 class CoreTurn(Base):
