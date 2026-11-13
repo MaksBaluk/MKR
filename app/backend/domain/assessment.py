@@ -28,6 +28,7 @@ class EvaluatorOutput(BaseModel):
     needs_followup: bool = False
     followup_goal: str | None = None
     limitations: str = ""
+    off_topic: bool = False
 
     @field_validator("limitations", mode="before")
     @classmethod

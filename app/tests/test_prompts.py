@@ -43,6 +43,7 @@ def test_evaluator_system_rules():
     assert 'allowed_criterion_ids' in p
     assert 'JSON only' in p
     assert 'one item per' in p
+    assert '"criteria"' in p and '"items"' not in p and 'off_topic' in p and 'exact_excerpt' in p
     assert 'verbatim' in p
     assert '0.5' in p and 'null' in p
     assert 'never infer' in p.lower() and 'fluent' in p

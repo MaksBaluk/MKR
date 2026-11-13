@@ -4,8 +4,6 @@ Budgets: ≤10 distinct actions, ≤5 shown questions per action. Pending questi
 """
 from __future__ import annotations
 
-import logging
-
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
@@ -17,15 +15,13 @@ from backend.domain.core_flow import planner_state
 from backend.domain.interview_budget import can_ask_question, can_start_topic
 from backend.domain.market import VacancyInput, compute_market
 from backend.domain.planner import choose_next
+from backend.agents.graphs import run_answer, run_ask
+from backend.agents.model import get_chat_model
 from backend.models import (CohortSnapshot, CoreInterview, CoreTurn, Competency, CriterionAssessment, Rubric,
-                            User)
-from backend.providers.llm import get_transport
-from backend.providers.questions import next_question as bank_question
-from backend.providers.roles import LLMError, evaluator_assess, interviewer_question
+                            RubricCriterion, User)
 from backend.security import current_user
 
 router = APIRouter(tags=["adaptive interview"])
-log = logging.getLogger("competencematch.llm")
 
 
 def _owned_interview(db: Session, user: User, interview_id: str) -> CoreInterview:
@@ -46,14 +42,37 @@ def _revisions(snap: CohortSnapshot) -> list[dict]:
     return [{"id": vid, **snap.requirement_revisions[vid]} for vid in snap.vacancy_ids]
 
 
+def _action_scores(rows) -> dict[str, float | None]:
+    """Per action: mean (weights 1) of non-null scores of the latest revision per criterion; None if all null."""
+    latest: dict[tuple[str, str], float | None] = {}
+    for r in rows:  # rows arrive oldest first
+        latest[(r.action_id, r.criterion_id)] = r.score
+    by_action: dict[str, list[float]] = {}
+    for (action, _), score in latest.items():
+        vals = by_action.setdefault(action, [])
+        if score is not None:
+            vals.append(score)
+    return {a: (sum(v) / len(v) if v else None) for a, v in by_action.items()}
+
+
 def latest_scores(db: Session, user: User) -> dict[str, float | None]:
-    """Most recent accepted LLM score per action, across this user's interviews."""
+    """Action score per action (MATH_SPEC §3 M_c), across this user's interviews."""
     rows = db.scalars(select(CriterionAssessment).where(CriterionAssessment.user_id == user.id)
                       .order_by(CriterionAssessment.created_at, CriterionAssessment.revision)).all()
-    out: dict[str, float | None] = {}
-    for r in rows:
-        out[r.action_id] = r.score
-    return out
+    return _action_scores(rows)
+
+
+def _seeded_rubric(db: Session, action_id: str) -> Rubric | None:
+    return db.scalar(select(Rubric).where(Rubric.action_id == action_id, Rubric.version == "v1",
+                                          Rubric.source == "CURATED"))
+
+
+def criteria_for(db: Session, action_id: str) -> list[str]:
+    """Criterion ids of the seeded rubric, else the action itself."""
+    rubric = _seeded_rubric(db, action_id)
+    ids = sorted(db.scalars(select(RubricCriterion.criterion_id).where(RubricCriterion.rubric_id == rubric.id)).all()) \
+        if rubric else []
+    return ids or [action_id]
 
 
 def _label(db: Session, action_id: str) -> str:
@@ -149,10 +168,8 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     mass = {e.action_id: e.mass for e in compute_market([
         VacancyInput(r["id"], tuple(tuple(a["competency_id"] for a in g["alternatives"]) for g in r["groups"]))
         for r in revisions])}
-    latest_in_session: dict[str, float | None] = {}
-    for row in db.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == iv.id)
-                          .order_by(CriterionAssessment.revision)).all():
-        latest_in_session[row.action_id] = row.score
+    latest_in_session = _action_scores(db.scalars(select(CriterionAssessment).where(
+        CriterionAssessment.session_id == iv.id).order_by(CriterionAssessment.revision)).all())
     # A topic is re-asked only when the Evaluator found insufficient evidence (null score).
     def eligible(a: str) -> bool:
         if a not in used:
@@ -164,23 +181,13 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     if action is None:
         return {"turn": None, "version": iv.version, "done": True}
     label = _label(db, action)
-    prior = [t.answer_text for t in turns if t.action_id == action and t.answer_text]
-    question, source = None, "FALLBACK_UNGRADED"
-    transport = get_transport()
-    if transport is not None:
-        try:
-            question = interviewer_question(transport, action_name=label, rubric_criteria=[action],
-                                            previous_turns=prior, followup_goal=None)
-            source = "LLM_INTERVIEWER"
-        except LLMError as exc:
-            log.warning("interviewer failed for action=%s kind=%s", action, exc.kind)
-            question = None
-    if question is None:
-        banked = bank_question(action, 0)
-        if banked is None or banked.get("kind") != "FREE_TEXT":
-            banked = next((q for q in (bank_question(action, i) for i in range(6))
-                           if q and q.get("kind") == "FREE_TEXT"), None)
-        question = banked["text"] if banked else f"Розкажіть про ваш практичний досвід: {label}. Наведіть конкретний приклад."
+    answered = [t for t in turns if t.action_id == action and t.answer_text]
+    comp = db.get(Competency, action)
+    result = run_ask({"action_id": action, "action_name": label, "summary": comp.summary if comp else "",
+                      "unmet_criteria": criteria_for(db, action),
+                      "previous_answers": [t.answer_text for t in answered][-3:], "followup_goal": None,
+                      "off_topic_detected": bool(answered and answered[-1].off_topic)}, get_chat_model())
+    question, source = result.question_text, result.source
     turn = CoreTurn(interview_id=iv.id, sequence=len(turns) + 1, action_id=action, question_text=question,
                     question_source=source)
     iv.version += 1
@@ -189,30 +196,40 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     return {"turn": _turn_dict(turn, _names(db)), "version": iv.version, "done": False}
 
 
-def _assess_action(db: Session, user: User, iv: CoreInterview, action_id: str) -> str:
-    """Run Evaluator on the whole current action series; returns ACCEPTED | UNGRADED."""
-    transport = get_transport()
-    if transport is None:
+def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -> str:
+    """Run the answer graph on the current action series; returns ACCEPTED | UNGRADED."""
+    action_id = turn.action_id
+    model = get_chat_model()
+    if model is None:
         return "UNGRADED"
     turns = db.scalars(select(CoreTurn).where(CoreTurn.interview_id == iv.id, CoreTurn.action_id == action_id,
-                                              CoreTurn.answer_text.is_not(None)).order_by(CoreTurn.sequence)).all()
+                                              CoreTurn.answer_text.is_not(None), CoreTurn.off_topic.is_(False))
+                       .order_by(CoreTurn.sequence)).all()
     if not turns:
         return "UNGRADED"
-    rubric = db.scalar(select(Rubric).where(Rubric.action_id == action_id, Rubric.version == "auto-1"))
+    criteria = criteria_for(db, action_id)
+    rubric = _seeded_rubric(db, action_id)
+    version = "v1" if rubric else "auto-1"
+    result = run_answer({"action_id": action_id, "rubric_version": version, "allowed_criterion_ids": criteria,
+                         "turns": {t.id: t.answer_text for t in turns}}, model)
+    if result.status != "ACCEPTED":
+        return "UNGRADED"
+    if rubric is None:
+        rubric = db.scalar(select(Rubric).where(Rubric.action_id == action_id, Rubric.version == "auto-1"))
     if rubric is None:
         rubric = Rubric(action_id=action_id, version="auto-1", source="LLM_PROPOSED")
         db.add(rubric)
         db.flush()
-    text_by_turn = {t.id: t.answer_text for t in turns}
-    try:
-        out = evaluator_assess(transport, action_id=action_id, rubric_version="auto-1",
-                               allowed_criteria={action_id}, turns=text_by_turn)
-    except LLMError as exc:
-        log.warning("evaluator failed for action=%s kind=%s", action_id, exc.kind)  # no prompts or keys logged
-        return "UNGRADED"
     rev = (db.scalar(select(func.max(CriterionAssessment.revision)).where(
         CriterionAssessment.session_id == iv.id, CriterionAssessment.action_id == action_id)) or 0) + 1
-    for c in out.criteria:
+    if result.off_topic:  # null scores make the planner re-ask this action; nothing reaches ranking
+        turn.off_topic = True
+        for cid in criteria:
+            db.add(CriterionAssessment(user_id=user.id, session_id=iv.id, action_id=action_id, criterion_id=cid,
+                                       rubric_id=rubric.id, score=None, reason="Відповідь поза темою співбесіди.",
+                                       evidence=[], revision=rev))
+        return "ACCEPTED"
+    for c in result.output.criteria:
         db.add(CriterionAssessment(user_id=user.id, session_id=iv.id, action_id=action_id,
                                    criterion_id=c.criterion_id, rubric_id=rubric.id, score=c.score,
                                    reason=c.reason, evidence=[e.model_dump() for e in c.evidence], revision=rev))
@@ -242,7 +259,7 @@ def submit_answer(interview_id: str, data: AnswerBody, db: Session = Depends(get
     except IntegrityError:
         db.rollback()
         raise HTTPException(409, "Відповідь уже збережено в іншому запиті")
-    status = _assess_action(db, user, iv, turn.action_id)
+    status = _assess_action(db, user, iv, turn)
     db.commit()
     return {"turn": _turn_dict(turn, _names(db)), "version": iv.version, "replayed": False,
             "assessment_status": status}

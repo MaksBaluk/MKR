@@ -1,38 +1,45 @@
 import json
+import re
+from types import SimpleNamespace
 
 import pytest
 
-from backend.providers import roles
-from backend.providers.roles import EVALUATOR_SYSTEM, INTERVIEWER_SYSTEM
+from backend.agents.prompts import INTERVIEWER_SYSTEM
 
 
-class FakeLLM:
-    def __init__(self, score=0.6):
-        self.score = score
+class FakeChat:
+    """Fake chat model patched at backend.api.core.get_chat_model: interviewer or evaluator by system prompt."""
 
-    def complete(self, system, user, *, timeout_s):
+    def __init__(self, score=0.6, off_topic=False):
+        self.score, self.off_topic = score, off_topic
+        self.human_inputs = []
+
+    def invoke(self, messages, *a, **k):
+        system, human = messages[0].content, messages[1].content
+        self.human_inputs.append(human)
         if system == INTERVIEWER_SYSTEM:
-            return "Опишіть, як ви проєктували схему бази даних?"
-        data = json.loads(user)
-        turn_id, text = next(iter(data["turns"].items()))
-        action = data["action_id"]
-        return json.dumps({
-            "action_id": action, "rubric_version": "auto-1",
-            "criteria": [{"criterion_id": action, "score": self.score, "reason": "з відповіді",
-                          "evidence": [{"turn_id": turn_id, "exact_excerpt": text}]}],
-            "sufficient_evidence": True, "needs_followup": False, "followup_goal": None, "limitations": ""})
+            return SimpleNamespace(content="Опишіть, як ви проєктували схему бази даних?")
+        data = dict(line.split(": ", 1) for line in human.splitlines() if re.match(r"\w+: ", line))
+        action = json.loads(data["action_id"])
+        allowed = json.loads(data["allowed_criterion_ids"])
+        turn_id = re.search(r"turn_id=\"([^\"]+)\"", human).group(1)
+        text = json.loads(re.search(r">(\".*\")</candidate_answer>", human).group(1))
+        crit = [{"criterion_id": c, "score": None if self.off_topic else self.score, "reason": "з відповіді",
+                 "evidence": [] if self.off_topic else [{"turn_id": turn_id, "exact_excerpt": text}]} for c in allowed]
+        return SimpleNamespace(content=json.dumps({"action_id": action, "rubric_version": "auto-1",
+                                                   "off_topic": self.off_topic, "criteria": crit}))
 
 
 @pytest.fixture()
 def llm(monkeypatch):
-    fake = FakeLLM()
-    monkeypatch.setattr("backend.api.core.get_transport", lambda: fake)
+    fake = FakeChat()
+    monkeypatch.setattr("backend.api.core.get_chat_model", lambda: fake)
     return fake
 
 
 @pytest.fixture()
 def no_llm(monkeypatch):
-    monkeypatch.setattr("backend.api.core.get_transport", lambda: None)
+    monkeypatch.setattr("backend.api.core.get_chat_model", lambda: None)
 
 
 @pytest.fixture()
@@ -172,3 +179,21 @@ def test_recommendations_top_five_with_explanations(client, auth, cohort, no_llm
     first = body["items"][0]
     assert 0 <= first["confirmed_share"] <= 100
     assert first["tags"] and "strengths" in first and "gaps" in first and "unknown_count" in first
+
+
+def test_off_topic_answer_not_ranked_and_same_action_reasked(client, auth, cohort, llm):
+    iv = client.post("/api/v1/interviews", json={"cohort_id": cohort}, headers=auth).json()
+    q1 = _next(client, auth, iv, 0).json()
+    llm.off_topic = True
+    ans = client.post(f"/api/v1/interviews/{iv['id']}/answers", headers=auth, json={
+        "turn_id": q1["turn"]["id"], "text": "як приготувати борщ", "version": q1["version"],
+        "idempotency_key": "answer-key-0020"}).json()
+    assert ans["assessment_status"] == "ACCEPTED"
+    items = client.get("/api/v1/assessments", headers=auth).json()["items"]
+    assert items and all(i["score"] is None for i in items)
+    ranked = client.post("/api/v1/recommendations", json={"cohort_id": cohort}, headers=auth).json()["items"]
+    assert all(i["label"] != "RANKED" for i in ranked)
+    llm.off_topic = False
+    q2 = _next(client, auth, iv, ans["version"]).json()
+    assert q2["turn"]["action_id"] == q1["turn"]["action_id"]
+    assert "off_topic_detected: true" in llm.human_inputs[-1]

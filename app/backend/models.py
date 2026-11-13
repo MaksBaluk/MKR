@@ -1,7 +1,7 @@
 """Relational entities. Immutable vacancy snapshots store revision-safe JSON copies."""
 from datetime import datetime, timezone
 from uuid import uuid4
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, Index
+from sqlalchemy import Boolean, DateTime, false, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .db import Base
 
@@ -298,6 +298,7 @@ class CoreTurn(Base):
     question_source: Mapped[str] = mapped_column(String(24), nullable=False)  # LLM_INTERVIEWER | FALLBACK_UNGRADED
     answer_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     idempotency_key: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    off_topic: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     __table_args__ = (UniqueConstraint("interview_id", "sequence", name="uq_core_turn_sequence"),
                       UniqueConstraint("interview_id", "idempotency_key", name="uq_core_turn_idem"))
