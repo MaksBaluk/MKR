@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { timeLabel } from '@/lib/bands';
-import { MAX_TOPICS, deriveTopics } from '@/lib/interviewTopics';
+import { MAX_TOPICS, PANEL_TEXT as P, deriveTopics, topicsCountLabel } from '@/lib/interviewTopics';
 import type { InterviewState, Profile, TurnView } from '@/types';
 import { Bot, CheckCircle2, ChevronDown, Circle, Flag, Info, Laptop, Lightbulb, Loader2, Pause, Play, Send, Target, WifiOff } from 'lucide-react';
 
@@ -198,7 +198,7 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
         </div>
         <div className="flex w-full items-center gap-3 sm:w-auto">
           <Progress value={(topics / MAX_TOPICS) * 100} label="Прогрес розмови" className="flex-1 sm:w-44" />
-          <span className="shrink-0 text-sm font-medium tabular-nums text-ink-muted">{topics} з {MAX_TOPICS} тем</span>
+          <span className="shrink-0 text-sm font-medium tabular-nums text-ink-muted">{topicsCountLabel(topics)}</span>
         </div>
       </Card>
       {offline && !navigator.onLine && (
@@ -285,18 +285,18 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
             aria-controls="interview-info"
             onClick={() => setInfoOpen((v) => !v)}
           >
-            <span className="flex items-center gap-2"><Info className="size-5 text-primary" aria-hidden="true" />Про розмову</span>
+            <span className="flex items-center gap-2"><Info className="size-5 text-primary" aria-hidden="true" />{P.disclosure}</span>
             <ChevronDown className={`size-5 transition-transform motion-reduce:transition-none ${infoOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
           </button>
           <div id="interview-info" className={`${infoOpen ? 'flex' : 'hidden'} flex-col gap-4 lg:flex`}>
             <Card>
               <CardHeader>
-                <CardTitle>Теми розмови</CardTitle>
-                <p className="text-sm text-ink-subtle">{topics} з {MAX_TOPICS} тем. Кожна тема — від 1 до 5 запитань.</p>
+                <CardTitle>{P.topicsTitle}</CardTitle>
+                <p className="text-sm text-ink-subtle">{topicsCountLabel(topics)}. {P.topicsNote}</p>
               </CardHeader>
               <CardContent>
                 {topicList.length === 0 ? (
-                  <p className="text-sm text-ink-subtle">Теми з’являться, щойно почнеться розмова.</p>
+                  <p className="text-sm text-ink-subtle">{P.topicsEmpty}</p>
                 ) : (
                   <ul className="flex flex-col gap-2">
                     {topicList.map((tp) => (
@@ -305,7 +305,7 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
                           ? <Circle className="size-4 shrink-0 text-primary" aria-hidden="true" />
                           : <CheckCircle2 className="size-4 shrink-0 text-success" aria-hidden="true" />}
                         <span className="min-w-0 flex-1 truncate">{tp.action_name}</span>
-                        {tp.isCurrent && <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs text-primary">поточна</span>}
+                        {tp.isCurrent && <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs text-primary">{P.currentMarker}</span>}
                       </li>
                     ))}
                   </ul>
@@ -319,9 +319,9 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
                     <Target className="size-6" aria-hidden="true" />
                   </span>
                   <div>
-                    <p className="text-xs text-primary">Поточна тема</p>
+                    <p className="text-xs text-primary">{P.currentTopic}</p>
                     <p className="text-lg font-semibold text-ink">{pending.action_name}</p>
-                    <p className="text-sm text-ink-muted">Кілька запитань, щоб краще зрозуміти ваш досвід</p>
+                    <p className="text-sm text-ink-muted">{P.currentTopicLine}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -330,29 +330,27 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
               <CardContent className="flex items-start gap-3 pt-5">
                 <Lightbulb className="mt-0.5 size-5 shrink-0 text-warning" aria-hidden="true" />
                 <div>
-                  <p className="font-semibold text-ink">Поради для відповіді</p>
+                  <p className="font-semibold text-ink">{P.tipsTitle}</p>
                   <ul className="mt-1 list-disc space-y-1 pl-4 text-sm text-ink-muted">
-                    <li>Наведіть конкретний приклад із власної практики.</li>
-                    <li>Розкажіть, що саме робили ви самі, а не вся команда.</li>
-                    <li>Назвіть інструменти та результат вашої роботи.</li>
+                    {P.tips.map((tip) => <li key={tip}>{tip}</li>)}
                   </ul>
                 </div>
               </CardContent>
             </Card>
             {!llmConfigured && (
-              <Alert className="text-sm">Автоматична оцінка зараз вимкнена: відповіді збережуться, але підсумок буде неповним.</Alert>
+              <Alert className="text-sm">{P.llmOff}</Alert>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
             {state?.status === 'ACTIVE' && (
               <Button variant="outline" onClick={() => void lifecycle('pause')} disabled={busy}>
                 <Pause className="size-4" aria-hidden="true" />
-                Призупинити
+                {P.pause}
               </Button>
             )}
             <Button variant="outline" onClick={() => void lifecycle('finish')} disabled={busy || turns.every((t) => t.answer_text === null)}>
               <Flag className="size-4" aria-hidden="true" />
-              Завершити і переглянути результати
+              {P.finish}
             </Button>
           </div>
         </aside>

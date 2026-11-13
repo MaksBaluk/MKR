@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import type { TurnView } from '@/types';
 import {
-  INTERVIEW_PANEL_STRINGS, containsScoreLeak, deriveTopics,
+  PANEL_TEXT, allPanelStrings, containsScoreLeak, deriveTopics, topicsCountLabel,
 } from '@/lib/interviewTopics';
 
 const t = (id: string, action_id: string, answered: boolean): TurnView => ({
@@ -23,12 +23,23 @@ test('repeated action counts once, answeredCount grows', () => {
   expect(r).toEqual([{ action_id: 'a', action_name: 'Тема a', answeredCount: 2, isCurrent: true }]);
 });
 
-test('leak detector', () => {
-  for (const s of ['оцінено на 0.25', 'оцінено Django', 'оцінка: 4', 'рівень B2', 'Високий', 'Середній', 'Низький', '75 %', '80%'])
-    expect(containsScoreLeak(s), s).toBe(true);
-  expect(containsScoreLeak('2 з 10 тем')).toBe(false);
+test('same action_name, different action_id stay separate', () => {
+  const x = { ...t('2', 'b', false), action_name: 'Тема a' };
+  expect(deriveTopics([t('1', 'a', true), x])).toHaveLength(2);
 });
 
-test('panel static strings never leak scores', () => {
-  for (const s of INTERVIEW_PANEL_STRINGS) expect(containsScoreLeak(s), s).toBe(false);
+test('leak detector flags scores and levels', () => {
+  for (const s of ['оцінено на 0.25', 'оцінено Django', 'оцінка: 4', 'оцінка висока', '7/10', '7 / 10', 'Високий',
+    'висока', 'низька', 'середня', 'рівень 3', 'рівні', 'level 3', '75 %', '80%'])
+    expect(containsScoreLeak(s), s).toBe(true);
+});
+
+test('leak detector allows neutral text', () => {
+  expect(containsScoreLeak(PANEL_TEXT.llmOff)).toBe(false);
+  expect(topicsCountLabel(2, 10)).toBe('2 з 10 тем');
+  expect(containsScoreLeak(topicsCountLabel(2, 10))).toBe(false);
+});
+
+test('all panel strings (rendered by the UI from PANEL_TEXT) never leak', () => {
+  for (const s of allPanelStrings()) expect(containsScoreLeak(s), s).toBe(false);
 });
