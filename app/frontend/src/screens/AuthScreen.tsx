@@ -1,66 +1,91 @@
-import { useState, type FormEvent } from 'react';
-import { LogIn, Play, Target } from 'lucide-react';
-import { uk } from '../i18n/uk';
-import { Card, ErrorAlert } from '../components/ui';
+import { useId, useState, type FormEvent } from 'react';
+import { api, setToken, ApiError } from '@/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert } from '@/components/ui/alert';
+import { LogIn, UserPlus } from 'lucide-react';
 
-export type AuthSubmit = (mode: 'login' | 'register', data: { email: string; password: string; name: string }) => Promise<void>;
-
-export function AuthScreen({ busy, error, demoMode, onSubmit, onDemo, onDismissError }: {
-  busy: boolean; error: string; demoMode: boolean; onSubmit: AuthSubmit; onDemo: () => void; onDismissError: () => void;
-}) {
+export function AuthScreen({ onSignedIn }: { onSignedIn: () => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const ids = { email: useId(), name: useId(), password: useId() };
 
-  function handle(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
-    void onSubmit(mode, { email, password, name });
+    setBusy(true);
+    setError(null);
+    try {
+      const body =
+        mode === 'login'
+          ? await api<{ token: string }>('/auth/login', { method: 'POST', json: { email, password } })
+          : await api<{ token: string }>('/auth/register', {
+              method: 'POST',
+              json: { email, display_name: name, password },
+            });
+      setToken(body.token);
+      onSignedIn();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Не вдалося увійти. Спробуйте ще раз.');
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
-    <div className="auth-shell">
-      <div className="auth-brand"><div className="brand-logo"><Target size={27} aria-hidden="true" /></div><span>Competence<span>Match</span></span></div>
-      <div className="auth-layout">
-        <div className="auth-story">
-          <h1>Знайдіть вакансії, що відповідають вашим навичкам</h1>
-          <p>{uk.auth.intro}</p>
-        </div>
-        <Card className="auth-panel">
-          <h2>{mode === 'login' ? uk.auth.loginTitle : uk.auth.registerTitle}</h2>
-          <form onSubmit={handle} noValidate={false}>
+    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center p-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>{mode === 'login' ? 'Вхід' : 'Створення акаунта'}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form className="flex flex-col gap-4" onSubmit={submit} noValidate>
             {mode === 'register' && (
-              <div className="field">
-                <label htmlFor="auth-name">{uk.auth.name}</label>
-                <input id="auth-name" autoComplete="name" required minLength={2} value={name} onChange={e => setName(e.target.value)} />
+              <div className="flex flex-col gap-1">
+                <Label htmlFor={ids.name}>Ім’я</Label>
+                <Input id={ids.name} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required minLength={2} />
               </div>
             )}
-            <div className="field">
-              <label htmlFor="auth-email">{uk.auth.email}</label>
-              <input id="auth-email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} />
+            <div className="flex flex-col gap-1">
+              <Label htmlFor={ids.email}>Електронна пошта</Label>
+              <Input id={ids.email} type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
             </div>
-            <div className="field">
-              <label htmlFor="auth-password">{uk.auth.password}</label>
-              <input id="auth-password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                required minLength={mode === 'register' ? 10 : undefined} value={password} onChange={e => setPassword(e.target.value)} />
+            <div className="flex flex-col gap-1">
+              <Label htmlFor={ids.password}>Пароль</Label>
+              <Input
+                id={ids.password}
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                required
+                minLength={10}
+              />
+              {mode === 'register' && <p className="text-xs text-slate-500">Щонайменше 10 символів.</p>}
             </div>
-            <button disabled={busy} className="btn primary stretch" type="submit">
-              <LogIn size={17} aria-hidden="true" />{mode === 'login' ? uk.auth.login : uk.auth.register}
+            {error && <Alert role="alert">{error}</Alert>}
+            <Button type="submit" disabled={busy}>
+              {mode === 'login' ? <LogIn className="size-4" aria-hidden="true" /> : <UserPlus className="size-4" aria-hidden="true" />}
+              {busy ? 'Зачекайте…' : mode === 'login' ? 'Увійти' : 'Створити акаунт'}
+            </Button>
+            <button
+              type="button"
+              className="text-sm text-blue-700 underline underline-offset-2"
+              onClick={() => {
+                setMode(mode === 'login' ? 'register' : 'login');
+                setError(null);
+              }}
+            >
+              {mode === 'login' ? 'Немає акаунта? Зареєструватися' : 'Уже маєте акаунт? Увійти'}
             </button>
           </form>
-          <button className="text-link" type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
-            {mode === 'login' ? uk.auth.toRegister : uk.auth.toLogin}
-          </button>
-          {demoMode && (
-            <div className="demo-access">
-              <p className="muted">{uk.auth.demoHint}</p>
-              <button className="btn ghost stretch" type="button" onClick={onDemo} disabled={busy}><Play size={16} aria-hidden="true" />{uk.auth.demo}</button>
-            </div>
-          )}
-          {error && <ErrorAlert message={error} onDismiss={onDismissError} />}
-        </Card>
-      </div>
-      <footer className="auth-footer">{uk.auth.footer}</footer>
-    </div>
+        </CardContent>
+      </Card>
+    </main>
   );
 }

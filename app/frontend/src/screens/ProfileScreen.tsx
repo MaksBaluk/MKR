@@ -1,96 +1,124 @@
-import { useState, type FormEvent } from 'react';
-import { Check, Lightbulb } from 'lucide-react';
-import { uk } from '../i18n/uk';
-import type { Profile, Skill, Track } from '../types';
-import { Card, Tag2 } from '../components/ui';
+import { useId, useState, type FormEvent } from 'react';
+import { api, ApiError } from '@/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert } from '@/components/ui/alert';
+import { SelfRatingList } from '@/components/SelfRatingList';
+import type { CohortResponse, Profile } from '@/types';
+import { LogOut, MessageSquare } from 'lucide-react';
 
-export type ProfileDraft = { display_name: string; desired_title: string; years_experience: number | null; location: string; track: Track };
+const TRACKS = [
+  { value: 'python', label: 'Python-розробка' },
+  { value: 'marketing', label: 'Маркетинг' },
+  { value: 'design', label: 'Дизайн' },
+];
 
-export function ProfileScreen({ profile, skills, busy, onSave, onSkill }: {
-  profile: Profile; skills: Skill[]; busy: boolean;
-  onSave: (draft: ProfileDraft) => Promise<void>; onSkill: (id: string, level: number | null) => Promise<void>;
+export function ProfileScreen({ profile, onSaved, onStarted, onLogout }: {
+  profile: Profile;
+  onSaved: (p: Profile) => void;
+  onStarted: (interviewId: string, cohortId: string) => void;
+  onLogout: () => void;
 }) {
-  const [draft, setDraft] = useState<ProfileDraft>({
-    display_name: profile.display_name, desired_title: profile.desired_title, years_experience: profile.years_experience,
-    location: profile.location, track: profile.track,
-  });
+  const [name, setName] = useState(profile.display_name);
+  const [track, setTrack] = useState(profile.track);
+  const [title, setTitle] = useState(profile.desired_title);
+  const [years, setYears] = useState(profile.years_experience?.toString() ?? '');
+  const [location, setLocation] = useState(profile.location);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const ids = { name: useId(), track: useId(), title: useId(), years: useId(), location: useId() };
+  const initialRatings = Object.fromEntries(profile.self_ratings.map((r) => [r.action_id, r.value]));
 
-  function submit(e: FormEvent) { e.preventDefault(); void onSave(draft); }
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      const saved = await api<Profile>('/profile', {
+        method: 'PUT',
+        json: {
+          display_name: name,
+          track,
+          desired_title: title,
+          years_experience: years === '' ? null : Number(years),
+          location,
+        },
+      });
+      onSaved(saved);
+      const cohort = await api<CohortResponse>('/cohorts/auto', { method: 'POST' });
+      if (cohort.empty || !cohort.cohort_id) {
+        setError('Для цього треку ще немає вакансій у каталозі. Спробуйте інший трек.');
+        return;
+      }
+      const iv = await api<{ id: string }>('/interviews', { method: 'POST', json: { cohort_id: cohort.cohort_id } });
+      onStarted(iv.id, cohort.cohort_id);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Не вдалося зберегти профіль. Перевірте дані та спробуйте ще раз.');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    <>
-      <div className="intro-line">
-        <div>
-          <h2>{uk.profile.subtitle}</h2>
-          <p>{uk.profile.intro}</p>
-        </div>
-        <Tag2><span aria-hidden="true">●</span> Самооцінка</Tag2>
-      </div>
-
-      <div className="profile-grid">
-        <Card className="profile-card">
-          <form onSubmit={submit} className="form-grid">
-            <div className="field">
-              <label htmlFor="p-name">{uk.profile.name}</label>
-              <input id="p-name" required minLength={2} value={draft.display_name} onChange={e => setDraft({ ...draft, display_name: e.target.value })} />
+    <main className="mx-auto flex max-w-3xl flex-col gap-4 p-4">
+      <header className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold">Ваш профіль</h1>
+        <Button variant="ghost" onClick={onLogout}>
+          <LogOut className="size-4" aria-hidden="true" />
+          Вийти
+        </Button>
+      </header>
+      <Card>
+        <CardHeader>
+          <CardTitle>Основні дані</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form className="grid gap-4 sm:grid-cols-2" onSubmit={submit} noValidate>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor={ids.name}>Ім’я</Label>
+              <Input id={ids.name} value={name} onChange={(e) => setName(e.target.value)} required minLength={2} />
             </div>
-            <div className="field">
-              <label htmlFor="p-title">{uk.profile.desiredTitle}</label>
-              <input id="p-title" value={draft.desired_title} onChange={e => setDraft({ ...draft, desired_title: e.target.value })} />
-            </div>
-            <div className="field">
-              <label htmlFor="p-years">{uk.profile.years}</label>
-              <input id="p-years" type="number" min={0} max={70} inputMode="numeric" value={draft.years_experience ?? ''}
-                onChange={e => setDraft({ ...draft, years_experience: e.target.value === '' ? null : Number(e.target.value) })} />
-            </div>
-            <div className="field">
-              <label htmlFor="p-location">{uk.profile.location}</label>
-              <input id="p-location" value={draft.location} onChange={e => setDraft({ ...draft, location: e.target.value })} />
-            </div>
-            <div className="field full">
-              <label htmlFor="p-track">{uk.profile.track}</label>
-              <select id="p-track" value={draft.track} onChange={e => setDraft({ ...draft, track: e.target.value as Track })}>
-                {Object.entries(uk.tracks).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+            <div className="flex flex-col gap-1">
+              <Label htmlFor={ids.track}>Професійний трек</Label>
+              <select id={ids.track} value={track} onChange={(e) => setTrack(e.target.value)}
+                className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm">
+                {TRACKS.map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
               </select>
-              <small className="muted">{uk.profile.trackNote}</small>
             </div>
-            <button className="btn primary" disabled={busy} type="submit"><Check size={17} aria-hidden="true" />{uk.profile.save}</button>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor={ids.title}>Бажана посада</Label>
+              <Input id={ids.title} value={title} onChange={(e) => setTitle(e.target.value)} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor={ids.years}>Років досвіду</Label>
+              <Input id={ids.years} type="number" min={0} max={70} value={years} onChange={(e) => setYears(e.target.value)} />
+            </div>
+            <div className="flex flex-col gap-1 sm:col-span-2">
+              <Label htmlFor={ids.location}>Місто або формат роботи</Label>
+              <Input id={ids.location} value={location} onChange={(e) => setLocation(e.target.value)} />
+            </div>
+            {error && <Alert role="alert" className="sm:col-span-2">{error}</Alert>}
+            <div className="sm:col-span-2">
+              <Button type="submit" disabled={busy}>
+                <MessageSquare className="size-4" aria-hidden="true" />
+                {busy ? 'Готуємо розмову…' : 'Зберегти та почати розмову'}
+              </Button>
+            </div>
           </form>
-        </Card>
-        <Card className="profile-note">
-          <Lightbulb size={24} aria-hidden="true" />
-          <h3>{uk.profile.scaleTitle}</h3>
-          <p>{uk.profile.scaleText}</p>
-        </Card>
-      </div>
-
-      <Card className="skills-card">
-        <h3>{uk.profile.skills}</h3>
-        <p className="muted">{uk.profile.skillsHint}</p>
-        <ul className="skills-list">
-          {skills.map(s => {
-            const id = `skill-${s.id}`;
-            const value = profile.levels[s.id];
-            return (
-              <li key={s.id} className="skill-row">
-                <div>
-                  <strong>{s.label_uk}</strong>
-                  <p className="muted">{s.summary}</p>
-                </div>
-                <label htmlFor={id} className="sr-only">{`Рівень: ${s.label_uk}`}</label>
-                <select id={id} value={value === null || value === undefined ? 'unknown' : String(value)} disabled={busy}
-                  onChange={e => void onSkill(s.id, e.target.value === 'unknown' ? null : Number(e.target.value))}>
-                  <option value="unknown">{uk.profile.unknown}</option>
-                  <option value="0">{uk.profile.l0}</option>
-                  <option value="1">{uk.profile.l1}</option>
-                  <option value="2">{uk.profile.l2}</option>
-                  <option value="3">{uk.profile.l3}</option>
-                </select>
-              </li>
-            );
-          })}
-        </ul>
+        </CardContent>
       </Card>
-    </>
+      <Card>
+        <CardHeader>
+          <CardTitle>Самооцінка дій</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SelfRatingList track={track} initial={initialRatings} />
+        </CardContent>
+      </Card>
+    </main>
   );
 }

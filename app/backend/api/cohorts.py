@@ -26,6 +26,10 @@ def _vacancy_revisions(db: Session, track: str) -> list[dict]:
         out.append({
             "id": v.id,
             "years_min": v.years_min,
+            "title": v.title,
+            "company": v.company,
+            "location": v.location,
+            "work_mode": v.work_mode,
             "groups": [
                 {"id": g.id, "kind": g.kind,
                  "alternatives": sorted(
@@ -57,7 +61,8 @@ def create_auto_cohort(db: Session = Depends(get_db), user: User = Depends(curre
         return {"cohort_id": existing.id, "vacancy_count": len(existing.vacancy_ids), "sha256": digest,
                 "empty": False, "policy": POLICY_ID}
     snap = CohortSnapshot(user_id=user.id, vacancy_ids=[r["id"] for r in revisions],
-                          requirement_revisions={r["id"]: {"years_min": r["years_min"], "groups": r["groups"]} for r in revisions},
+                          requirement_revisions={r["id"]: {k: r[k] for k in ("years_min", "title", "company", "location", "work_mode", "groups")}
+                                                 for r in revisions},
                           policy_id=POLICY_ID, sha256=digest)
     db.add(snap)
     db.commit()

@@ -137,3 +137,16 @@ def _track_action(client, auth):
     cohort = client.post("/api/v1/cohorts/auto", headers=auth).json()["cohort_id"]
     market = client.get(f"/api/v1/cohorts/{cohort}/market", headers=auth).json()["skills"]
     return market[0]["action_id"]
+
+
+def test_resume_returns_open_interview_without_browser_storage(client, auth, interview):
+    r = client.get("/api/v1/interviews/active", headers=auth).json()
+    assert r["interview"]["id"] == interview["id"]
+    assert r["interview"]["status"] == "ACTIVE"
+
+
+def test_finished_interview_not_active(client, auth, interview):
+    client.post(f"/api/v1/interviews/{interview['id']}/finish", json={"version": 0}, headers=auth)
+    assert client.get("/api/v1/interviews/active", headers=auth).json()["interview"] is None
+    done = client.get("/api/v1/interviews/latest-finished", headers=auth).json()["interview"]
+    assert done["id"] == interview["id"]

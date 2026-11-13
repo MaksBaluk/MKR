@@ -1,267 +1,219 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { CheckCircle2, LockKeyhole, Pause, Play, Send, SkipForward, Sparkles, TrendingUp, WandSparkles } from 'lucide-react';
-import { request, ApiError } from '../api';
-import { uk } from '../i18n/uk';
-import type { Evidence, Interview, LLMInfo, Turn } from '../types';
-import { Card, EmptyState, Tag2, Bar, ErrorAlert } from '../components/ui';
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { api, ApiError } from '@/api';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/input';
+import { Alert } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import type { InterviewState, TurnView } from '@/types';
+import { Loader2, Pause, Play, Send, Flag, WifiOff } from 'lucide-react';
 
-type Props = {
-  interview: Interview | null;
-  llm: LLMInfo | null;
-  labelFor: (id: string) => string;
-  onChange: (next: Interview) => void;
-  onRefresh: () => Promise<void>;
-  onStart: () => void;
-  onOpenResults: () => void;
-};
+const MAX_TURNS_SHOWN = 10;
 
-const MAX_ANSWER = 4000;
-
-function turnBadge(turn: Turn, ev: Evidence | undefined): { text: string; tone: 'green' | 'orange' | 'red' | 'grey' | 'blue' }[] {
-  if (turn.status === 'SKIPPED') return [{ text: uk.interview.statusSkipped, tone: 'grey' }];
-  if (turn.question_kind === 'MULTIPLE_CHOICE') {
-    if (turn.assessment_status === 'DEMO_OBSERVED_LEVEL_1') return [{ text: uk.interview.checkPassed, tone: 'green' }];
-    if (turn.assessment_status === 'INSUFFICIENT_EVIDENCE') return [{ text: uk.interview.checkFailed, tone: 'grey' }];
-  }
-  if (ev?.status === 'CONFIRMED') return [{ text: uk.interview.statusConfirmed, tone: 'green' }];
-  if (ev?.status === 'REJECTED') return [{ text: uk.interview.statusRejected, tone: 'grey' }];
-  if (ev?.status === 'PROPOSED') return [{ text: uk.interview.statusProposed, tone: 'orange' }];
-  return [{ text: uk.interview.statusSaved, tone: 'blue' }, { text: uk.interview.statusPending, tone: 'orange' }];
-}
-
-export function InterviewScreen({ interview, llm, labelFor, onChange, onRefresh, onStart, onOpenResults }: Props) {
+export function InterviewScreen({ interviewId, onFinished, onLogout }: {
+  interviewId: string;
+  onFinished: () => void;
+  onLogout: () => void;
+}) {
+  const [state, setState] = useState<InterviewState | null>(null);
+  const [pending, setPending] = useState<TurnView | null>(null);
   const [draft, setDraft] = useState('');
-  const [option, setOption] = useState('');
-  const [sending, setSending] = useState(false);
-  const [localError, setLocalError] = useState('');
-  const [evidence, setEvidence] = useState<Record<string, Evidence>>({});
-  const [gradingTurn, setGradingTurn] = useState<string | null>(null);
-  const keyRef = useRef<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [offline, setOffline] = useState(!navigator.onLine);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const logRef = useRef<HTMLOListElement>(null);
+
+  async function refresh() {
+    const s = await api<InterviewState>(`/interviews/${interviewId}`);
+    setState(s);
+    setPending(s.pending_turn);
+    return s;
+  }
+
+  async function askNext(version: number) {
+    const res = await api<{ turn: TurnView | null; version: number; done?: boolean }>(
+      `/interviews/${interviewId}/next-question`,
+      { method: 'POST', json: { version } },
+    );
+    if (res.done || !res.turn) {
+      await api(`/interviews/${interviewId}/finish`, { method: 'POST', json: { version: res.version } });
+      onFinished();
+      return;
+    }
+    await refresh();
+  }
 
   useEffect(() => {
-    if (!interview) return;
-    let alive = true;
-    request<Evidence[]>(`/interviews/${interview.id}/evidence`)
-      .then(rows => { if (alive) setEvidence(Object.fromEntries(rows.map(r => [r.turn_id, r]))); })
-      .catch(() => { /* evidence list is optional for rendering */ });
-    return () => { alive = false; };
-  }, [interview?.id]);
-
-  if (!interview) {
-    return <EmptyState title={uk.interview.none} text={uk.interview.noneText} action={uk.interview.start} onAction={onStart} />;
-  }
-
-  const current = interview.current_question;
-  const total = interview.question_budget;
-  const shown = Math.min(interview.used_questions, total);
-  const completed = interview.status === 'COMPLETED';
-  const paused = interview.status === 'PAUSED';
-  const isChoice = current?.question_kind === 'MULTIPLE_CHOICE';
-
-  async function run(action: () => Promise<void>) {
-    setSending(true);
-    setLocalError('');
-    try { await action(); }
-    catch (err) {
-      setLocalError(err instanceof ApiError || err instanceof Error ? err.message : uk.common.genericError);
-      if (err instanceof ApiError && (err.code === 'STALE_SESSION_VERSION' || err.status === 409)) await onRefresh();
-    } finally { setSending(false); }
-  }
-
-  function submit() {
-    if (!current) return;
-    const body = {
-      turn_id: current.id,
-      state_version: interview!.state_version,
-      idempotency_key: keyRef.current ?? (keyRef.current = crypto.randomUUID()),
-      ...(isChoice ? { option_id: option } : { answer_text: draft.trim() }),
+    const up = () => setOffline(false);
+    const down = () => setOffline(true);
+    window.addEventListener('online', up);
+    window.addEventListener('offline', down);
+    return () => {
+      window.removeEventListener('online', up);
+      window.removeEventListener('offline', down);
     };
-    void run(async () => {
-      let result = await request<Interview>(`/interviews/${interview!.id}/answers`, 'POST', body);
-      keyRef.current = null;
-      setDraft(''); setOption('');
-      if (result.status === 'READY') {
-        result = await request<Interview>(`/interviews/${interview!.id}/next-question`, 'POST', { state_version: result.state_version });
+  }, []);
+
+  useEffect(() => {
+    setBusy(true);
+    refresh()
+      .then(async (s) => {
+        if (s.status === 'FINISHED') onFinished();
+        else if (!s.pending_turn && s.status === 'ACTIVE') await askNext(s.version);
+      })
+      .catch((err) => setError(err instanceof ApiError ? err.message : 'Не вдалося відкрити розмову.'))
+      .finally(() => setBusy(false));
+    // load once for this interview
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [interviewId]);
+
+  useEffect(() => {
+    if (pending) inputRef.current?.focus();
+  }, [pending?.id]);
+
+  useEffect(() => {
+    logRef.current?.lastElementChild?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+  }, [state?.turns.length]);
+
+  async function send(e?: FormEvent) {
+    e?.preventDefault();
+    if (!pending || !state || !draft.trim() || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await api(`/interviews/${interviewId}/answers`, {
+        method: 'POST',
+        json: {
+          turn_id: pending.id,
+          text: draft.trim(),
+          version: state.version,
+          idempotency_key: crypto.randomUUID(),
+        },
+      });
+      setDraft('');
+      const fresh = await refresh();
+      if (fresh.status === 'ACTIVE') await askNext(fresh.version);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setError('Розмова оновилась в іншій вкладці. Ми завантажили актуальний стан.');
+        await refresh();
+      } else {
+        setError(err instanceof ApiError ? err.message : 'Не вдалося надіслати відповідь. Ваш текст збережено.');
       }
-      onChange(result);
-    });
+    } finally {
+      setBusy(false);
+    }
   }
 
-  function nextQuestion() {
-    void run(async () => onChange(await request<Interview>(`/interviews/${interview!.id}/next-question`, 'POST', { state_version: interview!.state_version })));
+  function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      void send();
+    }
   }
 
-  function skip() {
-    if (!current) return;
-    void run(async () => {
-      let result = await request<Interview>(`/interviews/${interview!.id}/skip`, 'POST', { turn_id: current.id, state_version: interview!.state_version });
-      if (result.status === 'READY') result = await request<Interview>(`/interviews/${interview!.id}/next-question`, 'POST', { state_version: result.state_version });
-      setDraft(''); setOption('');
-      onChange(result);
-    });
+  async function lifecycle(action: 'pause' | 'resume' | 'finish') {
+    if (!state) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await api(`/interviews/${interviewId}/${action}`, { method: 'POST', json: { version: state.version } });
+      if (action === 'finish') onFinished();
+      else await refresh();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Не вдалося змінити стан розмови.');
+    } finally {
+      setBusy(false);
+    }
   }
 
-  function control(action: 'pause' | 'resume' | 'finish') {
-    void run(async () => onChange(await request<Interview>(`/interviews/${interview!.id}/${action}`, 'POST', { state_version: interview!.state_version })));
-  }
-
-  function grade(turnId: string) {
-    setGradingTurn(turnId);
-    void run(async () => {
-      const ev = await request<Evidence>(`/interviews/${interview!.id}/turns/${turnId}/grade`, 'POST');
-      setEvidence(prev => ({ ...prev, [turnId]: ev }));
-    }).finally(() => setGradingTurn(null));
-  }
-
-  function review(ev: Evidence, decision: 'ACCEPT' | 'REJECT') {
-    void run(async () => {
-      const updated = await request<Evidence>(`/evidence/${ev.id}/review`, 'POST', { decision });
-      setEvidence(prev => ({ ...prev, [updated.turn_id]: updated }));
-      await onRefresh();
-    });
-  }
-
-  function onAnswerKey(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && canSubmit) { e.preventDefault(); submit(); }
-  }
-
-  const canSubmit = !sending && (isChoice ? option !== '' : draft.trim().length > 0);
+  const answered = state?.turns.filter((t) => t.answer_text !== null).length ?? 0;
+  const shown = state?.turns.slice(-MAX_TURNS_SHOWN) ?? [];
 
   return (
-    <div className="interview-grid">
-      <Card className="chat-card">
-        <div className="interview-lead">
-          <div>
-            <Tag2 tone="blue">{uk.interview.title}</Tag2>
-            <p className="muted" aria-live="polite">{uk.interview.progress(shown, total)}</p>
-          </div>
-          <Bar value={total ? shown / total : 0} label={uk.interview.progress(shown, total)} />
+    <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-4 p-4">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold">Розмова про ваш досвід</h1>
+        <div className="flex items-center gap-3">
+          <Progress value={Math.min(100, answered * 10)} label="Прогрес розмови" className="w-32" />
+          <Badge variant="info">Відповідей: {answered}</Badge>
+          <Button variant="ghost" size="sm" onClick={onLogout}>Вийти</Button>
         </div>
-        <p className="muted provider-line">
-          {llm?.question_generation ? uk.interview.providerLlm : uk.interview.providerBank}
-        </p>
-
-        <ol className="chat-history" aria-label="Історія інтервю">
-          {interview.turns.map(turn => {
-            const ev = evidence[turn.id];
-            const answered = turn.status === 'ANSWERED';
-            const canGrade = Boolean(llm?.configured) && answered && turn.question_kind === 'FREE_TEXT' && !ev && !completed;
-            return (
-              <li key={turn.id} className="chat-turn">
-                <div className="bubble bot-bubble">
-                  <small>{turn.question_source === 'LLM_GENERATED' ? uk.interview.sourceGenerated : uk.interview.sourceBank} · {labelFor(turn.competency_id)}</small>
-                  {turn.question_format === 'OPTIONAL_CHECK' && <small className="check-badge">{uk.interview.optionalCheck}</small>}
-                  <p>{turn.question_text}</p>
-                </div>
-                {(answered || turn.status === 'SKIPPED') && (
-                  <div className="bubble user-bubble">
-                    {turn.status === 'SKIPPED' ? uk.interview.statusSkipped : (turn.answer_text ?? turn.question_options.find(o => o.id === turn.answer_option)?.text ?? '—')}
-                  </div>
-                )}
-                <div className="badge-row">
-                  {turnBadge(turn, ev).map(b => <Tag2 key={b.text} tone={b.tone}>{b.text}</Tag2>)}
-                </div>
-                {canGrade && (
-                  <button className="btn ghost small" disabled={sending} onClick={() => grade(turn.id)} aria-busy={gradingTurn === turn.id}>
-                    <WandSparkles size={15} aria-hidden="true" /> {gradingTurn === turn.id ? uk.interview.gradeBusy : uk.interview.gradeButton}
-                  </button>
-                )}
-                {ev && (
-                  <div className="evidence-box" aria-label="Пропозиція оцінки">
-                    <p>{ev.level !== null ? uk.interview.proposedLevel(ev.level) : uk.interview.proposedNone}</p>
-                    {ev.evidence_quote && <blockquote><small>{uk.interview.quoteLabel}:</small> {ev.evidence_quote}</blockquote>}
-                    {ev.uncertainty && <p className="muted"><small>{uk.interview.uncertaintyLabel}: {ev.uncertainty === 'NO_SUPPORTING_QUOTE' ? uk.interview.noQuote : ev.uncertainty}</small></p>}
-                    <p className="muted"><small>{uk.interview.gradeNote}</small></p>
-                    {ev.status === 'PROPOSED' && (
-                      <div className="answer-controls">
-                        <button className="btn primary small" disabled={sending || ev.level === null} onClick={() => review(ev, 'ACCEPT')}>{uk.interview.accept}</button>
-                        <button className="btn ghost small" disabled={sending} onClick={() => review(ev, 'REJECT')}>{uk.interview.reject}</button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </li>
-            );
-          })}
+      </header>
+      {offline && (
+        <Alert role="status" className="flex items-center gap-2">
+          <WifiOff className="size-4" aria-hidden="true" />
+          Немає мережі. Відповідь не буде надіслано, поки з’єднання не відновиться.
+        </Alert>
+      )}
+      {error && <Alert role="alert">{error}</Alert>}
+      <section aria-label="Листування" className="flex min-h-64 flex-col rounded-xl border border-slate-200 bg-white p-4">
+        <ol ref={logRef} aria-live="polite" className="flex flex-col gap-3">
+          {shown.map((t) => (
+            <li key={t.id} className="flex flex-col gap-2">
+              <p className="max-w-[85%] rounded-lg bg-slate-100 p-3 text-sm text-slate-900">
+                <span className="sr-only">Питання: </span>
+                {t.question_text}
+              </p>
+              {t.answer_text !== null && (
+                <p className="ml-auto max-w-[85%] rounded-lg bg-blue-600 p-3 text-sm text-white">
+                  <span className="sr-only">Ваша відповідь: </span>
+                  {t.answer_text}
+                </p>
+              )}
+              {!t.graded && <span className="text-xs text-slate-500">Питання без автоматичної оцінки</span>}
+            </li>
+          ))}
         </ol>
-
-        {completed && (
-          <div className="completed-banner" role="status"><CheckCircle2 size={24} aria-hidden="true" /><div><strong>{uk.interview.completed}</strong></div></div>
+        {busy && !pending && (
+          <p role="status" className="mt-3 flex items-center gap-2 text-sm text-slate-600">
+            <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+            Готуємо наступне питання…
+          </p>
         )}
-        {paused && <div className="paused-banner" role="status"><Pause size={22} aria-hidden="true" />{uk.interview.paused}</div>}
-        {localError && <ErrorAlert message={localError} onDismiss={() => setLocalError('')} onRetry={current ? submit : undefined} />}
-
-        {!completed && !paused && interview.status === 'WAITING_FOR_ANSWER' && current && (
-          <form className="answer-area" onSubmit={e => { e.preventDefault(); if (canSubmit) submit(); }}>
-            {isChoice ? (
-              <fieldset className="answer-options">
-                <legend>{uk.interview.optionalCheck}</legend>
-                <p className="muted">{uk.interview.optionalHint}</p>
-                {current.question_options.map(opt => (
-                  <label key={opt.id} className={`answer-choice ${option === opt.id ? 'chosen' : ''}`}>
-                    <input type="radio" name="option" value={opt.id} checked={option === opt.id} onChange={() => setOption(opt.id)} />
-                    <span>{opt.text}</span>
-                  </label>
-                ))}
-              </fieldset>
-            ) : (
-              <div className="field">
-                <label htmlFor="answer-text">{uk.interview.answerLabel}</label>
-                <textarea id="answer-text" rows={5} maxLength={MAX_ANSWER} aria-describedby="answer-hint answer-count"
-                  value={draft} disabled={sending}
-                  onChange={e => { setDraft(e.target.value); keyRef.current = null; }} onKeyDown={onAnswerKey} />
-                <div className="answer-meta">
-                  <small id="answer-hint" className="muted">{uk.interview.answerHint}</small>
-                  <small id="answer-count" className="muted">{uk.interview.charCount(draft.length)}</small>
-                </div>
-              </div>
-            )}
-            <div className="answer-controls">
-              <button type="button" className="btn ghost small" onClick={skip} disabled={sending}><SkipForward size={16} aria-hidden="true" />{uk.interview.skip}</button>
-              <button type="submit" className="btn primary" disabled={!canSubmit}>
-                <Send size={17} aria-hidden="true" />{sending ? uk.interview.sending : isChoice ? uk.interview.optionSubmit : uk.interview.send}
-              </button>
+      </section>
+      {pending && state?.status === 'ACTIVE' && (
+        <form onSubmit={send} className="flex flex-col gap-2">
+          <label htmlFor="answer" className="text-sm font-medium text-slate-700">Ваша відповідь</label>
+          <Textarea
+            id="answer"
+            ref={inputRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={onKeyDown}
+            maxLength={4000}
+            placeholder="Опишіть конкретний приклад із вашого досвіду"
+          />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-slate-500">Enter — надіслати, Shift+Enter — новий рядок.</p>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={busy || !draft.trim() || offline}>
+                <Send className="size-4" aria-hidden="true" />
+                Надіслати
+              </Button>
             </div>
-          </form>
-        )}
-
-        {!completed && !paused && interview.status === 'READY' && !current && (
-          <div className="answer-controls">
-            {shown >= total
-              ? <button className="btn primary" onClick={() => control('finish')} disabled={sending}><CheckCircle2 size={16} aria-hidden="true" />{uk.interview.finishReady}</button>
-              : <button className="btn primary" onClick={nextQuestion} disabled={sending}><Sparkles size={16} aria-hidden="true" />{uk.interview.nextQuestion}</button>}
           </div>
+        </form>
+      )}
+      <footer className="flex flex-wrap gap-2">
+        {state?.status === 'ACTIVE' && (
+          <Button variant="outline" onClick={() => void lifecycle('pause')} disabled={busy}>
+            <Pause className="size-4" aria-hidden="true" />
+            Призупинити
+          </Button>
         )}
-
-        <div className="chat-footer">
-          {paused && <button className="btn primary" disabled={sending} onClick={() => control('resume')}><Play size={16} aria-hidden="true" />{uk.interview.resume}</button>}
-          {completed && <button className="btn primary" onClick={onOpenResults}><TrendingUp size={17} aria-hidden="true" />{uk.interview.results}</button>}
-          {!completed && !paused && (
-            <>
-              <span className="muted"><LockKeyhole size={14} aria-hidden="true" /> Набір вакансій зафіксовано</span>
-              <div>
-                <button className="btn ghost small" disabled={sending} onClick={() => control('pause')}><Pause size={14} aria-hidden="true" />{uk.interview.pause}</button>
-                <button className="btn ghost small" disabled={sending} onClick={() => control('finish')}>{uk.interview.finish}</button>
-              </div>
-            </>
-          )}
-        </div>
-      </Card>
-
-      <aside className="interview-sidebar" aria-label={uk.interview.currentProfile}>
-        <Card>
-          <h3>{uk.interview.currentProfile}</h3>
-          <p className="muted">{uk.interview.profileHint}</p>
-          <ul className="mini-skills">
-            {Object.entries(interview.effective_profile.levels).filter(([, v]) => v !== null).slice(0, 10).map(([id, lev]) => (
-              <li key={id}>
-                <div><strong>{labelFor(id)}</strong><span>{uk.interview.level(lev as number)}</span></div>
-                <Bar value={((lev as number) ?? 0) / 3} tone={lev === 3 ? 'green' : 'blue'} label={labelFor(id)} />
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </aside>
-    </div>
+        {state?.status === 'PAUSED' && (
+          <Button variant="outline" onClick={() => void lifecycle('resume')} disabled={busy}>
+            <Play className="size-4" aria-hidden="true" />
+            Продовжити
+          </Button>
+        )}
+        <Button variant="ghost" onClick={() => void lifecycle('finish')} disabled={busy || !answered}>
+          <Flag className="size-4" aria-hidden="true" />
+          Завершити і переглянути результати
+        </Button>
+      </footer>
+    </main>
   );
 }

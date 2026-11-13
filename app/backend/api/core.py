@@ -86,6 +86,25 @@ def create_interview(data: CreateInterview, db: Session = Depends(get_db), user:
     return {"id": iv.id, "status": iv.status, "version": iv.version}
 
 
+@router.get("/interviews/active")
+def latest_open_interview(db: Session = Depends(get_db), user: User = Depends(current_user)):
+    """Server-side resume: newest interview that is not finished. Survives browser storage loss."""
+    iv = db.scalar(select(CoreInterview).where(CoreInterview.user_id == user.id, CoreInterview.status != "FINISHED")
+                   .order_by(CoreInterview.created_at.desc()))
+    if iv is None:
+        return {"interview": None}
+    return {"interview": {"id": iv.id, "cohort_id": iv.cohort_id, "status": iv.status, "version": iv.version}}
+
+
+@router.get("/interviews/latest-finished")
+def latest_finished_interview(db: Session = Depends(get_db), user: User = Depends(current_user)):
+    iv = db.scalar(select(CoreInterview).where(CoreInterview.user_id == user.id, CoreInterview.status == "FINISHED")
+                   .order_by(CoreInterview.created_at.desc()))
+    if iv is None:
+        return {"interview": None}
+    return {"interview": {"id": iv.id, "cohort_id": iv.cohort_id, "status": iv.status, "version": iv.version}}
+
+
 @router.get("/interviews/{interview_id}")
 def get_interview(interview_id: str, db: Session = Depends(get_db), user: User = Depends(current_user)):
     iv = _owned_interview(db, user, interview_id)
