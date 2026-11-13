@@ -25,11 +25,11 @@ export function AppShell({ title, name, onLogout, right, children }: {
               </span>
               <button
                 onClick={onLogout}
+                aria-label="Вийти"
                 className="flex items-center gap-1 rounded-md px-2 py-1 text-sm text-slate-600 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-blue-600"
               >
                 <LogOut className="size-4" aria-hidden="true" />
-                <span className="hidden sm:inline">Вийти</span>
-                <span className="sr-only sm:hidden">Вийти</span>
+                <span className="hidden sm:inline" aria-hidden="true">Вийти</span>
               </button>
             </div>
           </div>

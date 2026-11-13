@@ -4,6 +4,8 @@ Budgets: ≤10 distinct actions, ≤5 shown questions per action. Pending questi
 """
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
@@ -23,6 +25,7 @@ from backend.providers.roles import LLMError, evaluator_assess, interviewer_ques
 from backend.security import current_user
 
 router = APIRouter(tags=["adaptive interview"])
+log = logging.getLogger("competencematch.llm")
 
 
 def _owned_interview(db: Session, user: User, interview_id: str) -> CoreInterview:
@@ -169,7 +172,8 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
             question = interviewer_question(transport, action_name=label, rubric_criteria=[action],
                                             previous_turns=prior, followup_goal=None)
             source = "LLM_INTERVIEWER"
-        except LLMError:
+        except LLMError as exc:
+            log.warning("interviewer failed for action=%s kind=%s", action, exc.kind)
             question = None
     if question is None:
         banked = bank_question(action, 0)
@@ -203,7 +207,8 @@ def _assess_action(db: Session, user: User, iv: CoreInterview, action_id: str) -
     try:
         out = evaluator_assess(transport, action_id=action_id, rubric_version="auto-1",
                                allowed_criteria={action_id}, turns=text_by_turn)
-    except LLMError:
+    except LLMError as exc:
+        log.warning("evaluator failed for action=%s kind=%s", action_id, exc.kind)  # no prompts or keys logged
         return "UNGRADED"
     rev = (db.scalar(select(func.max(CriterionAssessment.revision)).where(
         CriterionAssessment.session_id == iv.id, CriterionAssessment.action_id == action_id)) or 0) + 1

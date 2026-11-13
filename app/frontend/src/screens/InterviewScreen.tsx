@@ -100,7 +100,7 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
 
   useEffect(() => {
     const up = () => setOffline(false);
-    const down = () => setOffline(true);
+    const down = () => setOffline(!navigator.onLine);
     window.addEventListener('online', up);
     window.addEventListener('offline', down);
     return () => {
@@ -143,6 +143,7 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
         method: 'POST',
         json: { turn_id: pending.id, text, version: state.version, idempotency_key: crypto.randomUUID() },
       });
+      setOffline(false);
       setPending(null);
       const fresh = await refresh();
       setOptimistic(null);
@@ -203,7 +204,7 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
         </div>
       }
     >
-      {offline && (
+      {offline && !navigator.onLine && (
         <Alert className="mb-3 flex items-center gap-2">
           <WifiOff className="size-4" aria-hidden="true" />
           Немає мережі. Відповідь буде надіслано, коли з’єднання відновиться.
@@ -259,7 +260,7 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
                 </span>
               </div>
             )}
-            {(thinking || (busy && !pending && !optimistic)) && <TypingIndicator />}
+            {(thinking || busy) && <TypingIndicator />}
             <div ref={endRef} />
           </div>
           {state?.status === 'PAUSED' && (
@@ -285,7 +286,7 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
                   placeholder="Введіть вашу відповідь…"
                   className="min-h-12 resize-none border-0 shadow-none focus-visible:outline-0"
                 />
-                <Button type="submit" size="icon" disabled={busy || !draft.trim() || offline} aria-label="Надіслати">
+                <Button type="submit" size="icon" disabled={busy || !draft.trim()} aria-label="Надіслати">
                   {busy ? <Loader2 className="size-5 animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <Send className="size-5" aria-hidden="true" />}
                 </Button>
               </div>
