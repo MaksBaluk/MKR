@@ -45,6 +45,8 @@ class AskState(TypedDict, total=False):
     previous_answers: list[str]
     followup_goal: str | None
     off_topic_detected: bool
+    candidate_level: str | None
+    years_experience: int | None
     question: str | None
     source: str
 
@@ -116,7 +118,8 @@ def _build_ask(model):
             user = format_interviewer_input(
                 action_name=s["action_name"], topic_summary=s.get("summary", ""),
                 unmet_criteria=s.get("unmet_criteria", []), previous_answers=s.get("previous_answers", [])[-3:],
-                followup_goal=s.get("followup_goal"), off_topic_detected=s.get("off_topic_detected", False))
+                followup_goal=s.get("followup_goal"), off_topic_detected=s.get("off_topic_detected", False),
+                candidate_level=s.get("candidate_level"), years_experience=s.get("years_experience"))
             resp = model.invoke([SystemMessage(INTERVIEWER_SYSTEM), HumanMessage(user)])
             return {"question": _text(resp).strip().strip('"«»').strip()}
         except Exception as exc:  # noqa: BLE001 - any provider failure means bank fallback

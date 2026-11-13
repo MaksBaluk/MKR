@@ -221,3 +221,12 @@ def test_fallback_has_fixed_refusal_only_when_off_topic():
     assert validate_question(r.question_text, True) is None
     m = FakeModel("Перше. Друге. Третє. Четверте?")
     assert _ask(m, off_topic=True).question_text.startswith(REFUSAL)
+
+
+def test_ask_graph_passes_candidate_level_to_interviewer():
+    m = FakeModel("Запит до PostgreSQL став повільним. Як би ви шукали причину?")
+    run_ask({"action_id": ACTION, "action_name": "PostgreSQL", "summary": "", "unmet_criteria": ["sql_design"],
+             "previous_answers": [], "followup_goal": None, "off_topic_detected": False,
+             "candidate_level": "junior", "years_experience": 1}, m)
+    human = m.messages[0][1].content
+    assert 'candidate_level: "junior"' in human and "years_experience: 1" in human

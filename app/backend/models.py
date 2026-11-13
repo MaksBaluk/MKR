@@ -276,6 +276,7 @@ class CriterionAssessment(Base):
     reason: Mapped[str] = mapped_column(Text, default="")
     evidence: Mapped[list] = mapped_column(JSON, default=list)
     revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    sufficient_evidence: Mapped[bool | None] = mapped_column(Boolean, nullable=True)  # NULL = unknown (legacy)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     __table_args__ = (
         UniqueConstraint("session_id", "action_id", "criterion_id", "revision", name="uq_assessment_revision"),

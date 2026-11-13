@@ -10,3 +10,15 @@ def can_start_topic(distinct_topics_so_far: int) -> bool:
 
 def can_ask_question(shown_for_action: int) -> bool:
     return shown_for_action < MAX_SHOWN_QUESTIONS_PER_ACTION
+
+MIN_SHOWN_QUESTIONS_PER_ACTION = 2
+EARLY_CLOSE_SCORE = 0.75  # MATH_SPEC band [.75,.90): "good"; one strong, sufficient answer may close a topic
+
+
+def needs_min_followup(shown_for_action: int, *, graded: bool, score: float | None, sufficient: bool) -> bool:
+    """A graded topic gets a second shown question unless the first answer was sufficient and scored >= 0.75.
+
+    Ungraded topics (no accepted assessment, e.g. no LLM) move on: a fallback bank question would only repeat."""
+    if not graded or not can_ask_question(shown_for_action) or shown_for_action >= MIN_SHOWN_QUESTIONS_PER_ACTION:
+        return False
+    return not (sufficient and score is not None and score >= EARLY_CLOSE_SCORE)

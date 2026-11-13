@@ -10,8 +10,8 @@ from backend.agents.prompts import INTERVIEWER_SYSTEM
 class FakeChat:
     """Fake chat model patched at backend.api.core.get_chat_model: interviewer or evaluator by system prompt."""
 
-    def __init__(self, score=0.6, off_topic=False):
-        self.score, self.off_topic = score, off_topic
+    def __init__(self, score=0.6, off_topic=False, sufficient=False):
+        self.score, self.off_topic, self.sufficient = score, off_topic, sufficient
         self.human_inputs = []
 
     def invoke(self, messages, *a, **k):
@@ -27,7 +27,8 @@ class FakeChat:
         crit = [{"criterion_id": c, "score": None if self.off_topic else self.score, "reason": "з відповіді",
                  "evidence": [] if self.off_topic else [{"turn_id": turn_id, "exact_excerpt": text}]} for c in allowed]
         return SimpleNamespace(content=json.dumps({"action_id": action, "rubric_version": "auto-1",
-                                                   "off_topic": self.off_topic, "criteria": crit}))
+                                                   "off_topic": self.off_topic, "criteria": crit,
+                                                   "sufficient_evidence": self.sufficient}))
 
 
 @pytest.fixture()
@@ -197,3 +198,53 @@ def test_off_topic_answer_not_ranked_and_same_action_reasked(client, auth, cohor
     q2 = _next(client, auth, iv, ans["version"]).json()
     assert q2["turn"]["action_id"] == q1["turn"]["action_id"]
     assert "off_topic_detected: true" in llm.human_inputs[-1]
+
+
+def _answer(client, auth, iv, q, text, key):
+    return client.post(f"/api/v1/interviews/{iv['id']}/answers", headers=auth, json={
+        "turn_id": q["turn"]["id"], "text": text, "version": q["version"], "idempotency_key": key}).json()
+
+
+def test_weak_first_answer_gets_second_question_on_same_topic(client, auth, cohort, llm):
+    iv = client.post("/api/v1/interviews", json={"cohort_id": cohort}, headers=auth).json()
+    q1 = _next(client, auth, iv, 0).json()
+    llm.score = 0.2
+    ans = _answer(client, auth, iv, q1, "Трохи знаю.", "answer-key-0101")
+    q2 = _next(client, auth, iv, ans["version"]).json()
+    assert q2["turn"]["action_id"] == q1["turn"]["action_id"]
+    ans2 = _answer(client, auth, iv, q2, "Більше не знаю.", "answer-key-0102")
+    q3 = _next(client, auth, iv, ans2["version"]).json()
+    assert q3["turn"]["action_id"] != q1["turn"]["action_id"]
+
+
+def test_strong_sufficient_first_answer_closes_topic(client, auth, cohort, llm):
+    iv = client.post("/api/v1/interviews", json={"cohort_id": cohort}, headers=auth).json()
+    q1 = _next(client, auth, iv, 0).json()
+    llm.score, llm.sufficient = 0.9, True
+    ans = _answer(client, auth, iv, q1, "Детально проєктував схему з індексами.", "answer-key-0111")
+    q2 = _next(client, auth, iv, ans["version"]).json()
+    assert q2["turn"]["action_id"] != q1["turn"]["action_id"]
+
+
+def test_five_question_cap_per_topic_still_enforced(client, auth, cohort, llm):
+    iv = client.post("/api/v1/interviews", json={"cohort_id": cohort}, headers=auth).json()
+    llm.off_topic = True  # null scores: the topic stays open for re-asks
+    q = _next(client, auth, iv, 0).json()
+    first = q["turn"]["action_id"]
+    seen = []
+    for i in range(6):
+        seen.append(q["turn"]["action_id"])
+        ans = _answer(client, auth, iv, q, "як приготувати борщ", f"answer-key-02{i:02d}")
+        q = _next(client, auth, iv, ans["version"]).json()
+    assert seen.count(first) == 5 and seen[5] != first
+
+
+def test_interviewer_gets_candidate_level_from_profile(client, auth, cohort, llm, db):
+    from backend.models import CandidateProfile
+    iv = client.post("/api/v1/interviews", json={"cohort_id": cohort}, headers=auth).json()
+    with db() as s:  # the attempt's profile exists now; make it an early-career one
+        for p in s.query(CandidateProfile).all():
+            p.desired_title, p.years_experience = "Python Developer", 1
+        s.commit()
+    _next(client, auth, iv, 0)
+    assert 'candidate_level: "junior"' in llm.human_inputs[-1] and "years_experience: 1" in llm.human_inputs[-1]

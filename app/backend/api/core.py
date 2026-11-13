@@ -13,13 +13,14 @@ from sqlalchemy.orm import Session
 from backend.api.common import create_attempt, default_profile
 from backend.db import get_db
 from backend.domain.core_flow import planner_state
-from backend.domain.interview_budget import can_ask_question, can_start_topic
+from backend.domain.candidate_level import candidate_level
+from backend.domain.interview_budget import can_ask_question, can_start_topic, needs_min_followup
 from backend.domain.market import VacancyInput, compute_market
 from backend.domain.planner import choose_next
 from backend.agents.graphs import run_answer, run_ask
 from backend.agents.model import get_chat_model
-from backend.models import (CohortSnapshot, CoreInterview, CoreTurn, Competency, CriterionAssessment, Rubric,
-                            RubricCriterion, User)
+from backend.models import (CandidateProfile, CohortSnapshot, CoreInterview, CoreTurn, Competency,
+                            CriterionAssessment, Rubric, RubricCriterion, User)
 from backend.security import current_user
 
 router = APIRouter(tags=["adaptive interview"])
@@ -202,16 +203,29 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     mass = {e.action_id: e.mass for e in compute_market([
         VacancyInput(r["id"], tuple(tuple(a["competency_id"] for a in g["alternatives"]) for g in r["groups"]))
         for r in revisions])}
-    latest_in_session = _action_scores(db.scalars(select(CriterionAssessment).where(
-        CriterionAssessment.session_id == iv.id).order_by(CriterionAssessment.revision)).all())
-    # A topic is re-asked only when the Evaluator found insufficient evidence (null score).
+    session_rows = db.scalars(select(CriterionAssessment).where(
+        CriterionAssessment.session_id == iv.id).order_by(CriterionAssessment.revision)).all()
+    latest_in_session = _action_scores(session_rows)
+    sufficient = {r.action_id: bool(r.sufficient_evidence) for r in session_rows}  # latest revision wins
+
+    def needs_second(a: str) -> bool:
+        """Min two shown questions per graded topic unless the first answer was sufficient and >= 0.75."""
+        return needs_min_followup(shown[a], graded=a in latest_in_session, score=latest_in_session.get(a),
+                                  sufficient=sufficient.get(a, False))
+
+    # Otherwise a started topic is re-asked only when the Evaluator found insufficient evidence (null score).
     def eligible(a: str) -> bool:
         if a not in used:
             return can_start_topic(len(used))
         return can_ask_question(shown[a]) and a in latest_in_session and latest_in_session[a] is None
 
-    available = sorted({a for alts in state.open_alternatives.values() for a in alts if eligible(a)})
-    action = choose_next(state, weights, available, mass)
+    # A topic below its minimum continues before the planner opens anything (even if its groups closed/failed).
+    followup = next((t.action_id for t in reversed(turns) if needs_second(t.action_id)), None)
+    if followup is not None:
+        action = followup
+    else:
+        available = sorted({a for alts in state.open_alternatives.values() for a in alts if eligible(a)})
+        action = choose_next(state, weights, available, mass)
     if action is None:
         return {"turn": None, "version": iv.version, "done": True}
     label = _label(db, action)
@@ -220,7 +234,8 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     result = run_ask({"action_id": action, "action_name": label, "summary": comp.summary if comp else "",
                       "unmet_criteria": criteria_for(db, action),
                       "previous_answers": [t.answer_text for t in answered][-3:], "followup_goal": None,
-                      "off_topic_detected": bool(answered and answered[-1].off_topic)}, get_chat_model())
+                      "off_topic_detected": bool(answered and answered[-1].off_topic),
+                      **_level_context(db, iv)}, get_chat_model())
     question, source = result.question_text, result.source
     turn = CoreTurn(interview_id=iv.id, sequence=len(turns) + 1, action_id=action, question_text=question,
                     question_source=source)
@@ -228,6 +243,14 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     db.add(turn)
     db.commit()
     return {"turn": _turn_dict(turn, _names(db)), "version": iv.version, "done": False}
+
+
+def _level_context(db: Session, iv: CoreInterview) -> dict:
+    """Desired title / years from the attempt's profile (falls back to the user) for Interviewer question depth."""
+    src = db.get(CandidateProfile, iv.profile_id) if iv.profile_id else None
+    src = src or db.get(User, iv.user_id)
+    years = getattr(src, "years_experience", None)
+    return {"candidate_level": candidate_level(getattr(src, "desired_title", None), years), "years_experience": years}
 
 
 def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -> str:
@@ -262,12 +285,13 @@ def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -
         for cid in criteria:
             db.add(CriterionAssessment(user_id=user.id, session_id=iv.id, action_id=action_id, criterion_id=cid,
                                        rubric_id=rubric.id, score=None, reason="Відповідь поза темою співбесіди.",
-                                       evidence=[], revision=rev))
+                                       evidence=[], revision=rev, sufficient_evidence=False))
         return "ACCEPTED"
     for c in result.output.criteria:
         db.add(CriterionAssessment(user_id=user.id, session_id=iv.id, action_id=action_id,
                                    criterion_id=c.criterion_id, rubric_id=rubric.id, score=c.score,
-                                   reason=c.reason, evidence=[e.model_dump() for e in c.evidence], revision=rev))
+                                   reason=c.reason, evidence=[e.model_dump() for e in c.evidence], revision=rev,
+                                   sufficient_evidence=result.output.sufficient_evidence))
     return "ACCEPTED"
 
 
