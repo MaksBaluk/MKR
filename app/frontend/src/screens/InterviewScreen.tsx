@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { api, ApiError } from '@/api';
-import { ScoreBar } from '@/components/ScoreBar';
 import { Alert } from '@/components/ui/alert';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -8,10 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { timeLabel } from '@/lib/bands';
-import type { AssessmentItem, InterviewState, Profile, TurnView } from '@/types';
-import { Bot, Flag, Laptop, Lightbulb, Loader2, Pause, Play, Send, Target, WifiOff } from 'lucide-react';
+import { MAX_TOPICS, deriveTopics } from '@/lib/interviewTopics';
+import type { InterviewState, Profile, TurnView } from '@/types';
+import { Bot, CheckCircle2, ChevronDown, Circle, Flag, Info, Laptop, Lightbulb, Loader2, Pause, Play, Send, Target, WifiOff } from 'lucide-react';
 
-const MAX_TOPICS = 10;
 const TRACK_NAMES: Record<string, string> = { python: 'Python-розробник', marketing: 'Маркетолог', design: 'Дизайнер' };
 
 function prefersReducedMotion(): boolean {
@@ -58,7 +57,7 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
 }) {
   const [state, setState] = useState<InterviewState | null>(null);
   const [pending, setPending] = useState<TurnView | null>(null);
-  const [assessments, setAssessments] = useState<AssessmentItem[]>([]);
+  const [infoOpen, setInfoOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const [optimistic, setOptimistic] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -73,8 +72,6 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
     const s = await api<InterviewState>(`/interviews/${interviewId}`);
     setState(s);
     setPending(s.pending_turn);
-    const a = await api<{ items: AssessmentItem[] }>(`/assessments?interview_id=${interviewId}`);
-    setAssessments(a.items);
     return s;
   }
 
@@ -185,11 +182,7 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
 
   const topics = state?.topics_used ?? 0;
   const turns = state?.turns ?? [];
-  const latest = new Map<string, AssessmentItem>();
-  assessments.forEach((a) => {
-    if (a.score !== null) latest.set(a.action_id, a);
-  });
-  const profileItems = [...latest.values()].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 5);
+  const topicList = deriveTopics(turns);
 
   return (
     <div className="flex flex-col gap-4">
@@ -285,47 +278,71 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
         </Card>
 
         <aside className="flex flex-col gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Поточний профіль</CardTitle>
-              <p className="text-sm text-ink-subtle">Виявлені компетентності за вашими відповідями.</p>
-            </CardHeader>
-            <CardContent>
-              {!llmConfigured && (
-                <Alert className="mb-3 text-xs">Автоматична оцінка зараз вимкнена, тому профіль не заповнюється.</Alert>
-              )}
-              {profileItems.length === 0 ? (
-                <p className="text-sm text-ink-subtle">Оцінки з’являться після ваших відповідей.</p>
-              ) : (
-                <ul className="flex flex-col gap-4">
-                  {profileItems.map((a) => <li key={a.action_id}><ScoreBar name={a.action_name} score={a.score ?? 0} /></li>)}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
-          {pending && (
-            <Card className="border-primary-line bg-primary-soft">
+          <button
+            type="button"
+            className="flex items-center justify-between rounded-xl border border-line bg-white px-4 py-3 text-left font-semibold text-ink lg:hidden"
+            aria-expanded={infoOpen}
+            aria-controls="interview-info"
+            onClick={() => setInfoOpen((v) => !v)}
+          >
+            <span className="flex items-center gap-2"><Info className="size-5 text-primary" aria-hidden="true" />Про розмову</span>
+            <ChevronDown className={`size-5 transition-transform motion-reduce:transition-none ${infoOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+          </button>
+          <div id="interview-info" className={`${infoOpen ? 'flex' : 'hidden'} flex-col gap-4 lg:flex`}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Теми розмови</CardTitle>
+                <p className="text-sm text-ink-subtle">{topics} з {MAX_TOPICS} тем. Кожна тема — від 1 до 5 запитань.</p>
+              </CardHeader>
+              <CardContent>
+                {topicList.length === 0 ? (
+                  <p className="text-sm text-ink-subtle">Теми з’являться, щойно почнеться розмова.</p>
+                ) : (
+                  <ul className="flex flex-col gap-2">
+                    {topicList.map((tp) => (
+                      <li key={tp.action_id} className="flex items-center gap-2 text-sm text-ink">
+                        {tp.isCurrent
+                          ? <Circle className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                          : <CheckCircle2 className="size-4 shrink-0 text-success" aria-hidden="true" />}
+                        <span className="min-w-0 flex-1 truncate">{tp.action_name}</span>
+                        {tp.isCurrent && <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs text-primary">поточна</span>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+            {pending && (
+              <Card className="border-primary-line bg-primary-soft">
+                <CardContent className="flex items-start gap-3 pt-5">
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white text-primary">
+                    <Target className="size-6" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="text-xs text-primary">Поточна тема</p>
+                    <p className="text-lg font-semibold text-ink">{pending.action_name}</p>
+                    <p className="text-sm text-ink-muted">Кілька запитань, щоб краще зрозуміти ваш досвід</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            <Card>
               <CardContent className="flex items-start gap-3 pt-5">
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white text-primary">
-                  <Target className="size-6" aria-hidden="true" />
-                </span>
+                <Lightbulb className="mt-0.5 size-5 shrink-0 text-warning" aria-hidden="true" />
                 <div>
-                  <p className="text-xs text-primary">Поточна компетентність</p>
-                  <p className="text-lg font-semibold text-ink">{pending.action_name}</p>
-                  <p className="text-sm text-ink-muted">Кілька запитань, щоб краще оцінити ваш досвід.</p>
+                  <p className="font-semibold text-ink">Поради для відповіді</p>
+                  <ul className="mt-1 list-disc space-y-1 pl-4 text-sm text-ink-muted">
+                    <li>Наведіть конкретний приклад із власної практики.</li>
+                    <li>Розкажіть, що саме робили ви самі, а не вся команда.</li>
+                    <li>Назвіть інструменти та результат вашої роботи.</li>
+                  </ul>
                 </div>
               </CardContent>
             </Card>
-          )}
-          <Card>
-            <CardContent className="flex items-start gap-3 pt-5">
-              <Lightbulb className="mt-0.5 size-5 shrink-0 text-warning" aria-hidden="true" />
-              <div>
-                <p className="font-semibold text-ink">Порада</p>
-                <p className="text-sm text-ink-muted">Наводьте конкретні приклади з вашого досвіду: це допомагає точніше оцінити рівень.</p>
-              </div>
-            </CardContent>
-          </Card>
+            {!llmConfigured && (
+              <Alert className="text-sm">Автоматична оцінка зараз вимкнена: відповіді збережуться, але підсумок буде неповним.</Alert>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2">
             {state?.status === 'ACTIVE' && (
               <Button variant="outline" onClick={() => void lifecycle('pause')} disabled={busy}>
