@@ -54,9 +54,16 @@ def test_incomplete_json_is_malformed_after_retry():
     assert t.calls == 2
 
 
-def test_timeout_retries_then_succeeds():
+def test_timeout_is_not_retried_so_requests_stay_bounded():
+    t = FakeTransport(LLMError("TIMEOUT"))
+    with pytest.raises(LLMError) as err:
+        _assess(t)
+    assert err.value.kind == "TIMEOUT" and t.calls == 1
+
+
+def test_rate_limit_retries_once_then_succeeds():
     import json
-    t = FakeTransport(LLMError("TIMEOUT"), json.dumps(VALID))
+    t = FakeTransport(LLMError("RATE_LIMIT"), json.dumps(VALID))
     assert _assess(t).criteria[0].score == 0.6
     assert t.calls == 2
 
@@ -90,3 +97,31 @@ def test_interviewer_forbids_topic_change():
                              previous_turns=[], followup_goal=None)
     assert q.startswith("Яким")
     assert "не змінюй" in t.systems[0].lower() or "не змінювати" in t.systems[0].lower()
+
+
+def test_evaluator_prompt_lists_allowed_criterion_ids():
+    import json
+    seen = {}
+
+    class Spy:
+        def complete(self, system, user, *, timeout_s):
+            seen["user"] = json.loads(user)
+            return json.dumps(VALID)
+
+    _assess(Spy())
+    assert seen["user"]["allowed_criterion_ids"] == ["sql_design"]
+
+
+def test_http_transport_maps_dropped_read_to_llm_error(monkeypatch):
+    import http.client
+    import urllib.request
+
+    from backend.providers.llm import HttpTransport
+
+    def boom(*a, **k):
+        raise http.client.IncompleteRead(b"x")
+
+    monkeypatch.setattr(urllib.request, "urlopen", boom)
+    with pytest.raises(LLMError) as err:
+        HttpTransport("openai_compatible", "k", "m", "https://x/v1").complete("s", "u", timeout_s=1)
+    assert err.value.kind == "OFFLINE"

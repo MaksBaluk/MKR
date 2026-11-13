@@ -1,6 +1,7 @@
 """LLM status and HTTP transport for Interviewer/Evaluator roles. Keys stay server-side."""
 from __future__ import annotations
 
+import http.client
 import json
 import urllib.error
 import urllib.request
@@ -31,8 +32,8 @@ class HttpTransport:
         else:
             url = self.base_url.rstrip("/") + "/chat/completions"
             headers = {"Authorization": f"Bearer {self.api_key}", "content-type": "application/json"}
-            body = {"model": self.model, "messages": [{"role": "system", "content": system},
-                                                      {"role": "user", "content": user}]}
+            body = {"model": self.model, "max_tokens": 1500,
+                    "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
         req = urllib.request.Request(url, data=json.dumps(body).encode(), headers=headers, method="POST")
         try:
             with urllib.request.urlopen(req, timeout=timeout_s) as resp:  # noqa: S310 - fixed https endpoints
@@ -41,11 +42,16 @@ class HttpTransport:
             raise LLMError("RATE_LIMIT" if exc.code == 429 else "OFFLINE") from exc
         except TimeoutError as exc:
             raise LLMError("TIMEOUT") from exc
-        except (urllib.error.URLError, OSError) as exc:
-            raise LLMError("OFFLINE") from exc
-        if self.provider == "anthropic":
-            return "".join(part.get("text", "") for part in data.get("content", []))
-        return data["choices"][0]["message"]["content"]
+        except (urllib.error.URLError, OSError, http.client.HTTPException) as exc:
+            raise LLMError("OFFLINE") from exc  # includes dropped/incomplete reads
+        except ValueError as exc:
+            raise LLMError("MALFORMED") from exc  # non-JSON envelope
+        try:
+            if self.provider == "anthropic":
+                return "".join(part.get("text", "") for part in data.get("content", []))
+            return data["choices"][0]["message"].get("content") or ""
+        except (KeyError, IndexError, TypeError, AttributeError) as exc:
+            raise LLMError("MALFORMED") from exc
 
 
 def get_transport():

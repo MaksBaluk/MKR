@@ -55,3 +55,11 @@ def test_unknown_criterion_rejected():
 def test_malformed_payload_raises():
     with pytest.raises(ValidationError):
         EvaluatorOutput.model_validate({"action_id": "x"})
+
+
+@pytest.mark.parametrize("limitations", [None, ["a", "b"], "текст"])
+def test_limitations_variants_from_models_are_accepted(limitations):
+    out = EvaluatorOutput.model_validate({
+        "action_id": "x", "rubric_version": "1", "criteria": [], "sufficient_evidence": True,
+        "needs_followup": False, "followup_goal": None, "limitations": limitations})
+    assert isinstance(out.limitations, str)

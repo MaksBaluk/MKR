@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class EvidenceRef(BaseModel):
@@ -24,10 +24,25 @@ class EvaluatorOutput(BaseModel):
     action_id: str
     rubric_version: str
     criteria: list[CriterionResult]
-    sufficient_evidence: bool
-    needs_followup: bool
-    followup_goal: str | None
-    limitations: str
+    sufficient_evidence: bool = False
+    needs_followup: bool = False
+    followup_goal: str | None = None
+    limitations: str = ""
+
+    @field_validator("limitations", mode="before")
+    @classmethod
+    def _coerce_limitations(cls, v):
+        """Models return null or a list here; keep the text, never reject an otherwise valid assessment."""
+        if v is None:
+            return ""
+        if isinstance(v, list):
+            return "; ".join(str(x) for x in v)
+        return v
+
+    @field_validator("followup_goal", mode="before")
+    @classmethod
+    def _coerce_goal(cls, v):
+        return "; ".join(str(x) for x in v) if isinstance(v, list) else v
 
 
 def validate_against_context(

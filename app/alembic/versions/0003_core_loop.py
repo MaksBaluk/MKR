@@ -15,6 +15,7 @@ def _tables():
 
 
 def upgrade():
+    _core_tables()  # core_interviews must exist before criterion_assessments references it
     existing = _tables()
     if "candidate_self_ratings" not in existing:
         op.create_table(
@@ -49,7 +50,7 @@ def upgrade():
             "criterion_assessments",
             sa.Column("id", sa.String(36), primary_key=True),
             sa.Column("user_id", sa.String(36), sa.ForeignKey("users.id", ondelete="CASCADE"), index=True),
-            sa.Column("session_id", sa.String(36), sa.ForeignKey("interview_sessions.id", ondelete="CASCADE"),
+            sa.Column("session_id", sa.String(36), sa.ForeignKey("core_interviews.id", ondelete="CASCADE"),
                       index=True),
             sa.Column("action_id", sa.String(120), nullable=False),
             sa.Column("criterion_id", sa.String(120), nullable=False),
@@ -72,7 +73,6 @@ def upgrade():
             sa.Column("sha256", sa.String(64), nullable=False),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
         )
-    _core_tables()
 
 
 def downgrade():

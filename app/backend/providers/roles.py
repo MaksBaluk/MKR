@@ -14,7 +14,10 @@ from backend.domain.assessment import EvaluatorOutput, validate_against_context
 
 ErrorKind = Literal["TIMEOUT", "RATE_LIMIT", "MALFORMED", "OFFLINE"]
 RETRYABLE: dict[str, int] = {"TIMEOUT": 2, "RATE_LIMIT": 2, "MALFORMED": 1}
-TIMEOUT_S = 30.0
+INTERVIEWER_TIMEOUT_S = 25.0   # fail fast: the bank question is an acceptable fallback
+EVALUATOR_TIMEOUT_S = 50.0
+INTERVIEWER_RETRIES: dict[str, int] = {"TIMEOUT": 0, "RATE_LIMIT": 0, "MALFORMED": 1}
+EVALUATOR_RETRIES: dict[str, int] = {"TIMEOUT": 0, "RATE_LIMIT": 1, "MALFORMED": 1}
 
 
 class LLMError(Exception):
@@ -37,7 +40,11 @@ EVALUATOR_SYSTEM = (
     "Ти оцінювач. Оціни ВСІ наведені відповіді для однієї дії за рубрикою. "
     "Поверни лише JSON за схемою: action_id, rubric_version, criteria[criterion_id, score (0..1 або null), "
     "reason, evidence[turn_id, exact_excerpt]], sufficient_evidence, needs_followup, followup_goal, limitations. "
-    "Цитати мають бути дослівними фрагментами відповіді. Без доказів став score = null."
+    "Використовуй ЛИШЕ criterion_id зі списку allowed_criterion_ids, по одному елементу на кожен ID, нічого не вигадуй. "
+    "Шкала score: [0,0.25) суттєво хибно, [0.25,0.5) слабко, [0.5,0.75) частково, [0.75,0.9) добре з недоліками, "
+    "[0.9,1] майже повністю. Цитати мають бути дослівними фрагментами відповіді. Без доказів став score = null. "
+    "Поле reason пиши українською. Загальне твердження про досвід без технічних деталей і прикладів не заслуговує "
+    "оцінки вище 0.5: не виводь високий рівень лише з гладкого тексту."
 )
 
 
@@ -69,12 +76,12 @@ def interviewer_question(
     }, ensure_ascii=False)
 
     def call() -> str:
-        text = transport.complete(INTERVIEWER_SYSTEM, user, timeout_s=TIMEOUT_S).strip()
+        text = transport.complete(INTERVIEWER_SYSTEM, user, timeout_s=INTERVIEWER_TIMEOUT_S).strip()
         if not text:
             raise LLMError("MALFORMED")
         return text
 
-    return _with_retries(call)
+    return _with_retries(call, INTERVIEWER_RETRIES)
 
 
 def evaluator_assess(
@@ -86,10 +93,10 @@ def evaluator_assess(
     turns: Mapping[str, str],
 ) -> EvaluatorOutput:
     user = json.dumps({"action_id": action_id, "rubric_version": rubric_version,
-                       "turns": turns}, ensure_ascii=False)
+                       "allowed_criterion_ids": sorted(allowed_criteria), "turns": turns}, ensure_ascii=False)
 
     def call() -> EvaluatorOutput:
-        raw = transport.complete(EVALUATOR_SYSTEM, user, timeout_s=TIMEOUT_S)
+        raw = transport.complete(EVALUATOR_SYSTEM, user, timeout_s=EVALUATOR_TIMEOUT_S)
         try:
             out = EvaluatorOutput.model_validate(json.loads(raw))
         except (ValueError, ValidationError) as exc:
@@ -98,4 +105,4 @@ def evaluator_assess(
             raise LLMError("MALFORMED")
         return out
 
-    return _with_retries(call)
+    return _with_retries(call, EVALUATOR_RETRIES)

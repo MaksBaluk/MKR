@@ -19,3 +19,9 @@ def test_head_has_new_tables_and_keeps_existing_tables(tmp_path, monkeypatch):
         assert {"users", "vacancies", "interview_sessions", "snapshots"} <= names
     finally:
         get_settings.cache_clear()
+
+
+def test_assessment_session_fk_points_at_core_interviews():
+    from backend.models import CriterionAssessment
+    targets = {fk.column.table.name for fk in CriterionAssessment.__table__.c.session_id.foreign_keys}
+    assert targets == {"core_interviews"}

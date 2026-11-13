@@ -26,6 +26,8 @@ export interface TurnView {
   id: string;
   sequence: number;
   action_id: string;
+  action_name: string;
+  created_at: string | null;
   question_text: string;
   question_source: string;
   answer_text: string | null;
@@ -38,11 +40,13 @@ export interface InterviewState {
   version: number;
   turns: TurnView[];
   pending_turn: TurnView | null;
+  topics_used: number;
 }
 
 export interface AssessmentItem {
   interview_id: string;
   action_id: string;
+  action_name: string;
   criterion_id: string;
   score: number | null;
   reason: string;
@@ -63,4 +67,9 @@ export interface RankedItem {
   w_preferred: number;
   has_mandatory: boolean;
   has_preferred: boolean;
+  confirmed_share: number;
+  strengths: string[];
+  gaps: string[];
+  unknown_count: number;
+  tags: string[];
 }

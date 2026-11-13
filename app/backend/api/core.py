@@ -191,7 +191,6 @@ def _assess_action(db: Session, user: User, iv: CoreInterview, action_id: str) -
     if transport is None:
         return "UNGRADED"
     turns = db.scalars(select(CoreTurn).where(CoreTurn.interview_id == iv.id, CoreTurn.action_id == action_id,
-                                              CoreTurn.question_source == "LLM_INTERVIEWER",
                                               CoreTurn.answer_text.is_not(None)).order_by(CoreTurn.sequence)).all()
     if not turns:
         return "UNGRADED"

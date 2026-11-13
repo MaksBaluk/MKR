@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api, ApiError } from '@/api';
-import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 
 interface Competency {
   id: string;
   label_uk: string;
 }
+
+type SaveState = 'idle' | 'saving' | 'saved';
 
 export function SelfRatingList({ track, initial, onSaved }: {
   track: string;
@@ -15,8 +17,9 @@ export function SelfRatingList({ track, initial, onSaved }: {
 }) {
   const [actions, setActions] = useState<Competency[]>([]);
   const [values, setValues] = useState<Record<string, number | null>>(initial);
+  const [state, setState] = useState<Record<string, SaveState>>({});
   const [error, setError] = useState<string | null>(null);
-  const [savingId, setSavingId] = useState<string | null>(null);
+  const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   useEffect(() => {
     api<Competency[]>(`/competencies?track=${encodeURIComponent(track)}`)
@@ -24,59 +27,68 @@ export function SelfRatingList({ track, initial, onSaved }: {
       .catch(() => setError('Не вдалося завантажити список професійних дій.'));
   }, [track]);
 
-  async function save(actionId: string, value: number | null) {
-    setSavingId(actionId);
+  useEffect(() => () => Object.values(timers.current).forEach(clearTimeout), []);
+
+  async function persist(actionId: string, value: number | null) {
+    setState((s) => ({ ...s, [actionId]: 'saving' }));
     setError(null);
     try {
       await api(`/profile/self-ratings/${actionId}`, { method: 'PUT', json: { value } });
-      setValues((prev) => ({ ...prev, [actionId]: value }));
+      setState((s) => ({ ...s, [actionId]: 'saved' }));
       onSaved?.();
     } catch (err) {
+      setState((s) => ({ ...s, [actionId]: 'idle' }));
       setError(err instanceof ApiError ? err.message : 'Не вдалося зберегти оцінку.');
-    } finally {
-      setSavingId(null);
     }
+  }
+
+  function change(actionId: string, value: number | null) {
+    setValues((v) => ({ ...v, [actionId]: value }));
+    clearTimeout(timers.current[actionId]);
+    timers.current[actionId] = setTimeout(() => void persist(actionId, value), 400);
   }
 
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm text-slate-600">
-        Оцініть, наскільки впевнено ви виконуєте кожну дію. Це ваша самооцінка: вона редагується, але не замінює оцінку розмови.
+        Оцініть, наскільки впевнено ви виконуєте кожну дію. Це ваша самооцінка: вона зберігається автоматично, але не замінює
+        оцінку розмови.
       </p>
       {error && <Alert role="alert">{error}</Alert>}
-      <ul className="flex flex-col gap-3">
+      <ul className="grid gap-3 sm:grid-cols-2">
         {actions.map((a) => {
           const value = values[a.id] ?? null;
           const id = `sr-${a.id}`;
+          const st = state[a.id] ?? 'idle';
           return (
-            <li key={a.id} className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-3">
-              <label htmlFor={id} className="text-sm font-medium text-slate-800">
-                {a.label_uk}
-              </label>
-              <div className="flex flex-wrap items-center gap-3">
-                <input
-                  id={id}
-                  type="range"
-                  min={0}
-                  max={100}
-                  step={5}
-                  disabled={value === null}
-                  value={value === null ? 0 : Math.round(value * 100)}
-                  onChange={(e) => setValues((prev) => ({ ...prev, [a.id]: Number(e.target.value) / 100 }))}
-                  className="min-w-40 flex-1 accent-blue-600"
-                  aria-valuetext={value === null ? 'не вказано' : `${Math.round(value * 100)} з 100`}
-                />
-                <span className="w-24 text-sm text-slate-600">
-                  {value === null ? 'Не вказано' : `${Math.round(value * 100)} з 100`}
+            <li key={a.id} className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <label htmlFor={id} className="text-sm font-semibold text-slate-900">{a.label_uk}</label>
+                <span className="flex items-center gap-1 text-xs text-slate-500" aria-live="polite">
+                  {st === 'saving' && <Loader2 className="size-3 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
+                  {st === 'saved' && <CheckCircle2 className="size-3 text-emerald-600" aria-hidden="true" />}
+                  {st === 'saving' ? 'Зберігаємо…' : st === 'saved' ? 'Збережено' : ''}
                 </span>
-                <Button size="sm" variant="outline" disabled={savingId === a.id}
-                  onClick={() => void save(a.id, values[a.id] ?? null)}>
-                  {savingId === a.id ? 'Зберігаємо…' : 'Зберегти'}
-                </Button>
-                <Button size="sm" variant="ghost"
-                  onClick={() => void save(a.id, value === null ? 0 : null)}>
-                  {value === null ? 'Вказати оцінку' : 'Не знаю'}
-                </Button>
+              </div>
+              <input
+                id={id}
+                type="range"
+                min={0}
+                max={100}
+                step={5}
+                value={value === null ? 0 : Math.round(value * 100)}
+                onChange={(e) => change(a.id, Number(e.target.value) / 100)}
+                className={`w-full accent-blue-600 ${value === null ? 'opacity-50' : ''}`}
+                aria-valuetext={value === null ? 'не вказано' : `${Math.round(value * 100)} зі 100`}
+              />
+              <div className="flex items-center justify-between text-xs text-slate-600">
+                <span>{value === null ? 'Не вказано' : `${Math.round(value * 100)} зі 100`}</span>
+                {value !== null && (
+                  <button type="button" className="underline underline-offset-2 hover:text-slate-900"
+                    onClick={() => change(a.id, null)}>
+                    Не знаю
+                  </button>
+                )}
               </div>
             </li>
           );

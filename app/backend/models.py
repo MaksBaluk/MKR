@@ -251,7 +251,7 @@ class CriterionAssessment(Base):
     __tablename__ = "criterion_assessments"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    session_id: Mapped[str] = mapped_column(ForeignKey("interview_sessions.id", ondelete="CASCADE"), index=True)
+    session_id: Mapped[str] = mapped_column(ForeignKey("core_interviews.id", ondelete="CASCADE"), index=True)
     action_id: Mapped[str] = mapped_column(String(120), nullable=False)
     criterion_id: Mapped[str] = mapped_column(String(120), nullable=False)
     rubric_id: Mapped[str] = mapped_column(ForeignKey("rubrics.id"), nullable=False)

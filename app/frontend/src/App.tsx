@@ -16,6 +16,7 @@ export default function App() {
   const [interviewId, setInterviewId] = useState<string | null>(null);
   const [cohortId, setCohortId] = useState<string | null>(null);
   const [bootError, setBootError] = useState<string | null>(null);
+  const [llmConfigured, setLlmConfigured] = useState(false);
 
   async function loadProfile() {
     const p = await api<Profile>('/profile');
@@ -31,6 +32,8 @@ export default function App() {
     }
     try {
       await loadProfile();
+      const cfg = await api<{ llm: { configured: boolean } }>('/config');
+      setLlmConfigured(cfg.llm.configured);
       const open = await api<{ interview: { id: string; cohort_id: string } | null }>('/interviews/active');
       if (open.interview) {
         setInterviewId(open.interview.id);
@@ -113,15 +116,17 @@ export default function App() {
         onLogout={logout}
       />
     );
-  if (stage === 'interview' && interviewId && cohortId)
+  if (stage === 'interview' && interviewId && cohortId && profile)
     return (
       <InterviewScreen
         interviewId={interviewId}
+        profile={profile}
+        llmConfigured={llmConfigured}
         onFinished={() => setStage('results')}
         onLogout={logout}
       />
     );
   if (stage === 'results' && cohortId)
-    return <ResultsScreen cohortId={cohortId} onLogout={logout} onProfileChanged={() => void loadProfile()} />;
+    return <ResultsScreen cohortId={cohortId} name={profile?.display_name ?? ''} onLogout={logout} onProfileChanged={() => void loadProfile()} />;
   return <AuthScreen onSignedIn={signedIn} />;
 }
