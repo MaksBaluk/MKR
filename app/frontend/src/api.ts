@@ -6,6 +6,28 @@ export class ApiError extends Error {
 
 const TOKEN_KEY = 'cm_token';
 
+/*
+ * Session-expiry hook: the auth layer registers one handler; it fires once when an
+ * authenticated call gets HTTP 401 (parallel failures do not fire it again).
+ * Storing a new token re-arms it. 401 from /auth/* means wrong credentials, not expiry.
+ */
+let unauthorizedHandler: (() => void) | null = null;
+let unauthorizedFired = false;
+
+export function onUnauthorized(handler: () => void): () => void {
+  unauthorizedHandler = handler;
+  unauthorizedFired = false;
+  return () => {
+    if (unauthorizedHandler === handler) unauthorizedHandler = null;
+  };
+}
+
+function notifyUnauthorized(path: string): void {
+  if (path.startsWith('/auth/') || unauthorizedFired) return;
+  unauthorizedFired = true;
+  unauthorizedHandler?.();
+}
+
 export function getToken(): string | null {
   try {
     return localStorage.getItem(TOKEN_KEY);
@@ -15,6 +37,7 @@ export function getToken(): string | null {
 }
 
 export function setToken(token: string | null): void {
+  if (token) unauthorizedFired = false;
   try {
     if (token) localStorage.setItem(TOKEN_KEY, token);
     else localStorage.removeItem(TOKEN_KEY);
@@ -39,6 +62,7 @@ export async function api<T>(path: string, init: RequestInit & { json?: unknown 
     throw new ApiError(0, 'Немає з’єднання з сервером. Перевірте мережу та спробуйте ще раз.');
   }
   if (!response.ok) {
+    if (response.status === 401) notifyUnauthorized(path);
     let message = 'Сталася помилка. Спробуйте ще раз.';
     try {
       const data = await response.json();

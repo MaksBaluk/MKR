@@ -15,7 +15,7 @@ const FEATURES = [
   { icon: ShieldCheck, title: 'Ваші дані під контролем', text: 'Самооцінку змінюєте лише ви; оцінки розмови не є перевіреним досвідом.' },
 ];
 
-export function AuthScreen({ onSignedIn }: { onSignedIn: () => void }) {
+export function AuthScreen({ onSignedIn, notice = null }: { onSignedIn: () => void; notice?: string | null }) {
   const [mode, setMode] = useState<AuthMode>('login');
   const [fields, setFields] = useState<AuthFields>({ email: '', name: '', password: '' });
   const [touched, setTouched] = useState<Partial<Record<keyof AuthFields, boolean>>>({});
@@ -101,6 +101,7 @@ export function AuthScreen({ onSignedIn }: { onSignedIn: () => void }) {
             <p className="mt-1.5 text-sm text-ink-muted">
               {mode === 'login' ? 'Раді бачити вас знову. Увійдіть, щоб продовжити.' : 'Кілька полів — і можна починати оцінювання.'}
             </p>
+            {notice && <Alert variant="info" className="mt-5">{notice}</Alert>}
             <form ref={formRef} className="mt-6 flex flex-col gap-4" onSubmit={submit} noValidate>
               {mode === 'register' && (
                 <Field id={ids.name} label="Ім’я" error={visible('name')}>

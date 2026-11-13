@@ -39,7 +39,7 @@ function BootError({ message, onRetry }: { message: string; onRetry: () => void 
 }
 
 function LoginPage() {
-  const { status, boot } = useSession();
+  const { status, boot, sessionExpired } = useSession();
   const location = useLocation();
   const from = safeReturnPath((location.state as { from?: unknown } | null)?.from);
   useEffect(() => {
@@ -50,7 +50,7 @@ function LoginPage() {
   return (
     <>
       <SkipLink />
-      <AuthScreen onSignedIn={() => void boot()} />
+      <AuthScreen onSignedIn={() => void boot()} notice={sessionExpired ? 'Сесію завершено. Увійдіть знову.' : null} />
     </>
   );
 }

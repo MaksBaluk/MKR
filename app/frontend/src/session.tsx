@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { api, ApiError, getToken, setToken } from '@/api';
+import { api, ApiError, getToken, onUnauthorized, setToken } from '@/api';
 import type { SessionInterview } from '@/lib/navigation';
 import type { Profile } from '@/types';
 
@@ -15,6 +15,8 @@ interface SessionValue {
   interview: SessionInterview | null;
   /** Set once after a successful boot so the shell can resume the candidate's stage. */
   justBooted: boolean;
+  /** True after the server rejected the stored token mid-session (login page shows a notice). */
+  sessionExpired: boolean;
   consumeBoot: () => void;
   boot: () => Promise<void>;
   refreshInterview: () => Promise<SessionInterview | null>;
@@ -39,14 +41,28 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [llmConfigured, setLlmConfigured] = useState(false);
   const [interview, setInterview] = useState<SessionInterview | null>(null);
   const [justBooted, setJustBooted] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
-  const signOut = useCallback(() => {
+  const clear = useCallback(() => {
     setToken(null);
     setProfile(null);
     setInterview(null);
     setJustBooted(false);
     setStatus('anonymous');
   }, []);
+
+  const signOut = useCallback(() => {
+    setSessionExpired(false);
+    clear();
+  }, [clear]);
+
+  /** Any authenticated 401: drop the session; the route guard redirects to /login with `from`. */
+  const expire = useCallback(() => {
+    setSessionExpired(true);
+    clear();
+  }, [clear]);
+
+  useEffect(() => onUnauthorized(expire), [expire]);
 
   const boot = useCallback(async () => {
     setError(null);
@@ -63,15 +79,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setLlmConfigured(cfg.llm.configured);
       setInterview(iv);
       setJustBooted(true);
+      setSessionExpired(false);
       setStatus('ready');
     } catch (err) {
-      if (err instanceof ApiError && err.status === 401) signOut();
+      if (err instanceof ApiError && err.status === 401) expire();
       else {
         setError(err instanceof Error ? err.message : 'Не вдалося завантажити дані.');
         setStatus('error');
       }
     }
-  }, [signOut]);
+  }, [expire]);
 
   const refreshInterview = useCallback(async () => {
     const iv = await fetchInterview();
@@ -89,11 +106,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<SessionValue>(
     () => ({
-      status, error, profile, llmConfigured, interview, justBooted,
+      status, error, profile, llmConfigured, interview, justBooted, sessionExpired,
       consumeBoot: () => setJustBooted(false),
       boot, refreshInterview, reloadProfile, setProfile, signOut,
     }),
-    [status, error, profile, llmConfigured, interview, justBooted, boot, refreshInterview, reloadProfile, signOut],
+    [status, error, profile, llmConfigured, interview, justBooted, sessionExpired, boot, refreshInterview, reloadProfile, signOut],
   );
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
