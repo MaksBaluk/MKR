@@ -242,7 +242,8 @@ def test_write_report_files_reload_equal(tmp_path):
     for row in rows:
         m = r["modes"][row["mode"]]
         assert row["data_status"] == "SYNTHETIC_TEST_DATA" and int(row["n_candidates"]) == m["n_candidates"]
-        assert float(row["precision_at_5"]) == pytest.approx(m["precision_at_5"])
+        assert float(row["precision_at_5_paired"]) == pytest.approx(m["precision_at_5_paired"])
+        assert int(row["n_paired"]) == m["n_paired"] == 1
         assert json.loads(row["config"]) == m["config"] and row["mae"] == ""  # None stays empty, never 0
 
 
@@ -282,7 +283,8 @@ def test_expert_adjudicated_labels_give_expert_status():
     assert r["data_status"] == "EXPERT" and "not established" not in r["quality_statement"]
     assert "not adjudicated" not in r["quality_statement"]
     assert "not evidence of real-candidate performance" in r["quality_statement"]  # answers were scripted
-    assert r["labels"]["relevance"] == {"n_used": 12, "adjudicated": True}
+    assert r["labels"]["relevance"] == {"n_used": 12, "adjudicated": True, "n_ignored": 0,
+                                        "candidates_labels_ignored": []}
 
 
 def test_expert_single_annotator_labels_flagged_not_adjudicated():
@@ -299,7 +301,8 @@ def test_adjudicated_labels_preferred_over_annotator_rows():
     raw = rel("c1", grades({"v05": 3}), review="PENDING", ann="ann1")
     r = build_report(ReportInputs([rec("c1")], final + raw))
     assert r["modes"]["ADAPTIVE_INTERVIEW"]["ndcg_at_10"] == pytest.approx(1.0)
-    assert "12 non-adjudicated relevance label(s) were ignored" in r["quality_statement"]
+    assert "12 non-adjudicated relevance label(s) for candidate(s) c1 were ignored" in r["quality_statement"]
+    assert r["labels"]["relevance"]["candidates_labels_ignored"] == ["c1"]
     with pytest.raises(LabelError, match="more than once"):  # two annotators, nothing adjudicated
         build_report(ReportInputs([rec("c1")], raw + rel("c1", grades({}), review="PENDING", ann="ann2")))
 
@@ -396,3 +399,97 @@ def test_engine_never_imports_report_or_metrics():
     offenders = {str(p.relative_to(BACKEND)): sorted(set(imports(p.read_text(encoding="utf-8"))) & banned)
                  for p in SCANNED}
     assert {k: v for k, v in offenders.items() if v} == {}
+
+
+# --- fix round 1: paired means, partial adjudication, statement sentences, CLI errors ----------------------------------
+
+def _c4_setup():
+    c1, c2 = grades({"v00": 3, "v01": 3}), grades({"v00": 2})
+    c4 = {v: 1 for v in V if v != "v10"}  # unlabelled v10: 3rd in ADAPTIVE, 11th in STATIC
+    static_c1 = V[2:10] + ["v00", "v01"] + V[10:]
+    records = [rec("c1", ADAPTIVE, V), rec("c1", STATIC, static_c1),
+               rec("c2", ADAPTIVE, ["v01", "v00"] + V[2:]), rec("c2", STATIC, V),
+               rec("c4", ADAPTIVE, ["v00", "v01", "v10"] + V[2:10] + ["v11"]), rec("c4", STATIC, V),
+               rec("c6", STATIC, V)]  # c6 only in STATIC
+    return records, rel("c1", c1) + rel("c2", c2) + rel("c4", c4) + rel("c6", grades({"v00": 3}))
+
+
+def test_paired_means_over_candidates_included_in_every_mode():
+    records, labels = _c4_setup()
+    r = build_report(ReportInputs(records, labels))
+    a, s = r["modes"]["ADAPTIVE_INTERVIEW"], r["modes"]["STATIC_INTERVIEW"]
+    # unpaired: ADAPTIVE {c1, c2}; STATIC {c1, c2, c4, c6}
+    assert (a["n_included"], s["n_included"]) == (2, 4)
+    assert s["precision_at_5"] == pytest.approx((0.0 + 0.2 + 0.0 + 0.2) / 4)
+    # paired: {c1, c2} only (c4 excluded in ADAPTIVE, c6 missing from ADAPTIVE)
+    ndcg_c1 = (3 / math.log2(10) + 3 / math.log2(11)) / (3 + 3 / math.log2(3))
+    assert a["n_paired"] == s["n_paired"] == 2
+    assert s["precision_at_5_paired"] == pytest.approx(0.1) and s["ndcg_at_10_paired"] == pytest.approx((ndcg_c1 + 1) / 2)
+    assert a["precision_at_5_paired"] == pytest.approx(0.3)
+    assert a["ndcg_at_10_paired"] == pytest.approx((1 + 1 / math.log2(3)) / 2)
+    assert "per-mode means cover different candidate subsets; compare the paired values" in r["quality_statement"].lower()
+    chart = {x["mode"]: x for x in chart_data(r)["ranking_by_mode"]["data"]}
+    assert chart["STATIC_INTERVIEW"]["precision_at_5"] == pytest.approx(0.1) and chart["STATIC_INTERVIEW"]["n_paired"] == 2
+
+
+def test_paired_equals_unpaired_when_same_candidates_included():
+    records, labels = _c4_setup()
+    same = [x for x in records if x.candidate_id in ("c1", "c2")]
+    r = build_report(ReportInputs(same, labels))
+    for m in r["modes"].values():
+        assert m["n_paired"] == m["n_included"] == 2
+        assert m["precision_at_5_paired"] == pytest.approx(m["precision_at_5"])
+        assert m["ndcg_at_10_paired"] == pytest.approx(m["ndcg_at_10"])
+    assert "paired values" not in r["quality_statement"]
+
+
+def test_partial_adjudication_lists_ignored_candidates_not_lt_min():
+    """Test fixtures only: c1 adjudicated, c2 has single-annotator labels only."""
+    labels = rel("c1", grades({"v00": 3})) + rel("c2", grades({"v00": 3}), review="REVIEWED", ann="ann1")
+    r = build_report(ReportInputs([rec("c1"), rec("c2")], labels))
+    m = r["modes"]["ADAPTIVE_INTERVIEW"]
+    assert m["n_included"] == 1 and m["n_excluded_lt_10_labeled"] == 0 and m["n_excluded_labels_not_adjudicated"] == 1
+    assert r["labels"]["relevance"]["candidates_labels_ignored"] == ["c2"]
+    assert r["excluded_candidates"]["labels_not_adjudicated"] == {"ADAPTIVE_INTERVIEW": ["c2"]}
+    assert "for candidate(s) c2 were ignored" in r["quality_statement"]
+
+
+def test_not_adjudicated_sentence_for_synthetic_labels():
+    labels = rel("c1", grades({"v00": 3}), review="PENDING", ann="ann1")
+    r = build_report(ReportInputs([rec("c1")], labels))
+    assert r["data_status"] == "SYNTHETIC_TEST_DATA" and "relevance labels are not adjudicated" in r["quality_statement"]
+
+
+def test_rubric_version_mismatch_sentence_and_missing_version_kept():
+    assess = [{"action_id": "A", "criterion_id": "A.1", "score": 0.8},
+              {"action_id": "C", "criterion_id": "C.1", "score": 0.3}]
+    labels = [crit("c1", "A", "A.1", 0.6, version="old"), crit("c1", "C", "C.1", 0.1, version="any")]
+    r = build_report(ReportInputs([rec("c1", assessments=assess, rubric_versions={"A": "v1"})], criteria=labels))
+    mae = r["modes"]["ADAPTIVE_INTERVIEW"]["evaluator_mae"]
+    assert mae["n_rubric_version_mismatch"] == 1 and mae["n_compared"] == 1  # C has no run version: kept
+    assert mae["mae"] == pytest.approx(0.2) and mae["n_missing_expert"] == 1
+    assert "different rubric version" in r["quality_statement"]
+
+
+def test_mixed_config_error_names_fields():
+    with pytest.raises(ValueError, match=r"differing fields: \['total_budget'\]"):
+        build_report(ReportInputs([rec("c1", total_budget=4), rec("c2", total_budget=6)]))
+
+
+@pytest.mark.parametrize("mutate", [lambda d: d.update(ranking=5), lambda d: d.update(ranking="abc"),
+                                    lambda d: d["ranking"][0].pop("vacancy_id"), lambda d: d.update(config=[])],
+                         ids=["ranking-int", "ranking-str", "no-vacancy-id", "config-list"])
+def test_cli_malformed_runs_is_error_not_traceback(tmp_path, capsys, mutate):
+    d = asdict(rec("c1"))
+    mutate(d)
+    (tmp_path / "runs.json").write_text(json.dumps([d]), encoding="utf-8")
+    assert main(["--runs", str(tmp_path / "runs.json"), "--out", str(tmp_path / "rep")]) == 2
+    err = capsys.readouterr().err
+    assert err.startswith("error:") and "Traceback" not in err and not (tmp_path / "rep").exists()
+
+
+def test_cli_out_is_existing_file(tmp_path, capsys):
+    export_records([rec("c1")], tmp_path / "runs")
+    (tmp_path / "taken").write_text("x", encoding="utf-8")
+    assert main(["--runs", str(tmp_path / "runs" / "runs.json"), "--out", str(tmp_path / "taken")]) == 2
+    assert capsys.readouterr().err.startswith("error: cannot write report")

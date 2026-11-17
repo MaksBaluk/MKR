@@ -10,18 +10,29 @@ once per mode key; candidates are matched across modes by candidate_id.
 Ranking metrics (P@5, NDCG@10): labels restricted to the vacancies the record ranked. A candidate is included only
 with >= min_labeled_vacancies labelled vacancies and a fully labelled top 10; otherwise excluded and counted
 (n_excluded_lt_10_labeled, n_excluded_unlabeled_in_top with the unlabelled ids). Unlabelled vacancies are never given
-a grade. All-zero labels: P@5 counted, NDCG undefined (None) and counted in n_ndcg_undefined.
+a grade. All-zero labels: P@5 counted, NDCG undefined (None) and counted in n_ndcg_undefined. One inclusion rule covers
+both P@5 and NDCG@10: a candidate with an unlabelled vacancy at ranks 6-10 is excluded from P@5 too (deliberate: both
+metrics stay on one sample).
+precision_at_5 / ndcg_at_10 per mode are UNPAIRED means over that mode's included candidates, which can differ between
+modes. precision_at_5_paired / ndcg_at_10_paired / n_paired are means over the candidates included in EVERY mode of
+the report; the ranking_by_mode chart and report.csv use the paired values.
 
 Coverage: records with an empty relevant_criteria (also records exported before that field existed) are excluded from
 criterion_coverage_mean, questions_to_coverage_mean and n_reached and counted in n_excluded_no_relevant_criteria.
 An interview with no answers has coverage 0.0 (nothing is evidenced).
 
-Labels: when any label in a set is ADJUDICATED only the adjudicated labels are used; otherwise the given labels are used
-and the quality statement says they are not adjudicated. Each key may appear once in the set used.
+Labels: when any label in a set is ADJUDICATED only the adjudicated labels are used; the candidates whose
+non-adjudicated labels were ignored are listed (labels.<kind>.candidates_labels_ignored) and stated, and a candidate left
+with no relevance label at all is excluded as LABELS_NOT_ADJUDICATED (n_excluded_labels_not_adjudicated), not as too
+few labels. Otherwise the given labels are used and the quality statement says they are not adjudicated (any
+data_status). Each key may appear once in the set used. Criterion labels whose rubric_version differs from the run's
+version of that action are dropped and counted (n_rubric_version_mismatch); a label for an action the run has no
+rubric version for is kept.
 
 report.csv has one row per mode with the columns REPORT_CSV_FIELDS:
 mode, data_status, n_candidates, n_included, n_excluded_lt_10_labeled, n_excluded_unlabeled_in_top,
-n_ndcg_undefined, precision_at_5, ndcg_at_10, n_excluded_no_relevant_criteria, criterion_coverage_mean,
+n_excluded_labels_not_adjudicated, n_ndcg_undefined, n_paired, precision_at_5_paired, ndcg_at_10_paired,
+n_excluded_no_relevant_criteria, criterion_coverage_mean,
 unresolved_requirements_rate_mean, questions_mean, questions_to_coverage_mean, n_reached, total_s_mean,
 llm_wait_s_mean, excluding_llm_s_mean, llm_errors, mae, mae_n_compared, mae_n_evaluator_unknown,
 mae_n_expert_unknown, mae_n_missing_expert, mae_n_rubric_version_mismatch, answer_sources (";"-joined),
@@ -54,7 +65,8 @@ _BASE_ORDER = ("INITIAL_PROFILE", "STATIC_INTERVIEW", "ADAPTIVE_INTERVIEW")
 _MAE_FIELDS = ("mae", "n_compared", "n_evaluator_unknown", "n_expert_unknown", "n_missing_expert")
 REPORT_CSV_FIELDS = [
     "mode", "data_status", "n_candidates", "n_included", "n_excluded_lt_10_labeled", "n_excluded_unlabeled_in_top",
-    "n_ndcg_undefined", "precision_at_5", "ndcg_at_10", "n_excluded_no_relevant_criteria", "criterion_coverage_mean",
+    "n_excluded_labels_not_adjudicated", "n_ndcg_undefined", "n_paired", "precision_at_5_paired", "ndcg_at_10_paired",
+    "n_excluded_no_relevant_criteria", "criterion_coverage_mean",
     "unresolved_requirements_rate_mean", "questions_mean", "questions_to_coverage_mean", "n_reached",
     "total_s_mean", "llm_wait_s_mean", "excluding_llm_s_mean", "llm_errors", "mae", "mae_n_compared",
     "mae_n_evaluator_unknown", "mae_n_expert_unknown", "mae_n_missing_expert", "mae_n_rubric_version_mismatch",
@@ -89,10 +101,10 @@ def _mean(xs: Sequence[float | None]) -> float | None:
     return sum(vals) / len(vals) if vals else None
 
 
-def _used_labels(labels: Sequence | None, kind: str) -> tuple[list, bool | None, int]:
-    """(labels used, adjudicated?, n ignored non-adjudicated). adjudicated is None without labels."""
+def _used_labels(labels: Sequence | None, kind: str) -> tuple[list, bool | None, list]:
+    """(labels used, adjudicated?, ignored non-adjudicated labels). adjudicated is None without labels."""
     if not labels:
-        return [], None, 0
+        return [], None, []
     validate_label_set(labels)
     adj = [lb for lb in labels if lb.review_status is ReviewStatus.ADJUDICATED]
     used = adj or list(labels)
@@ -100,13 +112,15 @@ def _used_labels(labels: Sequence | None, kind: str) -> tuple[list, bool | None,
     if dup:
         raise LabelError([f"{kind}: {len(dup)} key(s) labelled more than once in the set used, e.g. {dup[0]}; "
                           "pass one final (adjudicated) label per key"])
-    return used, bool(adj), len(labels) - len(used)
+    return used, bool(adj), [lb for lb in labels if lb.review_status is not ReviewStatus.ADJUDICATED] if adj else []
 
 
-def _ranking(rec: ExperimentRecord, labels: dict[str, int] | None, min_labeled: int) -> dict:
+def _ranking(rec: ExperimentRecord, labels: dict[str, int] | None, min_labeled: int, ignored_only: set[str]) -> dict:
     out: dict[str, Any] = {"precision_at_5": None, "ndcg_at_10": None, "n_labeled": None, "unlabeled_in_top": []}
     if labels is None:
         return {**out, "ranking_status": "NO_LABELS"}
+    if not labels and rec.candidate_id in ignored_only:
+        return {**out, "n_labeled": 0, "ranking_status": "LABELS_NOT_ADJUDICATED"}
     ranked = [i["vacancy_id"] for i in rec.ranking]
     in_cohort = set(ranked)
     own = {v: g for v, g in labels.items() if v in in_cohort}
@@ -143,12 +157,12 @@ def _pool(results: Sequence[MaeResult]) -> dict:
             **{f: sum(getattr(r, f) for r in results) for f in _MAE_FIELDS[2:]}}
 
 
-def _candidate(rec: ExperimentRecord, labels: dict | None, inp: ReportInputs) -> dict:
+def _candidate(rec: ExperimentRecord, labels: dict | None, inp: ReportInputs, ignored_only: set[str]) -> dict:
     rel = list(rec.relevant_criteria or [])
     curve = coverage_curve(rec.qa, rel) if rel else None
     coverage = None if curve is None else (curve[-1] if curve else 0.0)
     dur = interview_duration(rec.timings)
-    return {"candidate_id": rec.candidate_id, **_ranking(rec, labels, inp.min_labeled_vacancies),
+    return {"candidate_id": rec.candidate_id, **_ranking(rec, labels, inp.min_labeled_vacancies, ignored_only),
             "criterion_coverage": coverage, "coverage_curve": curve,
             "questions_to_coverage": None if curve is None else questions_to_coverage(curve, inp.coverage_threshold),
             "n_questions": len(rec.qa), "unresolved_requirements_rate": unresolved_requirements_rate(rec.ranking),
@@ -156,8 +170,10 @@ def _candidate(rec: ExperimentRecord, labels: dict | None, inp: ReportInputs) ->
             "answer_source": rec.answer_source}
 
 
-def _mode(recs: list[ExperimentRecord], rel: list | None, crit: list | None, inp: ReportInputs) -> dict:
-    rows = [_candidate(r, None if rel is None else relevance_map(rel, r.candidate_id), inp) for r in recs]
+def _mode(recs: list[ExperimentRecord], rel: list | None, crit: list | None, inp: ReportInputs,
+          ignored_only: set[str]) -> dict:
+    rows = [_candidate(r, None if rel is None else relevance_map(rel, r.candidate_id), inp, ignored_only)
+            for r in recs]
     included = [c for c in rows if c["ranking_status"] == "INCLUDED"]
     covered = [c for c in rows if c["criterion_coverage"] is not None]
     reached = [c["questions_to_coverage"] for c in covered if c["questions_to_coverage"] is not None]
@@ -165,6 +181,7 @@ def _mode(recs: list[ExperimentRecord], rel: list | None, crit: list | None, inp
     mode = {
         "n_candidates": len(rows), "n_included": len(included),
         "n_excluded_lt_10_labeled": status["LT_MIN_LABELED"], "n_excluded_unlabeled_in_top": status["UNLABELED_IN_TOP"],
+        "n_excluded_labels_not_adjudicated": status["LABELS_NOT_ADJUDICATED"],
         "n_ndcg_undefined": sum(1 for c in included if c["ndcg_at_10"] is None),
         "precision_at_5": _mean([c["precision_at_5"] for c in included]),
         "ndcg_at_10": _mean([c["ndcg_at_10"] for c in included]),
@@ -192,6 +209,7 @@ def _mode(recs: list[ExperimentRecord], rel: list | None, crit: list | None, inp
 
 
 def _statement(status: str, adjudicated: dict, ignored: dict, sources: list[str], modes: dict) -> str:
+    """ignored: kind -> list of ignored non-adjudicated labels."""
     parts = []
     if status == NO_EXPERT_LABELS:
         parts.append("No expert labels were supplied: ranking metrics and evaluator MAE are not computed, "
@@ -201,15 +219,16 @@ def _statement(status: str, adjudicated: dict, ignored: dict, sources: list[str]
                      "only check the pipeline, so method quality is not established.")
     else:
         parts.append("Label-based metrics use EXPERT labels.")
-        for kind, adj in adjudicated.items():
-            if adj is False:
-                parts.append(f"The {kind} labels are not adjudicated (single-annotator, PENDING/REVIEWED); "
-                             f"{kind} results are preliminary.")
     for kind, adj in adjudicated.items():
+        if adj is False:
+            parts.append(f"The {kind} labels are not adjudicated (single-annotator, PENDING/REVIEWED); "
+                         f"{kind} results are preliminary.")
         if adj is None:
             parts.append(f"No {kind} labels were supplied; the corresponding metrics are not computed.")
         if ignored[kind]:
-            parts.append(f"{ignored[kind]} non-adjudicated {kind} label(s) were ignored in favour of adjudicated ones.")
+            cands = sorted({lb.candidate_id for lb in ignored[kind]})
+            parts.append(f"{len(ignored[kind])} non-adjudicated {kind} label(s) for candidate(s) {', '.join(cands)} "
+                         "were ignored because other labels are adjudicated.")
     parts.append(f"Answer sources: {', '.join(sources) or 'none'}.")
     if {"SCRIPTED", "SIMULATED"} & set(sources):
         parts.append("Scripted or simulated answers are pipeline checks, not evidence of real-candidate performance.")
@@ -217,13 +236,25 @@ def _statement(status: str, adjudicated: dict, ignored: dict, sources: list[str]
         parts.append("LLM evaluator grades assess the supplied answers only, not verified employment history.")
     sums = Counter()
     for m in modes.values():
-        for k in ("n_excluded_lt_10_labeled", "n_excluded_unlabeled_in_top", "n_ndcg_undefined",
+        for k in ("n_excluded_lt_10_labeled", "n_excluded_unlabeled_in_top", "n_excluded_labels_not_adjudicated",
+                  "n_ndcg_undefined",
                   "n_excluded_no_relevant_criteria"):
             sums[k] += m[k]
     if sums["n_excluded_lt_10_labeled"] or sums["n_excluded_unlabeled_in_top"]:
         parts.append(f"Ranking metrics exclude {sums['n_excluded_lt_10_labeled']} candidate run(s) with too few "
                      f"labelled vacancies and {sums['n_excluded_unlabeled_in_top']} with unlabelled vacancies in the "
                      "top 10.")
+    if sums["n_excluded_labels_not_adjudicated"]:
+        parts.append(f"Ranking metrics exclude {sums['n_excluded_labels_not_adjudicated']} candidate run(s) whose "
+                     "relevance labels are all non-adjudicated.")
+    included = {m["n_included"] for m in modes.values()}
+    if adjudicated["relevance"] is not None and len(included) > 1:
+        parts.append("Per-mode means cover different candidate subsets; compare the paired values "
+                     f"({next(iter(modes.values()))['n_paired']} candidate(s) included in every mode).")
+    mismatch = sum((m["evaluator_mae"] or {}).get("n_rubric_version_mismatch", 0) for m in modes.values())
+    if mismatch:
+        parts.append(f"Evaluator MAE ignores {mismatch} expert criterion label(s) written for a different rubric "
+                     "version than the run used.")
     if sums["n_ndcg_undefined"]:
         parts.append(f"NDCG@10 is undefined for {sums['n_ndcg_undefined']} run(s) whose labels are all zero "
                      "(P@5 still counted).")
@@ -231,6 +262,24 @@ def _statement(status: str, adjudicated: dict, ignored: dict, sources: list[str]
         parts.append(f"Coverage metrics exclude {sums['n_excluded_no_relevant_criteria']} run(s) without "
                      "relevant_criteria (empty cohort or records exported before that field existed).")
     return " ".join(parts)
+
+
+def _check_record(n: int, r: ExperimentRecord) -> None:
+    """Structural check of the fields the report reads; malformed exported records raise ValueError."""
+    problems = []
+    if not isinstance(r.config, dict):
+        problems.append("config must be an object")
+    for name in ("qa", "assessments", "ranking", "relevant_criteria"):
+        if not isinstance(getattr(r, name), list) or not all(
+                isinstance(x, str if name == "relevant_criteria" else dict) for x in getattr(r, name)):
+            problems.append(f"{name} must be a list of {'strings' if name == 'relevant_criteria' else 'objects'}")
+    if isinstance(r.ranking, list) and not all(isinstance(i, dict) and isinstance(i.get("vacancy_id"), str)
+                                               for i in r.ranking):
+        problems.append("every ranking item needs a string vacancy_id")
+    if not isinstance(r.timings, dict) or not isinstance(r.errors, dict):
+        problems.append("timings and errors must be objects")
+    if problems:
+        raise ValueError(f"record {n} ({r.candidate_id!r}, {r.mode!r}): {'; '.join(problems)}")
 
 
 def build_report(inp: ReportInputs) -> dict:
@@ -244,6 +293,8 @@ def build_report(inp: ReportInputs) -> dict:
     if len(statuses) > 1:
         raise LabelError(["mixed data_status (SYNTHETIC_TEST_DATA and EXPERT) across label files in one report"])
     status = statuses.pop().value if statuses else NO_EXPERT_LABELS
+    for n, r in enumerate(inp.records):
+        _check_record(n, r)
     groups: dict[str, list] = defaultdict(list)
     for r in inp.records:
         groups[mode_key(r)].append(r)
@@ -251,15 +302,28 @@ def build_report(inp: ReportInputs) -> dict:
         dup = sorted(c for c, n in Counter(r.candidate_id for r in recs).items() if n > 1)
         if dup:
             raise ValueError(f"mode {key}: candidate(s) {dup} appear more than once")
-        if any(r.config != recs[0].config for r in recs):
-            raise ValueError(f"mode {key}: records with different configs cannot be averaged together")
-    modes = {k: _mode(groups[k], rel if inp.relevance else None, crit if inp.criteria else None, inp)
+        diff = sorted({f for r in recs for f in set(r.config) | set(recs[0].config)
+                       if r.config.get(f) != recs[0].config.get(f)})
+        if diff:
+            raise ValueError(f"mode {key}: records with different configs cannot be averaged together "
+                             f"(differing fields: {diff})")
+    used_rel = {lb.candidate_id for lb in rel}
+    ignored_only = {lb.candidate_id for lb in rel_ign} - used_rel
+    modes = {k: _mode(groups[k], rel if inp.relevance else None, crit if inp.criteria else None, inp, ignored_only)
              for k in sorted(groups, key=_order)}
+    paired = set.intersection(*({c["candidate_id"] for c in m["candidates"] if c["ranking_status"] == "INCLUDED"}
+                                for m in modes.values())) if modes else set()
+    for m in modes.values():
+        rows = [c for c in m["candidates"] if c["candidate_id"] in paired]
+        m.update({"n_paired": len(rows), "precision_at_5_paired": _mean([c["precision_at_5"] for c in rows]),
+                  "ndcg_at_10_paired": _mean([c["ndcg_at_10"] for c in rows])})
     present = defaultdict(set)
     for k, recs in groups.items():
         for r in recs:
             present[r.candidate_id].add(k)
     excluded = {
+        "labels_not_adjudicated": {k: [c["candidate_id"] for c in m["candidates"]
+                                       if c["ranking_status"] == "LABELS_NOT_ADJUDICATED"] for k, m in modes.items()},
         "lt_min_labeled": {k: [c["candidate_id"] for c in m["candidates"] if c["ranking_status"] == "LT_MIN_LABELED"]
                            for k, m in modes.items()},
         "unlabeled_in_top": {k: {c["candidate_id"]: c["unlabeled_in_top"] for c in m["candidates"]
@@ -278,8 +342,10 @@ def build_report(inp: ReportInputs) -> dict:
                                             {"relevance": rel_ign, "criterion": crit_ign}, sources, modes),
             "answer_sources": sources, "experiment_ids": sorted({r.experiment_id for r in inp.records}),
             "coverage_threshold": inp.coverage_threshold, "min_labeled_vacancies": inp.min_labeled_vacancies,
-            "labels": {"relevance": {"n_used": len(rel), "adjudicated": rel_adj},
-                       "criterion": {"n_used": len(crit), "adjudicated": crit_adj}},
+            "labels": {kind: {"n_used": len(used), "adjudicated": adj, "n_ignored": len(ign),
+                              "candidates_labels_ignored": sorted({lb.candidate_id for lb in ign})}
+                       for kind, used, adj, ign in (("relevance", rel, rel_adj, rel_ign),
+                                                    ("criterion", crit, crit_adj, crit_ign))},
             "modes": modes, "excluded_candidates": excluded}
 
 
@@ -295,7 +361,9 @@ def _coverage_points(cands: list[dict]) -> list[dict]:
 
 
 def chart_data(report: dict) -> dict:
-    """Four datasets, each {"data_status", "data"}. questions_static_vs_adaptive pairs candidates present in both
+    """Four datasets, each {"data_status", "data"}. ranking_by_mode carries the PAIRED means (candidates included
+    in every mode) under precision_at_5 / ndcg_at_10, with n_paired and n_included. questions_static_vs_adaptive
+    pairs candidates present in both
     STATIC_INTERVIEW and ADAPTIVE_INTERVIEW: static/adaptive = questions to reach the coverage threshold (None if
     not reached or no relevant criteria), *_asked = questions shown."""
     st, modes = report["data_status"], report["modes"]
@@ -303,7 +371,8 @@ def chart_data(report: dict) -> dict:
                for k in ("STATIC_INTERVIEW", "ADAPTIVE_INTERVIEW")}
     s, a = by_cand["STATIC_INTERVIEW"], by_cand["ADAPTIVE_INTERVIEW"]
     data = {
-        "ranking_by_mode": [{"mode": k, "precision_at_5": m["precision_at_5"], "ndcg_at_10": m["ndcg_at_10"],
+        "ranking_by_mode": [{"mode": k, "precision_at_5": m["precision_at_5_paired"],
+                             "ndcg_at_10": m["ndcg_at_10_paired"], "n_paired": m["n_paired"],
                              "n_included": m["n_included"]} for k, m in modes.items()],
         "coverage_vs_questions": {k: _coverage_points(m["candidates"]) for k, m in modes.items()},
         "questions_static_vs_adaptive": [
@@ -318,7 +387,7 @@ def chart_data(report: dict) -> dict:
 def _csv_row(key: str, m: dict, status: str) -> dict:
     mae = m["evaluator_mae"] or {}
     return {"mode": key, "data_status": status,
-            **{f: m[f] for f in REPORT_CSV_FIELDS[2:15]},
+            **{f: m[f] for f in REPORT_CSV_FIELDS[2:REPORT_CSV_FIELDS.index("total_s_mean")]},
             **m["duration"], "llm_errors": m["llm_errors"], "mae": mae.get("mae"),
             **{f"mae_{f}": mae.get(f) for f in (*_MAE_FIELDS[1:], "n_rubric_version_mismatch")},
             "answer_sources": ";".join(m["answer_sources"]), "config": json.dumps(m["config"], sort_keys=True)}

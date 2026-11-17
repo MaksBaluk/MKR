@@ -7,7 +7,8 @@ Run from app/:
 Label files are optional (CSV or JSON, see backend/experiments/expert_labels.py). Without labels the report has
 data_status NO_EXPERT_LABELS and only the label-free metrics. SYNTHETIC_TEST_DATA labels are refused unless
 --allow-synthetic-labels is given; such a report checks the pipeline only. Reads files only: no database, no model,
-no network. Exit codes: 0 ok, 2 refused (bad input, invalid labels, synthetic labels without the flag).
+no network. Exit codes: 0 ok, 2 refused (missing or malformed runs/label files, synthetic labels without the flag,
+an --out path that cannot be written); every refusal prints one `error: ...` line, never a traceback.
 """
 from __future__ import annotations
 
@@ -58,7 +59,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         criteria = load_criterion_labels(args.criteria) if args.criteria else None
     except LabelError as exc:
         return _fail("invalid labels: " + "; ".join(exc.errors))
-    except (ValueError, OSError) as exc:  # json.JSONDecodeError is a ValueError
+    except (ValueError, TypeError, OSError) as exc:  # json.JSONDecodeError is a ValueError
         return _fail(str(exc))
     synthetic = sum(lb.data_status is DataStatus.SYNTHETIC_TEST_DATA for lb in [*(relevance or []), *(criteria or [])])
     if synthetic and not args.allow_synthetic_labels:
@@ -67,11 +68,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         report = build_report(ReportInputs(records, relevance, criteria, args.coverage_threshold,
                                            args.min_labeled_vacancies))
+        charts = chart_data(report)
     except LabelError as exc:
         return _fail("invalid labels: " + "; ".join(exc.errors))
-    except ValueError as exc:
-        return _fail(str(exc))
-    write_report(report, chart_data(report), args.out)
+    except (KeyError, TypeError, AttributeError, ValueError) as exc:  # malformed runs.json content
+        return _fail(f"cannot build report ({type(exc).__name__}): {exc}")
+    try:
+        write_report(report, charts, args.out)
+    except OSError as exc:  # e.g. --out is an existing file
+        return _fail(f"cannot write report to {args.out}: {exc}")
     print(f"report written to {args.out}")
     print(f"data_status: {report['data_status']}")
     print(report["quality_statement"])
