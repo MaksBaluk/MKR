@@ -23,6 +23,8 @@ from backend.domain.difficulty import (DEFAULT_CONFIG, ControllerState, Difficul
 from backend.domain.interview_budget import MIN_SHOWN_QUESTIONS_PER_ACTION, topic_open_for_question
 from backend.domain.market import VacancyInput, compute_market
 from backend.domain.planner import choose_next
+from backend.experiments.config import ExperimentConfig, InterviewMode
+from backend.experiments.planning import plan_topics, slot_targets, static_plan_json
 from backend.agents.graphs import run_answer, run_ask
 from backend.agents.model import get_chat_model
 from backend.models import (CandidateProfile, CohortSnapshot, CoreInterview, CoreTurn, Competency,
@@ -228,6 +230,11 @@ def _profile_ratings(db: Session, iv: CoreInterview, user: User) -> dict[str, fl
     return profile_self_ratings(db, iv.profile_id)
 
 
+def _mode_config(iv: CoreInterview) -> ExperimentConfig:
+    """Server-side experiment config of the attempt; NULL (product and legacy attempts) = adaptive defaults."""
+    return ExperimentConfig.from_json(iv.mode_config) if iv.mode_config else ExperimentConfig(InterviewMode.ADAPTIVE_INTERVIEW)
+
+
 def profile_self_ratings(db: Session, profile_id: str) -> dict[str, float | None]:
     """Latest self-rating per action of one profile (revisions oldest first, last wins)."""
     rows = db.scalars(select(CandidateSelfRating).where(CandidateSelfRating.profile_id == profile_id)
@@ -247,6 +254,7 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     pending = next((t for t in turns if t.answer_text is None), None)
     if pending is not None:
         return {"turn": _turn_dict(pending, _names(db)), "version": iv.version}  # never regenerate a shown question
+    cfg = _mode_config(iv)
     snap = db.get(CohortSnapshot, iv.cohort_id)
     revisions = _revisions(snap)
     cscores = attempt_scores(db, iv.id)
@@ -264,6 +272,9 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     mass = {e.action_id: e.mass for e in compute_market([
         VacancyInput(r["id"], tuple(tuple(a["competency_id"] for a in g["alternatives"]) for g in r["groups"]))
         for r in revisions])}
+    if not cfg.adaptive_topics and iv.static_plan is None:  # fixed once, before any answer; never rebuilt
+        iv.static_plan = static_plan_json(plan_topics(revisions, rubric_map(db, sorted(cohort_actions(revisions)), {}),
+                                                      mass, cfg.max_topics), cfg)
     latest_in_session = {a: t.m for a, t in summaries.items()}
     sufficient = {r.action_id: bool(r.sufficient_evidence) for r in session_rows}  # latest revision wins
 
@@ -322,23 +333,35 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
 
     def needs_second(a: str) -> bool:
         """Min two shown questions per graded topic: the controller keeps it open (needs_min_followup) below two."""
-        return a in latest_in_session and shown[a] < MIN_SHOWN_QUESTIONS_PER_ACTION and not closed(a)
+        return (a in latest_in_session and shown[a] < min(MIN_SHOWN_QUESTIONS_PER_ACTION, cfg.max_per_topic)
+                and not closed(a))
 
     # Otherwise a started topic is re-asked only when the Evaluator found insufficient evidence (null score) or its
     # last answer left a validated goal on a still-open criterion; the 5-question and 10-topic caps still apply.
     def eligible(a: str) -> bool:
+        if not cfg.adaptive_followup:  # static slots: a started topic continues only through its fixed slots
+            return a not in used and len(used) < cfg.max_topics
         return not (a in used and closed(a)) and topic_open_for_question(
             used=a in used, distinct_topics=len(used), shown=shown.get(a, 0),
             latest_score_is_null=a in latest_in_session and latest_in_session[a] is None,
-            goal_open=a in used and goal_for(a) is not None)
+            goal_open=a in used and goal_for(a) is not None, max_topics=cfg.max_topics, max_per_topic=cfg.max_per_topic)
 
     # A topic below its minimum continues before the planner opens anything (even if its groups closed/failed);
     # so does the topic just answered while its goal-driven follow-up is still eligible.
-    followup = next((t.action_id for t in reversed(turns) if needs_second(t.action_id)), None)
-    if followup is None and turns and goal_for(turns[-1].action_id) is not None and eligible(turns[-1].action_id):
-        followup = turns[-1].action_id
-    if followup is not None:
+    # Static slots: the last started topic gets exactly k questions whatever its scores (no goal, no early close).
+    k = cfg.static_questions_per_topic
+    if not cfg.adaptive_followup:
+        followup = turns[-1].action_id if turns and shown[turns[-1].action_id] < k else None
+    else:
+        followup = next((t.action_id for t in reversed(turns) if needs_second(t.action_id)), None)
+        if followup is None and turns and goal_for(turns[-1].action_id) is not None and eligible(turns[-1].action_id):
+            followup = turns[-1].action_id
+    if cfg.total_budget is not None and len(turns) >= cfg.total_budget:
+        action = None  # experiment budget spent: completes exactly like plan exhaustion; unasked criteria stay null
+    elif followup is not None:
         action = followup
+    elif not cfg.adaptive_topics:  # fixed topic order stored on the attempt; the planner is not called
+        action = next((a for a in iv.static_plan["topics"] if eligible(a)), None)
     else:
         available = sorted({a for alts in state.open_alternatives.values() for a in alts if eligible(a)})
         action = choose_next(state, weights, available, mass)
@@ -351,11 +374,17 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     label = _label(db, action)
     answered = [t for t in turns if t.action_id == action and t.answer_text]
     comp = db.get(Competency, action)
-    unmet = open_ids(action)
-    goal = goal_for(action)  # the Evaluator may have just confirmed the criterion it named: re-checked in goal_for
+    if cfg.adaptive_followup:
+        unmet = open_ids(action)
+        goal = goal_for(action)  # the Evaluator may have just confirmed the criterion it named: re-checked in goal_for
+    else:  # slot i of k targets a fixed round-robin share of the rubric (all criteria if the share is empty)
+        crit = criteria_for(db, action)
+        unmet, goal = list(slot_targets(crit, k, shown.get(action, 0)) or crit), None
     goal_dict = goal.model_dump() if goal else None
     before, chosen = decision(action)
-    level = chosen.next_level  # the controller state advances for bank fallback questions too
+    # the controller state advances for bank fallback questions too; fixed difficulty takes no controller step
+    level, level_reason = ((chosen.next_level, chosen.reason) if cfg.adaptive_difficulty
+                           else (start_level, f"FIXED:{start_reason}"))
     result = run_ask({"action_id": action, "action_name": label, "summary": comp.summary if comp else "",
                       "unmet_criteria": unmet,
                       "previous_answers": [t.answer_text for t in answered][-3:],
@@ -369,10 +398,11 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     turn = CoreTurn(interview_id=iv.id, sequence=len(turns) + 1, action_id=action, question_text=question,
                     question_source=source,
                     target_criteria=(goal.criterion_ids if goal else unmet) if targeted else None,
-                    followup_reason=((goal.reason[:GOAL_TEXT_MAX] if goal else "OPEN_CRITERIA") if targeted
+                    followup_reason=((goal.reason[:GOAL_TEXT_MAX] if goal else
+                                      "OPEN_CRITERIA" if cfg.adaptive_followup else "STATIC_SLOT") if targeted
                                      else "BANK_FALLBACK"),
                     difficulty=level.value,
-                    difficulty_reason=(chosen.reason if targeted else f"FALLBACK:{chosen.reason}")[:64],
+                    difficulty_reason=(level_reason if targeted else f"FALLBACK:{level_reason}")[:64],
                     controller_before=_controller_json(before), controller_after=_controller_json(after))
     iv.version += 1
     db.add(turn)

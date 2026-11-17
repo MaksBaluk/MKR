@@ -27,14 +27,17 @@ def needs_min_followup(shown_for_action: int, *, graded: bool, score: float | No
 
 
 def topic_open_for_question(*, used: bool, distinct_topics: int, shown: int, latest_score_is_null: bool,
-                            goal_open: bool = False) -> bool:
+                            goal_open: bool = False, max_topics: int = MAX_TOPICS,
+                            max_per_topic: int = MAX_SHOWN_QUESTIONS_PER_ACTION) -> bool:
     """Whether a topic may receive another planned question.
 
     New topics need budget left. A started topic is re-asked only while the question cap allows, its latest
     evidence is insufficient (null score) or a validated Evaluator goal still names an open criterion (goal_open),
     and the interview still has topic budget (after ten topics the interview is closed).
 
-    Keep equivalent with needs_min_followup and difficulty.next_step (`enough`): the continuation rule lives in all three."""
+    Keep equivalent with needs_min_followup and difficulty.next_step (`enough`): the continuation rule lives in all three.
+    An experiment config may lower max_topics / max_per_topic, never raise them above the product limits."""
+    max_topics, max_per_topic = min(max_topics, MAX_TOPICS), min(max_per_topic, MAX_SHOWN_QUESTIONS_PER_ACTION)
     if not used:
-        return can_start_topic(distinct_topics)
-    return can_ask_question(shown) and (latest_score_is_null or goal_open) and distinct_topics < MAX_TOPICS
+        return distinct_topics < max_topics
+    return shown < max_per_topic and (latest_score_is_null or goal_open) and distinct_topics < max_topics
