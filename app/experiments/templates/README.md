@@ -18,4 +18,4 @@
 - Other fields as above.
 
 ## Protocol
-Two annotators label the same keys independently. Each key has at most one label per annotator. A third person adjudicates disagreements; the final file covers exactly the shared keys, carries the adjudicator as `annotator_id` and `review_status=ADJUDICATED`. Agreement (exact, quadratic weighted kappa) is reported before adjudication. Results built from synthetic or missing labels do not establish method quality.
+Two annotators label the same keys independently. Each key has at most one label per annotator. A third person, distinct from both annotators, adjudicates disagreements; the final file covers exactly the shared keys, carries the adjudicator as `annotator_id` and `review_status=ADJUDICATED`. Annotator and final files must share one `data_status` and one `label_version` (criterion labels: one `rubric_version` per action). Agreement (exact, quadratic weighted kappa) is reported before adjudication. Results built from synthetic or missing labels do not establish method quality.
