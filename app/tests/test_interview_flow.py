@@ -248,3 +248,8 @@ def test_interviewer_gets_candidate_level_from_profile(client, auth, cohort, llm
         s.commit()
     _next(client, auth, iv, 0)
     assert 'candidate_level: "junior"' in llm.human_inputs[-1] and "years_experience: 1" in llm.human_inputs[-1]
+
+
+def test_turn_dict_hides_difficulty_and_controller_state(client, auth, interview):
+    turn = _next(client, auth, interview, interview["version"]).json()["turn"]
+    assert not [k for k in turn if k.startswith(("difficulty", "controller_"))]

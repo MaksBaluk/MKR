@@ -328,6 +328,11 @@ class CoreTurn(Base):
     followup_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Validated Evaluator follow-up goal produced after this turn's answer; NULL when none or ungraded.
     eval_goal: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Question difficulty level + why, and DifficultyController state before/after; internal, never candidate-facing.
+    difficulty: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    difficulty_reason: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    controller_before: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    controller_after: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     __table_args__ = (UniqueConstraint("interview_id", "sequence", name="uq_core_turn_sequence"),
                       UniqueConstraint("interview_id", "idempotency_key", name="uq_core_turn_idem"))
