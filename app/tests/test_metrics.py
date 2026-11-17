@@ -38,7 +38,34 @@ def test_ndcg_exp_differs():
 
 def test_ndcg_perfect_and_reversed():
     assert ndcg_at_k(["a", "d", "c", "b"], L) == pytest.approx(1.0)
-    assert ndcg_at_k(["b", "c", "d", "a"], L) < 1.0
+    # reversed [b,c,d,a] = rels 0,2,3,3: DCG = 0 + 2/log2(3) + 3/log2(4) + 3/log2(5)
+    # ideal = 3 + 3/log2(3) + 2/2 = 4 + 3/log2(3)
+    exp = (2 / math.log2(3) + 1.5 + 3 / math.log2(5)) / (4 + 3 / math.log2(3))
+    assert ndcg_at_k(["b", "c", "d", "a"], L) == pytest.approx(exp)
+    assert exp < 1.0
+    # ties: a and d both grade 3, either order is perfect
+    assert ndcg_at_k(["d", "a", "c", "b"], L) == pytest.approx(1.0)
+
+
+def test_ndcg_k_truncation_and_args():
+    # k=2, ranked [b,a]: DCG = 0 + 3/log2(3); ideal[:2] = 3 + 3/log2(3)
+    got = ndcg_at_k(["b", "a"], L, k=2)
+    assert got == pytest.approx((3 / math.log2(3)) / (3 + 3 / math.log2(3)))
+    assert got == pytest.approx(0.3868528, abs=1e-6)
+    for k in (0, -1):
+        with pytest.raises(ValueError):
+            ndcg_at_k(["a"], L, k=k)
+        with pytest.raises(ValueError):
+            precision_at_k(["a"], L, k=k)
+    with pytest.raises(ValueError):
+        ndcg_at_k(["a"], L, gain="bad")
+    with pytest.raises(ValueError):
+        ndcg_at_k(["a"], L, unlabeled="bad")
+    with pytest.raises(ValueError):
+        precision_at_k(["a"], L, unlabeled="bad")
+    # empty ranking: DCG 0, ideal > 0 -> 0.0; P@5 0.0
+    assert ndcg_at_k([], L) == 0.0
+    assert precision_at_k([], L) == 0.0
 
 
 def test_all_zero_labels():
@@ -116,3 +143,35 @@ def test_duration():
     assert interview_duration({"total_s": 10, "llm_wait_s": 4}) == {
         "total_s": 10.0, "llm_wait_s": 4.0, "excluding_llm_s": 6.0}
     assert interview_duration({"total_s": 3, "llm_wait_s": 5})["excluding_llm_s"] == 0.0
+
+
+def test_curve_empty_relevant_is_not_zero():
+    qa = [{"sufficient_criteria_after": ["c1"]}, {"sufficient_criteria_after": []}]
+    curve = coverage_curve(qa, [])
+    assert curve == []
+    assert questions_to_coverage(curve, 0.0) is None
+
+
+def test_mae_rejects_bad_scores():
+    base = {"action_id": "x", "criterion_id": "1"}
+    for bad in (True, float("nan"), float("inf"), 1.1, -0.1, "0.5"):
+        with pytest.raises(ValueError):
+            evaluator_mae([{**base, "score": bad}], {("x", "1"): 0.5})
+        with pytest.raises(ValueError):
+            evaluator_mae([{**base, "score": 0.5}], {("x", "1"): bad})
+
+
+def test_unresolved_rate_validation():
+    for bad in ({"unknown_count": 1, "groups_total": None}, {"unknown_count": -1, "groups_total": 2},
+                {"unknown_count": 3, "groups_total": 2}, {"unknown_count": 1.5, "groups_total": 2},
+                {"unknown_count": True, "groups_total": 2}):
+        with pytest.raises(ValueError):
+            unresolved_requirements_rate([bad])
+
+
+def test_duration_validation():
+    for bad in (-1, float("nan"), float("inf"), True):
+        with pytest.raises(ValueError):
+            interview_duration({"total_s": bad})
+        with pytest.raises(ValueError):
+            interview_duration({"total_s": 1, "llm_wait_s": bad})

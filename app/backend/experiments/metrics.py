@@ -87,19 +87,29 @@ def criterion_coverage(sufficient_ids: Iterable[str], relevant_criteria: Sequenc
 
 
 def unresolved_requirements_rate(ranking_items: Sequence[Mapping[str, Any]]) -> float | None:
-    """Sum unknown_count / sum groups_total over items with groups_total > 0; None if no such item."""
-    items = [i for i in ranking_items if i.get("groups_total", 0) > 0]
+    """Sum unknown_count / sum groups_total over items with groups_total > 0; None if no such item.
+
+    Counts must be non-negative ints with unknown_count <= groups_total, else ValueError.
+    """
+    for i in ranking_items:
+        u, t = i.get("unknown_count"), i.get("groups_total")
+        if any(isinstance(x, bool) or not isinstance(x, int) or x < 0 for x in (u, t)) or u > t:
+            raise ValueError(f"invalid unknown_count/groups_total: {u!r}/{t!r}")
+    items = [i for i in ranking_items if i["groups_total"] > 0]
     if not items:
         return None
-    return sum(i.get("unknown_count", 0) for i in items) / sum(i["groups_total"] for i in items)
+    return sum(i["unknown_count"] for i in items) / sum(i["groups_total"] for i in items)
 
 
 def coverage_curve(qa: Sequence[Mapping[str, Any]], relevant_criteria: Sequence[str]) -> list[float]:
     """Coverage after each qa entry, in order, from qa[i]["sufficient_criteria_after"].
 
-    Empty relevant set gives 0.0 per entry (callers should treat that case as no data).
+    Empty relevant set -> [] (coverage undefined, never 0). Callers must exclude candidates
+    whose criterion_coverage is None from coverage means and n_reached, and report the count.
     """
-    return [criterion_coverage(q.get("sufficient_criteria_after", []), relevant_criteria) or 0.0 for q in qa]
+    if not relevant_criteria:
+        return []
+    return [criterion_coverage(q.get("sufficient_criteria_after", []), relevant_criteria) for q in qa]
 
 
 def questions_to_coverage(curve: Sequence[float], threshold: float) -> int | None:
@@ -111,10 +121,18 @@ def questions_to_coverage(curve: Sequence[float], threshold: float) -> int | Non
 
 
 def interview_duration(timings: Mapping[str, float]) -> dict[str, float]:
-    """{"total_s","llm_wait_s","excluding_llm_s"}; missing keys count 0; excluding is clamped at 0."""
-    total = float(timings.get("total_s", 0.0))
-    llm = float(timings.get("llm_wait_s", 0.0))
+    """{"total_s","llm_wait_s","excluding_llm_s"}; missing keys count 0; excluding clamped at 0.
+
+    Negative, non-finite or non-numeric timings raise ValueError.
+    """
+    total, llm = (_unit(timings.get(k, 0.0), "timing", 0.0, math.inf) for k in ("total_s", "llm_wait_s"))
     return {"total_s": total, "llm_wait_s": llm, "excluding_llm_s": max(total - llm, 0.0)}
+
+
+def _unit(x: Any, what: str, lo: float = 0.0, hi: float = 1.0) -> float:
+    if isinstance(x, bool) or not isinstance(x, (int, float)) or not math.isfinite(x) or not lo <= x <= hi:
+        raise ValueError(f"{what} must be a finite number in [{lo}, {hi}], got {x!r}")
+    return float(x)
 
 
 @dataclass(frozen=True)
@@ -134,16 +152,21 @@ def evaluator_mae(
 
     Evaluator score None -> n_evaluator_unknown (checked first). Otherwise no expert key ->
     n_missing_expert; expert None -> n_expert_unknown. None is never treated as 0.
-    mae is None when no pair is compared.
+    mae is None when no pair is compared. Scores must be finite floats in [0,1]
+    (bool/NaN/out-of-range, evaluator or expert) -> ValueError.
     """
     errs: list[float] = []
     ev_unk = ex_unk = missing = 0
     for a in assessments:
         score = a.get("score")
+        if score is not None:
+            score = _unit(score, "evaluator score")
         if score is None:
             ev_unk += 1
             continue
         key = (a["action_id"], a["criterion_id"])
+        if expert.get(key) is not None:
+            _unit(expert[key], "expert score")
         if key not in expert:
             missing += 1
         elif expert[key] is None:
