@@ -226,6 +226,8 @@ export interface FitAlternative {
   threshold: number;
   /** Interview grade 0..1, null when not assessed. */
   candidate_score: number | null;
+  /** Share (0..1) of the alternative's required criteria that were graded; below 1 the state stays UNKNOWN. */
+  coverage?: number | null;
   state: FitState;
 }
 

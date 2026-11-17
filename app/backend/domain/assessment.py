@@ -20,10 +20,21 @@ class CriterionResult(BaseModel):
     evidence: list[EvidenceRef]
 
 
+GOAL_TEXT_MAX = 200  # goal reason / expected_evidence are untrusted model text: bounded before storage and prompting
+
+
 class FollowupGoal(BaseModel):
     criterion_ids: list[str] = Field(min_length=1)
-    reason: str = Field(min_length=1)
-    expected_evidence: str = ""
+    reason: str = Field(min_length=1, max_length=GOAL_TEXT_MAX)
+    expected_evidence: str = Field(default="", max_length=GOAL_TEXT_MAX)
+
+    @field_validator("reason", "expected_evidence", mode="before")
+    @classmethod
+    def _truncate(cls, v):
+        """Truncate instead of rejecting: an over-long goal must never discard a valid assessment."""
+        if v is None:
+            return ""
+        return v.strip()[:GOAL_TEXT_MAX] if isinstance(v, str) else v
 
 
 class EvaluatorOutput(BaseModel):
@@ -85,5 +96,6 @@ def sanitize_goal(
     """Keep only criteria that are allowed and still open; no remainder means no goal."""
     if goal is None:
         return None
-    keep = [c for c in goal.criterion_ids if c in allowed and c in set(open_ids)]
+    still_open = set(open_ids)
+    keep = [c for c in dict.fromkeys(goal.criterion_ids) if c in allowed and c in still_open]
     return goal.model_copy(update={"criterion_ids": keep}) if keep else None

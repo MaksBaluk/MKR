@@ -26,11 +26,13 @@ def needs_min_followup(shown_for_action: int, *, graded: bool, score: float | No
     return not (sufficient and score is not None and (score >= EARLY_CLOSE_SCORE or score <= DECLINED_SCORE))
 
 
-def topic_open_for_question(*, used: bool, distinct_topics: int, shown: int, latest_score_is_null: bool) -> bool:
+def topic_open_for_question(*, used: bool, distinct_topics: int, shown: int, latest_score_is_null: bool,
+                            goal_open: bool = False) -> bool:
     """Whether a topic may receive another planned question.
 
     New topics need budget left. A started topic is re-asked only while the question cap allows, its latest
-    evidence is insufficient, and the interview still has topic budget (after ten topics the interview is closed)."""
+    evidence is insufficient (null score) or a validated Evaluator goal still names an open criterion (goal_open),
+    and the interview still has topic budget (after ten topics the interview is closed)."""
     if not used:
         return can_start_topic(distinct_topics)
-    return can_ask_question(shown) and latest_score_is_null and distinct_topics < MAX_TOPICS
+    return can_ask_question(shown) and (latest_score_is_null or goal_open) and distinct_topics < MAX_TOPICS

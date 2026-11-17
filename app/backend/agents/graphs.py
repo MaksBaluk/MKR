@@ -243,6 +243,8 @@ def _build_answer(model):
         open_ids = s.get("open_criterion_ids")
         goal = sanitize_goal(out.followup_goal, allowed, allowed if open_ids is None else open_ids)
         out = out.model_copy(update={"followup_goal": goal})
+        if not out.off_topic and any(c.score is None for c in out.criteria):
+            out = out.model_copy(update={"sufficient_evidence": False})  # a null criterion is never sufficient evidence
         if out.off_topic:  # nothing from an off-topic answer may reach ranking
             out = out.model_copy(update={"criteria": [c.model_copy(update={"score": None, "evidence": []})
                                                      for c in out.criteria]})

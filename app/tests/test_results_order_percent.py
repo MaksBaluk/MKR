@@ -8,7 +8,7 @@ def items(client, auth, pid, **params):
     return r.json()["items"]
 
 
-def test_results_sorted_by_215_key_then_tv_jv(client, auth, finished, db):  # noqa: F811
+def test_results_sorted_by_percent_then_215_key_then_tv_jv(client, auth, finished, db):  # noqa: F811
     from backend.api.core import _revisions
     from backend.domain.core_flow import self_claim_metrics
     from backend.models import CohortSnapshot, CoreInterview
@@ -24,9 +24,10 @@ def test_results_sorted_by_215_key_then_tv_jv(client, auth, finished, db):  # no
     keys = []
     for i in rows:
         t, j = self_claim_metrics(revs[i["vacancy_id"]]["groups"], ratings)
-        keys.append((-i["z"], -i["x"], -i["l_mandatory"], -i["l_preferred"], i["w_mandatory"], i["w_preferred"],
-                     -t, -j, i["vacancy_id"]))
+        keys.append((-i["confirmed_share"], -i["z"], -i["x"], -i["l_mandatory"], -i["l_preferred"], i["w_mandatory"],
+                     i["w_preferred"], -t, -j, i["vacancy_id"]))
     assert len(rows) > 5 and keys == sorted(keys)
+    assert any(a[0] == b[0] for a, b in zip(keys, keys[1:]))  # equal percents exist, so the (2.15)+T/J tie-break is exercised
 
 
 def test_fits_means_some_confirmed_share(client, auth, finished):  # noqa: F811
@@ -37,6 +38,7 @@ def test_fits_means_some_confirmed_share(client, auth, finished):  # noqa: F811
 def test_fitting_filter_keeps_relative_order(client, auth, finished):  # noqa: F811
     every = [i["vacancy_id"] for i in items(client, auth, finished["id"]) if i["fits"]]
     only = [i["vacancy_id"] for i in items(client, auth, finished["id"], fitting="fitting")]
+    assert every
     assert only[:len(every)] == every  # 'all' is page-capped at 50; filter keeps relative order
 
 

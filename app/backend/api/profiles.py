@@ -10,10 +10,12 @@ from sqlalchemy.orm import Session
 
 from backend.api.cohorts import _market_input, get_or_create_cohort
 from backend.api.common import create_attempt, open_attempt
-from backend.api.core import _names, _revisions, action_summary, attempt_scores, cohort_actions, current_criteria_rows, rubric_map
+from backend.api.core import (_names, _revisions, action_summary, attempt_scores, cohort_actions, current_criteria_rows,
+                              profile_self_ratings, rubric_map)
 from backend.api.recommendations import NOTE, rank_items
 from backend.db import get_db
-from backend.domain.core_flow import eval_alternative, eval_group, tau_for
+from backend.domain.core_flow import alt_criteria, eval_alternative, eval_group, tau_for
+from backend.domain.topic_summary import topic_summary
 from backend.domain.market import compute_market
 from backend.models import (CandidateProfile, CandidateSelfRating, CohortSnapshot, Competency, CoreInterview,
                             CoreTurn, CriterionAssessment, User)
@@ -105,17 +107,11 @@ def archive_profile(profile_id: str, db: Session = Depends(get_db), user: User =
 
 # ---- self-ratings ----------------------------------------------------------------------------------------
 
-def _latest_profile_ratings(db: Session, profile_id: str) -> dict[str, float | None]:
-    rows = db.scalars(select(CandidateSelfRating).where(CandidateSelfRating.profile_id == profile_id)
-                      .order_by(CandidateSelfRating.revision)).all()
-    return {r.action_id: r.value for r in rows}
-
-
 @router.get("/{profile_id}/self-ratings")
 def get_self_ratings(profile_id: str, db: Session = Depends(get_db), user: User = Depends(current_user)):
     prof = _owned_profile(db, user, profile_id)
     return {"items": [{"action_id": k, "value": v, "source": "SELF_REPORT", "editable": True}
-                      for k, v in _latest_profile_ratings(db, prof.id).items()]}
+                      for k, v in profile_self_ratings(db, prof.id).items()]}
 
 
 @router.put("/{profile_id}/self-ratings/{action_id}")
@@ -213,7 +209,7 @@ def _competencies(db: Session, iv: CoreInterview) -> list[dict]:
     cscores = attempt_scores(db, iv.id)
     summaries = action_summary(rows, rubric_map(db, {r.action_id for r in rows}, cscores))
     names = _names(db)
-    ratings = _latest_profile_ratings(db, iv.profile_id)
+    ratings = profile_self_ratings(db, iv.profile_id)
     out = []
     for action, t in summaries.items():
         mine = [r for r in cur if r.action_id == action]
@@ -250,8 +246,10 @@ def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(
                 "market": [], **base}
     snap = db.get(CohortSnapshot, iv.cohort_id)
     items = [_with_fit(i) for i in rank_items(db, prof.years_experience, snap, attempt_scores(db, iv.id),
-                                         _latest_profile_ratings(db, prof.id))]
-    # Order is rank_items' (2.15) + T_v/J_v; confirmed_share is display only. Filters keep relative order.
+                                         profile_self_ratings(db, prof.id))]
+    # Display order (owner decision, deviates from thesis (2.15)): displayed confirmed_share percent first. The sort is
+    # stable over rank_items' (2.15) + T_v/J_v + id order, so equal percents keep that key. Filters keep relative order.
+    items.sort(key=lambda i: -i["confirmed_share"])
     if work_mode:
         items = [i for i in items if (i["work_mode"] or "").lower() == work_mode.lower()]
     if seniority:
@@ -291,24 +289,24 @@ def result_detail(profile_id: str, vacancy_id: str, db: Session = Depends(get_db
         raise HTTPException(404, "Вакансії немає у вашій добірці")
     scores = attempt_scores(db, iv.id)
     rubrics = rubric_map(db, cohort_actions(_revisions(snap)), scores)
-    rows = db.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == iv.id)
-                      .order_by(CriterionAssessment.created_at, CriterionAssessment.revision)).all()
-    mc = {a: t.m for a, t in action_summary(rows, rubrics).items()}  # candidate_score stays M_c
     names = _names(db)
-    item = next(_with_fit(i) for i in rank_items(db, prof.years_experience, snap, scores, _latest_profile_ratings(db, prof.id)) if i["vacancy_id"] == vacancy_id)
+    item = next(_with_fit(i) for i in rank_items(db, prof.years_experience, snap, scores, profile_self_ratings(db, prof.id)) if i["vacancy_id"] == vacancy_id)
     groups = []
     for g in revision["groups"]:
         ev = eval_group(g["alternatives"], scores, rubrics)
         alternatives = []
         for a in g["alternatives"]:
             tau = tau_for(a["required_level"])
-            score = mc.get(a["competency_id"])
+            req = topic_summary(alt_criteria(a, rubrics), scores)  # M_c / E_c over the alternative's required criteria
+            score = req.m
             status = eval_alternative(a, scores, rubrics).status  # criterion-level, same as ranking
-            state = {"SATISFIED": "MET", "FAILED": "GAP"}.get(status, "UNKNOWN" if score is None else "BORDERLINE")
+            # BORDERLINE only when every required criterion is graded; a partly graded topic stays UNKNOWN.
+            state = {"SATISFIED": "MET", "FAILED": "GAP"}.get(
+                status, "BORDERLINE" if score is not None and not req.unknown else "UNKNOWN")
             level = min(3, max(1, a["required_level"]))
             alternatives.append({"competency_id": a["competency_id"], "name": names.get(a["competency_id"], a["competency_id"]),
                                  "required_level": level, "required_label": LEVEL_WORDS[level], "threshold": tau,
-                                 "candidate_score": score, "state": state})
+                                 "candidate_score": score, "coverage": req.e, "state": state})
         groups.append({"id": g.get("id"), "kind": g["kind"], "label": g.get("label", ""), "excerpt": g.get("excerpt", ""),
                        "status": ev.status, "alternatives": alternatives})
     summary = {"met": sum(1 for g in groups if g["status"] == "SATISFIED"),

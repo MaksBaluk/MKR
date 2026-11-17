@@ -7,7 +7,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from backend.api.common import create_attempt, default_profile
 from backend.db import get_db
 from backend.domain.core_flow import RubricMap, planner_state
-from backend.domain.assessment import FollowupGoal, sanitize_goal
+from backend.domain.assessment import GOAL_TEXT_MAX, FollowupGoal, sanitize_goal
 from backend.domain.topic_summary import TopicSummary, needs_verification, open_criteria, topic_summary
 from backend.domain.candidate_level import resolve_level
 from backend.domain.interview_budget import needs_min_followup, topic_open_for_question
@@ -60,15 +60,14 @@ def criterion_scores(rows) -> dict[str, float | None]:
     return {r.criterion_id: r.score for r in current_criteria_rows(rows)}
 
 
-def action_summary(rows, rubrics: RubricMap, fallback: Mapping[str, list[str]] | None = None) -> dict[str, TopicSummary]:
+def action_summary(rows, rubrics: RubricMap) -> dict[str, TopicSummary]:
     """Per action M_c / E_c from criterion scores. A legacy holistic row (criterion_id == action_id) scores the action."""
     cur = current_criteria_rows(rows)
     scores = criterion_scores(rows)
     out = {}
     for a in dict.fromkeys(r.action_id for r in cur):
         seen = [(c, 1.0) for c in dict.fromkeys(r.criterion_id for r in cur if r.action_id == a)]
-        # No rubric: weight 1 over fallback criteria (criteria_for) so E_c has the full denominator; else criteria seen.
-        rubric = rubrics.get(a) or ([(c, 1.0) for c in fallback[a]] if fallback and a in fallback else seen)
+        rubric = rubrics.get(a) or seen  # no rubric: weight 1 over the criteria seen
         if a in scores and not any(c in scores for c, _ in rubric):
             rubric = [(a, 1.0)]
         out[a] = topic_summary(rubric, scores)
@@ -224,7 +223,12 @@ def _profile_ratings(db: Session, iv: CoreInterview, user: User) -> dict[str, fl
     if iv.profile_id is None:
         from backend.api.profile import latest_self_ratings
         return latest_self_ratings(db, user)
-    rows = db.scalars(select(CandidateSelfRating).where(CandidateSelfRating.profile_id == iv.profile_id)
+    return profile_self_ratings(db, iv.profile_id)
+
+
+def profile_self_ratings(db: Session, profile_id: str) -> dict[str, float | None]:
+    """Latest self-rating per action of one profile (revisions oldest first, last wins)."""
+    rows = db.scalars(select(CandidateSelfRating).where(CandidateSelfRating.profile_id == profile_id)
                       .order_by(CandidateSelfRating.revision)).all()
     return {r.action_id: r.value for r in rows}
 
@@ -268,6 +272,21 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
             open_memo[a] = open_criteria_for(db, a, cscores, sufficient.get(a, False))
         return open_memo[a]
 
+    goal_memo: dict[str, FollowupGoal | None] = {}
+
+    def goal_for(a: str) -> FollowupGoal | None:
+        """Goal of the topic's last answered turn, re-checked against criteria open now; malformed stored goal => None."""
+        if a not in goal_memo:
+            last = next((t for t in reversed(turns) if t.action_id == a and t.answer_text), None)
+            goal = None
+            if last is not None and last.eval_goal:
+                try:
+                    goal = sanitize_goal(FollowupGoal.model_validate(last.eval_goal), set(criteria_for(db, a)), open_ids(a))
+                except ValidationError:
+                    goal = None
+            goal_memo[a] = goal
+        return goal_memo[a]
+
     def closed(a: str) -> bool:
         """A graded topic with no open criterion left (all CONFIRMED or DECLINED) gets no more questions."""
         return a in latest_in_session and not open_ids(a)
@@ -278,14 +297,19 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         return not closed(a) and needs_min_followup(shown[a], graded=a in latest_in_session,
                                                     score=latest_in_session.get(a), sufficient=sufficient.get(a, False))
 
-    # Otherwise a started topic is re-asked only when the Evaluator found insufficient evidence (null score).
+    # Otherwise a started topic is re-asked only when the Evaluator found insufficient evidence (null score) or its
+    # last answer left a validated goal on a still-open criterion; the 5-question and 10-topic caps still apply.
     def eligible(a: str) -> bool:
         return not (a in used and closed(a)) and topic_open_for_question(
             used=a in used, distinct_topics=len(used), shown=shown.get(a, 0),
-            latest_score_is_null=a in latest_in_session and latest_in_session[a] is None)
+            latest_score_is_null=a in latest_in_session and latest_in_session[a] is None,
+            goal_open=a in used and goal_for(a) is not None)
 
-    # A topic below its minimum continues before the planner opens anything (even if its groups closed/failed).
+    # A topic below its minimum continues before the planner opens anything (even if its groups closed/failed);
+    # so does the topic just answered while its goal-driven follow-up is still eligible.
     followup = next((t.action_id for t in reversed(turns) if needs_second(t.action_id)), None)
+    if followup is None and turns and goal_for(turns[-1].action_id) is not None and eligible(turns[-1].action_id):
+        followup = turns[-1].action_id
     if followup is not None:
         action = followup
     else:
@@ -301,9 +325,7 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     answered = [t for t in turns if t.action_id == action and t.answer_text]
     comp = db.get(Competency, action)
     unmet = open_ids(action)
-    # The last answer's goal, re-checked against criteria still open now (the Evaluator may have just confirmed it).
-    last_goal = answered[-1].eval_goal if answered else None
-    goal = sanitize_goal(FollowupGoal.model_validate(last_goal), set(criteria_for(db, action)), unmet) if last_goal else None
+    goal = goal_for(action)  # the Evaluator may have just confirmed the criterion it named: re-checked in goal_for
     goal_dict = goal.model_dump() if goal else None
     result = run_ask({"action_id": action, "action_name": label, "summary": comp.summary if comp else "",
                       "unmet_criteria": unmet,
@@ -317,7 +339,8 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     turn = CoreTurn(interview_id=iv.id, sequence=len(turns) + 1, action_id=action, question_text=question,
                     question_source=source,
                     target_criteria=(goal.criterion_ids if goal else unmet) if targeted else None,
-                    followup_reason=(goal.reason if goal else "OPEN_CRITERIA") if targeted else None)
+                    followup_reason=((goal.reason[:GOAL_TEXT_MAX] if goal else "OPEN_CRITERIA") if targeted
+                                     else "BANK_FALLBACK"))
     iv.version += 1
     db.add(turn)
     try:

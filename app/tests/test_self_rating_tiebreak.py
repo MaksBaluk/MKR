@@ -78,4 +78,4 @@ def test_recommendations_order_follows_215_then_tv_jv(client, auth, cohort, db, 
         keys.append((-i["z"], -i["x"], -i["l_mandatory"], -i["l_preferred"], i["w_mandatory"], i["w_preferred"],
                      -t, -j, i["vacancy_id"]))
     assert len(items) == 5 and keys == sorted(keys)
-    assert any(a[:6] == b[:6] and a[6] != b[6] for a, b in zip(keys, keys[1:]))  # tie really broken by T_v  # ratings actually differentiate the cohort
+    assert any(a[:6] == b[:6] and a[6] != b[6] for a, b in zip(keys, keys[1:]))  # some exact (2.15) tie is broken by T_v

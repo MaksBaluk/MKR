@@ -14,10 +14,10 @@ GOAL_REASON = "Немає прикладу керування транзакці
 
 
 class PolicyChat:
-    """Evaluator grades by criterion position via `policy(allowed) -> (scores, goal_ids)`; `fail` raises for every call."""
+    """Evaluator grades via `policy(allowed, n) -> (scores, goal_ids)` (n = 1-based evaluator call); `fail` raises always."""
 
-    def __init__(self, policy=None, fail=False, sufficient=False):
-        self.policy, self.fail, self.sufficient = policy, fail, sufficient
+    def __init__(self, policy=None, fail=False, sufficient=False, reason=GOAL_REASON):
+        self.policy, self.fail, self.sufficient, self.reason = policy, fail, sufficient, reason
         self.evaluator_inputs: list[dict] = []
         self.asked = 0
 
@@ -34,11 +34,11 @@ class PolicyChat:
         allowed = data["allowed_criterion_ids"]
         turn_id = re.findall(r"turn_id=\"([^\"]+)\"", human)[-1]
         text = json.loads(re.findall(r">(\".*\")</candidate_answer>", human)[-1])
-        scores, goal_ids = self.policy(allowed)
+        scores, goal_ids = self.policy(allowed, len(self.evaluator_inputs))
         crit = [{"criterion_id": c, "score": scores.get(c), "reason": "з відповіді",
                  "evidence": [{"turn_id": turn_id, "exact_excerpt": text}] if scores.get(c) is not None else []}
                 for c in allowed]
-        goal = {"criterion_ids": goal_ids, "reason": GOAL_REASON, "expected_evidence": "Конкретний приклад."} if goal_ids else None
+        goal = {"criterion_ids": goal_ids, "reason": self.reason, "expected_evidence": "Конкретний приклад."} if goal_ids else None
         return SimpleNamespace(content=json.dumps({"action_id": data["action_id"], "rubric_version": "v1",
                                                    "criteria": crit, "sufficient_evidence": self.sufficient,
                                                    "needs_followup": bool(goal), "followup_goal": goal}))
@@ -87,7 +87,7 @@ def _turn(db, turn_id) -> CoreTurn:
 
 
 def test_goal_targets_open_criterion_and_is_persisted(client, auth, db, monkeypatch, ask_log):
-    fake = _use(monkeypatch, PolicyChat(lambda allowed: ({allowed[0]: 0.9}, [allowed[1]])))
+    fake = _use(monkeypatch, PolicyChat(lambda allowed, n: ({allowed[0]: 0.9}, [allowed[1]])))
     iv = _start(client, auth)
     q1 = _next(client, auth, iv, 0)
     assert len(ask_log[0]["unmet_criteria"]) >= 2 and ask_log[0]["followup_goal"] is None
@@ -113,7 +113,7 @@ def test_goal_targets_open_criterion_and_is_persisted(client, auth, db, monkeypa
 
 
 def test_goal_on_just_confirmed_criterion_is_dropped(client, auth, db, monkeypatch, ask_log):
-    _use(monkeypatch, PolicyChat(lambda allowed: ({allowed[0]: 0.9}, [allowed[0]])))
+    _use(monkeypatch, PolicyChat(lambda allowed, n: ({allowed[0]: 0.9}, [allowed[0]])))
     iv = _start(client, auth)
     q1 = _next(client, auth, iv, 0)
     allowed = ask_log[0]["unmet_criteria"]
@@ -127,7 +127,7 @@ def test_goal_on_just_confirmed_criterion_is_dropped(client, auth, db, monkeypat
 
 def test_all_confirmed_closes_topic_early(client, auth, db, monkeypatch, ask_log):
     # sufficient_evidence false: the old min-two rule would have asked again; no open criterion now closes the topic.
-    _use(monkeypatch, PolicyChat(lambda allowed: ({c: 0.9 for c in allowed}, [])))
+    _use(monkeypatch, PolicyChat(lambda allowed, n: ({c: 0.9 for c in allowed}, [])))
     iv = _start(client, auth)
     q1 = _next(client, auth, iv, 0)
     first_action = q1["turn"]["action_id"]
@@ -148,7 +148,7 @@ def test_provider_failure_is_ungraded_without_goal(client, auth, db, monkeypatch
     q1 = _next(client, auth, iv, 0)
     assert q1["turn"]["question_source"] == "FALLBACK_UNGRADED"
     first = _turn(db, q1["turn"]["id"])
-    assert first.target_criteria is None and first.followup_reason is None
+    assert first.target_criteria is None and first.followup_reason == "BANK_FALLBACK"
     a1 = _answer(client, auth, iv, q1, "followup-key-0041")
     assert a1["assessment_status"] == "UNGRADED"
     t = _turn(db, q1["turn"]["id"])
@@ -157,3 +157,76 @@ def test_provider_failure_is_ungraded_without_goal(client, auth, db, monkeypatch
         assert s.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == iv["id"])).all() == []
     q2 = _next(client, auth, iv, a1["version"])
     assert q2["turn"]["question_source"] == "FALLBACK_UNGRADED" and ask_log[-1]["followup_goal"] is None
+
+
+def _series(client, auth, iv, n, prefix):
+    """Answer n questions in a row; returns the shown turns."""
+    out, version = [], iv["version"]
+    for i in range(n):
+        q = _next(client, auth, iv, version)
+        if q.get("done"):
+            break
+        out.append(q["turn"])
+        version = _answer(client, auth, iv, q, f"{prefix}-{i:04d}")["version"]
+    return out
+
+
+def test_null_criterion_overrides_sufficient_and_keeps_topic_open(client, auth, db, monkeypatch, ask_log):
+    _use(monkeypatch, PolicyChat(lambda allowed, n: ({allowed[0]: 0.95}, []), sufficient=True))
+    iv = _start(client, auth)
+    q1, q2 = _series(client, auth, iv, 2, "suff")
+    allowed = ask_log[0]["unmet_criteria"]
+    with db() as s:
+        rows = s.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == iv["id"])).all()
+    assert rows and all(r.sufficient_evidence is False for r in rows)
+    assert q2["action_id"] == q1["action_id"] and ask_log[1]["unmet_criteria"] == allowed[1:]
+
+
+def test_goal_keeps_topic_until_five_question_cap(client, auth, db, monkeypatch, ask_log):
+    _use(monkeypatch, PolicyChat(lambda allowed, n: ({allowed[0]: 0.9}, [allowed[1]])))
+    iv = _start(client, auth)
+    shown = _series(client, auth, iv, 6, "cap")
+    allowed = ask_log[0]["unmet_criteria"]
+    assert [t["action_id"] for t in shown[:5]] == [shown[0]["action_id"]] * 5  # 3rd, 4th, 5th are goal-driven
+    for t in shown[1:5]:
+        assert _turn(db, t["id"]).target_criteria == [allowed[1]]
+    assert len(shown) < 6 or shown[5]["action_id"] != shown[0]["action_id"]  # never a 6th question on one topic
+
+
+def test_goal_followup_stops_when_criteria_close(client, auth, db, monkeypatch, ask_log):
+    _use(monkeypatch, PolicyChat(lambda allowed, n: ({c: 0.9 for c in allowed}, []) if n >= 3
+                                 else ({allowed[0]: 0.9}, [allowed[1]])))
+    iv = _start(client, auth)
+    shown = _series(client, auth, iv, 4, "close")
+    assert [t["action_id"] for t in shown[:3]] == [shown[0]["action_id"]] * 3
+    assert len(shown) < 4 or shown[3]["action_id"] != shown[0]["action_id"]
+
+
+def test_no_goal_is_not_reasked_after_second_question(client, auth, db, monkeypatch, ask_log):
+    _use(monkeypatch, PolicyChat(lambda allowed, n: ({allowed[0]: 0.9}, [])))
+    iv = _start(client, auth)
+    shown = _series(client, auth, iv, 3, "nogoal")
+    assert shown[1]["action_id"] == shown[0]["action_id"]  # min-two rule
+    assert len(shown) < 3 or shown[2]["action_id"] != shown[0]["action_id"]
+
+
+def test_malformed_stored_goal_is_ignored(client, auth, db, monkeypatch, ask_log):
+    _use(monkeypatch, PolicyChat(lambda allowed, n: ({allowed[0]: 0.9}, [allowed[1]])))
+    iv = _start(client, auth)
+    q1 = _next(client, auth, iv, 0)
+    a1 = _answer(client, auth, iv, q1, "malformed-0001")
+    with db() as s:
+        s.get(CoreTurn, q1["turn"]["id"]).eval_goal = {"criterion_ids": [], "reason": ""}
+        s.commit()
+    q2 = _next(client, auth, iv, a1["version"])
+    assert ask_log[-1]["followup_goal"] is None and _turn(db, q2["turn"]["id"]).followup_reason == "OPEN_CRITERIA"
+
+
+def test_long_goal_reason_is_truncated_and_assessment_kept(client, auth, db, monkeypatch, ask_log):
+    _use(monkeypatch, PolicyChat(lambda allowed, n: ({allowed[0]: 0.9}, [allowed[1]]), reason="р" * 500))
+    iv = _start(client, auth)
+    q1 = _next(client, auth, iv, 0)
+    a1 = _answer(client, auth, iv, q1, "longreason-0001")
+    assert a1["assessment_status"] == "ACCEPTED" and len(_turn(db, q1["turn"]["id"]).eval_goal["reason"]) == 200
+    q2 = _next(client, auth, iv, a1["version"])
+    assert _turn(db, q2["turn"]["id"]).followup_reason == "р" * 200

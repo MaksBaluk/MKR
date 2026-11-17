@@ -9,7 +9,8 @@ const STATE_TAIL: Record<Exclude<FitState, 'UNKNOWN'>, string> = {
 /** «Потрібен робочий рівень, у вас 45%: не вистачає». */
 export function altText(a: FitAlternative): string {
   const need = `Потрібен ${a.required_label} рівень`;
-  if (a.state === 'UNKNOWN' || a.candidate_score === null) return `${need}, не оцінювали`;
+  if (a.candidate_score === null) return `${need}, не оцінювали`;
+  if (a.state === 'UNKNOWN') return `${need}, оцінено лише частину критеріїв`;
   return `${need}, у вас ${pct(a.candidate_score)}%: ${STATE_TAIL[a.state]}`;
 }
 

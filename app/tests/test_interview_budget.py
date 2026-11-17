@@ -59,3 +59,13 @@ def test_declined_topic_closes_after_the_first_answer():
     # a weak score without sufficient evidence still gets a second question
     assert needs_min_followup(1, graded=True, score=0.0, sufficient=False) is True
     assert needs_min_followup(1, graded=True, score=0.3, sufficient=True) is True
+
+
+def test_goal_open_reasks_started_topic_within_caps():
+    from backend.domain.interview_budget import topic_open_for_question
+    ok = dict(used=True, shown=2, latest_score_is_null=False)
+    assert topic_open_for_question(distinct_topics=3, goal_open=True, **ok) is True
+    assert topic_open_for_question(distinct_topics=3, goal_open=False, **ok) is False  # no goal: planner moves on
+    assert topic_open_for_question(distinct_topics=10, goal_open=True, **ok) is False  # 10-topic cap
+    assert topic_open_for_question(used=True, distinct_topics=3, shown=5, latest_score_is_null=False,
+                                   goal_open=True) is False  # 5-question cap

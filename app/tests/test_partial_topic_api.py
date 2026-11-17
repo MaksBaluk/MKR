@@ -62,7 +62,8 @@ def test_detail_shows_score_and_state_for_seeded_rubric(client, auth, db, finish
 def test_detail_partial_topic_not_met(client, auth, db, finished):
     action, vid = _setup(db, finished)
     alt = client.get(f"{API}/profiles/{finished['id']}/results/{vid}", headers=auth).json()["groups"][0]["alternatives"][0]
-    assert alt["candidate_score"] == 0.95 and alt["state"] != "MET"
+    # 1 of 5 required criteria graded: M_c 0.95 is shown, but the state is not BORDERLINE ("майже достатньо").
+    assert alt["candidate_score"] == 0.95 and alt["state"] == "UNKNOWN" and alt["coverage"] == 0.2
 
 
 def test_recommendations_one_of_five_not_met(client, auth, db, finished):
@@ -70,11 +71,5 @@ def test_recommendations_one_of_five_not_met(client, auth, db, finished):
     with db() as s:
         cid = s.scalars(select(CoreInterview)).first().cohort_id
     r = client.post(f"{API}/recommendations", json={"cohort_id": cid}, headers=auth).json()
-    from backend.api.recommendations import rank_items
-    with db() as s:
-        from backend.models import User
-        u = s.scalars(select(User)).first()
-        from backend.api.core import latest_scores
-        item = next(i for i in rank_items(s, u.years_experience, s.get(CohortSnapshot, cid), latest_scores(s, u))
-                    if i["vacancy_id"] == vid)
-    assert item["met_count"] == 0 and item["z"] != 2 and r["items"] is not None
+    item = next(i for i in r["items"] if i["vacancy_id"] == vid)
+    assert item["met_count"] == 0 and item["z"] != 2

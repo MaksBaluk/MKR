@@ -57,3 +57,24 @@ def test_evaluator_input_lists_open_and_goal_shape():
                                turns={}, open_criterion_ids=["b"])
     assert 'open_criterion_ids: ["b"]' in u
     assert '"criterion_ids"' in EVALUATOR_SYSTEM and '"expected_evidence"' in EVALUATOR_SYSTEM
+
+
+def test_long_goal_text_is_truncated_and_assessment_kept():
+    r = _run({"criterion_ids": ["b"], "reason": "р" * 500, "expected_evidence": "е" * 300})
+    assert r.status == "ACCEPTED" and r.output.criteria[0].score == 0.6
+    goal = r.output.followup_goal
+    assert goal.criterion_ids == ["b"] and len(goal.reason) == 200 and len(goal.expected_evidence) == 200
+
+
+def test_sanitize_goal_dedupes_ids():
+    assert sanitize_goal(_g("b", "b", "a"), {"a", "b"}, ["a", "b"]).criterion_ids == ["b", "a"]
+
+
+def test_null_criterion_forces_insufficient_evidence():
+    raw = json.dumps({"action_id": ACTION, "rubric_version": "v1", "sufficient_evidence": True,
+                      "criteria": [{"criterion_id": "a", "score": 0.95, "reason": "ок",
+                                    "evidence": [{"turn_id": "t1", "exact_excerpt": "PostgreSQL"}]},
+                                   {"criterion_id": "b", "score": None, "reason": "немає", "evidence": []}]})
+    r = run_answer({"action_id": ACTION, "rubric_version": "v1", "allowed_criterion_ids": ["a", "b"],
+                    "turns": {"t1": "Працював з PostgreSQL."}}, FakeModel(raw))
+    assert r.status == "ACCEPTED" and r.output.sufficient_evidence is False

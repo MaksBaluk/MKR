@@ -27,6 +27,10 @@ describe('vacancyFit', () => {
   test('unknown score', () => {
     expect(altText(alt({ candidate_score: null, state: 'UNKNOWN' }))).toBe('Потрібен робочий рівень, не оцінювали');
   });
+  test('partly graded topic is not called borderline', () => {
+    expect(altText(alt({ candidate_score: 0.95, coverage: 0.2, state: 'UNKNOWN' })))
+      .toBe('Потрібен робочий рівень, оцінено лише частину критеріїв');
+  });
   test('group status text', () => {
     expect(groupStatusText('SATISFIED')).toBe('Підходить');
     expect(groupStatusText('FAILED')).toBe('Не підходить');
