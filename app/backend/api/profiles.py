@@ -251,8 +251,7 @@ def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(
     snap = db.get(CohortSnapshot, iv.cohort_id)
     items = [_with_fit(i) for i in rank_items(db, prof.years_experience, snap, attempt_scores(db, iv.id),
                                          _latest_profile_ratings(db, prof.id))]
-    # Product order: highest confirmed share first; ties by fewer mandatory failures (z), experience (x), id.
-    items.sort(key=lambda i: (-i["confirmed_share"], -i["z"], -i["x"], i["vacancy_id"]))
+    # Order is rank_items' (2.15) + T_v/J_v; confirmed_share is display only. Filters keep relative order.
     if work_mode:
         items = [i for i in items if (i["work_mode"] or "").lower() == work_mode.lower()]
     if seniority:

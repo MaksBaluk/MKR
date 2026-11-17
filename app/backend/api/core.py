@@ -249,8 +249,7 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     summaries = action_summary(session_rows, rubric_map(db, {r.action_id for r in session_rows}, cscores))
     own = _profile_ratings(db, iv, user)
     state, weights = planner_state(revisions, cscores, rubric_map(db, cohort_actions(revisions), cscores),
-                                   frozenset(a for a in {a for s in revisions for g in s["groups"] for al in g["alternatives"]
-                                                         for a in [al["competency_id"]]}
+                                   frozenset(a for a in cohort_actions(revisions)
                                              if needs_verification(own.get(a), summaries.get(a))))
     shown: dict[str, int] = {}
     for t in turns:

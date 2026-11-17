@@ -1,5 +1,5 @@
 from backend.api.core import _revisions
-from backend.domain.core_flow import rank_vacancy, self_claim_metrics
+from backend.domain.core_flow import eval_group, rank_vacancy, self_claim_metrics
 from backend.domain.planner import OpenState, choose_next
 from backend.domain.ranking import VacancyRanking, rank
 from backend.domain.topic_summary import TopicSummary, needs_verification
@@ -31,6 +31,7 @@ def test_tie_break_only_on_exact_key_tie():
 def test_self_rating_cannot_satisfy_mandatory():
     v = {"id": "v", "years_min": 0, "groups": [_g("a")]}
     r = rank_vacancy(v, {}, {}, 3, {"a": 0.95})
+    assert eval_group(v["groups"][0]["alternatives"], {}, {}).status == "UNRESOLVED"
     assert r.z == 1 and r.l_m == 0.0 and r.t_v == 0.95 and r.label == "LOW_INFORMATION"
 
 
@@ -77,4 +78,4 @@ def test_recommendations_order_follows_215_then_tv_jv(client, auth, cohort, db, 
         keys.append((-i["z"], -i["x"], -i["l_mandatory"], -i["l_preferred"], i["w_mandatory"], i["w_preferred"],
                      -t, -j, i["vacancy_id"]))
     assert len(items) == 5 and keys == sorted(keys)
-    assert len({k[6:8] for k in keys}) > 1  # ratings actually differentiate the cohort
+    assert any(a[:6] == b[:6] and a[6] != b[6] for a, b in zip(keys, keys[1:]))  # tie really broken by T_v  # ratings actually differentiate the cohort
