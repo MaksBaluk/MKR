@@ -5,7 +5,7 @@ from __future__ import annotations
 import csv
 import json
 from collections.abc import Sequence
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 
 from sqlalchemy.orm import Session
@@ -65,7 +65,7 @@ def load_record(db: Session, run_id: str) -> ExperimentRecord:
 
 _FLAGS = ("adaptive_topics", "adaptive_followup", "adaptive_difficulty", "max_topics", "max_per_topic",
           "total_budget", "static_questions_per_topic")
-_ERRORS = ("ungraded_answers", "fallback_questions", "llm_exceptions", "empty_cohort")
+_ERRORS = ("ungraded_answers", "fallback_questions", "llm_exceptions", "evaluator_rejections", "empty_cohort")
 CSV_FIELDS = ["experiment_id", "candidate_id", "mode", *_FLAGS, "answer_source", "interview_id", "cohort_id",
               "cohort_sha256", "n_vacancies", "n_questions", "n_assessed_criteria", *_ERRORS,
               "total_s", "llm_wait_s", "llm_calls"]
@@ -90,3 +90,22 @@ def export_records(records: Sequence[ExperimentRecord], out_dir: Path) -> None:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
         writer.writeheader()
         writer.writerows(_csv_row(r) for r in records)
+
+
+def load_exported_records(path: Path) -> list[ExperimentRecord]:
+    """Inverse of export_records' runs.json. Records exported before relevant_criteria existed load with [].
+    Malformed input (not a list of objects, unknown or missing keys) raises ValueError."""
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(data, list) or not all(isinstance(d, dict) for d in data):
+        raise ValueError(f"{path}: runs JSON must be a list of objects")
+    known = {f.name for f in fields(ExperimentRecord)}
+    out = []
+    for n, d in enumerate(data):
+        unknown = set(d) - known
+        if unknown:
+            raise ValueError(f"{path}: record {n}: unknown keys {sorted(unknown)}")
+        try:
+            out.append(ExperimentRecord(**d))
+        except TypeError as exc:
+            raise ValueError(f"{path}: record {n}: {exc}") from exc
+    return out
