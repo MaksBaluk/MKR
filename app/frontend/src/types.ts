@@ -108,6 +108,10 @@ export interface CompetencyResult {
   reason: string;
   /** The evaluator judged the answers sufficient to grade every criterion; false means the grade is rough. */
   sufficient_evidence: boolean;
+  /** Share of rubric weight with a known grade (E_c); optional, absent on older API responses. */
+  coverage?: number | null;
+  /** False when coverage is below the overall-level threshold; show criteria, not one summary level. */
+  overall_level_allowed?: boolean;
   evidence: { turn_id: string; exact_excerpt: string }[];
 }
 

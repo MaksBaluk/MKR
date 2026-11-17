@@ -59,6 +59,31 @@ A descriptive action score among assessed rubric criteria `K_c={d∈D_c:s_cd≠�
 
 `M_c` is an illustrative action summary and `E_c` is evidence coverage. **Neither replaces the individual criterion scores in vacancy matching.** Baseline self-rating remains independently editable and versioned, never overwriting an accepted LLM assessment.
 
+## 3a. Topic coverage vs score, criterion states, follow-up goal contract
+
+Implemented in `app/backend/domain/topic_summary.py`, `assessment.py`, `core_flow.py`.
+
+- **Score and coverage are separate.** `M_c` (score among assessed criteria) is never read alone: it is shown with `E_c` (weight share of assessed criteria). A topic with `E_c < MIN_COVERAGE_FOR_OVERALL` (0.6) has `overall_level_allowed=false`; the UI must show criterion-level evidence, not one overall level. The API returns `coverage` and `overall_level_allowed` on result competency items.
+- **Criterion states** (per criterion, from latest assessment): `UNKNOWN` (score `null`); `CONFIRMED` (`s>=CONFIRMED_SCORE`=0.75); `DECLINED` (`s<=DECLINED_SCORE`=0.05 **and** `sufficient_evidence`, i.e. the candidate said they lack the experience, a closed observation, not a gap to probe); `WEAK` (any other known score). **Open criteria** = `UNKNOWN` or `WEAK`, in rubric order. Only open criteria are targeted by follow-ups.
+- **Follow-up goal.** Evaluator may return `followup_goal = {criterion_ids: [str, ...] (min 1), reason: str (min 1), expected_evidence: str}`. Backend sanitization (`sanitize_goal`) keeps only ids that exist in the action rubric **and** are still open; if none remain the goal is dropped (no goal). The sanitized goal is persisted as `eval_goal` on the answered `core_turns` row (migration 0009; also `followup_reason`). The next question targets the goal criteria, or else all open criteria. If no criterion is open the topic closes early (no forced second question); otherwise the existing minimum of two questions per topic applies. Caps stay: 5 shown questions per topic, 10 topics.
+- The LLM goal is a proposal. Python owns budgets, validation and the decision to continue.
+
+## 3b. Policy constants (policy, not calibration)
+
+| Constant | Value | Role |
+|---|---|---|
+| `CONFIRMED_SCORE` | 0.75 | lower edge of band "good"; criterion `CONFIRMED` |
+| `DECLINED_SCORE` | 0.05 | with sufficient evidence: criterion `DECLINED` |
+| `EARLY_CLOSE_SCORE` | 0.75 | strong sufficient answer may close topic early |
+| `MIN_COVERAGE_FOR_OVERALL` | 0.6 | below it no overall topic level is shown |
+| `SELF_CLAIM_THRESHOLD` | 0.7 | self-rating at/above it counts as a claim worth verifying |
+| `SELF_GAP` | 0.25 | claim minus `M_c` at/above it sets planner `needs_verification` |
+| `ε(τ)` | `min(0.05, τ/2)` | borderline margin (§4) |
+
+These are author's policy values, not statistically calibrated; they need expert review.
+
+**`D_vga` limitation.** By default `D_vga` is **all** rubric criteria of the alternative's action, with target `τ` derived by requirement level (policy-derived, not an employer statement). The code supports an optional per-alternative `criterion_ids` subset; **the 90 fixtures do not contain it**, so every fixture alternative uses the whole rubric. Fixture requirements are therefore harder to satisfy than a vacancy-specific criterion list would be. An invalid `criterion_ids` currently falls back silently to the whole rubric.
+
 ## 4. Requirement thresholds and interval fulfilment
 
 Each alternative `(v,g,a)` lists required **criterion IDs** `D_vga` and a documented target `τ_vgad∈(0,1]` per criterion. ESCO URI does not determine targets. If the vacancy states no level, apply an explicitly named **policy-derived rubric threshold** or mark the target unavailable; never report such a value as an employer statement. For existing integer requirements, a documented migration may convert `1→.50`, `2→.75`, `3→.90`, tagged `POLICY_DERIVED_LEGACY`; never silently reinterpret stored values. Rubrics/target versions must be compatible or the item is `NOT_EVALUABLE`.
@@ -90,6 +115,10 @@ Sort descending by the tuple
 `K(v)=(Z_v, X_v, L_v^M, L_v^P, -W_v^M, -W_v^P)`;
 
 on an exact tie sort **stable vacancy ID ascending as a string** (UUID-compatible). This is an ordered multi-criteria rule; it is not a calibrated 'fit score'. Explanations include mandatory status, known fulfilled/failed/unassessed actions, rubric evidence, experience mismatch, criteria and target provenance and low-information conditions. For all-unassessed profiles the rank is **not** presented as confident evidence of match; clearly show `LOW_INFORMATION`.
+
+**Self-rating tie-break `T_v`, `J_v`.** After the six-part key and before the vacancy id, sort by `T_v` desc then `J_v` desc. For group `g` let `b_vg` = the **maximum known** self-rating among its alternatives' actions (groups with none known contribute nothing to the sum). `T_v = Σ_g b_vg / |G_v|` over all groups of the vacancy; `J_v = |{g: b_vg known}| / |G_v|` (share of groups with any self-rating). Full key: `(Z, X, L^M, L^P, -W^M, -W^P, T_v, J_v)`, then id ascending. Self-ratings only break exact ties of the interview-based key; they never raise `L`, never change `Z`/`X`, and are not evidence. Never shown as classes or percents. `GET /profiles/{id}/results` order is exactly this key; `confirmed_share` is a display field, not a sort key.
+
+**Planner flag.** `needs_verification(self_rating, summary)` is true when `self_rating>=SELF_CLAIM_THRESHOLD` (0.7) and either the topic has `E_c<MIN_COVERAGE_FOR_OVERALL` or `self_rating-M_c>=SELF_GAP` (0.25). It prioritizes asking, not scoring.
 
 Potential trade-off: conservative sorting favors observed evidence; another set of rank policies may reorder uncertain jobs. Validate expert relevance before claiming this policy is optimal. Do not show a large percentage, even if an internal bounded number happens to reach 1.
 

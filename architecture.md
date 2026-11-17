@@ -78,6 +78,10 @@ The model may propose interpretations, but backend owns identity, permissions, b
 - Vacancy target: each required criterion has documented `τ∈(0,1]` and source/policy. Unknown thresholds render a requirement not yet evaluable, not automatically achieved. OR alternatives use `max`, never sum.
 - Recommendation sorting: descending `(Z, X, L_mandatory, L_preferred, -W_mandatory, -W_preferred)`, stable string ID ascending. Mandatory unmet requirements cannot be compensated by strong optional ones. This is not a probability. `LOW_INFORMATION` when evidence is sparse.
 
+### Follow-up flow within a topic
+
+1. Candidate answer is persisted (idempotency key). 2. Evaluator grades all topic answers and may return a `followup_goal` (criterion ids, reason, expected evidence). 3. Backend sanitizes the goal to rubric-valid, still-open criteria (`UNKNOWN`/`WEAK`; `CONFIRMED`/`DECLINED` are closed) and persists it as `eval_goal` (+ `followup_reason`) on the answered `core_turns` row (migration 0009). 4. The next question is generated for the goal criteria, or all open criteria without a goal; bank-fallback turns carry no goal. 5. No open criteria: topic closes early; otherwise minimum two questions, cap 5 per topic, 10 topics. Results show `M_c` with coverage `E_c`; below 0.6 coverage no overall level is shown. Results order is `(Z,X,L,W)` plus `T_v/J_v` self-rating tie-break (`MATH_SPEC.md` §3a, §5).
+
 ## 5. Suggested persisted entities
 
 - `CandidateProfile`, `CandidateSelfRating` (editable, action-level), `ProfileVersion` (immutable).
