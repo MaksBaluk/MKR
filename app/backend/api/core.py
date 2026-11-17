@@ -18,7 +18,9 @@ from backend.domain.core_flow import RubricMap, planner_state
 from backend.domain.assessment import GOAL_TEXT_MAX, FollowupGoal, sanitize_goal
 from backend.domain.topic_summary import TopicSummary, needs_verification, open_criteria, topic_summary
 from backend.domain.candidate_level import resolve_level
-from backend.domain.interview_budget import needs_min_followup, topic_open_for_question
+from backend.domain.difficulty import (DEFAULT_CONFIG, ControllerState, Difficulty, DifficultyDecision,
+                                       initial_difficulty, market_level, next_step)
+from backend.domain.interview_budget import MIN_SHOWN_QUESTIONS_PER_ACTION, topic_open_for_question
 from backend.domain.market import VacancyInput, compute_market
 from backend.domain.planner import choose_next
 from backend.agents.graphs import run_answer, run_ask
@@ -287,15 +289,40 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
             goal_memo[a] = goal
         return goal_memo[a]
 
+    level_ctx = _level_context(db, iv)
+    start_level, start_reason = initial_difficulty(level_ctx["candidate_level"],
+                                                   market_level([r.get("years_min") for r in revisions]))
+    decision_memo: dict[str, tuple[ControllerState, DifficultyDecision]] = {}
+
+    def decision(a: str) -> tuple[ControllerState, DifficultyDecision]:
+        """Controller state replayed from the topic's stored turns, then the decision for its next question.
+        A topic without turns starts at the initial difficulty; a legacy last turn (NULL difficulty) restarts there."""
+        if a not in decision_memo:
+            mine = [t for t in turns if t.action_id == a]
+            history = tuple(Difficulty(t.difficulty) for t in mine if t.difficulty in Difficulty.__members__)
+            if not mine:
+                st = ControllerState(start_level, 0, ())
+                decision_memo[a] = st, DifficultyDecision(start_level, start_reason, "CONTINUE", tuple(open_ids(a)))
+            else:
+                last = mine[-1]
+                legacy = last.difficulty not in Difficulty.__members__
+                st = ControllerState(start_level if legacy else Difficulty(last.difficulty), len(mine), history)
+                d = next_step(st, DEFAULT_CONFIG, targeted=last.target_criteria or [], scores=cscores,
+                              topic_score=latest_in_session.get(a), sufficient=sufficient.get(a, False),
+                              open_criteria=open_ids(a), goal_open=goal_for(a) is not None)
+                if legacy:
+                    d = DifficultyDecision(start_level, "LEGACY_RESTART", d.action, d.target_criteria)
+                decision_memo[a] = st, d
+        return decision_memo[a]
+
     def closed(a: str) -> bool:
-        """A graded topic with no open criterion left (all CONFIRMED or DECLINED) gets no more questions."""
-        return a in latest_in_session and not open_ids(a)
+        """A graded topic the controller closes (no open criterion, question cap, or enough evidence) gets no more
+        questions. Ungraded topics (no accepted assessment) are never continued: see eligible()."""
+        return a in latest_in_session and decision(a)[1].action == "CLOSE"
 
     def needs_second(a: str) -> bool:
-        """Min two shown questions per graded topic while criteria stay open, unless the first answer was
-        sufficient and >= 0.75 (or declined)."""
-        return not closed(a) and needs_min_followup(shown[a], graded=a in latest_in_session,
-                                                    score=latest_in_session.get(a), sufficient=sufficient.get(a, False))
+        """Min two shown questions per graded topic: the controller keeps it open (needs_min_followup) below two."""
+        return a in latest_in_session and shown[a] < MIN_SHOWN_QUESTIONS_PER_ACTION and not closed(a)
 
     # Otherwise a started topic is re-asked only when the Evaluator found insufficient evidence (null score) or its
     # last answer left a validated goal on a still-open criterion; the 5-question and 10-topic caps still apply.
@@ -327,20 +354,26 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     unmet = open_ids(action)
     goal = goal_for(action)  # the Evaluator may have just confirmed the criterion it named: re-checked in goal_for
     goal_dict = goal.model_dump() if goal else None
+    before, chosen = decision(action)
+    level = chosen.next_level  # the controller state advances for bank fallback questions too
     result = run_ask({"action_id": action, "action_name": label, "summary": comp.summary if comp else "",
                       "unmet_criteria": unmet,
                       "previous_answers": [t.answer_text for t in answered][-3:],
                       "asked_questions": [t.question_text for t in turns if t.action_id == action],
                       "followup_goal": goal_dict,
                       "off_topic_detected": bool(answered and answered[-1].off_topic),
-                      **_level_context(db, iv)}, get_chat_model())
+                      "difficulty": level.value, **level_ctx}, get_chat_model())
     question, source = result.question_text, result.source
     targeted = source == "LLM_INTERVIEWER"  # a bank fallback question is not aimed at specific criteria
+    after = ControllerState(level, before.shown + 1, before.history + (level,))
     turn = CoreTurn(interview_id=iv.id, sequence=len(turns) + 1, action_id=action, question_text=question,
                     question_source=source,
                     target_criteria=(goal.criterion_ids if goal else unmet) if targeted else None,
                     followup_reason=((goal.reason[:GOAL_TEXT_MAX] if goal else "OPEN_CRITERIA") if targeted
-                                     else "BANK_FALLBACK"))
+                                     else "BANK_FALLBACK"),
+                    difficulty=level.value,
+                    difficulty_reason=(chosen.reason if targeted else f"FALLBACK:{chosen.reason}")[:64],
+                    controller_before=_controller_json(before), controller_after=_controller_json(after))
     iv.version += 1
     db.add(turn)
     try:
@@ -354,6 +387,10 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         db.refresh(iv)
         return {"turn": _turn_dict(winner, _names(db)), "version": iv.version, "done": False}
     return {"turn": _turn_dict(turn, _names(db)), "version": iv.version, "done": False}
+
+
+def _controller_json(st: ControllerState) -> dict:
+    return {"level": st.level.value, "shown": st.shown, "history": [d.value for d in st.history]}
 
 
 def _level_context(db: Session, iv: CoreInterview) -> dict:
@@ -385,7 +422,9 @@ def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -
     open_ids = open_criteria_for(db, action_id, criterion_scores(prior), bool(prior and prior[-1].sufficient_evidence))
     result = run_answer({"action_id": action_id, "rubric_version": version, "allowed_criterion_ids": criteria,
                          "bands": criterion_bands(db, action_id), "turns": {t.id: t.answer_text for t in turns},
-                         "open_criterion_ids": open_ids}, model)
+                         "open_criterion_ids": open_ids,
+                         "turn_meta": {t.id: {"difficulty": t.difficulty, "target_criteria": t.target_criteria}
+                                       for t in turns}}, model)
     if result.status != "ACCEPTED":
         return "UNGRADED"
     goal = result.output.followup_goal  # already sanitized against allowed + open criteria by the answer graph

@@ -75,6 +75,7 @@ class AskState(TypedDict, total=False):
     off_topic_detected: bool
     candidate_level: str | None
     years_experience: int | None
+    difficulty: str | None  # BASIC | INTERMEDIATE | ADVANCED from the DifficultyController
     question: str | None
     source: str
 
@@ -86,6 +87,7 @@ class AnswerState(TypedDict, total=False):
     bands: dict[str, str] | None  # per-criterion anchored bands of a seeded rubric
     turns: dict[str, str]
     open_criterion_ids: list[str] | None  # None/absent: every allowed criterion is open
+    turn_meta: dict[str, dict] | None  # turn_id -> {difficulty, target_criteria}; context, never a score
     attempt: int
     output: EvaluatorOutput | None
     status: str
@@ -155,7 +157,7 @@ def _build_ask(model):
                 unmet_criteria=s.get("unmet_criteria", []), previous_answers=s.get("previous_answers", [])[-3:],
                 followup_goal=s.get("followup_goal"), off_topic_detected=s.get("off_topic_detected", False),
                 candidate_level=s.get("candidate_level"), years_experience=s.get("years_experience"),
-                asked_questions=s.get("asked_questions", []))
+                asked_questions=s.get("asked_questions", []), difficulty=s.get("difficulty"))
             resp = _invoke(model, [SystemMessage(INTERVIEWER_SYSTEM), HumanMessage(user)])
             question = _text(resp).strip().strip('"«»').strip()
             if validate_question(question, s.get("off_topic_detected", False)) in ("TOO_LONG", "MULTI_PART"):
@@ -216,7 +218,8 @@ def _build_answer(model):
             return {"status": "UNGRADED", "reason": "NO_MODEL", "retryable": False, "output": None}
         user = format_evaluator_input(action_id=s["action_id"], rubric_version=s["rubric_version"],
                                       allowed_criterion_ids=s["allowed_criterion_ids"], bands=s.get("bands"),
-                                      turns=s["turns"], open_criterion_ids=s.get("open_criterion_ids"))
+                                      turns=s["turns"], open_criterion_ids=s.get("open_criterion_ids"),
+                                      turn_meta=s.get("turn_meta"))
         try:
             raw = _text(_invoke(model, [SystemMessage(EVALUATOR_SYSTEM), HumanMessage(user)]))
         except Exception as exc:  # noqa: BLE001 - timeouts/connection errors are not retried
