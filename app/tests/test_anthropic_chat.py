@@ -17,10 +17,12 @@ def test_sends_a_messages_api_request_and_returns_the_text():
 
     def handler(request: httpx.Request) -> httpx.Response:
         seen["url"], seen["headers"], seen["body"] = str(request.url), request.headers, json.loads(request.content)
-        return httpx.Response(200, json={"content": [{"type": "text", "text": "Питання?"}], "stop_reason": "end_turn"})
+        return httpx.Response(200, json={"content": [{"type": "text", "text": "Питання?"}], "stop_reason": "end_turn",
+                                         "model": "claude-haiku-5-5-served"})
 
     out = make(handler).invoke([SystemMessage("Ти інтерв'юер"), HumanMessage("Тема: FastAPI")])
     assert out.content == "Питання?"
+    assert out.response_metadata == {"model": "claude-haiku-5-5-served"}  # served model for experiment records
     assert seen["url"] == "https://api.anthropic.com/v1/messages"
     assert seen["headers"]["x-api-key"] == "sk-ant-test" and seen["headers"]["anthropic-version"] == "2023-06-01"
     body = seen["body"]

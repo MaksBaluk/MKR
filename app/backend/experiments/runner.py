@@ -12,19 +12,19 @@ import time
 import uuid
 from contextlib import contextmanager
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+import backend.agents.model as agent_model
+import backend.agents.prompts as prompts
 import backend.api.core as core
-from backend.agents.prompts import EVALUATOR_SYSTEM, INTERVIEWER_SYSTEM
-from backend.api.core import _revisions, _seeded_rubric, cohort_actions, current_criteria_rows, rubric_map
+from backend.api.core import _revisions, _seeded_rubric, cohort_actions, current_criteria_rows, static_plan_for
 from backend.api.recommendations import rank_items
 from backend.config import get_settings
-from backend.domain.market import VacancyInput, compute_market
 from backend.experiments.config import ExperimentConfig, InterviewMode
-from backend.experiments.planning import plan_topics, static_plan_json
 from backend.experiments.providers import DEFAULT_ANSWER, AnswerProvider, CandidateSpec
 from backend.experiments.store import ExperimentRecord
 from backend.models import CohortSnapshot, CoreInterview, CoreTurn, CriterionAssessment, Rubric
@@ -34,8 +34,12 @@ API = "/api/v1"
 MAX_ANSWER_CHARS = 4000
 
 
-def prompt_version() -> str:
-    return hashlib.sha256(f"{INTERVIEWER_SYSTEM}\n{EVALUATOR_SYSTEM}".encode()).hexdigest()
+PROMPTS_FILE = Path(prompts.__file__)
+
+
+def prompt_version(path: Path = PROMPTS_FILE) -> str:
+    """sha256 of the whole prompts module source: system prompts, input formatters and default bands."""
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 @dataclass
@@ -43,6 +47,8 @@ class _LlmStats:
     calls: int = 0
     wait_s: float = 0.0
     exceptions: int = 0
+    rejections: int = 0  # evaluator runs that returned without a provider exception but were not ACCEPTED
+    served: set[str] = field(default_factory=set)  # model names reported in response metadata
     lock: threading.Lock = field(default_factory=threading.Lock)
 
 
@@ -55,7 +61,13 @@ class _TimedModel:
     def invoke(self, *args, **kwargs):
         start, failed = time.perf_counter(), False
         try:
-            return self._inner.invoke(*args, **kwargs)
+            result = self._inner.invoke(*args, **kwargs)
+            meta = getattr(result, "response_metadata", None) or {}
+            served = meta.get("model_name") or meta.get("model") if isinstance(meta, dict) else None
+            if served:
+                with self._stats.lock:
+                    self._stats.served.add(str(served))
+            return result
         except Exception:
             failed = True
             raise
@@ -71,28 +83,49 @@ class _TimedModel:
 
 @contextmanager
 def _timed_model(stats: _LlmStats):
-    """Wrap backend.api.core.get_chat_model for the duration of the run; yields the unwrapped factory."""
-    original = core.get_chat_model
+    """Wrap backend.api.core.get_chat_model (timing) and run_answer (evaluator rejections) for the run;
+    yields the unwrapped model factory."""
+    original, original_answer = core.get_chat_model, core.run_answer
 
     def wrapped():
         model = original()
         return None if model is None else _TimedModel(model, stats)
 
-    core.get_chat_model = wrapped  # module-global patch: not safe for concurrent runs in one process
+    def counted_answer(state, model):
+        before = stats.exceptions
+        result = original_answer(state, model)
+        if result.status != "ACCEPTED" and stats.exceptions == before:
+            with stats.lock:
+                stats.rejections += 1
+        return result
+
+    # module-global patch: not safe for concurrent runs in one process
+    core.get_chat_model, core.run_answer = wrapped, counted_answer
     try:
         yield original
     finally:
-        core.get_chat_model = original
+        core.get_chat_model, core.run_answer = original, original_answer
 
 
-def _model_info(model) -> dict:
+def _number(model, *names):
+    for n in names:
+        v = getattr(model, n, None)
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            return v
+    return None
+
+
+def _model_info(model, factory) -> dict:
+    """Configured provider only when the product factory is in use; an injected factory never reports settings."""
     if model is None:
         return {"provider": None}
+    if factory is not agent_model.get_chat_model:
+        return {"provider": "injected", "client_class": type(model).__name__, "served_models": []}
     s = get_settings()
-    temperature = getattr(model, "temperature", getattr(model, "_temperature", None))
-    return {"provider": s.llm_provider if s.llm_ready else "injected", "model": s.llm_model if s.llm_ready else None,
-            "temperature": temperature if isinstance(temperature, (int, float)) else None,
-            "client_class": type(model).__name__}
+    return {"provider": s.llm_provider, "model": s.llm_model,
+            "temperature": _number(model, "temperature", "_temperature"),
+            "max_tokens": _number(model, "max_tokens", "_max_tokens"), "timeout": s.llm_timeout_seconds,
+            "client_class": type(model).__name__, "served_models": []}
 
 
 def _ok(response, status: int) -> dict:
@@ -148,28 +181,23 @@ def _latest_assessments(db: Session, interview_id: str) -> list[dict]:
     return list(out.values())
 
 
-def _rubric_versions(db: Session, snap: CohortSnapshot, interview_id: str | None) -> dict[str, str]:
+def _seeded_versions(db: Session, snap: CohortSnapshot) -> dict[str, str]:
     out = {}
     for a in sorted(cohort_actions(_revisions(snap))):
         rubric = _seeded_rubric(db, a)
         if rubric is not None:
             out[a] = rubric.version
+    return out
+
+
+def _rubric_versions(db: Session, snap: CohortSnapshot, interview_id: str | None) -> dict[str, str]:
+    out = _seeded_versions(db, snap)
     if interview_id:
         for r in db.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == interview_id)):
             rubric = db.get(Rubric, r.rubric_id)
             if rubric is not None:
                 out[r.action_id] = rubric.version
     return dict(sorted(out.items()))
-
-
-def _static_plan(db: Session, snap: CohortSnapshot, cfg: ExperimentConfig) -> dict:
-    """Same plan the engine would fix before the first answer: greedy coverage over the cohort, no scores."""
-    revisions = _revisions(snap)
-    mass = {e.action_id: e.mass for e in compute_market([
-        VacancyInput(r["id"], tuple(tuple(a["competency_id"] for a in g["alternatives"]) for g in r["groups"]))
-        for r in revisions])}
-    rubrics = rubric_map(db, sorted(cohort_actions(revisions)), {})
-    return static_plan_json(plan_topics(revisions, rubrics, mass, cfg.max_topics), cfg)
 
 
 def _interview(client: TestClient, h: dict, db: Session, snap: CohortSnapshot, cfg: ExperimentConfig,
@@ -179,7 +207,7 @@ def _interview(client: TestClient, h: dict, db: Session, snap: CohortSnapshot, c
     db.expire_all()
     row = db.get(CoreInterview, iv_id)
     row.mode_config = cfg.to_json()  # server-side only: never a public request field
-    row.static_plan = None if cfg.adaptive_topics else _static_plan(db, snap, cfg)
+    row.static_plan = None if cfg.adaptive_topics else static_plan_for(db, _revisions(snap), cfg)
     db.commit()
     qa: list[dict] = []
     shown: dict[str, int] = {}
@@ -228,8 +256,10 @@ def run_experiment(experiment_id: str, cfg: ExperimentConfig, candidate: Candida
         snap = db.get(CohortSnapshot, cohort["cohort_id"])
         if interviewing:
             with _timed_model(stats) as factory:
-                model_info = _model_info(factory())
+                model_info = _model_info(factory(), factory)
                 interview_id, qa = _interview(client, h, db, snap, cfg, candidate, provider)
+            if "served_models" in model_info:
+                model_info["served_models"] = sorted(stats.served)
             db.expire_all()
             assessments = _latest_assessments(db, interview_id)
         # Mode A: scores={} (every criterion unknown); self-ratings act only through the T_v/J_v tie-break.
@@ -237,7 +267,8 @@ def run_experiment(experiment_id: str, cfg: ExperimentConfig, candidate: Candida
         rubric_versions = _rubric_versions(db, snap, interview_id)
     errors = {"ungraded_answers": sum(1 for q in qa if q["assessment_status"] != "ACCEPTED"),
               "fallback_questions": sum(1 for q in qa if q["question_source"] != "LLM_INTERVIEWER"),
-              "llm_exceptions": stats.exceptions, "empty_cohort": bool(cohort["empty"])}
+              "llm_exceptions": stats.exceptions, "evaluator_rejections": stats.rejections,
+              "empty_cohort": bool(cohort["empty"])}
     return ExperimentRecord(
         experiment_id=experiment_id, candidate_id=candidate.candidate_id, mode=cfg.mode.value, config=cfg.to_json(),
         cohort_id=cohort["cohort_id"] or "", cohort_sha256=cohort["sha256"] or "", profile_snapshot=profile,
@@ -250,10 +281,18 @@ def run_experiment(experiment_id: str, cfg: ExperimentConfig, candidate: Candida
 
 
 def rerank(record: ExperimentRecord, db: Session) -> list[dict]:
-    """Ranking recomputed from the stored assessments, profile snapshot and cohort snapshot; no model call."""
+    """Ranking recomputed from the stored assessments, profile snapshot and cohort snapshot; no model call.
+    Raises ValueError when the cohort snapshot or the seeded rubric versions differ from the recorded ones."""
     if not record.cohort_id:
         return []
     snap = db.get(CohortSnapshot, record.cohort_id)
     if snap is None or snap.sha256 != record.cohort_sha256:
         raise ValueError(f"cohort snapshot {record.cohort_id} missing or changed (sha256 mismatch)")
+    current = _seeded_versions(db, snap)
+    # auto-1 rubrics (LLM-proposed for actions without a seeded rubric) never enter rubric_map, so ranking ignores them
+    expected = {**{a: v for a, v in record.rubric_versions.items() if v == "auto-1" and a not in current}, **current}
+    if dict(sorted(expected.items())) != dict(sorted(record.rubric_versions.items())):
+        diff = sorted(a for a in set(expected) | set(record.rubric_versions)
+                      if expected.get(a) != record.rubric_versions.get(a))
+        raise ValueError(f"rubric versions changed since the run for actions {diff[:10]}")
     return _rank(db, snap, record.profile_snapshot, _scores(record.assessments))

@@ -13,3 +13,4 @@ app/frontend/dist/
 .DS_Store
 app/.env
 app/DEMO_CREDENTIALS.txt
+app/out/

@@ -312,7 +312,7 @@ class CoreInterview(Base):
     # Experiment-only, set server-side by the runner: ExperimentConfig (mode + ablation flags) and the fixed STATIC topic plan.
     # NULL for product interviews (= fully adaptive).
     mode_config: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    static_plan: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    static_plan: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     __table_args__ = (UniqueConstraint("profile_id", "attempt_no", name="uq_attempt_profile_no"),)
 
 
@@ -363,5 +363,5 @@ class ExperimentRun(Base):
     assessments: Mapped[list] = mapped_column(JSON)
     ranking: Mapped[list] = mapped_column(JSON)
     timings: Mapped[dict] = mapped_column(JSON)
-    errors: Mapped[list] = mapped_column(JSON)
+    errors: Mapped[dict] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)

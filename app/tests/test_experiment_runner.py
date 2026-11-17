@@ -1,8 +1,10 @@
 """Experiment runner: modes A/B/C through the real API, stored runs, deterministic re-ranking and the CLI."""
 import csv
+import hashlib
 import json
 import re
 from dataclasses import replace
+from types import SimpleNamespace
 
 import pytest
 from sqlalchemy import select
@@ -12,9 +14,10 @@ from backend.api.core import _revisions
 from backend.domain.core_flow import self_claim_metrics
 from backend.experiments.config import ExperimentConfig, InterviewMode, config_for
 from backend.experiments.providers import CandidateSpec, ScriptedProvider
-from backend.experiments.runner import ALGORITHM_VERSION, rerank, run_experiment
+from backend.agents.prompts import INTERVIEWER_SYSTEM
+from backend.experiments.runner import ALGORITHM_VERSION, PROMPTS_FILE, prompt_version, rerank, run_experiment
 from backend.experiments.store import CSV_FIELDS, export_records, load_record, save_record
-from backend.models import CohortSnapshot, CoreInterview, CoreTurn, ExperimentRun, Vacancy
+from backend.models import CohortSnapshot, CoreInterview, CoreTurn, ExperimentRun, Rubric, Vacancy
 from tests.test_followup_flow import PolicyChat, _use
 
 INITIAL = InterviewMode.INITIAL_PROFILE
@@ -96,8 +99,10 @@ def test_run_static_and_adaptive_record_everything(client, db, monkeypatch, mode
                                    for a in rec.assessments)
     assert set(rec.timings) == {"total_s", "llm_wait_s", "calls"} and rec.timings["calls"] > 0
     assert 0 <= rec.timings["llm_wait_s"] <= rec.timings["total_s"]
-    assert rec.errors == {"ungraded_answers": 0, "fallback_questions": 0, "llm_exceptions": 0, "empty_cohort": False}
-    assert rec.model_info["client_class"] == "PolicyChat"
+    assert rec.errors == {"ungraded_answers": 0, "fallback_questions": 0, "llm_exceptions": 0,
+                          "evaluator_rejections": 0, "empty_cohort": False}
+    # injected factory: never the configured provider/model; PolicyChat sends no response metadata
+    assert rec.model_info == {"provider": "injected", "client_class": "PolicyChat", "served_models": []}
     assert rec.rubric_versions and set(rec.rubric_versions.values()) <= {"v1", "auto-1"}
     assert rec.ranking and any(i["label"] == "RANKED" for i in rec.ranking)
     assert rec.profile_snapshot["years_experience"] == 3 and rec.profile_snapshot["track"] == "python"
@@ -200,13 +205,24 @@ def _cli_inputs(tmp_path):
             "--answers", str(tmp_path / "answers.json"), "--out", str(tmp_path / "out")]
 
 
+class _Spy:
+    """Model factory that records calls; returns the wrapped fake (or None)."""
+
+    def __init__(self, fake=None):
+        self.fake, self.calls = fake, 0
+
+    def __call__(self):
+        self.calls += 1
+        return self.fake
+
+
 def test_cli_runs_modes_with_injected_model(tmp_path, capsys):
     from scripts.run_experiment import main
-    fake = PolicyChat(strong, sufficient=True)
+    spy = _Spy(PolicyChat(strong, sufficient=True))
     args = _cli_inputs(tmp_path) + ["--modes", "INITIAL_PROFILE", "STATIC_INTERVIEW", "ADAPTIVE_INTERVIEW",
                                     "--flags", "no_adaptive_difficulty", "--total-budget", "3",
-                                    "--experiment-id", "cli-1"]
-    assert main(args, model_factory=lambda: fake) == 0
+                                    "--llm", "configured", "--experiment-id", "cli-1"]
+    assert main(args, model_factory=spy) == 0 and spy.calls > 0
     assert core.get_chat_model is not None and core.get_chat_model.__module__ == "backend.agents.model"
     data = json.loads((tmp_path / "out" / "runs.json").read_text(encoding="utf-8"))
     assert [d["mode"] for d in data] == ["INITIAL_PROFILE", "STATIC_INTERVIEW", "ADAPTIVE_INTERVIEW"]
@@ -215,19 +231,98 @@ def test_cli_runs_modes_with_injected_model(tmp_path, capsys):
     assert data[0]["assessments"] == [] and all(d["assessments"] and d["timings"]["calls"] > 0 for d in data[1:])
     assert all(d["model_info"]["client_class"] == "PolicyChat" for d in data[1:])  # the injected model graded
     out = capsys.readouterr().out
+    assert "llm: provider=injected model=PolicyChat" in out
     assert str(tmp_path / "out") in out and len(re.findall(r"run [0-9a-f-]{36}", out)) == 3
 
 
-def test_cli_refuses_interview_without_llm_unless_allowed(tmp_path, capsys):
+def test_cli_default_mode_is_initial_and_calls_no_model(tmp_path):
     from scripts.run_experiment import main
-    args = _cli_inputs(tmp_path) + ["--modes", "STATIC_INTERVIEW", "--total-budget", "2"]
-    assert main(args) == 2 and not (tmp_path / "out").exists()
-    assert main(args + ["--allow-ungraded"]) == 0
+    spy = _Spy(PolicyChat(strong))
+    assert main(_cli_inputs(tmp_path), model_factory=spy) == 0 and spy.calls == 0
+    data = json.loads((tmp_path / "out" / "runs.json").read_text(encoding="utf-8"))
+    assert [d["mode"] for d in data] == ["INITIAL_PROFILE"]
+
+
+@pytest.mark.parametrize("extra", [[], ["--allow-ungraded"]], ids=["plain", "allow-ungraded"])
+def test_cli_interview_without_llm_flag_is_refused(tmp_path, capsys, extra):
+    from scripts.run_experiment import main
+    spy = _Spy(PolicyChat(strong))
+    args = _cli_inputs(tmp_path) + ["--modes", "STATIC_INTERVIEW", "--total-budget", "2", *extra]
+    assert main(args, model_factory=spy) == 2 and spy.calls == 0 and not (tmp_path / "out").exists()
+    assert "error: interview modes need --llm" in capsys.readouterr().err
+
+
+def test_cli_llm_none_needs_allow_ungraded_and_never_calls_a_model(tmp_path, capsys):
+    from scripts.run_experiment import main
+    spy = _Spy(PolicyChat(strong))
+    args = _cli_inputs(tmp_path) + ["--modes", "STATIC_INTERVIEW", "--total-budget", "2", "--llm", "none"]
+    assert main(args, model_factory=spy) == 2 and not (tmp_path / "out").exists()
+    assert main(args + ["--allow-ungraded"], model_factory=spy) == 0 and spy.calls == 0
     data = json.loads((tmp_path / "out" / "runs.json").read_text(encoding="utf-8"))
     assert data[0]["errors"]["ungraded_answers"] == len(data[0]["qa"]) > 0 and data[0]["assessments"] == []
-    assert data[0]["model_info"] == {"provider": None}
-    with pytest.raises(SystemExit):
-        main(["--candidates", "x.json", "--answers", "y.json", "--out", str(tmp_path)])  # --db is required
+    assert data[0]["model_info"] == {"provider": None} and data[0]["timings"]["calls"] == 0
+    assert "llm: none" in capsys.readouterr().out
+
+
+def test_cli_llm_configured_prints_provider_without_secrets(tmp_path, capsys, monkeypatch):
+    """Product factory path (no injection): provider/model printed and recorded; key and base URL never printed."""
+    from types import SimpleNamespace
+    from scripts.run_experiment import main
+    fake = PolicyChat(strong, sufficient=True)
+    settings = SimpleNamespace(database_url="sqlite+pysqlite://", llm_provider="openai_compatible",
+                               llm_model="vendor/model-x", llm_api_key="sk-SECRET-123",
+                               llm_base_url="https://secret-base.example/v1", llm_timeout_seconds=18.0)
+    monkeypatch.setattr("scripts.run_experiment.get_settings", lambda: settings)
+    monkeypatch.setattr("backend.experiments.runner.get_settings", lambda: settings)
+    factory = lambda: fake  # noqa: E731
+    monkeypatch.setattr("backend.agents.model.get_chat_model", factory)  # stands in for the configured provider
+    monkeypatch.setattr("backend.api.core.get_chat_model", factory)
+    args = _cli_inputs(tmp_path) + ["--modes", "ADAPTIVE_INTERVIEW", "--total-budget", "2", "--llm", "configured"]
+    assert main(args) == 0
+    captured = capsys.readouterr()
+    assert "llm: provider=openai_compatible model=vendor/model-x" in captured.out
+    assert "SECRET" not in captured.out + captured.err and "secret-base" not in captured.out + captured.err
+    data = json.loads((tmp_path / "out" / "runs.json").read_text(encoding="utf-8"))
+    info = data[0]["model_info"]
+    assert info["provider"] == "openai_compatible" and info["model"] == "vendor/model-x" and info["timeout"] == 18.0
+    assert set(info) == {"provider", "model", "temperature", "max_tokens", "timeout", "client_class", "served_models"}
+    assert data[0]["assessments"] and "SECRET" not in json.dumps(data)
+
+
+@pytest.mark.parametrize("extra,needle", [
+    (["--modes", "STATIC_INTERVIEW", "ADAPTIVE_INTERVIEW", "--llm", "none", "--allow-ungraded"], "--total-budget"),
+    (["--modes", "INITIAL_PROFILE", "--flags", "no_adaptive_topics"], "--flags"),
+    (["--modes", "STATIC_INTERVIEW", "--flags", "no_adaptive_topics", "--llm", "none", "--allow-ungraded",
+      "--total-budget", "2"], "--flags"),
+    (["--total-budget", "0"], "--total-budget"),
+    (["--total-budget", "-3"], "--total-budget"),
+    (["--total-budget", "two"], "--total-budget"),
+    (["--modes", "BOGUS"], "--modes"),
+])
+def test_cli_bad_arguments_exit_2_with_error(tmp_path, capsys, extra, needle):
+    from scripts.run_experiment import main
+    spy = _Spy(PolicyChat(strong))
+    assert main(_cli_inputs(tmp_path) + extra, model_factory=spy) == 2 and spy.calls == 0
+    err = capsys.readouterr().err
+    assert "error:" in err and needle in err and "Traceback" not in err
+    assert not (tmp_path / "out").exists()
+
+
+def test_cli_config_validation_error_exit_2(tmp_path, capsys, monkeypatch):
+    from scripts.run_experiment import main
+
+    def bad(*a, **k):
+        raise ValueError("max_topics must be in 1..10")
+
+    monkeypatch.setattr("scripts.run_experiment.config_for", bad)
+    assert main(_cli_inputs(tmp_path)) == 2
+    assert "error: invalid experiment config: max_topics" in capsys.readouterr().err
+
+
+def test_cli_requires_sqlite_db(tmp_path, capsys):
+    from scripts.run_experiment import main
+    assert main(["--candidates", "x.json", "--answers", "y.json", "--out", str(tmp_path)]) == 2  # --db is required
+    assert "--db" in capsys.readouterr().err
     assert main(["--db", "postgresql://x/y"] + _cli_inputs(tmp_path)[2:]) == 2
 
 
@@ -269,3 +364,65 @@ def test_cli_failing_run_keeps_batch_and_exits_nonzero(tmp_path, capsys):
     assert [d["candidate_id"] for d in data] == ["c1"]
     out = capsys.readouterr().out
     assert "FAILED bad INITIAL_PROFILE: RuntimeError" in out and "422" in out
+
+
+class _Garbled(PolicyChat):
+    """Interviewer works; the Evaluator answers with text that never validates (no provider exception)."""
+
+    def invoke(self, messages, *a, **k):
+        out = super().invoke(messages, *a, **k)
+        return out if messages[0].content == INTERVIEWER_SYSTEM else SimpleNamespace(content="не JSON")
+
+
+class _Served(PolicyChat):
+    def invoke(self, messages, *a, **k):
+        out = super().invoke(messages, *a, **k)
+        name = "vendor/interviewer-1" if messages[0].content == INTERVIEWER_SYSTEM else "vendor/evaluator-2"
+        return SimpleNamespace(content=out.content, response_metadata={"model_name": name})
+
+
+def test_evaluator_rejections_counted_apart_from_exceptions(client, db, monkeypatch):
+    _use(monkeypatch, _Garbled(strong, sufficient=True))
+    with db() as s:
+        rec = run_experiment("exp-rej", config_for(ADAPTIVE, total_budget=3), cand(), SCRIPT, client, s)
+    assert rec.qa and rec.errors["llm_exceptions"] == 0 and rec.errors["fallback_questions"] == 0
+    assert rec.errors["evaluator_rejections"] == rec.errors["ungraded_answers"] == len(rec.qa)
+    assert rec.assessments == []
+
+
+def test_served_models_from_response_metadata(client, db, monkeypatch):
+    _use(monkeypatch, _Served(strong, sufficient=True))
+    with db() as s:
+        rec = run_experiment("exp-served", config_for(ADAPTIVE, total_budget=2), cand(), SCRIPT, client, s)
+    assert rec.model_info["served_models"] == ["vendor/evaluator-2", "vendor/interviewer-1"]
+    assert rec.model_info["provider"] == "injected" and "model" not in rec.model_info
+
+
+def test_prompt_version_tracks_the_whole_prompts_module(tmp_path):
+    src = PROMPTS_FILE.read_text(encoding="utf-8")
+    assert prompt_version() == hashlib.sha256(PROMPTS_FILE.read_bytes()).hexdigest()
+    same, changed = tmp_path / "same.py", tmp_path / "changed.py"
+    same.write_text(src, encoding="utf-8")
+    # change only formatter code (not a system prompt): the version must still change
+    start = src.index("def format_evaluator_input")
+    assert src.count("def format_evaluator_input") == 1
+    changed.write_text(src[:start] + "# formatter edit\n" + src[start:], encoding="utf-8")
+    assert prompt_version(same) == prompt_version()
+    assert prompt_version(changed) != prompt_version()
+
+
+def test_rerank_refuses_changed_rubric_versions(client, db, monkeypatch):
+    _use(monkeypatch, PolicyChat(strong, sufficient=True))
+    with db() as s:
+        rec = run_experiment("exp-rv", config_for(ADAPTIVE, total_budget=2), cand(), SCRIPT, client, s)
+        action = next(a for a, v in rec.rubric_versions.items() if v == "v1")
+        assert rerank(rec, s) == rec.ranking
+        with pytest.raises(ValueError, match="rubric versions"):
+            rerank(replace(rec, rubric_versions={**rec.rubric_versions, action: "v0"}), s)
+        with pytest.raises(ValueError, match="rubric versions"):
+            rerank(replace(rec, rubric_versions={k: v for k, v in rec.rubric_versions.items() if k != action}), s)
+        rubric = s.scalar(select(Rubric).where(Rubric.action_id == action, Rubric.version == "v1"))
+        rubric.version = "v2"  # the seeded rubric row changed after the run
+        s.commit()
+        with pytest.raises(ValueError, match=action):
+            rerank(rec, s)

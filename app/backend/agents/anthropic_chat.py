@@ -45,5 +45,6 @@ class AnthropicChat:
             raise AnthropicRateLimitError("rate limited (429)")
         if resp.status_code >= 400:
             raise AnthropicAPIError(f"HTTP {resp.status_code}")
-        text = "".join(b.get("text", "") for b in resp.json().get("content", []) if b.get("type") == "text")
-        return SimpleNamespace(content=text)
+        data = resp.json()
+        text = "".join(b.get("text", "") for b in data.get("content", []) if b.get("type") == "text")
+        return SimpleNamespace(content=text, response_metadata={"model": data.get("model")})

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, fields
 from enum import Enum
 
@@ -44,9 +45,18 @@ class ExperimentConfig:
 
     @classmethod
     def from_json(cls, d: dict) -> "ExperimentConfig":
-        """Also reads a raw experiment_runs.config, which carries the run's `answer_source` (ignored here)."""
+        """Also reads a raw experiment_runs.config, which carries the run's `answer_source` (ignored here).
+        Any malformed input (not a mapping, missing/unknown key, bad mode or value type) raises ValueError."""
+        if not isinstance(d, Mapping) or "mode" not in d:
+            raise ValueError("experiment config must be a mapping with a 'mode' key")
         d = {k: v for k, v in d.items() if k != "answer_source"}
-        return cls(**{**d, "mode": InterviewMode(d["mode"])})
+        unknown = set(d) - {f.name for f in fields(cls)}
+        if unknown:
+            raise ValueError(f"unknown experiment config keys: {sorted(unknown)}")
+        try:
+            return cls(**{**d, "mode": InterviewMode(d["mode"])})
+        except TypeError as exc:  # e.g. a string where an int is compared in __post_init__
+            raise ValueError(f"invalid experiment config: {exc}") from exc
 
 
 def config_for(mode: InterviewMode, **overrides) -> ExperimentConfig:

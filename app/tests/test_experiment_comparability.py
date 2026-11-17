@@ -52,7 +52,7 @@ def test_same_initial_data_for_all_modes(abc):
     assert all(r.profile_snapshot["track"] == "python" and r.profile_snapshot["years_experience"] == 3 for r in recs)
     profiles = [{k: v for k, v in r.profile_snapshot.items() if k != "profile_id"} for r in recs]
     assert profiles[0] == profiles[1] == profiles[2]
-    assert recs[1].rubric_versions and recs[1].rubric_versions == recs[2].rubric_versions
+    assert recs[1].rubric_versions and recs[0].rubric_versions == recs[1].rubric_versions == recs[2].rubric_versions
     assert {v for r in recs for v in r.rubric_versions.values()} <= {"v1", "auto-1"}
     assert recs[1].prompt_version == recs[2].prompt_version and recs[1].algorithm_version == recs[2].algorithm_version
     assert {i["vacancy_id"] for i in recs[0].ranking} == {i["vacancy_id"] for i in recs[1].ranking} \
@@ -68,11 +68,34 @@ def test_static_and_adaptive_share_budget_and_caps(abc, db):
         per: dict[str, int] = {}
         for q in r.qa:
             per[q["action_id"]] = per.get(q["action_id"], 0) + 1
-        assert 0 < len(r.qa) <= BUDGET and len(per) <= 10 and max(per.values()) <= 5
+        assert len(per) <= 10 and max(per.values()) <= 5
         assert all(1 <= q["ordinal_in_topic"] <= 5 for q in r.qa)
+    # the python cohort has enough plan topics for B (k=2) and open criteria for C: both spend the whole budget
+    assert len(s.qa) == len(a.qa) == BUDGET
     with db() as sess:
         assert sess.get(CoreInterview, s.interview_id).static_plan is not None
         assert sess.get(CoreInterview, a.interview_id).static_plan is None
+
+
+def unknown(allowed, n):
+    """Evaluator never finds evidence: every criterion stays null, so topics stay open until the caps stop them."""
+    return {}, []
+
+
+@pytest.mark.parametrize("mode,over", [(ADAPTIVE, {}), (STATIC, {"static_questions_per_topic": 5})],
+                         ids=["adaptive", "static-k5"])
+def test_caps_bind_when_budget_exceeds_them(client, db, monkeypatch, mode, over):
+    """Budget 60 > 10 topics x 5 questions: only the product caps can stop the interview, and they must hold."""
+    _use(monkeypatch, PolicyChat(unknown, sufficient=False))
+    with db() as s:
+        rec = run_experiment("caps", config_for(mode, total_budget=60, **over), CAND, GOOD, client, s)
+    per: dict[str, int] = {}
+    for q in rec.qa:
+        per[q["action_id"]] = per.get(q["action_id"], 0) + 1
+    assert len(per) == 10 and max(per.values()) == 5  # both caps reached, neither exceeded
+    assert len(rec.qa) < 60 and all(1 <= q["ordinal_in_topic"] <= 5 for q in rec.qa)
+    if mode is STATIC:
+        assert len(rec.qa) == 50 and set(per.values()) == {5}
 
 
 def test_static_plan_identical_for_different_answer_scripts(client, db, monkeypatch):

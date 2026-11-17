@@ -47,6 +47,15 @@ def test_json_roundtrip():
     assert ExperimentConfig.from_json(d) == c
 
 
+@pytest.mark.parametrize("bad", [None, [], {}, {"adaptive_topics": True}, {"mode": "NOPE"},
+                                 {"mode": "ADAPTIVE_INTERVIEW", "extra": 1},
+                                 {"mode": "ADAPTIVE_INTERVIEW", "max_topics": "x"},
+                                 {"mode": "ADAPTIVE_INTERVIEW", "max_topics": 11}])
+def test_from_json_rejects_bad_input_with_value_error(bad):
+    with pytest.raises(ValueError):
+        ExperimentConfig.from_json(bad)
+
+
 def test_plan_topics_deterministic_and_greedy():
     mass = {"C": 0.9, "B": 0.1}
     # A covers 3 groups (gain 2/3) -> first. Then B,C tie on gain 1/6; mass picks C. D covered by A.

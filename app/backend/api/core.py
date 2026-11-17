@@ -132,6 +132,20 @@ def cohort_actions(revisions) -> set[str]:
     return {x["competency_id"] for r in revisions for g in r["groups"] for x in g["alternatives"]}
 
 
+def cohort_mass(revisions) -> dict[str, float]:
+    """Market mass per action of a cohort (§1), the planner's tie-break weight."""
+    return {e.action_id: e.mass for e in compute_market([
+        VacancyInput(r["id"], tuple(tuple(a["competency_id"] for a in g["alternatives"]) for g in r["groups"]))
+        for r in revisions])}
+
+
+def static_plan_for(db: Session, revisions, cfg: ExperimentConfig, mass: Mapping[str, float] | None = None) -> dict:
+    """Fixed STATIC topic plan: greedy coverage over the cohort with no scores (shared by the engine and the runner)."""
+    rubrics = rubric_map(db, sorted(cohort_actions(revisions)), {})
+    return static_plan_json(plan_topics(revisions, rubrics, cohort_mass(revisions) if mass is None else mass,
+                                        cfg.max_topics), cfg)
+
+
 def criteria_for(db: Session, action_id: str) -> list[str]:
     """Criterion ids of the seeded rubric (sorted), else the action itself."""
     return [c.criterion_id for c in _seeded_criteria(db, action_id)] or [action_id]
@@ -269,12 +283,9 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     for t in turns:
         shown[t.action_id] = shown.get(t.action_id, 0) + 1
     used = set(shown)
-    mass = {e.action_id: e.mass for e in compute_market([
-        VacancyInput(r["id"], tuple(tuple(a["competency_id"] for a in g["alternatives"]) for g in r["groups"]))
-        for r in revisions])}
+    mass = cohort_mass(revisions)
     if not cfg.adaptive_topics and iv.static_plan is None:  # fixed once, before any answer; never rebuilt
-        iv.static_plan = static_plan_json(plan_topics(revisions, rubric_map(db, sorted(cohort_actions(revisions)), {}),
-                                                      mass, cfg.max_topics), cfg)
+        iv.static_plan = static_plan_for(db, revisions, cfg, mass)
     latest_in_session = {a: t.m for a, t in summaries.items()}
     sufficient = {r.action_id: bool(r.sufficient_evidence) for r in session_rows}  # latest revision wins
 

@@ -95,10 +95,13 @@ Compare three interview modes (A `INITIAL_PROFILE`, B `STATIC_INTERVIEW`, C `ADA
 
 ```bash
 uv run python scripts/run_experiment.py --db sqlite:///experiments.db --candidates candidates.json \
-    --answers answers.json --modes INITIAL_PROFILE STATIC_INTERVIEW ADAPTIVE_INTERVIEW --out out/
+    --answers answers.json --modes INITIAL_PROFILE STATIC_INTERVIEW ADAPTIVE_INTERVIEW \
+    --llm configured --total-budget 12 --out out/
 ```
 
-Options: `--flags no_adaptive_topics no_adaptive_followup no_adaptive_difficulty` (ablations of mode C), `--total-budget N`, `--experiment-id`, `--allow-ungraded` (interview modes without an LLM: answers stay ungraded). Output: `out/runs.json`, `out/runs.csv` and rows in `experiment_runs`.
+`--modes` defaults to `INITIAL_PROFILE` (no LLM). Interview modes call the provider configured in `app/.env` (`LLM_PROVIDER`, `LLM_MODEL`, ...) only with an explicit `--llm configured`: questions, scripted answers, vacancy and rubric text are then sent to that provider. The CLI prints the provider and model name before the first run (never the key or base URL). `--llm none --allow-ungraded` runs interview modes without any model (bank questions, answers stay ungraded). Without `--llm`, interview modes exit with code 2.
+
+Options: `--flags no_adaptive_topics no_adaptive_followup no_adaptive_difficulty` (ablations of mode C; an error without `ADAPTIVE_INTERVIEW`), `--total-budget N` (N ≥ 1; required when both `STATIC_INTERVIEW` and `ADAPTIVE_INTERVIEW` run, so B and C get equal budgets), `--experiment-id`. Exit codes: 0 ok, 1 some runs failed (the others are still exported), 2 refused before any run. Output: `out/runs.json`, `out/runs.csv` and rows in `experiment_runs`. Mode B can end below the budget when its static plan runs out of topics (no topic with positive coverage gain is left); the `n_questions` column of `runs.csv` shows this.
 
 `candidates.json`:
 
