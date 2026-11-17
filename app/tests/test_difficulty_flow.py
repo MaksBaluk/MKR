@@ -1,6 +1,7 @@
 """DifficultyController wired into next_question: difficulty chosen, persisted with its reason and state, and passed
 to the Interviewer and Evaluator as context only. The candidate-facing turn never shows it."""
 import json
+from types import SimpleNamespace
 
 import pytest
 
@@ -75,7 +76,7 @@ def test_second_question_replays_controller_state(client, auth, db, spy):
     assert q2["turn"]["action_id"] == q1["turn"]["action_id"]  # min-two rule: 0.6 is not an early close
     t = _turn(db, q2["turn"]["id"])
     assert t.controller_before == {"level": "BASIC", "shown": 1, "history": ["BASIC"]}
-    assert t.difficulty == "BASIC" and t.difficulty_reason in ("PARTIAL", "NO_EVIDENCE")
+    assert t.difficulty == "BASIC" and t.difficulty_reason == "PARTIAL"
     assert t.controller_after["shown"] == 2 and t.controller_after["history"] == ["BASIC", "BASIC"]
 
 
@@ -115,3 +116,26 @@ def test_turn_dict_hides_difficulty_while_db_stores_it(client, auth, db, spy):
     assert t.controller_before is not None and t.controller_after is not None
     got = client.get(f"/api/v1/interviews/{iv['id']}", headers=auth).json()
     assert "difficulty" not in json.dumps(got) and "controller_" not in json.dumps(got)
+
+
+class LongInterviewer(PolicyChat):
+    """Interviewer output is always rejected (two questions), so every question comes from the bank."""
+
+    def invoke(self, messages, *a, **k):
+        if messages[0].content == INTERVIEWER_SYSTEM:
+            return SimpleNamespace(content="Що ви робили? Чому саме так?")
+        return super().invoke(messages, *a, **k)
+
+
+def test_strong_sufficient_bank_answer_closes_topic_early(client, auth, db, monkeypatch):
+    # every criterion graded (no null keeps sufficient_evidence), topic m >= 0.75, the last one stays WEAK (open)
+    _use(monkeypatch, LongInterviewer(lambda allowed, n: ({c: 0.95 for c in allowed[:-1]} | {allowed[-1]: 0.6}, []),
+                                      sufficient=True))
+    iv = _start(client, auth)
+    q1 = _next(client, auth, iv, 0)
+    assert q1["turn"]["question_source"] == "FALLBACK_UNGRADED"
+    assert _turn(db, q1["turn"]["id"]).target_criteria is None
+    a1 = _answer(client, auth, iv, q1, "difficulty-key-0031")
+    assert a1["assessment_status"] == "ACCEPTED"
+    q2 = _next(client, auth, iv, a1["version"])
+    assert q2.get("done") or q2["turn"]["action_id"] != q1["turn"]["action_id"]  # a new topic, not a 2nd question

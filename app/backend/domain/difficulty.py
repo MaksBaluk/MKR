@@ -82,9 +82,14 @@ def next_step(state: ControllerState, cfg: DifficultyConfig, *, targeted: Sequen
         return DifficultyDecision(level, "NO_OPEN_CRITERIA", "CLOSE", targets)
     if not can_ask_question(state.shown):
         return DifficultyDecision(level, "QUESTION_CAP", "CLOSE", targets)
+    # Rule 7 close check comes before NO_EVIDENCE: an early close (min-two not owed) also holds after a bank or
+    # untargeted question, whose targeted criteria carry no score.
+    owed = needs_min_followup(state.shown, graded=True, score=topic_score, sufficient=sufficient)
+    enough = not (owed or topic_score is None or goal_open)
     known = [s for c in targeted if (s := scores.get(c)) is not None]
     if not known:
-        return DifficultyDecision(level, "NO_EVIDENCE", "FOLLOWUP", targets)
+        return DifficultyDecision(level, "NO_EVIDENCE+ENOUGH" if enough else "NO_EVIDENCE",
+                                  "CLOSE" if enough else "FOLLOWUP", targets)
     share = len(known) / len(targeted)
     mean = sum(known) / len(known)
     r = rank(level)
@@ -94,7 +99,6 @@ def next_step(state: ControllerState, cfg: DifficultyConfig, *, targeted: Sequen
         new, reason = _ORDER[max(r - 1, rank(cfg.diagnostic_floor))], "WEAK"
     else:
         new, reason = level, "PARTIAL"
-    owed = needs_min_followup(state.shown, graded=True, score=topic_score, sufficient=sufficient)
-    if not (owed or topic_score is None or goal_open):
+    if enough:
         return DifficultyDecision(new, reason + "+ENOUGH", "CLOSE", targets)
     return DifficultyDecision(new, reason, "CONTINUE" if new != level else "FOLLOWUP", targets)

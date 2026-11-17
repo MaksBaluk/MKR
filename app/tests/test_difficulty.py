@@ -103,3 +103,12 @@ def test_config_thresholds_respected():
     s = {"c1": 0.85}
     assert step(B, s, cfg=DifficultyConfig(up_score=0.9)).next_level == B
     assert step(B, s).next_level == I
+
+
+def test_no_evidence_still_closes_early_when_min_two_not_owed():
+    st = ControllerState(I, 1, (I,))
+    kw = dict(targeted=[], scores={"c": 0.9}, topic_score=0.9, sufficient=True, open_criteria=["d"])
+    d = next_step(st, DEFAULT_CONFIG, **kw)
+    assert (d.action, d.reason, d.next_level) == ("CLOSE", "NO_EVIDENCE+ENOUGH", I)
+    d = next_step(st, DEFAULT_CONFIG, **kw, goal_open=True)
+    assert (d.action, d.reason, d.next_level) == ("FOLLOWUP", "NO_EVIDENCE", I)
