@@ -208,8 +208,16 @@ def _rubric_versions(db: Session, snap: CohortSnapshot, interview_id: str | None
     return dict(sorted(out.items()))
 
 
+def _sufficient(assessments: list[dict], relevant: set[str], outside: set[str]) -> list[str]:
+    ids = {a["criterion_id"] for a in assessments if a["score"] is not None and a["sufficient_evidence"]}
+    outside |= ids - relevant
+    return sorted(ids & relevant)
+
+
 def _interview(client: TestClient, h: dict, db: Session, snap: CohortSnapshot, cfg: ExperimentConfig,
-               candidate: CandidateSpec, provider: AnswerProvider) -> tuple[str, list[dict]]:
+               candidate: CandidateSpec, provider: AnswerProvider, relevant: set[str],
+               outside: set[str]) -> tuple[str, list[dict]]:
+    """`outside` collects graded ids that are not in `relevant` (kept out of sufficient_criteria_after)."""
     created = _ok(client.post(f"{API}/interviews", headers=h, json={"cohort_id": snap.id}), 201)
     iv_id, version = created["id"], created["version"]
     db.expire_all()
@@ -240,8 +248,7 @@ def _interview(client: TestClient, h: dict, db: Session, snap: CohortSnapshot, c
                    "question_text": t.question_text, "answer_text": t.answer_text,
                    "question_source": t.question_source, "difficulty": t.difficulty,
                    "target_criteria": t.target_criteria, "assessment_status": ans.get("assessment_status"),
-                   "sufficient_criteria_after": sorted(a["criterion_id"] for a in _latest_assessments(db, iv_id)
-                                                       if a["score"] is not None and a["sufficient_evidence"])})
+                   "sufficient_criteria_after": _sufficient(_latest_assessments(db, iv_id), relevant, outside)})
     raise RuntimeError(f"interview {iv_id} did not finish within the product caps")
 
 
@@ -262,6 +269,7 @@ def run_experiment(experiment_id: str, cfg: ExperimentConfig, candidate: Candida
     model_info: dict = {"provider": None}
     interview_id = None
     relevant: list[str] = []
+    outside: set[str] = set()
     if not cohort["empty"]:
         db.expire_all()
         snap = db.get(CohortSnapshot, cohort["cohort_id"])
@@ -269,7 +277,8 @@ def run_experiment(experiment_id: str, cfg: ExperimentConfig, candidate: Candida
         if interviewing:
             with _timed_model(stats) as factory:
                 model_info = _model_info(factory(), factory)
-                interview_id, qa = _interview(client, h, db, snap, cfg, candidate, provider)
+                interview_id, qa = _interview(client, h, db, snap, cfg, candidate, provider,
+                                            set(relevant), outside)
             if "served_models" in model_info:
                 model_info["served_models"] = sorted(stats.served)
             db.expire_all()
@@ -280,7 +289,9 @@ def run_experiment(experiment_id: str, cfg: ExperimentConfig, candidate: Candida
     errors = {"ungraded_answers": sum(1 for q in qa if q["assessment_status"] != "ACCEPTED"),
               "fallback_questions": sum(1 for q in qa if q["question_source"] != "LLM_INTERVIEWER"),
               "llm_exceptions": stats.exceptions, "evaluator_rejections": stats.rejections,
-              "empty_cohort": bool(cohort["empty"])}
+              "empty_cohort": bool(cohort["empty"]),
+              # graded sufficient criteria missing from relevant_criteria (sorted ids; the only non-numeric entry)
+              "criteria_outside_relevant": sorted(outside)}
     return ExperimentRecord(
         experiment_id=experiment_id, candidate_id=candidate.candidate_id, mode=cfg.mode.value, config=cfg.to_json(),
         cohort_id=cohort["cohort_id"] or "", cohort_sha256=cohort["sha256"] or "", profile_snapshot=profile,

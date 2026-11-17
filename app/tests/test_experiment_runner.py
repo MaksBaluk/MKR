@@ -44,7 +44,7 @@ def test_mode_a_has_no_scores_and_uses_self_ratings_only_as_tiebreak(client, db,
         base = run_experiment("exp-a", config_for(INITIAL), cand("plain"), None, client, s)
         assert base.qa == [] and base.assessments == [] and base.interview_id is None
         assert base.answer_source == "NONE" and base.model_info == {"provider": None}
-        assert base.relevant_criteria and base.qa == []
+        assert base.relevant_criteria
         assert base.ranking and all(i["label"] == "LOW_INFORMATION" and i["l_mandatory"] == 0 for i in base.ranking)
         revs = {r["id"]: r for r in _revisions(s.get(CohortSnapshot, base.cohort_id))}
     # a tied pair (equal ranking key) ordered by id; a self-rating on an action that favours the later id flips it
@@ -106,7 +106,7 @@ def test_run_static_and_adaptive_record_everything(client, db, monkeypatch, mode
     assert set(rec.timings) == {"total_s", "llm_wait_s", "calls"} and rec.timings["calls"] > 0
     assert 0 <= rec.timings["llm_wait_s"] <= rec.timings["total_s"]
     assert rec.errors == {"ungraded_answers": 0, "fallback_questions": 0, "llm_exceptions": 0,
-                          "evaluator_rejections": 0, "empty_cohort": False}
+                          "evaluator_rejections": 0, "empty_cohort": False, "criteria_outside_relevant": []}
     # injected factory: never the configured provider/model; PolicyChat sends no response metadata
     assert rec.model_info == {"provider": "injected", "client_class": "PolicyChat", "served_models": []}
     assert rec.rubric_versions and set(rec.rubric_versions.values()) <= {"v1", "auto-1"}
@@ -441,3 +441,45 @@ def test_rerank_refuses_changed_rubric_versions(client, db, monkeypatch):
         s.commit()
         with pytest.raises(ValueError, match=action):
             rerank(rec, s)
+
+
+def test_unseeded_action_criterion_is_relevant_and_sufficient(client, db, monkeypatch):
+    """criteria_for grades an action without a seeded rubric as the single criterion == action_id."""
+    _use(monkeypatch, PolicyChat(strong, sufficient=True))
+    with db() as s:
+        rec = run_experiment("exp-unseeded", config_for(ADAPTIVE, total_budget=6), cand(), SCRIPT, client, s)
+        seeded = {a for a in {q["action_id"] for q in rec.qa} if core._seeded_rubric(s, a) is not None}
+    unseeded = {q["action_id"] for q in rec.qa} - seeded
+    for a in unseeded:
+        assert a in rec.relevant_criteria
+    graded = {c for q in rec.qa for c in q["sufficient_criteria_after"]}
+    assert unseeded <= graded or not unseeded
+    assert all(set(q["sufficient_criteria_after"]) <= set(rec.relevant_criteria) for q in rec.qa)
+    assert rec.errors["criteria_outside_relevant"] == []
+
+
+def test_row_outside_relevant_is_omitted_and_recorded(client, db, monkeypatch):
+    """A holistic row on a seeded action without dotted rows is not a relevant criterion id."""
+    import backend.experiments.runner as runner
+    _use(monkeypatch, PolicyChat(strong, sufficient=True))
+    real = runner._latest_assessments
+    monkeypatch.setattr(runner, "_latest_assessments", lambda d, i: [
+        *real(d, i), {"action_id": "zz", "criterion_id": "zz", "score": 0.9, "sufficient_evidence": True, "revision": 1}])
+    with db() as s:
+        rec = run_experiment("exp-out", config_for(ADAPTIVE, total_budget=3), cand(), SCRIPT, client, s)
+        rid = save_record(s, rec)
+        loaded = load_record(s, rid)
+    assert rec.errors["criteria_outside_relevant"] == ["zz"] and loaded.errors == rec.errors
+    assert all("zz" not in q["sufficient_criteria_after"] for q in rec.qa)
+
+
+@pytest.mark.parametrize("reason,counted", [("MALFORMED", True), ("INVALID", True), ("NO_MODEL", False),
+                                            ("ERROR:timeout", False)])
+def test_evaluator_rejections_only_for_malformed_or_invalid(client, db, monkeypatch, reason, counted):
+    from backend.agents.graphs import AnswerResult
+    _use(monkeypatch, PolicyChat(strong, sufficient=True))
+    monkeypatch.setattr(core, "run_answer", lambda state, model: AnswerResult(None, "UNGRADED", reason, False))
+    with db() as s:
+        rec = run_experiment("exp-rsn", config_for(ADAPTIVE, total_budget=2), cand(), SCRIPT, client, s)
+    assert rec.qa and rec.errors["ungraded_answers"] == len(rec.qa)
+    assert rec.errors["evaluator_rejections"] == (len(rec.qa) if counted else 0)
