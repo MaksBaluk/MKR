@@ -1,0 +1,215 @@
+"""Experiment runner: modes A/B/C through the real API, stored runs, deterministic re-ranking and the CLI."""
+import csv
+import json
+import re
+from dataclasses import replace
+
+import pytest
+from sqlalchemy import select
+
+import backend.api.core as core
+from backend.api.core import _revisions
+from backend.domain.core_flow import self_claim_metrics
+from backend.experiments.config import InterviewMode, config_for
+from backend.experiments.providers import CandidateSpec, ScriptedProvider
+from backend.experiments.runner import ALGORITHM_VERSION, rerank, run_experiment
+from backend.experiments.store import CSV_FIELDS, export_records, load_record, save_record
+from backend.models import CohortSnapshot, CoreInterview, CoreTurn, ExperimentRun, Vacancy
+from tests.test_followup_flow import PolicyChat, _use
+
+INITIAL = InterviewMode.INITIAL_PROFILE
+STATIC = InterviewMode.STATIC_INTERVIEW
+ADAPTIVE = InterviewMode.ADAPTIVE_INTERVIEW
+KEY = ("z", "x", "l_mandatory", "l_preferred", "w_mandatory", "w_preferred")
+
+
+def strong(allowed, n):
+    return {c: 0.95 for c in allowed}, []
+
+
+def cand(cid="c1", track="python", ratings=None):
+    return CandidateSpec(candidate_id=cid, desired_title="Python Developer", years_experience=3, target_level="middle",
+                         track=track, location="Київ", work_mode="remote", self_ratings=ratings or {})
+
+
+SCRIPT = ScriptedProvider({"c1": {"default": "Налаштовував індекси та транзакції в PostgreSQL для сервісу замовлень."}})
+
+
+def test_mode_a_has_no_scores_and_uses_self_ratings_only_as_tiebreak(client, db, monkeypatch):
+    monkeypatch.setattr("backend.api.core.get_chat_model", lambda: pytest.fail("mode A must not touch the LLM"))
+    with db() as s:
+        base = run_experiment("exp-a", config_for(INITIAL), cand("plain"), None, client, s)
+        assert base.qa == [] and base.assessments == [] and base.interview_id is None
+        assert base.answer_source == "NONE" and base.model_info == {"provider": None}
+        assert base.ranking and all(i["label"] == "LOW_INFORMATION" and i["l_mandatory"] == 0 for i in base.ranking)
+        revs = {r["id"]: r for r in _revisions(s.get(CohortSnapshot, base.cohort_id))}
+    # a tied pair (equal ranking key) ordered by id; a self-rating on an action that favours the later id flips it
+    pick = None
+    for i, a in enumerate(base.ranking):
+        for b in base.ranking[i + 1:]:
+            if tuple(a[k] for k in KEY) != tuple(b[k] for k in KEY):
+                break
+            for x in sorted({alt["competency_id"] for g in revs[b["vacancy_id"]]["groups"] for alt in g["alternatives"]}):
+                tb = self_claim_metrics(revs[b["vacancy_id"]]["groups"], {x: 0.95})[0]
+                ta = self_claim_metrics(revs[a["vacancy_id"]]["groups"], {x: 0.95})[0]
+                if tb > ta:
+                    pick = (a["vacancy_id"], b["vacancy_id"], x)
+                    break
+            if pick:
+                break
+        if pick:
+            break
+    assert pick, "fixture cohort has no tied pair"
+    first, second, action = pick
+    assert first < second
+    with db() as s:
+        rec = run_experiment("exp-a", config_for(INITIAL), cand("rated", ratings={action: 0.95}), None, client, s)
+    assert rec.assessments == [] and rec.qa == [] and rec.profile_snapshot["self_ratings"] == {action: 0.95}
+    order = [i["vacancy_id"] for i in rec.ranking]
+    assert order.index(second) < order.index(first)  # T_v breaks the tie, not the id
+    assert all(i["label"] == "LOW_INFORMATION" and i["l_mandatory"] == 0 for i in rec.ranking)
+    keys = {i["vacancy_id"]: tuple(i[k] for k in KEY) for i in rec.ranking}
+    assert keys == {i["vacancy_id"]: tuple(i[k] for k in KEY) for i in base.ranking}  # never a criterion score
+    assert all(not i["strengths"] and not i["gaps"] for i in rec.ranking)
+
+
+@pytest.mark.parametrize("mode", [STATIC, ADAPTIVE])
+def test_run_static_and_adaptive_record_everything(client, db, monkeypatch, mode):
+    _use(monkeypatch, PolicyChat(strong, sufficient=True))
+    cfg = config_for(mode, total_budget=6)
+    with db() as s:
+        rec = run_experiment("exp-bc", cfg, cand(), SCRIPT, client, s)
+        snap = s.get(CohortSnapshot, rec.cohort_id)
+        row = s.get(CoreInterview, rec.interview_id)
+        turns = list(s.scalars(select(CoreTurn).where(CoreTurn.interview_id == row.id).order_by(CoreTurn.sequence)))
+    assert rec.mode == mode.value and rec.config == cfg.to_json() and row.mode_config == cfg.to_json()
+    assert (row.static_plan is not None) == (mode is STATIC) and row.status == "FINISHED"
+    assert rec.cohort_sha256 == snap.sha256 and re.fullmatch(r"[0-9a-f]{64}", rec.prompt_version)
+    assert rec.algorithm_version == ALGORITHM_VERSION == "rank-2.15+tv-jv/v1" and rec.answer_source == "SCRIPTED"
+    assert 0 < len(rec.qa) == len(turns) <= 6
+    for q, t in zip(rec.qa, turns):
+        assert (q["sequence"], q["action_id"], q["question_text"], q["answer_text"], q["question_source"],
+                q["difficulty"], q["target_criteria"]) == (t.sequence, t.action_id, t.question_text, t.answer_text,
+                                                          t.question_source, t.difficulty, t.target_criteria)
+        assert q["assessment_status"] == "ACCEPTED" and q["ordinal_in_topic"] >= 1
+    assert rec.assessments and all({"criterion_id", "score", "sufficient_evidence", "revision"} <= set(a)
+                                   for a in rec.assessments)
+    assert set(rec.timings) == {"total_s", "llm_wait_s", "calls"} and rec.timings["calls"] > 0
+    assert rec.errors == {"ungraded_answers": 0, "fallback_questions": 0, "llm_exceptions": 0, "empty_cohort": False}
+    assert rec.model_info["client_class"] == "PolicyChat"
+    assert rec.rubric_versions and set(rec.rubric_versions.values()) <= {"v1", "auto-1"}
+    assert rec.ranking and any(i["label"] == "RANKED" for i in rec.ranking)
+    assert rec.profile_snapshot["years_experience"] == 3 and rec.profile_snapshot["track"] == "python"
+
+
+def test_rerank_reproduces_ranking_without_llm(client, db, monkeypatch):
+    _use(monkeypatch, PolicyChat(strong, sufficient=True))
+    with db() as s:
+        rec = run_experiment("exp-rr", config_for(ADAPTIVE, total_budget=5), cand(), SCRIPT, client, s)
+
+    def boom():
+        raise AssertionError("rerank must not call the model")
+
+    monkeypatch.setattr("backend.api.core.get_chat_model", boom)
+    with db() as s:
+        assert rerank(rec, s) == rec.ranking
+        assert rerank(load_record(s, save_record(s, rec)), s) == rec.ranking
+        with pytest.raises(ValueError):
+            rerank(replace(rec, cohort_sha256="0" * 64), s)
+
+
+def test_save_load_roundtrip_and_export(client, db, monkeypatch, tmp_path):
+    _use(monkeypatch, PolicyChat(strong, sufficient=True))
+    with db() as s:
+        recs = [run_experiment("exp-io", config_for(m, total_budget=4), cand(), SCRIPT, client, s)
+                for m in (INITIAL, STATIC)]
+        ids = [save_record(s, r) for r in recs]
+        assert [load_record(s, i) for i in ids] == recs
+        rows = s.scalars(select(ExperimentRun).where(ExperimentRun.experiment_id == "exp-io")).all()
+        assert len(rows) == 2 and {r.interview_id for r in rows} == {None, recs[1].interview_id}
+    export_records(recs, tmp_path / "out")
+    data = json.loads((tmp_path / "out" / "runs.json").read_text(encoding="utf-8"))
+    assert [d["mode"] for d in data] == ["INITIAL_PROFILE", "STATIC_INTERVIEW"]
+    with open(tmp_path / "out" / "runs.csv", encoding="utf-8", newline="") as f:
+        reader = csv.DictReader(f)
+        assert reader.fieldnames == CSV_FIELDS
+        rows = list(reader)
+    assert rows[0]["n_questions"] == "0" and int(rows[1]["n_questions"]) == len(recs[1].qa)
+    assert rows[1]["adaptive_topics"] == "False" and rows[1]["empty_cohort"] == "False"
+
+
+def test_llm_failure_creates_no_grades(client, db, monkeypatch):
+    _use(monkeypatch, PolicyChat(fail=True))
+    with db() as s:
+        rec = run_experiment("exp-fail", config_for(ADAPTIVE), cand(), SCRIPT, client, s)
+        run_id = save_record(s, rec)
+        assert load_record(s, run_id) == rec
+    assert rec.qa and rec.errors["fallback_questions"] == len(rec.qa) > 0
+    assert rec.errors["ungraded_answers"] == len(rec.qa) and rec.errors["llm_exceptions"] > 0
+    assert all(q["assessment_status"] == "UNGRADED" for q in rec.qa)
+    assert rec.assessments == [] and all(i["label"] == "LOW_INFORMATION" for i in rec.ranking)
+
+
+def test_scripted_provider_defaults(tmp_path):
+    data = {"c1": {"a1": ["перша", "друга"], "default": "Не працював з цим."}}
+    path = tmp_path / "answers.json"
+    path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    for p in (ScriptedProvider(data), ScriptedProvider.from_file(path)):
+        turn = lambda a, n: {"action_id": a, "question_text": "?", "ordinal_in_topic": n}  # noqa: E731
+        assert p.source == "SCRIPTED"
+        assert [p.answer(cand("c1"), turn("a1", n)) for n in (1, 2, 3)] == ["перша", "друга", "Не працював з цим."]
+        assert p.answer(cand("c1"), turn("other", 1)) == "Не працював з цим."
+        assert p.answer(cand("nobody"), turn("a1", 1)) == "Не знаю."
+
+
+@pytest.mark.parametrize("mode", [INITIAL, ADAPTIVE])
+def test_empty_cohort_is_reported_not_crash(client, db, monkeypatch, mode):
+    monkeypatch.setattr("backend.api.core.get_chat_model", lambda: pytest.fail("no question without a cohort"))
+    with db() as s:
+        for v in s.scalars(select(Vacancy).where(Vacancy.track == "design")):
+            v.is_active = False
+        s.commit()
+        rec = run_experiment("exp-empty", config_for(mode), cand(track="design"), SCRIPT, client, s)
+        assert load_record(s, save_record(s, rec)) == rec
+        assert rerank(rec, s) == []
+    assert rec.ranking == [] and rec.qa == [] and rec.assessments == [] and rec.errors["empty_cohort"] is True
+    assert rec.cohort_id == "" and rec.interview_id is None
+
+
+def _cli_inputs(tmp_path):
+    (tmp_path / "candidates.json").write_text(json.dumps([{
+        "candidate_id": "c1", "desired_title": "Python Developer", "years_experience": 3, "target_level": "middle",
+        "track": "python", "location": "Київ", "work_mode": "remote", "self_ratings": {}}]), encoding="utf-8")
+    (tmp_path / "answers.json").write_text(json.dumps({"c1": {"default": "Писав API на FastAPI з тестами."}},
+                                                      ensure_ascii=False), encoding="utf-8")
+    return ["--db", f"sqlite:///{tmp_path / 'exp.db'}", "--candidates", str(tmp_path / "candidates.json"),
+            "--answers", str(tmp_path / "answers.json"), "--out", str(tmp_path / "out")]
+
+
+def test_cli_runs_modes_with_injected_model(tmp_path, capsys):
+    from scripts.run_experiment import main
+    fake = PolicyChat(strong, sufficient=True)
+    args = _cli_inputs(tmp_path) + ["--modes", "INITIAL_PROFILE", "STATIC_INTERVIEW", "ADAPTIVE_INTERVIEW",
+                                    "--flags", "no_adaptive_difficulty", "--total-budget", "3",
+                                    "--experiment-id", "cli-1"]
+    assert main(args, model_factory=lambda: fake) == 0
+    assert core.get_chat_model is not None and core.get_chat_model.__module__ == "backend.agents.model"
+    data = json.loads((tmp_path / "out" / "runs.json").read_text(encoding="utf-8"))
+    assert [d["mode"] for d in data] == ["INITIAL_PROFILE", "STATIC_INTERVIEW", "ADAPTIVE_INTERVIEW"]
+    assert all(len(d["qa"]) <= 3 for d in data) and data[2]["config"]["adaptive_difficulty"] is False
+    assert data[2]["config"]["adaptive_topics"] is True and data[1]["config"]["adaptive_topics"] is False
+    out = capsys.readouterr().out
+    assert str(tmp_path / "out") in out and len(re.findall(r"run [0-9a-f-]{36}", out)) == 3
+
+
+def test_cli_refuses_interview_without_llm_unless_allowed(tmp_path, capsys):
+    from scripts.run_experiment import main
+    args = _cli_inputs(tmp_path) + ["--modes", "STATIC_INTERVIEW", "--total-budget", "2"]
+    assert main(args) == 2 and not (tmp_path / "out").exists()
+    assert main(args + ["--allow-ungraded"]) == 0
+    data = json.loads((tmp_path / "out" / "runs.json").read_text(encoding="utf-8"))
+    assert data[0]["errors"]["ungraded_answers"] == len(data[0]["qa"]) > 0 and data[0]["assessments"] == []
+    assert data[0]["model_info"] == {"provider": None}
+    with pytest.raises(SystemExit):
+        main(["--candidates", "x.json", "--answers", "y.json", "--out", str(tmp_path)])  # --db is required
+    assert main(["--db", "postgresql://x/y"] + _cli_inputs(tmp_path)[2:]) == 2
