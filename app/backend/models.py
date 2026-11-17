@@ -309,6 +309,10 @@ class CoreInterview(Base):
     profile_id: Mapped[str | None] = mapped_column(
         ForeignKey("candidate_profiles.id", ondelete="CASCADE"), nullable=True, index=True)
     attempt_no: Mapped[int] = mapped_column(Integer, default=1, server_default="1", nullable=False)
+    # Experiment-only, set server-side by the runner: ExperimentConfig (mode + ablation flags) and the fixed STATIC topic plan.
+    # NULL for product interviews (= fully adaptive).
+    mode_config: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    static_plan: Mapped[list | None] = mapped_column(JSON, nullable=True)
     __table_args__ = (UniqueConstraint("profile_id", "attempt_no", name="uq_attempt_profile_no"),)
 
 
@@ -336,3 +340,27 @@ class CoreTurn(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     __table_args__ = (UniqueConstraint("interview_id", "sequence", name="uq_core_turn_sequence"),
                       UniqueConstraint("interview_id", "idempotency_key", name="uq_core_turn_idem"))
+
+
+class ExperimentRun(Base):
+    """One reproducible experiment run. No foreign keys: records must survive cohort/interview cleanup."""
+    __tablename__ = "experiment_runs"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    experiment_id: Mapped[str] = mapped_column(String(64), index=True)
+    candidate_id: Mapped[str] = mapped_column(String(120))
+    mode: Mapped[str] = mapped_column(String(24))
+    config: Mapped[dict] = mapped_column(JSON)
+    cohort_id: Mapped[str] = mapped_column(String(36))
+    cohort_sha256: Mapped[str] = mapped_column(String(64))
+    profile_snapshot: Mapped[dict] = mapped_column(JSON)
+    rubric_versions: Mapped[dict] = mapped_column(JSON)
+    prompt_version: Mapped[str] = mapped_column(String(64))
+    model_info: Mapped[dict] = mapped_column(JSON)
+    algorithm_version: Mapped[str] = mapped_column(String(64))
+    interview_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    qa: Mapped[list] = mapped_column(JSON)
+    assessments: Mapped[list] = mapped_column(JSON)
+    ranking: Mapped[list] = mapped_column(JSON)
+    timings: Mapped[dict] = mapped_column(JSON)
+    errors: Mapped[list] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
