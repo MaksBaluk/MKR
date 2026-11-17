@@ -21,7 +21,8 @@ from sqlalchemy.orm import Session
 import backend.agents.model as agent_model
 import backend.agents.prompts as prompts
 import backend.api.core as core
-from backend.api.core import _revisions, _seeded_rubric, cohort_actions, current_criteria_rows, static_plan_for
+from backend.api.core import (_revisions, _seeded_rubric, cohort_actions, current_criteria_rows, rubric_map,
+                              static_plan_for)
 from backend.api.recommendations import rank_items
 from backend.config import get_settings
 from backend.experiments.config import ExperimentConfig, InterviewMode
@@ -94,7 +95,7 @@ def _timed_model(stats: _LlmStats):
     def counted_answer(state, model):
         before = stats.exceptions
         result = original_answer(state, model)
-        if result.status != "ACCEPTED" and stats.exceptions == before:
+        if result.status != "ACCEPTED" and stats.exceptions == before and result.reason in {"MALFORMED", "INVALID"}:
             with stats.lock:
                 stats.rejections += 1
         return result
@@ -181,6 +182,13 @@ def _latest_assessments(db: Session, interview_id: str) -> list[dict]:
     return list(out.values())
 
 
+def _relevant_criteria(db: Session, snap: CohortSnapshot) -> list[str]:
+    """Every rubric criterion of every cohort action; an action without a seeded rubric stands for itself."""
+    actions = sorted(cohort_actions(_revisions(snap)))
+    rubrics = rubric_map(db, actions, {})
+    return sorted({c for a in actions for c in ([c for c, _ in rubrics[a]] if a in rubrics else [a])})
+
+
 def _seeded_versions(db: Session, snap: CohortSnapshot) -> dict[str, str]:
     out = {}
     for a in sorted(cohort_actions(_revisions(snap))):
@@ -231,7 +239,9 @@ def _interview(client: TestClient, h: dict, db: Session, snap: CohortSnapshot, c
         qa.append({"sequence": t.sequence, "action_id": t.action_id, "ordinal_in_topic": shown[t.action_id],
                    "question_text": t.question_text, "answer_text": t.answer_text,
                    "question_source": t.question_source, "difficulty": t.difficulty,
-                   "target_criteria": t.target_criteria, "assessment_status": ans.get("assessment_status")})
+                   "target_criteria": t.target_criteria, "assessment_status": ans.get("assessment_status"),
+                   "sufficient_criteria_after": sorted(a["criterion_id"] for a in _latest_assessments(db, iv_id)
+                                                       if a["score"] is not None and a["sufficient_evidence"])})
     raise RuntimeError(f"interview {iv_id} did not finish within the product caps")
 
 
@@ -251,9 +261,11 @@ def run_experiment(experiment_id: str, cfg: ExperimentConfig, candidate: Candida
     rubric_versions: dict = {}
     model_info: dict = {"provider": None}
     interview_id = None
+    relevant: list[str] = []
     if not cohort["empty"]:
         db.expire_all()
         snap = db.get(CohortSnapshot, cohort["cohort_id"])
+        relevant = _relevant_criteria(db, snap)
         if interviewing:
             with _timed_model(stats) as factory:
                 model_info = _model_info(factory(), factory)
@@ -276,7 +288,7 @@ def run_experiment(experiment_id: str, cfg: ExperimentConfig, candidate: Candida
         algorithm_version=ALGORITHM_VERSION, qa=qa, assessments=assessments, ranking=ranking,
         timings={"total_s": round(time.perf_counter() - started, 6), "llm_wait_s": round(stats.wait_s, 6),
                  "calls": stats.calls},
-        errors=errors, answer_source=getattr(provider, "source", "UNKNOWN") if interviewing else "NONE",
+        errors=errors, relevant_criteria=relevant, answer_source=getattr(provider, "source", "UNKNOWN") if interviewing else "NONE",
         interview_id=interview_id)
 
 

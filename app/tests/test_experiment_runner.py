@@ -44,6 +44,7 @@ def test_mode_a_has_no_scores_and_uses_self_ratings_only_as_tiebreak(client, db,
         base = run_experiment("exp-a", config_for(INITIAL), cand("plain"), None, client, s)
         assert base.qa == [] and base.assessments == [] and base.interview_id is None
         assert base.answer_source == "NONE" and base.model_info == {"provider": None}
+        assert base.relevant_criteria and base.qa == []
         assert base.ranking and all(i["label"] == "LOW_INFORMATION" and i["l_mandatory"] == 0 for i in base.ranking)
         revs = {r["id"]: r for r in _revisions(s.get(CohortSnapshot, base.cohort_id))}
     # a tied pair (equal ranking key) ordered by id; a self-rating on an action that favours the later id flips it
@@ -95,6 +96,11 @@ def test_run_static_and_adaptive_record_everything(client, db, monkeypatch, mode
                 q["difficulty"], q["target_criteria"]) == (t.sequence, t.action_id, t.question_text, t.answer_text,
                                                           t.question_source, t.difficulty, t.target_criteria)
         assert q["assessment_status"] == "ACCEPTED" and q["ordinal_in_topic"] >= 1
+    assert rec.relevant_criteria and rec.relevant_criteria == sorted(set(rec.relevant_criteria))
+    rel = set(rec.relevant_criteria)
+    assert all(set(q["sufficient_criteria_after"]) <= rel for q in rec.qa)
+    final = sorted(a["criterion_id"] for a in rec.assessments if a["score"] is not None and a["sufficient_evidence"])
+    assert rec.qa[-1]["sufficient_criteria_after"] == final and final
     assert rec.assessments and all({"criterion_id", "score", "sufficient_evidence", "revision"} <= set(a)
                                    for a in rec.assessments)
     assert set(rec.timings) == {"total_s", "llm_wait_s", "calls"} and rec.timings["calls"] > 0
@@ -143,9 +149,16 @@ def test_save_load_roundtrip_and_export(client, db, monkeypatch, tmp_path):
         assert [load_record(s, i) for i in ids] == recs
         rows = s.scalars(select(ExperimentRun).where(ExperimentRun.experiment_id == "exp-io")).all()
         assert len(rows) == 2 and {r.interview_id for r in rows} == {None, recs[1].interview_id}
-        for r in rows:  # answer_source rides in the raw config JSON; from_json still parses it
-            assert "answer_source" in r.config and ExperimentConfig.from_json(r.config).to_json() == {
-                k: v for k, v in r.config.items() if k != "answer_source"}
+        ordered = sorted(rows, key=lambda r: r.mode)  # INITIAL_PROFILE < STATIC_INTERVIEW
+        for r, rec in zip(ordered, recs):
+            assert "answer_source" not in r.config and r.answer_source == rec.answer_source
+            assert r.relevant_criteria == rec.relevant_criteria and rec.relevant_criteria
+            assert ExperimentConfig.from_json(r.config).to_json() == r.config
+        old = ordered[0]  # pre-0012 row: answer_source inside config, no relevant_criteria
+        old.config, old.answer_source, old.relevant_criteria = {**old.config, "answer_source": "HUMAN"}, None, None
+        s.commit()
+        loaded = load_record(s, old.id)
+        assert (loaded.answer_source, loaded.relevant_criteria, loaded.config) == ("HUMAN", [], recs[0].config)
     export_records(recs, tmp_path / "out")
     data = json.loads((tmp_path / "out" / "runs.json").read_text(encoding="utf-8"))
     assert [d["mode"] for d in data] == ["INITIAL_PROFILE", "STATIC_INTERVIEW"]
@@ -260,6 +273,8 @@ def test_cli_llm_none_needs_allow_ungraded_and_never_calls_a_model(tmp_path, cap
     assert main(args + ["--allow-ungraded"], model_factory=spy) == 0 and spy.calls == 0
     data = json.loads((tmp_path / "out" / "runs.json").read_text(encoding="utf-8"))
     assert data[0]["errors"]["ungraded_answers"] == len(data[0]["qa"]) > 0 and data[0]["assessments"] == []
+    assert data[0]["errors"]["evaluator_rejections"] == 0
+    assert all(q["sufficient_criteria_after"] == [] for q in data[0]["qa"])
     assert data[0]["model_info"] == {"provider": None} and data[0]["timings"]["calls"] == 0
     assert "llm: none" in capsys.readouterr().out
 

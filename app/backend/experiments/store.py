@@ -5,15 +5,14 @@ from __future__ import annotations
 import csv
 import json
 from collections.abc import Sequence
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from sqlalchemy.orm import Session
 
 from backend.models import ExperimentRun
 
-# experiment_runs has no own column for it: stored inside the config JSON and popped by load_record.
-# ExperimentConfig.from_json ignores this key, so a raw row's config can still be parsed directly.
+# Rows written before migration 0012 kept answer_source inside the config JSON; load_record still reads it.
 _SOURCE_KEY = "answer_source"
 
 
@@ -37,11 +36,11 @@ class ExperimentRecord:
     errors: dict
     answer_source: str  # "SCRIPTED" | "HUMAN" | "SIMULATED" | "NONE"
     interview_id: str | None = None
+    relevant_criteria: list[str] = field(default_factory=list)
 
 
 def save_record(db: Session, record: ExperimentRecord) -> str:
     data = asdict(record)
-    data["config"] = {**record.config, _SOURCE_KEY: data.pop(_SOURCE_KEY)}
     row = ExperimentRun(**data)
     db.add(row)
     db.commit()
@@ -53,14 +52,15 @@ def load_record(db: Session, run_id: str) -> ExperimentRecord:
     if row is None:
         raise KeyError(run_id)
     config = dict(row.config)
-    source = config.pop(_SOURCE_KEY, "UNKNOWN")
+    source = config.pop(_SOURCE_KEY, None)
+    source = row.answer_source or source or "UNKNOWN"
     return ExperimentRecord(experiment_id=row.experiment_id, candidate_id=row.candidate_id, mode=row.mode,
                             config=config, cohort_id=row.cohort_id, cohort_sha256=row.cohort_sha256,
                             profile_snapshot=row.profile_snapshot, rubric_versions=row.rubric_versions,
                             prompt_version=row.prompt_version, model_info=row.model_info,
                             algorithm_version=row.algorithm_version, qa=row.qa, assessments=row.assessments,
                             ranking=row.ranking, timings=row.timings, errors=row.errors, answer_source=source,
-                            interview_id=row.interview_id)
+                            interview_id=row.interview_id, relevant_criteria=row.relevant_criteria or [])
 
 
 _FLAGS = ("adaptive_topics", "adaptive_followup", "adaptive_difficulty", "max_topics", "max_per_topic",

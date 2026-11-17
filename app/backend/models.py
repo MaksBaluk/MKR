@@ -344,7 +344,7 @@ class CoreTurn(Base):
 
 class ExperimentRun(Base):
     """One reproducible experiment run. No foreign keys: records must survive cohort/interview cleanup.
-    `config` is ExperimentConfig.to_json() plus the run's `answer_source` key (no own column; see experiments/store.py)."""
+    `config` is ExperimentConfig.to_json(); older rows (before 0012) also hold `answer_source` there."""
     __tablename__ = "experiment_runs"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
     experiment_id: Mapped[str] = mapped_column(String(64), index=True)
@@ -364,4 +364,6 @@ class ExperimentRun(Base):
     ranking: Mapped[list] = mapped_column(JSON)
     timings: Mapped[dict] = mapped_column(JSON)
     errors: Mapped[dict] = mapped_column(JSON)
+    relevant_criteria: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    answer_source: Mapped[str | None] = mapped_column(String(16), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
