@@ -423,8 +423,7 @@ def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -
     result = run_answer({"action_id": action_id, "rubric_version": version, "allowed_criterion_ids": criteria,
                          "bands": criterion_bands(db, action_id), "turns": {t.id: t.answer_text for t in turns},
                          "open_criterion_ids": open_ids,
-                         "turn_meta": {t.id: {"difficulty": t.difficulty, "target_criteria": t.target_criteria}
-                                       for t in turns}}, model)
+                         "turn_meta": {t.id: {"target_criteria": t.target_criteria} for t in turns}}, model)
     if result.status != "ACCEPTED":
         return "UNGRADED"
     goal = result.output.followup_goal  # already sanitized against allowed + open criteria by the answer graph

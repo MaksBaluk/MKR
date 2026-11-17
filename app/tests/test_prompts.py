@@ -137,11 +137,10 @@ def test_interviewer_input_carries_candidate_level_and_years():
     assert 'candidate_level: unknown' in unknown and 'years_experience: unknown' in unknown
 
 
-def test_interviewer_system_matches_depth_to_level():
+def test_interviewer_system_level_sets_setting_only():
     p = INTERVIEWER_SYSTEM
     assert 'candidate_level' in p and 'years_experience' in p
-    assert 'junior' in p.lower() and 'fundamentals' in p.lower()
-    assert 'trade-offs' in p.lower() and 'team impact' in p.lower()
+    assert 'junior' in p.lower() and 'senior' in p.lower() and 'cross-team setting' in p
 
 
 def test_evaluator_system_requests_sufficient_evidence_flag():
@@ -196,6 +195,15 @@ def test_interviewer_input_difficulty():
     for name in ('BASIC', 'INTERMEDIATE', 'ADVANCED'):
         assert f'- {name}:' in INTERVIEWER_SYSTEM
     assert 'follow `difficulty`, never mention it' in INTERVIEWER_SYSTEM
+    assert '`difficulty` alone controls how deep and hard' in INTERVIEWER_SYSTEM
+
+
+def test_candidate_level_is_setting_not_depth():
+    p = INTERVIEWER_SYSTEM
+    for phrase in ('ask about trade-offs', 'architecture-level', 'fundamentals of the topic',
+                   'practical choices they made', 'Match the depth'):
+        assert phrase not in p
+    assert 'never its depth' in p and 'leading a team' in p and 'neutral' in p
 
 
 def test_evaluator_input_turn_meta():
@@ -204,8 +212,9 @@ def test_evaluator_input_turn_meta():
         turn_meta={'t1': {'difficulty': 'ADVANCED', 'target_criteria': ['c']}, 'gone': {'difficulty': 'BASIC'}},
     )
     line = next(x for x in out.splitlines() if x.startswith('turn_meta'))
-    assert json.loads(line.split(': ', 1)[1]) == {'t1': {'difficulty': 'ADVANCED', 'target_criteria': ['c']}}
+    assert json.loads(line.split(': ', 1)[1]) == {'t1': {'target_criteria': ['c']}}  # difficulty withheld
     plain = format_evaluator_input(action_id='a', rubric_version='v', allowed_criterion_ids=['c'], bands=None, turns={})
     assert 'turn_meta' not in plain
     assert 'question difficulty must not raise or lower a score' in EVALUATOR_SYSTEM
     assert 'only from' in EVALUATOR_SYSTEM and 'actually evidence it' in EVALUATOR_SYSTEM
+    assert 'BASIC question' not in EVALUATOR_SYSTEM and 'whatever the question' in EVALUATOR_SYSTEM

@@ -87,7 +87,7 @@ class AnswerState(TypedDict, total=False):
     bands: dict[str, str] | None  # per-criterion anchored bands of a seeded rubric
     turns: dict[str, str]
     open_criterion_ids: list[str] | None  # None/absent: every allowed criterion is open
-    turn_meta: dict[str, dict] | None  # turn_id -> {difficulty, target_criteria}; context, never a score
+    turn_meta: dict[str, dict] | None  # turn_id -> {target_criteria}; context, never a score
     attempt: int
     output: EvaluatorOutput | None
     status: str

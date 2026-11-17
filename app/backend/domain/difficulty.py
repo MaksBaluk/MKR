@@ -84,6 +84,9 @@ def next_step(state: ControllerState, cfg: DifficultyConfig, *, targeted: Sequen
         return DifficultyDecision(level, "QUESTION_CAP", "CLOSE", targets)
     # Rule 7 close check comes before NO_EVIDENCE: an early close (min-two not owed) also holds after a bank or
     # untargeted question, whose targeted criteria carry no score.
+    # The continuation rule lives in three places that must stay equivalent: `enough` here,
+    # interview_budget.needs_min_followup and interview_budget.topic_open_for_question (planner eligibility).
+    # graded=True: the caller decides only for topics with an accepted assessment (ungraded topics never continue).
     owed = needs_min_followup(state.shown, graded=True, score=topic_score, sufficient=sufficient)
     enough = not (owed or topic_score is None or goal_open)
     known = [s for c in targeted if (s := scores.get(c)) is not None]

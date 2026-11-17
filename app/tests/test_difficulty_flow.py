@@ -63,7 +63,7 @@ def test_evaluator_gets_turn_meta_and_no_score_rule(client, auth, db, spy):
     t = _turn(db, q1["turn"]["id"])
     line = next(x for x in spy.evaluator_humans[-1].splitlines() if x.startswith("turn_meta"))
     meta = json.loads(line.split(": ", 1)[1])
-    assert meta == {t.id: {"difficulty": "BASIC", "target_criteria": t.target_criteria}}
+    assert meta == {t.id: {"target_criteria": t.target_criteria}}  # difficulty withheld from the Evaluator
     assert "question difficulty must not raise or lower a score" in EVALUATOR_SYSTEM
 
 

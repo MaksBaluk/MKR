@@ -24,14 +24,15 @@ Source request: thesis chapters 2.3.2–2.3.5 and 3 (`Балук_Диплом.do
 
 Files: create `app/backend/domain/difficulty.py`, `app/tests/test_difficulty.py`, `app/tests/test_difficulty_flow.py`; modify `models.py` + migration `0010` (core_turns: `difficulty`, `difficulty_reason`, `controller_before`, `controller_after` JSON), `agents/prompts.py` (Interviewer gets difficulty + definition of each level), `api/core.py`.
 
-Interfaces:
+Interfaces (outline — superseded by MATH_SPEC §3c and app/backend/domain/difficulty.py):
 ```python
 class Difficulty(str, Enum): BASIC; INTERMEDIATE; ADVANCED
-@dataclass(frozen=True) class DifficultyConfig: up_score=0.75; down_score=0.50; min_evidence_turns=1; diagnostic_floor=BASIC
+@dataclass(frozen=True) class DifficultyConfig: up_score=0.75; down_score=0.50; min_known_share=0.5; diagnostic_floor=BASIC
 @dataclass(frozen=True) class ControllerState: level: Difficulty; shown: int; history: tuple[Difficulty,...]
 @dataclass(frozen=True) class DifficultyDecision: next_level: Difficulty; reason: str; action: Literal["CONTINUE","FOLLOWUP","CLOSE"]; target_criteria: tuple[str,...]
-def initial_difficulty(level: str|None, years: int|None, vacancy_seniority_mode: str|None) -> Difficulty
-def next_step(state, cfg, *, scores: Mapping[str,float|None], sufficient: bool, open_criteria: Sequence[str], targeted: Sequence[str]) -> DifficultyDecision
+def market_level(years_min: Sequence[float|None]) -> Literal["junior","middle","senior"] | None
+def initial_difficulty(candidate_level: str|None, market: str|None) -> tuple[Difficulty, str]
+def next_step(state, cfg, *, targeted: Sequence[str], scores: Mapping[str,float|None], topic_score: float|None, sufficient: bool, open_criteria: Sequence[str], goal_open: bool = False) -> DifficultyDecision
 ```
 Rules (tests): junior strong BASIC→INTERMEDIATE→ADVANCED; senior weak ADVANCED→INTERMEDIATE→BASIC (diagnostic); incomplete answer with open targeted criterion ⇒ FOLLOWUP, level unchanged; all-null ⇒ no level change; score of a BASIC question confirms only its `targeted` criteria; τ never changed by seniority; 5-question and 10-topic caps hold. Reuses `open_criteria` from Phase 1.
 

@@ -92,7 +92,7 @@ Implemented in `app/backend/domain/difficulty.py` (pure, no DB/API), wired in `a
 
 **Principle.** Difficulty only chooses how hard the next question is. It never sets or caps a criterion score, never changes any target `τ`, and never changes ranking. Scores come from the Evaluator's grading of the supplied answers. Caps are unchanged: 5 shown questions per topic, 10 topics, min two shown questions while criteria stay open (§3a).
 
-**Levels** (`Difficulty`): `BASIC` = recall and recognition of core terms, simple standard tasks; `INTERMEDIATE` = applying the skill to a realistic task, trade-offs; `ADVANCED` = design under constraints, edge cases, failure analysis, justification of decisions. Definitions are given to the Interviewer in the prompt, with the rule that difficulty never changes grading.
+**Levels** (`Difficulty`): `BASIC` = basic concepts and typical operations; `INTERMEDIATE` = practical application, diagnosis, choosing a solution; `ADVANCED` = designing complex systems, trade-offs, scaling, non-standard situations. The Interviewer prompt gives these definitions and only follows `difficulty` (candidate level sets the setting, not the depth). The rule that difficulty never changes grading lives in the Evaluator prompt; the Evaluator gets only each turn's `target_criteria` (`turn_meta`), not its difficulty.
 
 **Initial hypothesis** (`initial_difficulty`, start of each topic): candidate level `junior`->`BASIC`, `middle`->`INTERMEDIATE`, `senior`->`ADVANCED` (reason `LEVEL:<level>`). Only if the level is unknown, the market level from the median of known `years_min` of the cohort (`<2` junior, `<5` middle, else senior; reason `MARKET:<level>`). Otherwise `INTERMEDIATE` (`DEFAULT`). Seniority is only a starting guess; evidence moves the level.
 
@@ -107,7 +107,7 @@ Implemented in `app/backend/domain/difficulty.py` (pure, no DB/API), wired in `a
    Otherwise `PARTIAL`: level unchanged.
 7. If `enough`: `CLOSE` with reason + `+ENOUGH` (e.g. `STRONG+ENOUGH`). Else `CONTINUE` if the level changed, `FOLLOWUP` if not.
 
-Level moves at most one step per answer. Targets of the next question are the open criteria.
+Level moves at most one step per answer. Targets of the next question are the criterion ids of the validated follow-up goal when one exists, else the open criteria. `DifficultyDecision.target_criteria` (the open criteria) is informational; `next_question` sets `target_criteria` itself.
 
 **`DifficultyConfig` defaults** (policy, not calibration; need expert review):
 

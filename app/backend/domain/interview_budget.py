@@ -32,7 +32,9 @@ def topic_open_for_question(*, used: bool, distinct_topics: int, shown: int, lat
 
     New topics need budget left. A started topic is re-asked only while the question cap allows, its latest
     evidence is insufficient (null score) or a validated Evaluator goal still names an open criterion (goal_open),
-    and the interview still has topic budget (after ten topics the interview is closed)."""
+    and the interview still has topic budget (after ten topics the interview is closed).
+
+    Keep equivalent with needs_min_followup and difficulty.next_step (`enough`): the continuation rule lives in all three."""
     if not used:
         return can_start_topic(distinct_topics)
     return can_ask_question(shown) and (latest_score_is_null or goal_open) and distinct_topics < MAX_TOPICS
