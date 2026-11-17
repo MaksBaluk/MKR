@@ -15,7 +15,7 @@ const FEATURES = [
   { icon: ShieldCheck, title: 'Ваші дані під контролем', text: 'Самооцінку змінюєте лише ви; оцінки розмови не є перевіреним досвідом.' },
 ];
 
-export function AuthScreen({ onSignedIn, notice = null }: { onSignedIn: () => void; notice?: string | null }) {
+export function AuthScreen({ onSignedIn, notice = null }: { onSignedIn: (kind: AuthMode) => void; notice?: string | null }) {
   const [mode, setMode] = useState<AuthMode>('login');
   const [fields, setFields] = useState<AuthFields>({ email: '', name: '', password: '' });
   const [touched, setTouched] = useState<Partial<Record<keyof AuthFields, boolean>>>({});
@@ -50,7 +50,7 @@ export function AuthScreen({ onSignedIn, notice = null }: { onSignedIn: () => vo
               json: { email, display_name: fields.name.trim(), password: fields.password },
             });
       setToken(body.token);
-      onSignedIn();
+      onSignedIn(mode);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Не вдалося увійти. Спробуйте ще раз.');
     } finally {

@@ -98,6 +98,7 @@ def explain_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], names:
     strengths: list[str] = []
     gaps: list[str] = []
     unknown = 0
+    met_total = gap_total = 0  # uncapped: the display lists below are cut to `limit`
     assessed = 0
     tags: list[str] = []
     for g in vacancy["groups"]:
@@ -111,9 +112,12 @@ def explain_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], names:
         ev = eval_group(g["alternatives"], scores)
         if ev.status == "SATISFIED":
             strengths.append(label)
+            met_total += 1
         elif ev.status == "FAILED":
             gaps.append(label)
+            gap_total += 1
         else:
             unknown += 1
-    return {"strengths": strengths[:limit], "gaps": gaps[:limit], "unknown_count": unknown, "tags": tags[:5],
+    return {"strengths": strengths[:limit], "gaps": gaps[:limit], "unknown_count": unknown,
+            "met_count": met_total, "gap_count": gap_total, "tags": tags[:5],
             "groups_total": len(vacancy["groups"]), "groups_assessed": assessed}

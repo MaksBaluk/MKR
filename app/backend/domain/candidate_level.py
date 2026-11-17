@@ -21,3 +21,10 @@ def candidate_level(desired_title: str | None, years_experience: int | None) -> 
     if years_experience < 2:
         return "junior"
     return "middle" if years_experience < 5 else "senior"
+
+
+def resolve_level(target_level: str | None, desired_title: str | None, years_experience: int | None) -> str | None:
+    """The level the candidate chose wins; «lead» uses the senior depth. Otherwise title words, then years."""
+    if target_level:
+        return "senior" if target_level == "lead" else target_level
+    return candidate_level(desired_title, years_experience)

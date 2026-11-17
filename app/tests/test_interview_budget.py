@@ -38,3 +38,24 @@ def test_min_followup_stops_at_two_and_skips_ungraded():
     assert needs_min_followup(2, graded=True, score=0.2, sufficient=False) is False
     assert needs_min_followup(5, graded=True, score=None, sufficient=False) is False
     assert needs_min_followup(1, graded=False, score=None, sufficient=False) is False
+
+
+def test_no_reask_of_unfinished_topic_after_ten_topics():
+    from backend.domain.interview_budget import topic_open_for_question
+    # below the topic cap an unfinished (null-score) topic may still be re-asked, within the question cap
+    assert topic_open_for_question(used=True, distinct_topics=9, shown=2, latest_score_is_null=True) is True
+    # once ten distinct topics exist, interview topics are closed: no re-asks, no new topics
+    assert topic_open_for_question(used=True, distinct_topics=10, shown=2, latest_score_is_null=True) is False
+    assert topic_open_for_question(used=False, distinct_topics=10, shown=0, latest_score_is_null=False) is False
+    assert topic_open_for_question(used=False, distinct_topics=9, shown=0, latest_score_is_null=False) is True
+    # per-action question cap still applies
+    assert topic_open_for_question(used=True, distinct_topics=3, shown=5, latest_score_is_null=True) is False
+
+
+def test_declined_topic_closes_after_the_first_answer():
+    from backend.domain.interview_budget import needs_min_followup
+    # the candidate said they have no experience: zero scores with sufficient evidence, nothing more to ask
+    assert needs_min_followup(1, graded=True, score=0.0, sufficient=True) is False
+    # a weak score without sufficient evidence still gets a second question
+    assert needs_min_followup(1, graded=True, score=0.0, sufficient=False) is True
+    assert needs_min_followup(1, graded=True, score=0.3, sufficient=True) is True

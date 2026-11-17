@@ -9,7 +9,7 @@ First login is a guided process, not a dashboard of tabs:
 1. **Welcome** — brief Ukrainian explanation, one clear call to action.
 2. **Candidate profile** — name (display only), profession/specialization, experience, work mode, location, non-negotiables and **editable self-ratings for familiar professional actions**. Do not make people rate dozens of rubric subcriteria.
 3. **Adaptive interview** — the backend silently constructs a frozen candidate-appropriate vacancy cohort and ordered market-skill profile; the candidate receives a natural LLM-guided chat. There is no manual job selection. Maximum 10 different professional action topics, 5 displayed questions each, normally 1–2. Typed responses by default.
-4. **Results** — immutable interview criterion assessments alongside editable self-ratings, ranked vacancies with explanations, and an ordered market-skills table. The latter has **no n/N counts, fractions or demand percentages**.
+4. **Results** — immutable interview criterion assessments alongside editable self-ratings, ranked vacancies with explanations, and an ordered market-skills table. The latter has **no n/N counts, fractions or demand percentages** in the results view. Market distribution by track (share of vacancies per competency) is a separate market page; whether it shows percentages is an open owner decision (`docs/tasks/TODO.md`, §0б and §5).
 
 After the first completed results, enable a small set of useful tabs such as **Recommendations**, **All vacancies**, **My profile** and **Settings**. A returning user opens results, or the exact saved in-progress interview if unfinished.
 
@@ -71,7 +71,7 @@ The model may propose interpretations, but backend owns identity, permissions, b
 `MATH_SPEC.md` is canonical. Summary:
 
 - Cohort: `V_p = {v in V : H(v,p)=1}`. Excluded vacancies remain browsable later; users do not choose the interview cohort. Distinguish hard constraints from soft job experience suitability. Extra experience is not a negative.
-- Market list: sort by unique-vacancy prevalence `F(c)`, break ties by normalized group mass `I(c)`, then stable action ID. Aggregate parent technology names over unique vacancy IDs, not summed overlapping child counts. Display ranks/names, not counts or percentages.
+- Market list: sort by unique-vacancy prevalence `F(c)`, break ties by normalized group mass `I(c)`, then stable action ID. Aggregate parent technology names over unique vacancy IDs, not summed overlapping child counts. Results view shows ranks/names, not counts or percentages. Market page percentages: open owner decision (`docs/tasks/TODO.md` §5).
 - Adaptive planner: open groups, OR-aware weighted coverage `Q_t(T)`, greedy max marginal topic, reconsider after each completed action series. User self-rating can encourage **verification**, not establish verified evidence. No forced full ten-topic interview.
 - LLM interview: the two logical roles are *Interviewer* and *Evaluator*. Interviewer owns wording, Evaluator owns criterion proposals, and the Python controller owns topic selection and budgets. Questions are generated from **action specifications and rubrics**, not a giant manually written bank. Small fixed open-text fallback is separate and honestly ungraded without a provider.
 - Criterion grading: `s∈[0,1] or null`. Bands `[0,.25)`, `[.25,.50)`, `[.50,.75)`, `[.75,.90)`, `[.90,1]`, each with action-specific professional anchors and evidence. `M_c` and `E_c` are descriptive profile values; matching uses exact criteria.
@@ -124,7 +124,7 @@ We use TailWind and shadcn/UI
 
 All user-visible Ukrainian must be written as real Ukrainian strings, not custom romanization/transliteration (`u(...)`). Preserve correct English tool names (FastAPI, PostgreSQL) as product names. Screens must work at mobile widths and keyboard-only navigation, have labeled forms, error/empty/busy/loading states and reduced-motion CSS. Animations are subtle state transitions, not artificial wait times.
 
-The seeded 90 vacancy records are **invented structured data**; production claims about current vacancies require authorized real sources and freshness checks. Remove advertising labels such as “demo app” from the main experience, but keep transparent data provenance in an accessible catalog information panel. Do not invent live job links or employer outreach. The market-skill table is explicitly scoped to the selected catalog segment.
+The seeded vacancy records (`app/fixtures/vacancies.json`, 180 entries) are **invented structured data**; production claims about current vacancies require authorized real sources and freshness checks. Remove advertising labels such as “demo app” from the main experience, but keep transparent data provenance in an accessible catalog information panel. Source of the original records (`DEMO_CURATED` in repo vs. owner's statement "Djinni") is an open owner decision (`docs/tasks/TODO.md` §4, §5); do not describe them as Djinni postings until confirmed. Do not invent live job links or employer outreach. The market-skill table is explicitly scoped to the selected catalog segment.
 
 ## 8. Implementation order and verification
 
@@ -137,4 +137,4 @@ The seeded 90 vacancy records are **invented structured data**; production claim
 7. Authorized manual/CSV/JSON ingestion, LLM extraction, ESCO candidate matching/normalization, cache/review.
 8. Actual tests: Python, TypeScript, PostgreSQL, browser flow and provider mocks (plus real provider if configured). Report results precisely; don't assert tests ran just because a spec lists them.
 
-**Current-code inventory reminder:** existing API modules are `app/backend/api/{auth,profile,catalog,interviews,matches,llm}.py`; domain files `app/backend/domain/{adaptive,matching}.py`; ORM `app/backend/models.py`; React UI `app/frontend/src/App.tsx`. The existing React page currently exposes manual selection, multiple-choice items, old numeric matching and a Ukrainian transliteration helper, which must all be removed from the intended candidate flow. Current backend tests exercise older logic and do not verify these new modules until rewritten.
+**Current-code inventory:** API modules `app/backend/api/{auth,profile,catalog,interviews,matches,llm}.py`; domain files `app/backend/domain/{adaptive,matching}.py`; ORM `app/backend/models.py`; React UI `app/frontend/src/` (screens in `screens/`, routes in `routes.tsx`, shell in `components/AppShell.tsx`). Transliteration helper `u(...)` is no longer found in frontend source. Progress and open items: `docs/tasks/STATUS.md` and `docs/tasks/TODO.md`.

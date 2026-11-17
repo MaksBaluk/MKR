@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Archive, BarChart3, CheckCircle2, ChevronDown, History, Loader2, MapPin, Pencil, Plus, UsersRound } from 'lucide-react';
 import { api, ApiError } from '@/api';
 import { ErrorRetry } from '@/components/ErrorRetry';
+import { ProfileFields } from '@/components/ProfileFields';
 import { SelfRatingList } from '@/components/SelfRatingList';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -10,13 +11,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
-import { Field, describedBy } from '@/components/ui/field';
-import { Input, Select } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useStartAttempt } from '@/hooks/useStartAttempt';
 import { useActiveProfile } from '@/lib/activeProfile';
 import {
-  TRACKS, activeAfterArchive, attemptStatusLabel, formatDate, profileFormFrom, startLabel, trackLabel,
+  activeAfterArchive, attemptStatusLabel, formatDate, profileFormFrom, startLabel, trackLabel,
   validateProfileForm, type ProfileBody, type ProfileFormErrors,
 } from '@/lib/profiles';
 import { cn } from '@/lib/utils';
@@ -25,7 +24,7 @@ import type { AttemptSummary, CandidateProfile, SelfRatingValue } from '@/types'
 
 const errorText = (err: unknown, fallback: string) => (err instanceof ApiError ? err.message : fallback);
 
-function ProfileFormDialog({ open, profile, onClose, onSubmit, submitLabel, hint }: {
+export function ProfileFormDialog({ open, profile, onClose, onSubmit, submitLabel, hint }: {
   open: boolean;
   profile: CandidateProfile | null;
   onClose: () => void;
@@ -67,35 +66,12 @@ function ProfileFormDialog({ open, profile, onClose, onSubmit, submitLabel, hint
     }
   }
 
-  const input = (k: keyof typeof form) => ({
-    id: id(k), value: form[k], 'aria-invalid': errors[k] ? true : undefined,
-    'aria-describedby': describedBy(id(k), undefined, errors[k]),
-    onChange: (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value })),
-  });
-
   return (
     <Dialog open={open} onClose={onClose} title={profile ? 'Редагувати профіль' : 'Новий профіль'}>
       <form noValidate onSubmit={submit} className="flex flex-col gap-4">
         {hint && <p className="text-sm text-ink-muted">{hint}</p>}
-        <Field id={id('name')} label="Назва профілю" error={errors.name}>
-          <Input {...input('name')} maxLength={120} placeholder="Наприклад, Python Backend" autoComplete="off" />
-        </Field>
-        <Field id={id('track')} label="Напрям" error={errors.track}>
-          <Select {...input('track')}>
-            {TRACKS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-          </Select>
-        </Field>
-        <Field id={id('desired_title')} label="Бажана посада" error={errors.desired_title}>
-          <Input {...input('desired_title')} maxLength={160} placeholder="Наприклад, Middle Python Developer" />
-        </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field id={id('years')} label="Досвід, років" error={errors.years}>
-            <Input {...input('years')} inputMode="numeric" placeholder="Необов’язково" />
-          </Field>
-          <Field id={id('location')} label="Локація" error={errors.location}>
-            <Input {...input('location')} maxLength={120} placeholder="Наприклад, Київ" />
-          </Field>
-        </div>
+        <ProfileFields form={form} errors={errors} idBase={base}
+          onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))} />
         {serverError && <Alert role="alert" variant="danger">{serverError}</Alert>}
         <div className="flex flex-wrap justify-end gap-2">
           <Button type="button" variant="ghost" onClick={onClose}>Скасувати</Button>
@@ -109,7 +85,7 @@ function ProfileFormDialog({ open, profile, onClose, onSubmit, submitLabel, hint
   );
 }
 
-function AttemptHistory({ attempts }: { attempts: AttemptSummary[] }) {
+export function AttemptHistory({ attempts }: { attempts: AttemptSummary[] }) {
   if (attempts.length === 0) return <p className="text-sm text-ink-muted">Спроб ще немає.</p>;
   return (
     <ol className="flex flex-col divide-y divide-line rounded-xl border border-line">
@@ -128,7 +104,7 @@ function AttemptHistory({ attempts }: { attempts: AttemptSummary[] }) {
   );
 }
 
-function SelfRatings({ profile }: { profile: CandidateProfile }) {
+export function SelfRatings({ profile }: { profile: CandidateProfile }) {
   const [items, setItems] = useState<SelfRatingValue[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);
@@ -144,6 +120,7 @@ function SelfRatings({ profile }: { profile: CandidateProfile }) {
   }, [profile.id, nonce]);
   if (error) return <ErrorRetry message={error} onRetry={() => setNonce((n) => n + 1)} />;
   if (!items) return <Skeleton className="h-32" />;
+  if (!profile.track) return <p className="text-sm text-ink-muted">Оберіть напрям, щоб оцінити свої дії.</p>;
   return (
     <SelfRatingList key={profile.track} track={profile.track} profileId={profile.id}
       initial={Object.fromEntries(items.map((r) => [r.action_id, r.value]))} />
@@ -268,6 +245,7 @@ function ProfileCard({ profile, isActive, onEdit, onArchive, start }: {
 export function ProfilesScreen() {
   const { profiles, active, status, error, reload, setActive } = useActiveProfile();
   const start = useStartAttempt();
+  const navigate = useNavigate();
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<CandidateProfile | null>(null);
   const [archiving, setArchiving] = useState<CandidateProfile | null>(null);
@@ -275,12 +253,13 @@ export function ProfilesScreen() {
   const [archiveError, setArchiveError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  /** One straight flow: create the profile, then start its first interview right away. */
+  /** Create the profile, make it active and open its page. The interview starts from there, by the candidate. */
   async function create(body: ProfileBody) {
     const p = await api<CandidateProfile>('/profiles', { method: 'POST', json: body });
     setCreating(false);
+    setActive(p.id);
     await reload();
-    await start.start(p.id);
+    navigate('/profile');
   }
 
   async function update(body: ProfileBody) {
@@ -338,7 +317,7 @@ export function ProfilesScreen() {
       {profiles.length === 0 ? (
         <EmptyState icon={UsersRound} title="Профілів ще немає"
           action={<Button onClick={() => setCreating(true)}><Plus className="size-4" aria-hidden="true" />Створити профіль</Button>}>
-          Створіть профіль, і одразу після цього почнеться співбесіда.
+          Створіть профіль: відкриється його сторінка, звідки можна почати співбесіду.
         </EmptyState>
       ) : (
         <ul className="grid items-start gap-4 md:grid-cols-2">

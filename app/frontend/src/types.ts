@@ -71,12 +71,19 @@ export interface RankedItem {
   strengths: string[];
   gaps: string[];
   unknown_count: number;
+  /** Requirement groups met / failed, uncapped (same numbers as the vacancy detail summary). */
+  met_count: number;
+  gap_count: number;
   tags: string[];
-  /** «Djinni» for original fixtures, «Тестова вакансія» for generated ones; null if the vacancy row is gone. */
+  /** Provenance label; currently «Djinni» for every catalog vacancy (owner statement); null if the vacancy row is gone. */
   source_label: string | null;
   groups_total: number;
   /** Requirement groups with at least one assessed alternative. */
   groups_assessed: number;
+  /** True when no mandatory group failed and the confirmed share is enough (server rule). */
+  fits: boolean;
+  /** Short Ukrainian explanations, strengths first. */
+  reasons: string[];
 }
 
 export interface ResultVacancy extends RankedItem {
@@ -91,8 +98,16 @@ export interface ResultVacancy extends RankedItem {
 export interface CompetencyResult {
   action_id: string;
   action_name: string;
+  /** Same value as interview_score; kept for compatibility. */
   score: number | null;
+  /** LLM interview grade, read-only. */
+  interview_score: number | null;
+  /** Editable self-rating of this profile, null if not rated. */
+  self_rating: number | null;
+  /** Short explanation of the grade (at most two distinct sentences). */
   reason: string;
+  /** The evaluator judged the answers sufficient to grade every criterion; false means the grade is rough. */
+  sufficient_evidence: boolean;
   evidence: { turn_id: string; exact_excerpt: string }[];
 }
 
@@ -101,6 +116,8 @@ export interface ProfileResults {
   attempt_id: string | null;
   profile_id: string;
   total: number;
+  fitting_total: number;
+  all_total: number;
   page: number;
   page_size: number;
   items: ResultVacancy[];
@@ -112,13 +129,19 @@ export interface ProfileResults {
 export interface CandidateProfile {
   id: string;
   name: string;
-  track: string;
+  /** Chosen by the candidate; null until then (no default direction). */
+  track: string | null;
   desired_title: string;
+  target_level: string | null;
+  work_mode: string | null;
   years_experience: number | null;
   location: string;
   archived: boolean;
   attempts_count: number;
   latest_finished_attempt_id: string | null;
+  /** Unfinished attempt (active or paused), if any. */
+  open_attempt: { id: string; cohort_id: string; status: string } | null;
+  latest_finished_attempt: { id: string; cohort_id: string } | null;
   created_at: string | null;
 }
 
@@ -184,4 +207,41 @@ export interface AttemptSummary {
   created_at: string | null;
   topics_used: number;
   answers_count: number;
+}
+
+/** `GET /profiles/{id}/results/{vacancy_id}`: where the candidate fits one vacancy and why. */
+export type FitState = 'MET' | 'BORDERLINE' | 'GAP' | 'UNKNOWN';
+export type FitGroupStatus = 'SATISFIED' | 'FAILED' | 'UNRESOLVED';
+
+export interface FitAlternative {
+  competency_id: string;
+  name: string;
+  required_level: 1 | 2 | 3;
+  required_label: 'базовий' | 'робочий' | 'просунутий';
+  /** Needed score on the 0..1 interview scale. */
+  threshold: number;
+  /** Interview grade 0..1, null when not assessed. */
+  candidate_score: number | null;
+  state: FitState;
+}
+
+export interface FitGroup {
+  id: string;
+  kind: 'MANDATORY' | 'DESIRED';
+  label: string;
+  excerpt: string;
+  status: FitGroupStatus;
+  alternatives: FitAlternative[];
+}
+
+export interface VacancyFitBreakdown {
+  vacancy_id: string;
+  title: string;
+  company: string;
+  confirmed_share: number;
+  fits: boolean;
+  label: 'RANKED' | 'LOW_INFORMATION' | 'NOT_EVALUABLE';
+  z: 0 | 1 | 2;
+  summary: { met: number; gap: number; unknown: number };
+  groups: FitGroup[];
 }

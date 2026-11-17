@@ -13,19 +13,22 @@ from backend.api.common import create_attempt, open_attempt
 from backend.api.core import _action_scores, _names, _revisions, attempt_scores, current_criteria_rows
 from backend.api.recommendations import NOTE, rank_items
 from backend.db import get_db
+from backend.domain.core_flow import eval_group, tau_for
+from backend.domain.criteria import mandatory_status
 from backend.domain.market import compute_market
 from backend.models import (CandidateProfile, CandidateSelfRating, CohortSnapshot, Competency, CoreInterview,
                             CoreTurn, CriterionAssessment, User)
 from backend.security import current_user
 
 router = APIRouter(prefix="/profiles", tags=["profiles"])
-FIT_THRESHOLD_PERCENT = 40
 
 
 class ProfileBody(BaseModel):
     name: str = Field(min_length=2, max_length=120)
-    track: Literal["python", "marketing", "design"]
+    track: Literal["python", "marketing", "design"] | None = None
     desired_title: str = Field(default="", max_length=160)
+    target_level: Literal["junior", "middle", "senior", "lead"] | None = None
+    work_mode: Literal["remote", "hybrid", "office", "any"] | None = None
     years_experience: int | None = Field(default=None, ge=0, le=70)
     location: str = Field(default="", max_length=120)
 
@@ -46,9 +49,14 @@ def _profile_dict(db: Session, p: CandidateProfile) -> dict:
     attempts = db.scalars(select(CoreInterview).where(CoreInterview.profile_id == p.id)
                           .order_by(CoreInterview.attempt_no.desc())).all()
     finished = next((a for a in attempts if a.status == "FINISHED"), None)
+    open_attempt = next((a for a in attempts if a.status in ("ACTIVE", "PAUSED")), None)
     return {"id": p.id, "name": p.name, "track": p.track, "desired_title": p.desired_title,
+            "target_level": p.target_level, "work_mode": p.work_mode,
             "years_experience": p.years_experience, "location": p.location, "archived": p.archived,
             "attempts_count": len(attempts), "latest_finished_attempt_id": finished.id if finished else None,
+            "open_attempt": ({"id": open_attempt.id, "cohort_id": open_attempt.cohort_id, "status": open_attempt.status}
+                             if open_attempt else None),
+            "latest_finished_attempt": ({"id": finished.id, "cohort_id": finished.cohort_id} if finished else None),
             "created_at": p.created_at.isoformat() if p.created_at else None}
 
 
@@ -151,6 +159,10 @@ def start_attempt(profile_id: str, response: Response, db: Session = Depends(get
     if open_iv is not None:
         response.status_code = 200
         return _attempt_brief(open_iv)
+    missing = [label for label, value in (("напрям", prof.track), ("рівень, на який ви претендуєте", prof.target_level),
+                                           ("роки досвіду", prof.years_experience)) if value in (None, "")]
+    if missing:
+        raise HTTPException(422, "Для початку співбесіди вкажіть: " + ", ".join(missing))
     snap, _ = get_or_create_cohort(db, user, prof.track)
     if snap is None:
         raise HTTPException(422, "Для цього треку немає вакансій для добірки")
@@ -176,6 +188,21 @@ def list_attempts(profile_id: str, db: Session = Depends(get_db), user: User = D
 
 # ---- results ---------------------------------------------------------------------------------------------
 
+def _short_reason(reasons: list[str], limit: int = 2) -> str:
+    """Join at most `limit` explanations, dropping ones that start like an earlier one (the evaluator repeats itself)."""
+    seen: set[str] = set()
+    kept: list[str] = []
+    for text in reasons:
+        key = " ".join(text.lower().split()[:5])
+        if not text.strip() or key in seen:
+            continue
+        seen.add(key)
+        kept.append(text.strip())
+        if len(kept) == limit:
+            break
+    return " ".join(kept)
+
+
 def _competencies(db: Session, iv: CoreInterview) -> list[dict]:
     rows = current_criteria_rows(db.scalars(
         select(CriterionAssessment).where(CriterionAssessment.session_id == iv.id)
@@ -186,22 +213,25 @@ def _competencies(db: Session, iv: CoreInterview) -> list[dict]:
     cur = [r for r in rows if r.revision == latest_rev[r.action_id]]
     scores = _action_scores(rows)
     names = _names(db)
+    ratings = _latest_profile_ratings(db, iv.profile_id)
     out = []
     for action in scores:
         mine = [r for r in cur if r.action_id == action]
         scored = [r for r in mine if r.score is not None] or mine
         out.append({"action_id": action, "action_name": names.get(action, action), "score": scores[action],
-                    "reason": " ".join(dict.fromkeys(r.reason for r in scored if r.reason)),
+                    "interview_score": scores[action], "self_rating": ratings.get(action),
+                    "reason": _short_reason([r.reason for r in scored if r.reason]),
+                    "sufficient_evidence": bool(mine) and all(bool(r.sufficient_evidence) for r in mine),
                     "evidence": [e for r in scored for e in (r.evidence or [])]})
     return out
 
 
 def _with_fit(item: dict) -> dict:
-    """Add fit flag (no failed mandatory group and enough confirmed share) and short Ukrainian reasons."""
+    """Add fit flag (some requirement is confirmed) and short Ukrainian reasons."""
     reasons = [f"Підтверджено: {x}" for x in item["strengths"]] + [f"Прогалина: {x}" for x in item["gaps"]]
     if item["unknown_count"]:
         reasons.append(f"Не оцінено: {item['unknown_count']} вимог")
-    fits = item["z"] != 0 and item["confirmed_share"] >= FIT_THRESHOLD_PERCENT
+    fits = item["confirmed_share"] > 0
     return {**item, "fits": fits, "reasons": reasons or ["Недостатньо даних для пояснення"]}
 
 
@@ -220,6 +250,8 @@ def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(
                 "market": [], **base}
     snap = db.get(CohortSnapshot, iv.cohort_id)
     items = [_with_fit(i) for i in rank_items(db, prof.years_experience, snap, attempt_scores(db, iv.id))]
+    # Product order: highest confirmed share first; ties by fewer mandatory failures (z), experience (x), id.
+    items.sort(key=lambda i: (-i["confirmed_share"], -i["z"], -i["x"], i["vacancy_id"]))
     if work_mode:
         items = [i for i in items if (i["work_mode"] or "").lower() == work_mode.lower()]
     if seniority:
@@ -241,3 +273,43 @@ def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(
             "competencies": _competencies(db, iv),
             "market": [{"order": i + 1, "action_id": e.action_id, "name": names.get(e.action_id, e.action_id)}
                        for i, e in enumerate(market)], **base}
+
+
+LEVEL_WORDS = {1: "базовий", 2: "робочий", 3: "просунутий"}
+
+
+@router.get("/{profile_id}/results/{vacancy_id}")
+def result_detail(profile_id: str, vacancy_id: str, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    """Where the candidate fits one vacancy and why: every requirement with the needed level, the interview grade and a state."""
+    prof = _owned_profile(db, user, profile_id)
+    iv = _latest_finished(db, prof.id)
+    if iv is None:
+        raise HTTPException(404, "Результатів ще немає")
+    snap = db.get(CohortSnapshot, iv.cohort_id)
+    revision = next((r for r in _revisions(snap) if r["id"] == vacancy_id), None)
+    if revision is None:
+        raise HTTPException(404, "Вакансії немає у вашій добірці")
+    scores = attempt_scores(db, iv.id)
+    names = _names(db)
+    item = next(_with_fit(i) for i in rank_items(db, prof.years_experience, snap, scores) if i["vacancy_id"] == vacancy_id)
+    groups = []
+    for g in revision["groups"]:
+        ev = eval_group(g["alternatives"], scores)
+        alternatives = []
+        for a in g["alternatives"]:
+            tau = tau_for(a["required_level"])
+            score = scores.get(a["competency_id"])
+            status = mandatory_status(score, tau)
+            state = "UNKNOWN" if score is None else {"SATISFIED": "MET", "FAILED": "GAP"}.get(status, "BORDERLINE")
+            level = min(3, max(1, a["required_level"]))
+            alternatives.append({"competency_id": a["competency_id"], "name": names.get(a["competency_id"], a["competency_id"]),
+                                 "required_level": level, "required_label": LEVEL_WORDS[level], "threshold": tau,
+                                 "candidate_score": score, "state": state})
+        groups.append({"id": g.get("id"), "kind": g["kind"], "label": g.get("label", ""), "excerpt": g.get("excerpt", ""),
+                       "status": ev.status, "alternatives": alternatives})
+    summary = {"met": sum(1 for g in groups if g["status"] == "SATISFIED"),
+               "gap": sum(1 for g in groups if g["status"] == "FAILED"),
+               "unknown": sum(1 for g in groups if g["status"] == "UNRESOLVED")}
+    return {"vacancy_id": vacancy_id, "title": revision.get("title"), "company": revision.get("company"),
+            "confirmed_share": item["confirmed_share"], "fits": item["fits"], "label": item["label"], "z": item["z"],
+            "groups": groups, "summary": summary}

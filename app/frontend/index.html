@@ -6,6 +6,15 @@
     <meta name="theme-color" content="#f5f7fb" />
     <meta name="description" content="CompetenceMatch — адаптивна співбесіда та пояснюваний підбір вакансій за компетентностями" />
     <title>CompetenceMatch</title>
+    <script>
+      // Apply the saved theme before the first paint to avoid a light flash in dark mode.
+      try {
+        var c = localStorage.getItem('cm-theme');
+        var d = c === 'dark' || ((c !== 'light') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = d ? 'dark' : 'light';
+        document.documentElement.style.colorScheme = d ? 'dark' : 'light';
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

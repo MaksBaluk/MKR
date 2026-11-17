@@ -44,8 +44,8 @@ def serialize_vacancy(v: Vacancy, *, with_groups: bool = True) -> dict:
 
 
 def source_label(v: Vacancy) -> str:
-    """User-facing provenance label. Single point of change for catalog source naming."""
-    return "Тестова вакансія" if v.source_type == "SYNTHETIC_GENERATED" else "Djinni"
+    """User-facing provenance label. Owner states all catalog vacancies come from Djinni (not independently verified)."""
+    return "Djinni"
 
 
 def freeze_payload(records: list[dict]) -> tuple[list[dict], str]:
@@ -68,7 +68,7 @@ def serialize_snapshot(s: Snapshot, *, with_vacancies: bool = False) -> dict:
 
 
 def make_default_profile(db: Session, user: User) -> CandidateProfile:
-    prof = CandidateProfile(user_id=user.id, track=user.track, name="Основний профіль",
+    prof = CandidateProfile(user_id=user.id, track=None, name="Основний профіль",
                             desired_title=user.desired_title or "", years_experience=user.years_experience,
                             location=user.location or "")
     db.add(prof)

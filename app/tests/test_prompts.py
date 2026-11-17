@@ -24,7 +24,7 @@ def _outside(text: str, open_tag: str, close_tag: str) -> str:
 def test_interviewer_system_rules():
     p = INTERVIEWER_SYSTEM
     assert 'Ukrainian' in p and 'Russianisms' in p
-    assert 'at most 2 sentences' in p
+    assert 'at most 25 words' in p
     assert 'leading question' in p
     assert 'never reveal' in p.lower()
     assert 'never change the topic' in p.lower()
@@ -143,3 +143,31 @@ def test_interviewer_system_matches_depth_to_level():
 def test_evaluator_system_requests_sufficient_evidence_flag():
     assert '"sufficient_evidence"' in EVALUATOR_SYSTEM
     assert 'sufficient_evidence: boolean' in EVALUATOR_SYSTEM
+
+
+def test_interviewer_treats_clarification_as_on_topic():
+    p = INTERVIEWER_SYSTEM.lower()
+    assert 'clarification' in p and 'rephrase' in p
+    assert 'not off-topic' in p
+
+
+def test_evaluator_schema_placeholder_and_sufficient_rule():
+    p = EVALUATOR_SYSTEM
+    assert '0.0-1.0' not in p and 'number in [0,1] or null' in p
+    assert 'any criterion is null' in p.lower() and 'sufficient_evidence' in p
+
+
+def test_evaluator_treats_declined_answer_as_sufficient_zero():
+    p = EVALUATOR_SYSTEM.lower()
+    assert 'no experience' in p and 'score 0' in p and 'sufficient_evidence to true' in p
+
+
+def test_interviewer_asks_one_short_narrow_question():
+    p = INTERVIEWER_SYSTEM.lower()
+    assert 'at most 25 words' in p and 'single ask' in p and 'short paragraph' in p
+
+
+def test_evaluator_judges_content_not_length_and_keeps_reasons_short():
+    p = EVALUATOR_SYSTEM.lower()
+    assert 'judge content, not length' in p and 'short answer' in p and 'up to 0.75' in p
+    assert 'one sentence' in p and 'at most 20 words' in p

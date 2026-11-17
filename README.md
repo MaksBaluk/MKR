@@ -1,4 +1,6 @@
-# CompetenceMatch — lean MVP
+# CompetenceMatch
+
+> Цей README частково застарів (тести, кількість вакансій, описи потоку). Актуальний стан і відкриті пункти: `docs/tasks/STATUS.md` і `docs/tasks/TODO.md`.
 
 Candidate-centric, explainable job recommendation: the system ranks vacancies for the candidate automatically, then **one shared adaptive interview** refines the ranking over a frozen, system-selected cohort. Ukrainian React interface, FastAPI, PostgreSQL + pgvector, 90 synthetic curated vacancies, typed open-ended answers by default, and optional LLM question generation and rubric grading. No multi-agent SDLC required.
 

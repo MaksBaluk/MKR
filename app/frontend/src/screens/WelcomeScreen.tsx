@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
 import { STEPS } from '@/lib/navigation';
-import { useSession } from '@/session';
+import { useProfileInterview } from '@/hooks/useProfileInterview';
 
 const STEP_TEXT: Record<string, string> = {
   welcome: 'Знайомство із системою та правилами оцінювання.',
@@ -86,7 +86,7 @@ function HeroIllustration() {
 
 /** Step 1 (route `/`). The primary action follows the candidate's stage. */
 export function WelcomeScreen() {
-  const { interview } = useSession();
+  const interview = useProfileInterview();
   const [howOpen, setHowOpen] = useState(false);
 
   const cta =

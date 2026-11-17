@@ -1185,7 +1185,7 @@
   {
     "id": "python-07",
     "track": "python",
-    "title": "Senior Microservices Engineer (Python)",
+    "title": "Middle Microservices Engineer (Python)",
     "company": "BluePeak Analytics",
     "seniority": "MIDDLE",
     "years_min": 2,
@@ -1578,7 +1578,7 @@
   {
     "id": "python-09",
     "track": "python",
-    "title": "Junior Backend Developer (Python)",
+    "title": "Middle Backend Developer (Python)",
     "company": "Cobalt Harbor",
     "seniority": "MIDDLE",
     "years_min": 2,
@@ -1972,7 +1972,7 @@
   {
     "id": "python-11",
     "track": "python",
-    "title": "Senior Python Platform Engineer",
+    "title": "Junior Python Platform Engineer",
     "company": "Sequoia Loop",
     "seniority": "JUNIOR",
     "years_min": 0,
@@ -3547,7 +3547,7 @@
   {
     "id": "python-19",
     "track": "python",
-    "title": "Senior API Infrastructure Engineer",
+    "title": "Middle API Infrastructure Engineer",
     "company": "Mintline Labs",
     "seniority": "MIDDLE",
     "years_min": 2,
@@ -4728,7 +4728,7 @@
   {
     "id": "python-25",
     "track": "python",
-    "title": "Junior FastAPI Developer",
+    "title": "Lead FastAPI Developer",
     "company": "Glacierbox",
     "seniority": "LEAD",
     "years_min": 6,
@@ -5123,7 +5123,7 @@
   {
     "id": "python-27",
     "track": "python",
-    "title": "Senior Python Backend Developer",
+    "title": "Middle Python Backend Developer",
     "company": "Octave Signal",
     "seniority": "MIDDLE",
     "years_min": 2,
@@ -5714,7 +5714,7 @@
   {
     "id": "python-30",
     "track": "python",
-    "title": "Backend Team Lead (Python)",
+    "title": "Senior Backend Developer (Python)",
     "company": "Bluefox Platform",
     "seniority": "SENIOR",
     "years_min": 4,
@@ -7483,7 +7483,7 @@
   {
     "id": "marketing-09",
     "track": "marketing",
-    "title": "Senior Performance Marketer",
+    "title": "Middle Performance Marketer",
     "company": "Lighthouse Metric",
     "seniority": "MIDDLE",
     "years_min": 2,
@@ -9644,7 +9644,7 @@
   {
     "id": "marketing-20",
     "track": "marketing",
-    "title": "Junior PPC Specialist",
+    "title": "Senior PPC Specialist",
     "company": "Tideframe",
     "seniority": "SENIOR",
     "years_min": 4,
@@ -10432,7 +10432,7 @@
   {
     "id": "marketing-24",
     "track": "marketing",
-    "title": "Senior CRM Specialist",
+    "title": "Middle CRM Specialist",
     "company": "Sparrow Systems",
     "seniority": "MIDDLE",
     "years_min": 2,
@@ -11612,7 +11612,7 @@
   {
     "id": "marketing-30",
     "track": "marketing",
-    "title": "Senior Acquisition Lead",
+    "title": "Senior Acquisition Specialist",
     "company": "Cobalt Harbor",
     "seniority": "SENIOR",
     "years_min": 4,
@@ -13976,7 +13976,7 @@
   {
     "id": "design-12",
     "track": "design",
-    "title": "Product Design Lead",
+    "title": "Middle Product Designer",
     "company": "Tideframe",
     "seniority": "MIDDLE",
     "years_min": 2,
@@ -14566,7 +14566,7 @@
   {
     "id": "design-15",
     "track": "design",
-    "title": "Junior Product Designer",
+    "title": "Lead Product Designer",
     "company": "Clearpath Digital",
     "seniority": "LEAD",
     "years_min": 6,
@@ -15748,7 +15748,7 @@
   {
     "id": "design-21",
     "track": "design",
-    "title": "Design Systems Lead",
+    "title": "Junior Design Systems Designer",
     "company": "Riverton Works",
     "seniority": "JUNIOR",
     "years_min": 0,
@@ -17514,7 +17514,7 @@
   {
     "id": "design-30",
     "track": "design",
-    "title": "Lead Product Designer",
+    "title": "Senior Product Designer",
     "company": "NovaRidge Digital",
     "seniority": "SENIOR",
     "years_min": 4,

@@ -16,14 +16,14 @@ def _all(client, auth, pid, **kw):
 def test_default_returns_only_fitting(client, auth, finished, monkeypatch):
     real = prof_api.rank_items
 
-    def fake(*a, **k):  # stub-LLM scores confirm little: force two items over the threshold
+    def fake(*a, **k):  # one vacancy with confirmed share, one without
         items = real(*a, **k)
         items[0].update(z=1, confirmed_share=40)
-        items[1].update(z=1, confirmed_share=39)
+        items[1].update(z=1, confirmed_share=0)
         return items
     monkeypatch.setattr(prof_api, "rank_items", fake)
     r = _all(client, auth, finished["id"])
-    assert len(r["items"]) == r["total"] == r["fitting_total"] >= 1 and all(i["fits"] and i["confirmed_share"] >= 40 for i in r["items"])
+    assert len(r["items"]) == min(50, r["total"]) and r["total"] == r["fitting_total"] >= 1 and all(i["fits"] for i in r["items"])
     assert r["total"] == r["fitting_total"] <= r["all_total"]
 
 
@@ -36,16 +36,17 @@ def test_all_and_nonfitting(client, auth, finished):
     assert non["total"] == everything["all_total"] - everything["fitting_total"]
 
 
-def test_not_fit_when_z_zero(client, auth, finished, monkeypatch):
+def test_zero_share_is_not_fitting(client, auth, finished, monkeypatch):
     real = prof_api.rank_items
 
     def fake(*a, **k):
         items = real(*a, **k)
-        items[0].update(z=0, confirmed_share=90)
+        items[0].update(z=2, confirmed_share=0)
         return items
     monkeypatch.setattr(prof_api, "rank_items", fake)
-    r = _all(client, auth, finished["id"], fitting="all")
-    assert r["items"][0]["confirmed_share"] == 90 and r["items"][0]["fits"] is False
+    r = _all(client, auth, finished["id"], fitting="nonfitting")
+    zero = [i for i in r["items"] if i["confirmed_share"] == 0]
+    assert zero and all(i["fits"] is False for i in r["items"])
 
 
 def test_reasons_non_empty_strengths_first(client, auth, finished):

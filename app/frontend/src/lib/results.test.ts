@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import {
-  assessedLabel, DEFAULT_FILTERS, filtersFromQuery, filtersToQuery, fitLabel, hasActiveFilters, pageRange,
-  resultsApiPath, totalPages,
+  assessedLabel, comparisonRows, DEFAULT_FILTERS, filtersFromQuery, filtersToQuery, fitLabel,
+  hasActiveFilters, pageRange, resultsApiPath, totalPages,
 } from '@/lib/results';
 
 describe('filters <-> query string', () => {
@@ -23,11 +23,11 @@ describe('filters <-> query string', () => {
   });
 
   test('api path uses server param names and omits defaults', () => {
-    expect(resultsApiPath('p1', DEFAULT_FILTERS, 10)).toBe('/profiles/p1/results?page=1&page_size=10');
+    expect(resultsApiPath('p1', DEFAULT_FILTERS, 10)).toBe('/profiles/p1/results?page=1&page_size=10&fitting=all');
     const path = resultsApiPath('p 1', { work_mode: 'HYBRID', seniority: '', q: 'дані', min_share: 25, page: 2 }, 10);
     expect(path.startsWith('/profiles/p%201/results?')).toBe(true);
     const sp = new URLSearchParams(path.split('?')[1]);
-    expect(Object.fromEntries(sp)).toEqual({ page: '2', page_size: '10', work_mode: 'HYBRID', q: 'дані', min_share: '25' });
+    expect(Object.fromEntries(sp)).toEqual({ page: '2', page_size: '10', fitting: 'all', work_mode: 'HYBRID', q: 'дані', min_share: '25' });
   });
 
   test('active filters ignore the page', () => {
@@ -76,4 +76,17 @@ test('vacancyCount uses Ukrainian plural forms', async () => {
     'Знайдено 1 вакансію', 'Знайдено 3 вакансії', 'Знайдено 5 вакансій', 'Знайдено 11 вакансій',
     'Знайдено 21 вакансію', 'Знайдено 22 вакансії', 'Знайдено 112 вакансій',
   ]);
+});
+
+describe('comparisonRows', () => {
+  test('keeps server order and passes nulls through without inventing values', () => {
+    const rows = comparisonRows([
+      { action_name: 'Б', interview_score: 0.5, self_rating: null },
+      { action_name: 'А', interview_score: null, self_rating: 0.8 },
+    ]);
+    expect(rows).toEqual([
+      { name: 'Б', interview: 0.5, self: null },
+      { name: 'А', interview: null, self: 0.8 },
+    ]);
+  });
 });

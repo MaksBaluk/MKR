@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, Briefcase, Clock, ExternalLink, Loader2, MapPin, MessageSquare, SearchX } from 'lucide-react';
 import { api, ApiError } from '@/api';
 import { ErrorRetry } from '@/components/ErrorRetry';
+import { useVacancyFit, VacancyFit } from '@/components/VacancyFit';
 import { SourceMark } from '@/components/SourceMark';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -65,6 +66,30 @@ function Requirement({ g }: { g: RequirementGroup }) {
       </ul>
     </li>
   );
+}
+
+/** «Де ви підходите і чому» for the active profile; a hint with a profile link when there is no finished attempt. */
+function FitSection({ vacancyId }: { vacancyId: string }) {
+  const { active } = useActiveProfile();
+  const finished = active?.latest_finished_attempt ? active.id : null;
+  const { data, state, retry } = useVacancyFit(finished, vacancyId);
+  const { hash } = useLocation();
+  // The section appears after the fetch, so the browser's own anchor jump has nothing to land on yet.
+  useEffect(() => {
+    if (hash === '#fit' && (data || state === 'missing')) document.getElementById('fit')?.scrollIntoView({ block: 'start' });
+  }, [hash, data, state]);
+  if (!finished)
+    return (
+      <Card id="fit" className="scroll-mt-24 p-4 text-sm text-ink-muted">
+        Щоб побачити, де ви підходите до цієї вакансії, завершіть співбесіду у{' '}
+        <Link to="/profile" className="font-medium text-primary hover:underline">своєму профілі</Link>.
+      </Card>
+    );
+  if (state === 'loading' && !data) return <div id="fit" aria-busy="true"><Skeleton className="h-48" /></div>;
+  if (state === 'error') return <div id="fit"><ErrorRetry message="Не вдалося завантажити розбір збігу." onRetry={retry} /></div>;
+  if (state === 'missing')
+    return <Card id="fit" className="p-4 text-sm text-ink-muted">Ця вакансія не входить до вашої добірки, тому розбору збігу для неї немає.</Card>;
+  return data ? <VacancyFit data={data} /> : null;
 }
 
 /** Interview CTA when the active profile is in this vacancy's track and has no finished attempt yet. */
@@ -178,6 +203,7 @@ export function VacancyDetail() {
 
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="flex min-w-0 flex-col gap-4">
+          <FitSection vacancyId={v.id} />
           <Card className="flex flex-col gap-5 p-4 sm:p-6">
             <Description text={v.description} title={v.title} />
             <ExtraList title="Обов’язки" items={responsibilities} />

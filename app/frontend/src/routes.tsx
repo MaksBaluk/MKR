@@ -1,6 +1,6 @@
 import { lazy, useEffect, useState, type ReactNode } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { BarChart3, Compass, Loader2, MessageSquare, RefreshCw, UsersRound } from 'lucide-react';
+import { Compass, Loader2, RefreshCw, UsersRound } from 'lucide-react';
 import { api } from '@/api';
 import { AppShell, SkipLink } from '@/components/AppShell';
 import { ErrorRetry } from '@/components/ErrorRetry';
@@ -10,10 +10,13 @@ import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ActiveProfileProvider, useActiveProfile } from '@/lib/activeProfile';
-import { landingPath, safeReturnPath } from '@/lib/navigation';
+import { useProfileInterview } from '@/hooks/useProfileInterview';
+import { isProfileComplete } from '@/lib/profiles';
+import { landingAfterAuth, safeReturnPath } from '@/lib/navigation';
 import { AuthScreen } from '@/screens/AuthScreen';
 import { InterviewScreen } from '@/screens/InterviewScreen';
-import { ProfileScreen } from '@/screens/ProfileScreen';
+import { ProfileHubPage } from '@/screens/ProfileHub';
+import { SettingsScreen } from '@/screens/SettingsScreen';
 import { WelcomeScreen } from '@/screens/WelcomeScreen';
 import { MarketScreen } from '@/screens/MarketScreen';
 import { ResultsScreen } from '@/screens/ResultsScreen';
@@ -53,7 +56,8 @@ function LoginPage() {
   const { status, boot, sessionExpired } = useSession();
   const location = useLocation();
   // After sign-in land on welcome/profile, never straight in an interview (resume is a button there).
-  const from = landingPath(safeReturnPath((location.state as { from?: unknown } | null)?.from));
+  const [kind, setKind] = useState<'login' | 'register'>('login');
+  const from = landingAfterAuth(kind, safeReturnPath((location.state as { from?: unknown } | null)?.from));
   useEffect(() => {
     document.title = 'Вхід · CompetenceMatch';
   }, []);
@@ -62,9 +66,16 @@ function LoginPage() {
   return (
     <>
       <SkipLink />
-      <AuthScreen onSignedIn={() => void boot()} notice={sessionExpired ? 'Сесію завершено. Увійдіть знову.' : null} />
+      <AuthScreen onSignedIn={(k) => { setKind(k); void boot(); }} notice={sessionExpired ? 'Сесію завершено. Увійдіть знову.' : null} />
     </>
   );
+}
+
+/** App shell whose stepper, locks and banners follow the active candidate profile. */
+function ShellForActiveProfile({ name, email, onLogout }: { name: string; email: string; onLogout: () => void }) {
+  const interview = useProfileInterview();
+  const { active } = useActiveProfile();
+  return <AppShell name={name} email={email} interview={interview} profileComplete={isProfileComplete(active)} onLogout={onLogout} />;
 }
 
 /** Guard + shell for every signed-in route. Resumes the candidate's stage once after boot. */
@@ -85,7 +96,7 @@ function AuthenticatedLayout() {
     return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />;
   return (
     <ActiveProfileProvider>
-      <AppShell name={session.profile.display_name} email={session.profile.email} interview={session.interview}
+      <ShellForActiveProfile name={session.profile.display_name} email={session.profile.email}
         onLogout={() => { session.signOut(); navigate('/login', { replace: true }); }} />
     </ActiveProfileProvider>
   );
@@ -124,51 +135,21 @@ function useAttemptOwner(interviewId: string): CandidateProfile | null {
 function InterviewPage() {
   const { id = '' } = useParams();
   const { profile, llmConfigured, refreshInterview } = useSession();
+  const { reload } = useActiveProfile();
   const owner = useAttemptOwner(id);
   const navigate = useNavigate();
   if (!profile) return null;
   // Header shows the attempt's own profile (title/track) once known; the account profile until then.
-  const shown = owner ? { ...profile, desired_title: owner.desired_title, track: owner.track } : profile;
+  const shown = owner ? { ...profile, desired_title: owner.desired_title, track: owner.track ?? profile.track } : profile;
   return (
     <InterviewScreen key={id} interviewId={id} profile={shown} llmConfigured={llmConfigured}
       onFinished={() => {
-        void refreshInterview().finally(() => navigate('/results', { replace: true }));
+        void Promise.all([refreshInterview().catch(() => null), reload()]).finally(() => navigate('/results', { replace: true }));
       }} />
   );
 }
 
 /** Step 2. Only before the first interview: the profile is frozen into the interview snapshot afterwards. */
-function ProfilePage() {
-  const { profile, interview, setProfile, refreshInterview } = useSession();
-  const navigate = useNavigate();
-  if (!profile) return null;
-  if (interview?.status === 'active')
-    return (
-      <EmptyState icon={MessageSquare} title="Профіль уже використано в розмові"
-        action={
-          <div className="flex flex-wrap justify-center gap-2">
-            <Button asChild><Link to={`/interview/${interview.id}`}>Продовжити співбесіду</Link></Button>
-            <Button asChild variant="outline"><Link to="/profiles">Усі профілі</Link></Button>
-          </div>
-        }>
-        Дані профілю зафіксовано для поточної співбесіди. Самооцінку можна змінити в результатах.
-      </EmptyState>
-    );
-  if (interview?.status === 'finished')
-    return (
-      <EmptyState icon={BarChart3} title="Співбесіду завершено"
-        action={<Button asChild><Link to="/results">До результатів</Link></Button>}>
-        Профіль зафіксовано разом із результатами. Самооцінку можна змінити на вкладці «Мій профіль» у результатах.
-      </EmptyState>
-    );
-  return (
-    <ProfileScreen profile={profile} onSaved={setProfile}
-      onStarted={(id) => {
-        void refreshInterview().finally(() => navigate(`/interview/${id}`));
-      }} />
-  );
-}
-
 /** Resolves the active candidate profile, then renders the page for it. */
 function WithActiveProfile({ render }: { render: (p: CandidateProfile) => ReactNode }) {
   const { status, active, error, reload } = useActiveProfile();
@@ -194,7 +175,7 @@ function WithActiveProfile({ render }: { render: (p: CandidateProfile) => ReactN
 }
 
 function ResultsPage() {
-  const { interview } = useSession();
+  const interview = useProfileInterview();
   return (
     <div className="flex flex-col gap-4">
       {interview?.status === 'active' && (
@@ -223,8 +204,9 @@ export function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<AuthenticatedLayout />}>
         <Route index element={<WelcomeScreen />} />
-        <Route path="profile" element={<ProfilePage />} />
+        <Route path="profile" element={<ProfileHubPage />} />
         <Route path="profiles" element={<ProfilesScreen />} />
+        <Route path="settings" element={<SettingsScreen />} />
         <Route path="vacancies" element={<VacanciesScreen />} />
         <Route path="vacancies/:id" element={<VacancyDetail />} />
         <Route path="market" element={<WithActiveProfile render={(p) => <MarketScreen key={p.id} profile={p} />} />} />

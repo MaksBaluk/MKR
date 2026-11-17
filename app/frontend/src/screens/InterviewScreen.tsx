@@ -63,6 +63,8 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
   const [optimistic, setOptimistic] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [thinking, setThinking] = useState(false);
+  // Set when the planner has no topics left: the interview is finished on the server, results are one click away.
+  const [completed, setCompleted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [offline, setOffline] = useState(!navigator.onLine);
   const animateIds = useRef<Set<string>>(new Set());
@@ -90,8 +92,8 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
         { method: 'POST', json: { version } },
       );
       if (res.done || !res.turn) {
-        await api(`/interviews/${interviewId}/finish`, { method: 'POST', json: { version: res.version } });
-        onFinished();
+        setPending(null);
+        setCompleted(true);
         return;
       }
       animateIds.current.add(res.turn.id);
@@ -280,9 +282,15 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
               </Button>
             </div>
           )}
-          {state?.status === 'ACTIVE' && (
+          {completed && (
+            <div role="status" className="shrink-0 border-t border-line p-4 flex flex-col gap-3">
+              <p className="text-[15px] text-ink">Ви пройшли всі теми співбесіди. Дякуємо за відповіді, результати готові.</p>
+              <Button onClick={() => onFinished()} className="self-start">Переглянути результати</Button>
+            </div>
+          )}
+          {state?.status === 'ACTIVE' && !completed && (
             <form onSubmit={send} className="shrink-0 border-t border-line p-3" aria-busy={busy || thinking}>
-              <div className="flex items-end gap-2 rounded-2xl border border-line bg-white p-2 focus-within:border-primary">
+              <div className="flex items-end gap-2 rounded-2xl border border-line bg-surface p-2 focus-within:border-primary">
                 <label htmlFor="answer" className="sr-only">Ваша відповідь</label>
                 <Textarea
                   id="answer"
@@ -307,7 +315,7 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
         <aside className="flex max-h-[40dvh] min-h-0 flex-col gap-3 overflow-y-auto sm:gap-4 lg:max-h-none">
           <button
             type="button"
-            className="flex items-center justify-between rounded-xl border border-line bg-white px-4 py-3 text-left font-semibold text-ink lg:hidden"
+            className="flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3 text-left font-semibold text-ink lg:hidden"
             aria-expanded={infoOpen}
             aria-controls="interview-info"
             onClick={() => setInfoOpen((v) => !v)}
@@ -342,7 +350,7 @@ export function InterviewScreen({ interviewId, profile, llmConfigured, onFinishe
             {pending && (
               <Card className="border-primary-line bg-primary-soft">
                 <CardContent className="flex items-start gap-3 pt-5">
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white text-primary">
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface text-primary">
                     <Target className="size-6" aria-hidden="true" />
                   </span>
                   <div>

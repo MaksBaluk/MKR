@@ -13,8 +13,8 @@ from sqlalchemy.orm import Session
 from backend.api.common import create_attempt, default_profile
 from backend.db import get_db
 from backend.domain.core_flow import planner_state
-from backend.domain.candidate_level import candidate_level
-from backend.domain.interview_budget import can_ask_question, can_start_topic, needs_min_followup
+from backend.domain.candidate_level import resolve_level
+from backend.domain.interview_budget import needs_min_followup, topic_open_for_question
 from backend.domain.market import VacancyInput, compute_market
 from backend.domain.planner import choose_next
 from backend.agents.graphs import run_answer, run_ask
@@ -215,9 +215,8 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
 
     # Otherwise a started topic is re-asked only when the Evaluator found insufficient evidence (null score).
     def eligible(a: str) -> bool:
-        if a not in used:
-            return can_start_topic(len(used))
-        return can_ask_question(shown[a]) and a in latest_in_session and latest_in_session[a] is None
+        return topic_open_for_question(used=a in used, distinct_topics=len(used), shown=shown.get(a, 0),
+                                       latest_score_is_null=a in latest_in_session and latest_in_session[a] is None)
 
     # A topic below its minimum continues before the planner opens anything (even if its groups closed/failed).
     followup = next((t.action_id for t in reversed(turns) if needs_second(t.action_id)), None)
@@ -227,13 +226,19 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         available = sorted({a for alts in state.open_alternatives.values() for a in alts if eligible(a)})
         action = choose_next(state, weights, available, mass)
     if action is None:
-        return {"turn": None, "version": iv.version, "done": True}
+        # Plan exhausted: the interview completes itself, so results open and answers stop.
+        iv.status = "FINISHED"
+        iv.version += 1
+        db.commit()
+        return {"turn": None, "version": iv.version, "done": True, "status": iv.status}
     label = _label(db, action)
     answered = [t for t in turns if t.action_id == action and t.answer_text]
     comp = db.get(Competency, action)
     result = run_ask({"action_id": action, "action_name": label, "summary": comp.summary if comp else "",
                       "unmet_criteria": criteria_for(db, action),
-                      "previous_answers": [t.answer_text for t in answered][-3:], "followup_goal": None,
+                      "previous_answers": [t.answer_text for t in answered][-3:],
+                      "asked_questions": [t.question_text for t in turns if t.action_id == action],
+                      "followup_goal": None,
                       "off_topic_detected": bool(answered and answered[-1].off_topic),
                       **_level_context(db, iv)}, get_chat_model())
     question, source = result.question_text, result.source
@@ -241,7 +246,16 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
                     question_source=source)
     iv.version += 1
     db.add(turn)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:  # a parallel request created the same sequence first: return its pending question
+        db.rollback()
+        winner = db.scalar(select(CoreTurn).where(CoreTurn.interview_id == iv.id, CoreTurn.answer_text.is_(None))
+                           .order_by(CoreTurn.sequence))
+        if winner is None:
+            raise HTTPException(409, "Стан інтерв'ю змінився, оновіть сторінку")
+        db.refresh(iv)
+        return {"turn": _turn_dict(winner, _names(db)), "version": iv.version, "done": False}
     return {"turn": _turn_dict(turn, _names(db)), "version": iv.version, "done": False}
 
 
@@ -250,7 +264,8 @@ def _level_context(db: Session, iv: CoreInterview) -> dict:
     src = db.get(CandidateProfile, iv.profile_id) if iv.profile_id else None
     src = src or db.get(User, iv.user_id)
     years = getattr(src, "years_experience", None)
-    return {"candidate_level": candidate_level(getattr(src, "desired_title", None), years), "years_experience": years}
+    return {"candidate_level": resolve_level(getattr(src, "target_level", None), getattr(src, "desired_title", None), years),
+            "years_experience": years}
 
 
 def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -> str:
@@ -305,6 +320,8 @@ def submit_answer(interview_id: str, data: AnswerBody, db: Session = Depends(get
         return {"turn": _turn_dict(replay, _names(db)), "version": iv.version, "replayed": True}
     if data.version != iv.version:
         raise HTTPException(409, "Стан інтерв'ю змінився, оновіть сторінку")
+    if iv.status != "ACTIVE":
+        raise HTTPException(409, "Інтерв'ю не активне")
     turn = db.scalar(select(CoreTurn).where(CoreTurn.id == data.turn_id, CoreTurn.interview_id == iv.id))
     if turn is None:
         raise HTTPException(404, "Питання не знайдено")

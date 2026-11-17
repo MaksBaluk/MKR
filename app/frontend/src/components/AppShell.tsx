@@ -8,8 +8,8 @@ import { useActiveProfile } from '@/lib/activeProfile';
 import { trackLabel } from '@/lib/profiles';
 import { Dialog } from '@/components/ui/dialog';
 import {
-  MOBILE_TAB_KEYS, STEPS, isFocusLayout, pageTitleFor, stepForPath, stepStates,
-  type SessionInterview, type StepState,
+  STEPS, isFocusLayout, mobileTabs, pageTitleFor, progressPercent, progressSteps, sideStates, stepForPath, stepStates,
+  type SessionInterview, type SideState, type StepState,
 } from '@/lib/navigation';
 import { cn } from '@/lib/utils';
 
@@ -57,6 +57,29 @@ function StepCircle({ s }: { s: StepState }) {
 const STATUS_TEXT = { current: 'поточний крок', done: 'виконано', available: '', locked: 'недоступно' } as const;
 
 /** Numbered vertical stepper used as primary navigation (sidebar and mobile drawer). */
+/** Vacancies and settings: below the stepper, separated, never locked. */
+function SideNav({ items, collapsed = false, onNavigate }: { items: SideState[]; collapsed?: boolean; onNavigate?: () => void }) {
+  return (
+    <ul className="mt-4 flex flex-col gap-1 border-t border-line pt-4" aria-label="Інші розділи">
+      {items.map((s) => {
+        const current = s.status === 'current';
+        return (
+          <li key={s.key}>
+            <Link to={s.to} onClick={onNavigate} aria-current={current ? 'page' : undefined}
+              title={collapsed ? s.label : undefined}
+              className={cn('flex min-h-12 items-center gap-3 rounded-xl px-2.5 text-sm font-medium transition-colors duration-150 motion-reduce:transition-none',
+                focusRing, collapsed && 'justify-center px-0',
+                current ? 'bg-primary-soft text-primary-strong' : 'text-ink hover:bg-surface-muted')}>
+              <s.icon className={cn('size-5 shrink-0', current ? 'text-primary' : 'text-ink-subtle')} aria-hidden="true" />
+              <span className={cn('min-w-0 flex-1 truncate', collapsed && 'sr-only')}>{s.label}</span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 function StepperNav({ states, collapsed = false, onNavigate }: { states: StepState[]; collapsed?: boolean; onNavigate?: () => void }) {
   const reasonBase = useId();
   return (
@@ -218,10 +241,12 @@ function UserMenu({ name, email, onLogout }: { name: string; email: string; onLo
 }
 
 /** Authenticated layout: stepper sidebar (>=1024px) or drawer + bottom tab bar (<1024px), top bar, step header strip. */
-export function AppShell({ name, email, interview, onLogout }: {
+export function AppShell({ name, email, interview, profileComplete, onLogout }: {
   name: string;
   email: string;
   interview: SessionInterview | null;
+  /** Track, level and years are filled in (the candidate can start the interview). */
+  profileComplete: boolean;
   onLogout: () => void;
 }) {
   const { pathname } = useLocation();
@@ -229,6 +254,8 @@ export function AppShell({ name, email, interview, onLogout }: {
   const title = pageTitleFor(pathname);
   const step = stepForPath(pathname);
   const states = stepStates(pathname, interview);
+  const side = sideStates(pathname);
+  const tabs = mobileTabs(pathname, interview);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const firstRender = useRef(true);
   const [collapsed, setCollapsed] = useState(false);
@@ -259,6 +286,7 @@ export function AppShell({ name, email, interview, onLogout }: {
         </div>
         <nav aria-label="Кроки оцінювання" className="flex-1 overflow-y-auto px-3 py-5">
           <StepperNav states={states} collapsed={collapsed} />
+          <SideNav items={side} collapsed={collapsed} />
         </nav>
       </aside>
 
@@ -286,12 +314,12 @@ export function AppShell({ name, email, interview, onLogout }: {
               <h1 ref={headingRef} tabIndex={-1} id="page-title" className="min-w-0 text-base font-bold tracking-tight text-ink sm:text-lg">
                 {step ? <><span className="text-ink-muted">Крок {step.n} із {STEPS.length}:</span> {title}</> : title}
               </h1>
-              {step && <span className="shrink-0 text-sm font-medium tabular-nums text-ink-muted" aria-hidden="true">{step.n} із {STEPS.length}</span>}
+              {step && <span className="shrink-0 text-sm font-medium tabular-nums text-ink-muted" aria-hidden="true">Пройдено {progressSteps(interview, profileComplete)} із {STEPS.length}</span>}
             </div>
             {step && (
               <div className="h-2 overflow-hidden rounded-full bg-primary-soft" aria-hidden="true">
                 <div className="h-full rounded-full bg-primary transition-[width] duration-500 motion-reduce:transition-none"
-                  style={{ width: `${(step.n / STEPS.length) * 100}%` }} />
+                  style={{ width: `${progressPercent(interview, profileComplete)}%` }} />
               </div>
             )}
           </div>
@@ -316,6 +344,7 @@ export function AppShell({ name, email, interview, onLogout }: {
       <Dialog open={drawer} onClose={() => setDrawer(false)} title="Кроки оцінювання" side="left" className="lg:hidden">
         <nav aria-label="Кроки оцінювання">
           <StepperNav states={states} onNavigate={() => setDrawer(false)} />
+          <SideNav items={side} onNavigate={() => setDrawer(false)} />
         </nav>
       </Dialog>
 
@@ -323,28 +352,28 @@ export function AppShell({ name, email, interview, onLogout }: {
         <nav aria-label="Основні кроки"
           className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-nav backdrop-blur lg:hidden">
           <ul className="mx-auto grid max-w-lg grid-cols-5">
-            {states.filter((s) => MOBILE_TAB_KEYS.includes(s.step.key)).map((s) => {
+            {tabs.map((s) => {
               const active = s.status === 'current';
               const cls = cn('flex min-h-16 flex-col items-center justify-center gap-1 px-0.5 text-xs font-medium -outline-offset-2', focusRing);
               const icon = (
                 <span className={cn('flex h-7 w-11 items-center justify-center rounded-full transition-colors motion-reduce:transition-none', active && 'bg-primary-soft')}>
-                  <s.step.icon className="size-5" aria-hidden="true" />
+                  <s.icon className="size-5" aria-hidden="true" />
                 </span>
               );
               return (
-                <li key={s.step.key}>
+                <li key={s.key}>
                   {s.to && s.status !== 'locked' ? (
                     <Link to={s.to} aria-current={active ? 'page' : undefined}
                       className={cn(cls, active ? 'text-primary-strong' : 'text-ink-muted hover:text-ink')}>
                       {icon}
-                      <span className="max-w-full truncate">{s.step.short}</span>
+                      <span className="max-w-full truncate">{s.short}</span>
                     </Link>
                   ) : (
                     <span role="link" aria-disabled="true" tabIndex={0} title={s.reason ?? undefined}
                       aria-current={active ? 'page' : undefined}
                       className={cn(cls, active ? 'text-primary-strong' : 'text-ink-subtle/80')}>
                       {icon}
-                      <span className="max-w-full truncate">{s.step.short}</span>
+                      <span className="max-w-full truncate">{s.short}</span>
                       {s.reason && <span className="sr-only">: {s.reason}</span>}
                     </span>
                   )}

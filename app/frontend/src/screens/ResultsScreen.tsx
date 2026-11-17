@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CheckCircle2, FileText, Loader2, MapPin, MessageSquare, Search, SearchX, Sparkles } from 'lucide-react';
+import { Loader2, MapPin, MessageSquare, Search, SearchX } from 'lucide-react';
 import { api, ApiError } from '@/api';
 import { InfoPopover } from '@/components/InfoPopover';
 import { Pagination } from '@/components/Pagination';
-import { LazyMarketChart } from '@/components/LazyMarketChart';
 import { ScaleLegend } from '@/components/ScaleLegend';
-import { SelfRatingList } from '@/components/SelfRatingList';
 import { SourceMark } from '@/components/SourceMark';
+import { FitChips } from '@/components/VacancyFit';
 import { ErrorRetry } from '@/components/ErrorRetry';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -17,10 +16,12 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input, Select } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FIT_ANCHOR } from '@/lib/vacancyFit';
 import { bandFor } from '@/lib/bands';
 import {
-  assessedLabel, DEFAULT_FILTERS, FIT_EXPLANATION, filtersFromQuery, filtersToQuery, fitLabel, hasActiveFilters,
-  MIN_SHARE_OPTIONS, PAGE_SIZE, resultsApiPath, SENIORITIES, totalPages, vacancyCount, WORK_MODES, type ResultsFilters,
+  assessedLabel, DEFAULT_FILTERS, FIT_EXPLANATION, filtersFromQuery, filtersToQuery, fitLabel,
+  hasActiveFilters, MIN_SHARE_OPTIONS, PAGE_SIZE, resultsApiPath, SENIORITIES, totalPages, vacancyCount,
+  WORK_MODES, type ResultsFilters,
 } from '@/lib/results';
 import { useStartAttempt } from '@/hooks/useStartAttempt';
 import type { CandidateProfile, CompetencyResult, ProfileResults, ResultVacancy, SelfRatingValue } from '@/types';
@@ -122,16 +123,19 @@ function VacancyCard({ item, rank }: { item: ResultVacancy; rank: number }) {
               {item.tags.map((t) => <li key={t}><Badge variant="info">{t}</Badge></li>)}
             </ul>
           )}
-          {item.strengths.length > 0 && (
-            <p className="mt-2 flex gap-1.5 text-sm text-ink-muted">
-              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success-ink" aria-hidden="true" />
-              <span>Підтверджено відповідями: {item.strengths.join('; ')}</span>
-            </p>
-          )}
+          <div className="mt-3 flex flex-col gap-2">
+            <FitChips summary={{ met: item.met_count, gap: item.gap_count, unknown: item.unknown_count }} />
+            {item.gaps.length > 0 && (
+              <p className="text-sm text-ink-muted"><span className="font-medium text-ink">Головні прогалини: </span>{item.gaps.slice(0, 2).join('; ')}</p>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex flex-col gap-3 border-t border-line pt-3 sm:w-56 sm:shrink-0 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5">
         <FitBlock item={item} />
+        <Button asChild size="sm">
+          <Link to={`${href}#${FIT_ANCHOR}`} aria-label={`Де я підходжу: «${item.title}»`}>Де я підходжу</Link>
+        </Button>
         <Button asChild variant="outline" size="sm">
           <Link to={href} aria-label={`Деталі вакансії «${item.title}»`}>Деталі</Link>
         </Button>
@@ -211,8 +215,8 @@ function FilterBar({ filters, onChange }: { filters: ResultsFilters; onChange: (
 
   return (
     <form role="search" aria-label="Фільтри вакансій" onSubmit={submit}
-      className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
-      <div className="flex flex-col gap-1.5">
+      className="grid gap-3 sm:grid-cols-3">
+      <div className="flex flex-col gap-1.5 sm:col-span-3">
         <Label htmlFor="f-q">Пошук</Label>
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink-subtle" aria-hidden="true" />
@@ -235,7 +239,7 @@ function FilterBar({ filters, onChange }: { filters: ResultsFilters; onChange: (
         </Select>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="f-share">Мінімальний збіг профілю</Label>
+        <Label htmlFor="f-share">Збіг профілю від</Label>
         <Select id="f-share" value={String(filters.min_share)} onChange={(e) => set({ min_share: Number(e.target.value) })}>
           {MIN_SHARE_OPTIONS.map((v) => <option key={v} value={v}>{v === 0 ? 'Будь-який' : `Від ${v}%`}</option>)}
         </Select>
@@ -254,7 +258,6 @@ export function ResultsScreen({ profile }: { profile: CandidateProfile }) {
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);
   const listHeading = useRef<HTMLHeadingElement>(null);
-  const self = useSelfRatings(profile.id);
   const filtered = hasActiveFilters(filters);
 
   useEffect(() => {
@@ -311,42 +314,10 @@ export function ResultsScreen({ profile }: { profile: CandidateProfile }) {
   if (!data.has_results) return <NoResultsState profile={profile} />;
 
   const pages = totalPages(data.total, PAGE_SIZE);
-  const assessed = data.competencies.filter((c) => c.score !== null).length;
   const offset = (data.page - 1) * data.page_size;
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
-        <Card className="flex flex-wrap items-center gap-4 p-5">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-on-primary">
-            <FileText className="size-6" aria-hidden="true" />
-          </span>
-          <dl className="grid min-w-0 flex-1 grid-cols-2 gap-4">
-            <div>
-              <dt className="text-xs text-ink-subtle">Проаналізовано вакансій</dt>
-              <dd className="text-2xl font-bold tabular-nums text-ink">{cohortTotal ?? '—'}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-ink-subtle">Оцінено компетентностей</dt>
-              <dd className="text-2xl font-bold tabular-nums text-ink">{assessed}</dd>
-            </div>
-          </dl>
-        </Card>
-        <Card className="flex items-start gap-3 p-5 text-sm text-ink-muted">
-          <Sparkles className="mt-0.5 size-5 shrink-0 text-accent-ink" aria-hidden="true" />
-          <p>Профіль «{profile.name}». Порядок вакансій детермінований і базується на ваших відповідях.</p>
-        </Card>
-      </div>
-
-      <div className="grid items-start gap-4 xl:grid-cols-2">
-        <CompetencySection competencies={data.competencies} />
-        <Card className="min-w-0">
-          <CardContent className="pt-5 sm:pt-6">
-            <LazyMarketChart market={data.market} competencies={data.competencies} selfRatings={self.items ?? []} />
-          </CardContent>
-        </Card>
-      </div>
-
+    <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]">
       <section aria-labelledby="vacancies-title" className="flex flex-col gap-4">
         <h2 id="vacancies-title" ref={listHeading} tabIndex={-1} className="scroll-mt-24 text-xl font-semibold tracking-tight text-ink">
           Вакансії вашої добірки
@@ -380,24 +351,9 @@ export function ResultsScreen({ profile }: { profile: CandidateProfile }) {
         )}
         <Pagination page={data.page} pages={pages} onPage={goPage} />
       </section>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Самооцінка</CardTitle>
-          <CardDescription>Вона показана на діаграмі тонкою позначкою і не змінює оцінку співбесіди.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {self.items === null ? <Skeleton className="h-32" /> : (
-            <SelfRatingList track={profile.track} profileId={profile.id}
-              initial={Object.fromEntries(self.items.map((r) => [r.action_id, r.value]))}
-              onSaved={() => void self.reload()} />
-          )}
-        </CardContent>
-      </Card>
-
-      <footer className="flex flex-col gap-1 text-xs text-ink-subtle">
-        <p>Порядок вакансій детермінований і базується на ваших відповідях. «Збіг профілю» — не ймовірність працевлаштування.</p>
-      </footer>
+      <aside className="flex min-w-0 flex-col gap-4 xl:sticky xl:top-24">
+        <CompetencySection competencies={data.competencies} />
+      </aside>
     </div>
   );
 }

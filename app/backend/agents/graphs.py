@@ -8,6 +8,9 @@ from __future__ import annotations
 import json
 import logging
 import re
+import time
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FutureTimeout
 from dataclasses import dataclass
 from typing import Literal, TypedDict
 
@@ -21,6 +24,30 @@ from backend.domain.assessment import EvaluatorOutput, validate_against_context
 from backend.providers.questions import next_question as bank_question
 
 log = logging.getLogger("competencematch.llm")
+
+# Slow providers (free OpenRouter models) are waited for: no wall-clock limit by default. Set a number of seconds to make
+# a late call count as a provider failure (a stalled stream would otherwise hold the request).
+HARD_DEADLINE_SECONDS: float | None = None
+_POOL = ThreadPoolExecutor(max_workers=8, thread_name_prefix="llm")
+
+
+# Free provider tiers answer 429 under load: wait and try again instead of losing the answer (seconds per retry).
+RATE_LIMIT_WAITS: tuple[float, ...] = (15.0, 30.0, 60.0)
+
+
+def _invoke(model, messages):
+    for wait in (*RATE_LIMIT_WAITS, None):
+        future = _POOL.submit(model.invoke, messages)
+        try:
+            return future.result(timeout=HARD_DEADLINE_SECONDS)
+        except FutureTimeout as exc:
+            future.cancel()
+            raise TimeoutError("LLM call exceeded the hard deadline") from exc
+        except Exception as exc:  # noqa: BLE001 - only the provider's rate limit is retried, the rest is re-raised
+            if wait is None or "RateLimit" not in type(exc).__name__:
+                raise
+            log.warning("llm rate limited, retrying in %ss", wait)
+            time.sleep(wait)
 
 ALLOWLIST = ("FastAPI", "Django", "PostgreSQL", "Docker Compose", "Docker", "AWS", "CI/CD", "Kafka", "Redis", "Celery",
              "pytest", "SQL", "REST", "API", "Git", "Linux", "Kubernetes", "SQLAlchemy", "Python", "Figma", "SEO",
@@ -43,6 +70,7 @@ class AskState(TypedDict, total=False):
     summary: str
     unmet_criteria: list[str]
     previous_answers: list[str]
+    asked_questions: list[str]  # question texts already shown for this action (the fallback never repeats them)
     followup_goal: str | None
     off_topic_detected: bool
     candidate_level: str | None
@@ -92,8 +120,10 @@ def validate_question(text: str, off_topic: bool) -> str | None:
         return "EMPTY"
     flat = _ABBREV_RE.sub(lambda m: m.group(0).replace(".", "").replace(" ", ""), text.strip())
     sentences = [s for s in re.split(r"(?<=[.!?…])\s+", flat) if s.strip()]
-    if len(sentences) > (3 if off_topic else 2):
+    if len(sentences) > (3 if off_topic else 2) or len(flat.split()) > (50 if off_topic else 35):
         return "TOO_LONG"
+    if flat.count("?") > 1:
+        return "MULTI_PART"
     letters = [c for c in _ALLOW_RE.sub("", text) if c.isalpha()]
     if not letters or sum("Ѐ" <= c <= "ӿ" for c in letters) / len(letters) < 0.7:
         return "NOT_UKRAINIAN"
@@ -102,12 +132,16 @@ def validate_question(text: str, off_topic: bool) -> str | None:
     return None
 
 
-def _bank_text(action_id: str, label: str) -> str:
-    banked = bank_question(action_id, 0)
-    if banked is None or banked.get("kind") != "FREE_TEXT":
-        banked = next((q for q in (bank_question(action_id, i) for i in range(6))
-                       if q and q.get("kind") == "FREE_TEXT"), None)
-    return banked["text"] if banked else f"Розкажіть про ваш практичний досвід: {label}. Наведіть конкретний приклад."
+def _bank_text(action_id: str, label: str, asked: list[str] | None = None) -> str:
+    """First free-text bank question not shown yet; a generic ask only when the bank is exhausted."""
+    asked = asked or []
+    for i in range(12):
+        q = bank_question(action_id, i)
+        if q is None:
+            break
+        if q.get("kind") == "FREE_TEXT" and q["text"] not in asked:
+            return q["text"]
+    return f"Розкажіть про ваш практичний досвід: {label}. Наведіть конкретний приклад."
 
 
 def _build_ask(model):
@@ -120,8 +154,14 @@ def _build_ask(model):
                 unmet_criteria=s.get("unmet_criteria", []), previous_answers=s.get("previous_answers", [])[-3:],
                 followup_goal=s.get("followup_goal"), off_topic_detected=s.get("off_topic_detected", False),
                 candidate_level=s.get("candidate_level"), years_experience=s.get("years_experience"))
-            resp = model.invoke([SystemMessage(INTERVIEWER_SYSTEM), HumanMessage(user)])
-            return {"question": _text(resp).strip().strip('"«»').strip()}
+            resp = _invoke(model, [SystemMessage(INTERVIEWER_SYSTEM), HumanMessage(user)])
+            question = _text(resp).strip().strip('"«»').strip()
+            if validate_question(question, s.get("off_topic_detected", False)) in ("TOO_LONG", "MULTI_PART"):
+                # one more try with the reason, before the bank is used
+                retry = user + "\n\nПопередня версія задовга або з кількома питаннями. Дай ОДНЕ питання до 25 слів."
+                resp = _invoke(model, [SystemMessage(INTERVIEWER_SYSTEM), HumanMessage(retry)])
+                question = _text(resp).strip().strip('"«»').strip()
+            return {"question": question}
         except Exception as exc:  # noqa: BLE001 - any provider failure means bank fallback
             log.warning("interviewer failed action=%s kind=%s", s.get("action_id"), type(exc).__name__)
             return {"question": None}
@@ -137,7 +177,7 @@ def _build_ask(model):
         return {"source": "LLM_INTERVIEWER"}
 
     def fallback(s: AskState) -> dict:
-        text = _bank_text(s["action_id"], s["action_name"])
+        text = _bank_text(s["action_id"], s["action_name"], s.get("asked_questions"))
         if s.get("off_topic_detected"):
             text = f"{REFUSAL} {text}"
         return {"question": text, "source": "FALLBACK_UNGRADED"}
@@ -176,7 +216,7 @@ def _build_answer(model):
                                       allowed_criterion_ids=s["allowed_criterion_ids"], bands=s.get("bands"),
                                       turns=s["turns"])
         try:
-            raw = _text(model.invoke([SystemMessage(EVALUATOR_SYSTEM), HumanMessage(user)]))
+            raw = _text(_invoke(model, [SystemMessage(EVALUATOR_SYSTEM), HumanMessage(user)]))
         except Exception as exc:  # noqa: BLE001 - timeouts/connection errors are not retried
             kind = type(exc).__name__
             log.warning("evaluator failed action=%s kind=%s", s["action_id"], kind)

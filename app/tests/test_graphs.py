@@ -194,9 +194,9 @@ def test_action_score_is_mean_of_non_null_latest_criteria(db):
 @pytest.mark.parametrize("ok", [
     "Які критерії ви використовуєте для вибору індексу?",
     "Як би ви планували міграцію на Python 3.11?",
-    "Опишіть кроки 1, 2 і 3 вашого розгортання. Що ви б перевірили насамперед?",
+    "Опишіть кроки 1, 2 і 3 вашого розгортання: що ви б перевірили насамперед?",
     "Як ви організуєте балансування 2 серверів?",
-    "Як налаштуєте Terraform та Nginx, напр. для staging, тощо? Що перевірите першим?",
+    "Як налаштуєте Terraform та Nginx, напр. для staging, тощо?",
 ])
 def test_legitimate_questions_pass_validator(ok):
     assert validate_question(ok, False) is None
@@ -230,3 +230,81 @@ def test_ask_graph_passes_candidate_level_to_interviewer():
              "candidate_level": "junior", "years_experience": 1}, m)
     human = m.messages[0][1].content
     assert 'candidate_level: "junior"' in human and "years_experience: 1" in human
+
+
+LONG_Q = ("Ви приєднуєтеся до проєкту, де інструмент уже встановлено, але кількість реєстрацій у системі не збігається "
+          "з даними, а потрібних звітів про шляхи користувачів немає. Як би ви розібралися з причинами та налаштували "
+          "облік подій і звітність для команди?")
+
+
+def test_validate_question_rejects_long_and_multi_part_questions():
+    assert validate_question(LONG_Q, False) == "TOO_LONG"
+    assert validate_question("Як налаштувати пул з'єднань у PostgreSQL? І як перевірити його розмір?", False) == "MULTI_PART"
+    assert validate_question("Як би ви перевірили, що індекс у PostgreSQL справді прискорює запит?", False) is None
+
+
+def test_ask_retries_once_when_the_first_question_is_too_long():
+    short = "Як би ви перевірили, що індекс у PostgreSQL прискорює запит?"
+    model = FakeModel(LONG_Q, short)
+    out = run_ask({"action_id": ACTION, "action_name": "PostgreSQL", "summary": "", "unmet_criteria": [],
+                   "previous_answers": [], "followup_goal": None}, model)
+    assert out.source == "LLM_INTERVIEWER" and out.question_text == short and model.calls == 2
+
+
+def test_fallback_does_not_repeat_a_question_already_asked():
+    state = {"action_id": "fastapi", "action_name": "FastAPI", "summary": "", "unmet_criteria": [],
+             "previous_answers": [], "followup_goal": None}
+    first = run_ask({**state, "asked_questions": []}, None)
+    second = run_ask({**state, "asked_questions": [first.question_text]}, None)
+    assert first.source == second.source == "FALLBACK_UNGRADED"
+    assert second.question_text != first.question_text
+
+
+class SlowModel:
+    """A provider that never answers in time (a stalled stream)."""
+
+    def invoke(self, messages, *a, **k):
+        import time
+        time.sleep(2)
+        return SimpleNamespace(content="пізно")
+
+
+def test_a_stalled_provider_hits_a_hard_deadline_in_ask_and_answer(monkeypatch):
+    import time
+    import backend.agents.graphs as graphs
+    monkeypatch.setattr(graphs, "HARD_DEADLINE_SECONDS", 0.3)
+    started = time.monotonic()
+    asked = run_ask({"action_id": "fastapi", "action_name": "FastAPI", "summary": "", "unmet_criteria": [],
+                     "previous_answers": [], "followup_goal": None}, SlowModel())
+    assert asked.source == "FALLBACK_UNGRADED"
+    answered = _ans(SlowModel())
+    assert answered.status == "UNGRADED" and (answered.reason or "").startswith("ERROR")
+    assert time.monotonic() - started < 1.8
+
+
+def test_no_deadline_by_default_slow_providers_are_waited_for():
+    import backend.agents.graphs as graphs
+    assert graphs.HARD_DEADLINE_SECONDS is None
+
+
+class OpenAIRateLimitError(Exception):
+    """Same class name as the provider SDK's 429 error."""
+
+
+def test_rate_limited_calls_are_retried_after_a_wait(monkeypatch):
+    import backend.agents.graphs as graphs
+    monkeypatch.setattr(graphs, "RATE_LIMIT_WAITS", (0.0, 0.0))
+    short = "Як би ви перевірили, що індекс у PostgreSQL прискорює запит?"
+    model = FakeModel(OpenAIRateLimitError("429"), OpenAIRateLimitError("429"), short)
+    out = run_ask({"action_id": ACTION, "action_name": "PostgreSQL", "summary": "", "unmet_criteria": [],
+                   "previous_answers": [], "followup_goal": None}, model)
+    assert out.source == "LLM_INTERVIEWER" and out.question_text == short and model.calls == 3
+
+
+def test_rate_limit_that_never_clears_ends_as_a_provider_failure(monkeypatch):
+    import backend.agents.graphs as graphs
+    monkeypatch.setattr(graphs, "RATE_LIMIT_WAITS", (0.0,))
+    model = FakeModel(OpenAIRateLimitError("429"), OpenAIRateLimitError("429"))
+    answered = _ans(model)
+    assert answered.status == "UNGRADED" and (answered.reason or "").startswith("ERROR")
+    assert model.calls == 2

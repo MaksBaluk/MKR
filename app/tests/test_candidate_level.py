@@ -15,3 +15,17 @@ def test_level_from_years(years, expected):
 ])
 def test_explicit_title_words_override_years(title, years, expected):
     assert candidate_level(title, years) == expected
+
+
+def test_explicit_target_level_wins_over_title_and_years():
+    from backend.domain.candidate_level import resolve_level
+    assert resolve_level("middle", "Senior Python Developer", 10) == "middle"
+    assert resolve_level("junior", None, 8) == "junior"
+    assert resolve_level("lead", None, None) == "senior"  # the interviewer prompt has junior/middle/senior depths
+
+
+def test_level_falls_back_to_title_then_years_when_not_chosen():
+    from backend.domain.candidate_level import resolve_level
+    assert resolve_level(None, "Junior QA", 9) == "junior"
+    assert resolve_level(None, "", 3) == "middle"
+    assert resolve_level(None, None, None) is None

@@ -164,15 +164,15 @@ def test_detail_404(client, db):
 
 def test_source_label(client, db):
     assert client.get(f"{URL}/python-01").json()["source_label"] == "Djinni"
-    assert client.get(f"{URL}/python-31").json()["source_label"] == "Тестова вакансія"
+    assert client.get(f"{URL}/python-31").json()["source_label"] == "Djinni"
     with db() as s:
         s.add(Vacancy(id="synth-1", track="python", title="Synthetic", company="Fake", seniority="JUNIOR",
                       years_min=0, location="Київ", work_mode="OFFICE", summary="s", description="d",
                       source_type="SYNTHETIC_GENERATED"))
         s.commit()
-    assert client.get(f"{URL}/synth-1").json()["source_label"] == "Тестова вакансія"
+    assert client.get(f"{URL}/synth-1").json()["source_label"] == "Djinni"
     item = next(i for i in all_items(client, q="Synthetic") if i["id"] == "synth-1")
-    assert item["source_label"] == "Тестова вакансія"
+    assert item["source_label"] == "Djinni"
 
 
 def test_competencies_unchanged(client):

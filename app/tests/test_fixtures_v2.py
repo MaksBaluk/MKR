@@ -11,7 +11,8 @@ from backend.models import Rubric, RubricCriterion, Vacancy
 from backend.seed import read_fixture, seed_database
 
 # sha256(json.dumps(first 90 records of HEAD~ vacancies.json, ensure_ascii=False, sort_keys=True))
-ORIGINAL_90_SHA256 = "80dc900b47eb160b8b172f27db85bc958883267bda649fe471e2820228e4ac4d"
+# Updated after owner-approved title fixes (15 level mismatches), see docs/tasks/TODO.md
+ORIGINAL_90_SHA256 = "e4ad83c72c71b2ac9703675eea0a26f8b954d6e323e290a43e966c2b23e8fe67"
 TRACKS = ("python", "marketing", "design")
 BANDS = ("0-0.25", "0.25-0.5", "0.5-0.75", "0.75-0.9", "0.9-1")
 

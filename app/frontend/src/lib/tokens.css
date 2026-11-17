@@ -67,3 +67,42 @@
     }
   }
 }
+
+/* Dark theme: same token names, applied by <html data-theme="dark"> (see lib/theme.ts). */
+:root[data-theme='dark'] {
+  --color-canvas: #0b1220;
+  --color-surface: #111a2e;
+  --color-surface-muted: #18233b;
+  --color-ink: #e6ecf7;
+  --color-ink-muted: #b4c0d4;
+  --color-ink-subtle: #9aa8bf;
+  --color-line: #243049;
+  --color-line-strong: #3a4a68;
+  --color-ring: #8bb4ff;
+  --color-primary: #6ea0ff;
+  --color-primary-hover: #8bb4ff;
+  --color-primary-strong: #8bb4ff;
+  --color-on-primary: #0b1220;
+  --color-primary-soft: #16264a;
+  --color-primary-line: #2c4a8a;
+  --color-brand-deep: #a9c4ff;
+  --color-accent: #2dd4bf;
+  --color-accent-ink: #5eead4;
+  --color-accent-soft: #0f2f2c;
+  --color-success: #34d399;
+  --color-success-ink: #6ee7b7;
+  --color-success-soft: #0d2a22;
+  --color-warning: #fbbf24;
+  --color-warning-ink: #fcd34d;
+  --color-warning-soft: #33260a;
+  --color-danger: #f87171;
+  --color-danger-ink: #fca5a5;
+  --color-danger-soft: #3a1414;
+  --color-info: #60a5fa;
+  --color-info-ink: #93c5fd;
+  --color-info-soft: #10243f;
+  --shadow-card: 0 0 0 1px var(--color-line), 0 4px 16px -4px rgb(0 0 0 / 0.4);
+  --shadow-raised: 0 0 0 1px var(--color-line), 0 12px 32px -8px rgb(0 0 0 / 0.4);
+  --shadow-float: 0 0 0 1px var(--color-line), 0 18px 40px -12px rgb(0 0 0 / 0.45);
+  --shadow-nav: 0 -4px 16px -6px rgb(0 0 0 / 0.4);
+}

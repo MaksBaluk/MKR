@@ -1,4 +1,5 @@
 /** Pure helpers for the results page: URL filter state, pagination and fit labels. No ranking happens here. */
+import type { CompetencyResult } from '@/types';
 
 export interface ResultsFilters {
   work_mode: string;
@@ -56,8 +57,9 @@ export function filtersToQuery(f: ResultsFilters): URLSearchParams {
   return sp;
 }
 
+/** One list of every vacancy of the cohort, ordered by the server (highest match first). */
 export function resultsApiPath(profileId: string, f: ResultsFilters, pageSize: number): string {
-  const sp = new URLSearchParams({ page: String(f.page), page_size: String(pageSize) });
+  const sp = new URLSearchParams({ page: String(f.page), page_size: String(pageSize), fitting: 'all' });
   if (f.work_mode) sp.set('work_mode', f.work_mode);
   if (f.seniority) sp.set('seniority', f.seniority);
   if (f.q.trim()) sp.set('q', f.q.trim());
@@ -103,4 +105,9 @@ export function vacancyCount(n: number): string {
   const m100 = n % 100;
   const word = m10 === 1 && m100 !== 11 ? 'вакансію' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'вакансії' : 'вакансій';
   return `Знайдено ${n} ${word}`;
+}
+
+/** Interview score (read-only LLM) and self-rating side by side, in server order; nulls stay null. */
+export function comparisonRows(competencies: Pick<CompetencyResult, 'action_name' | 'interview_score' | 'self_rating'>[]) {
+  return competencies.map((c) => ({ name: c.action_name, interview: c.interview_score, self: c.self_rating }));
 }

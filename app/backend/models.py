@@ -32,9 +32,11 @@ class CandidateProfile(Base):
     __tablename__ = "candidate_profiles"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    track: Mapped[str] = mapped_column(String(32))
+    track: Mapped[str | None] = mapped_column(String(32), nullable=True)  # chosen by the candidate, no default
     name: Mapped[str] = mapped_column(String(120))
     desired_title: Mapped[str] = mapped_column(String(160), default="")
+    target_level: Mapped[str | None] = mapped_column(String(16), nullable=True)  # junior|middle|senior|lead
+    work_mode: Mapped[str | None] = mapped_column(String(16), nullable=True)  # remote|hybrid|office|any
     years_experience: Mapped[int | None] = mapped_column(Integer, nullable=True)
     location: Mapped[str] = mapped_column(String(120), default="")
     archived: Mapped[bool] = mapped_column(Boolean, default=False)

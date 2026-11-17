@@ -28,7 +28,10 @@ def seed_database(db: Session, *, demo_mode: bool | None = None, demo_password: 
             counts["competencies_added"] += 1
     db.flush()
     for record in read_fixture("vacancies.json"):
-        if db.get(Vacancy, record["id"]) is not None:
+        existing = db.get(Vacancy, record["id"])
+        if existing is not None:
+            # Keep existing rows (and their snapshots); only sync the display title from the fixture.
+            existing.title = record["title"]
             continue
         vacancy_data = {k: v for k, v in record.items() if k != "groups"}
         vacancy = Vacancy(**vacancy_data)
