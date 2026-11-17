@@ -323,6 +323,11 @@ class CoreTurn(Base):
     answer_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     idempotency_key: Mapped[str | None] = mapped_column(String(120), nullable=True)
     off_topic: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
+    # Criteria this question is meant to test, why (Evaluator goal reason or OPEN_CRITERIA); NULL for bank fallback.
+    target_criteria: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    followup_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Validated Evaluator follow-up goal produced after this turn's answer; NULL when none or ungraded.
+    eval_goal: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     __table_args__ = (UniqueConstraint("interview_id", "sequence", name="uq_core_turn_sequence"),
                       UniqueConstraint("interview_id", "idempotency_key", name="uq_core_turn_idem"))

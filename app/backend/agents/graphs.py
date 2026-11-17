@@ -71,7 +71,7 @@ class AskState(TypedDict, total=False):
     unmet_criteria: list[str]
     previous_answers: list[str]
     asked_questions: list[str]  # question texts already shown for this action (the fallback never repeats them)
-    followup_goal: str | None
+    followup_goal: dict | None  # validated FollowupGoal.model_dump(): criterion_ids, reason, expected_evidence
     off_topic_detected: bool
     candidate_level: str | None
     years_experience: int | None
@@ -154,7 +154,8 @@ def _build_ask(model):
                 action_name=s["action_name"], topic_summary=s.get("summary", ""),
                 unmet_criteria=s.get("unmet_criteria", []), previous_answers=s.get("previous_answers", [])[-3:],
                 followup_goal=s.get("followup_goal"), off_topic_detected=s.get("off_topic_detected", False),
-                candidate_level=s.get("candidate_level"), years_experience=s.get("years_experience"))
+                candidate_level=s.get("candidate_level"), years_experience=s.get("years_experience"),
+                asked_questions=s.get("asked_questions", []))
             resp = _invoke(model, [SystemMessage(INTERVIEWER_SYSTEM), HumanMessage(user)])
             question = _text(resp).strip().strip('"«»').strip()
             if validate_question(question, s.get("off_topic_detected", False)) in ("TOO_LONG", "MULTI_PART"):

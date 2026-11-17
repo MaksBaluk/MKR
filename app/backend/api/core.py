@@ -15,7 +15,8 @@ from sqlalchemy.orm import Session
 from backend.api.common import create_attempt, default_profile
 from backend.db import get_db
 from backend.domain.core_flow import RubricMap, planner_state
-from backend.domain.topic_summary import TopicSummary, topic_summary
+from backend.domain.assessment import FollowupGoal, sanitize_goal
+from backend.domain.topic_summary import TopicSummary, open_criteria, topic_summary
 from backend.domain.candidate_level import resolve_level
 from backend.domain.interview_budget import needs_min_followup, topic_open_for_question
 from backend.domain.market import VacancyInput, compute_market
@@ -133,6 +134,11 @@ def criteria_for(db: Session, action_id: str) -> list[str]:
     return [c.criterion_id for c in _seeded_criteria(db, action_id)] or [action_id]
 
 
+def open_criteria_for(db: Session, action_id: str, scores: Mapping[str, float | None], sufficient: bool) -> list[str]:
+    """Criteria of the action (criteria_for order) that are still UNKNOWN or WEAK."""
+    return open_criteria([(c, 1.0) for c in criteria_for(db, action_id)], scores, sufficient)
+
+
 def criterion_bands(db: Session, action_id: str) -> dict[str, str] | None:
     """Per-criterion title + five anchored bands for the Evaluator; None keeps the default policy bands."""
     out = {}
@@ -242,15 +248,28 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         session_rows, rubric_map(db, {r.action_id for r in session_rows}, cscores)).items()}
     sufficient = {r.action_id: bool(r.sufficient_evidence) for r in session_rows}  # latest revision wins
 
+    open_memo: dict[str, list[str]] = {}
+
+    def open_ids(a: str) -> list[str]:
+        if a not in open_memo:
+            open_memo[a] = open_criteria_for(db, a, cscores, sufficient.get(a, False))
+        return open_memo[a]
+
+    def closed(a: str) -> bool:
+        """A graded topic with no open criterion left (all CONFIRMED or DECLINED) gets no more questions."""
+        return a in latest_in_session and not open_ids(a)
+
     def needs_second(a: str) -> bool:
-        """Min two shown questions per graded topic unless the first answer was sufficient and >= 0.75."""
-        return needs_min_followup(shown[a], graded=a in latest_in_session, score=latest_in_session.get(a),
-                                  sufficient=sufficient.get(a, False))
+        """Min two shown questions per graded topic while criteria stay open, unless the first answer was
+        sufficient and >= 0.75 (or declined)."""
+        return not closed(a) and needs_min_followup(shown[a], graded=a in latest_in_session,
+                                                    score=latest_in_session.get(a), sufficient=sufficient.get(a, False))
 
     # Otherwise a started topic is re-asked only when the Evaluator found insufficient evidence (null score).
     def eligible(a: str) -> bool:
-        return topic_open_for_question(used=a in used, distinct_topics=len(used), shown=shown.get(a, 0),
-                                       latest_score_is_null=a in latest_in_session and latest_in_session[a] is None)
+        return not (a in used and closed(a)) and topic_open_for_question(
+            used=a in used, distinct_topics=len(used), shown=shown.get(a, 0),
+            latest_score_is_null=a in latest_in_session and latest_in_session[a] is None)
 
     # A topic below its minimum continues before the planner opens anything (even if its groups closed/failed).
     followup = next((t.action_id for t in reversed(turns) if needs_second(t.action_id)), None)
@@ -268,16 +287,24 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     label = _label(db, action)
     answered = [t for t in turns if t.action_id == action and t.answer_text]
     comp = db.get(Competency, action)
+    unmet = open_ids(action)
+    # The last answer's goal, re-checked against criteria still open now (the Evaluator may have just confirmed it).
+    last_goal = answered[-1].eval_goal if answered else None
+    goal = sanitize_goal(FollowupGoal.model_validate(last_goal), set(criteria_for(db, action)), unmet) if last_goal else None
+    goal_dict = goal.model_dump() if goal else None
     result = run_ask({"action_id": action, "action_name": label, "summary": comp.summary if comp else "",
-                      "unmet_criteria": criteria_for(db, action),
+                      "unmet_criteria": unmet,
                       "previous_answers": [t.answer_text for t in answered][-3:],
                       "asked_questions": [t.question_text for t in turns if t.action_id == action],
-                      "followup_goal": None,
+                      "followup_goal": goal_dict,
                       "off_topic_detected": bool(answered and answered[-1].off_topic),
                       **_level_context(db, iv)}, get_chat_model())
     question, source = result.question_text, result.source
+    targeted = source == "LLM_INTERVIEWER"  # a bank fallback question is not aimed at specific criteria
     turn = CoreTurn(interview_id=iv.id, sequence=len(turns) + 1, action_id=action, question_text=question,
-                    question_source=source)
+                    question_source=source,
+                    target_criteria=(goal.criterion_ids if goal else unmet) if targeted else None,
+                    followup_reason=(goal.reason if goal else "OPEN_CRITERIA") if targeted else None)
     iv.version += 1
     db.add(turn)
     try:
@@ -316,11 +343,17 @@ def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -
     criteria = criteria_for(db, action_id)
     rubric = _seeded_rubric(db, action_id)
     version = "v1" if rubric else "auto-1"
+    prior = db.scalars(select(CriterionAssessment).where(
+        CriterionAssessment.session_id == iv.id, CriterionAssessment.action_id == action_id)
+        .order_by(CriterionAssessment.created_at, CriterionAssessment.revision)).all()
+    open_ids = open_criteria_for(db, action_id, criterion_scores(prior), bool(prior and prior[-1].sufficient_evidence))
     result = run_answer({"action_id": action_id, "rubric_version": version, "allowed_criterion_ids": criteria,
-                         "bands": criterion_bands(db, action_id), "turns": {t.id: t.answer_text for t in turns}},
-                        model)
+                         "bands": criterion_bands(db, action_id), "turns": {t.id: t.answer_text for t in turns},
+                         "open_criterion_ids": open_ids}, model)
     if result.status != "ACCEPTED":
         return "UNGRADED"
+    goal = result.output.followup_goal  # already sanitized against allowed + open criteria by the answer graph
+    turn.eval_goal = goal.model_dump() if goal and not result.off_topic else None
     if rubric is None:
         rubric = db.scalar(select(Rubric).where(Rubric.action_id == action_id, Rubric.version == "auto-1"))
     if rubric is None:
