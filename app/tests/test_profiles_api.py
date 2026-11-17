@@ -320,7 +320,7 @@ def test_explain_vacancy_counts_assessed_groups():
                                                {"competency_id": "b", "required_level": 0.5}]},
         {"kind": "MANDATORY", "alternatives": [{"competency_id": "c", "required_level": 0.5}]},
         {"kind": "DESIRED", "alternatives": [{"competency_id": "d", "required_level": 0.5}]}]}
-    out = explain_vacancy(vac, {"a": None, "b": 0.0, "c": None}, {})
+    out = explain_vacancy(vac, {"a": None, "b": 0.0, "c": None}, {}, {})
     assert out["groups_total"] == 3 and out["groups_assessed"] == 1
 
 

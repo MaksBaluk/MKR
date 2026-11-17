@@ -11,6 +11,9 @@ from dataclasses import dataclass
 from .criteria import experience_status, fulfilment_bounds, mandatory_status
 from .planner import OpenState
 from .ranking import VacancyRanking, z_status
+from .topic_summary import RubricCriteria
+
+RubricMap = Mapping[str, RubricCriteria]  # action_id -> criteria; missing action => [(action_id, 1.0)]
 
 TAU_BY_LEVEL = {1: 0.50, 2: 0.75, 3: 0.90}  # LEGACY_MIGRATION: 1→.50, 2→.75, 3→.90
 
@@ -27,30 +30,55 @@ class GroupEval:
     open_alternatives: frozenset[str]
 
 
-def eval_group(alts: Sequence[Mapping], scores: Mapping[str, float | None]) -> GroupEval:
-    """OR over alternatives: SATISFIED if any satisfies, FAILED only if all fail."""
-    statuses: list[str] = []
-    lower = upper = 0.0
-    open_alts: set[str] = set()
-    for a in alts:
-        cid, tau = a["competency_id"], tau_for(a["required_level"])
-        s = scores.get(cid)
-        st = mandatory_status(s, tau)
-        statuses.append(st)
-        if st != "FAILED":
-            open_alts.add(cid)
-        lo, up = fulfilment_bounds({cid: s}, {cid: tau}, {cid: 1.0}, [cid])
-        lower, upper = max(lower, lo), max(upper, up)
-    if any(st == "SATISFIED" for st in statuses):
-        group_status = "SATISFIED"
-    elif statuses and all(st == "FAILED" for st in statuses):
-        group_status = "FAILED"
+def alt_criteria(alt: Mapping, rubrics: RubricMap) -> list[tuple[str, float]]:
+    """Criteria one alternative requires: its criterion_ids subset of the rubric, else the whole rubric."""
+    cid = alt["competency_id"]
+    rubric = list(rubrics.get(cid) or [(cid, 1.0)])
+    ids = alt.get("criterion_ids")
+    if ids:
+        sub = [(c, w) for c, w in rubric if c in set(ids)]
+        if sub:
+            return sub
+    return rubric
+
+
+def eval_alternative(alt: Mapping, scores: Mapping[str, float | None], rubrics: RubricMap) -> GroupEval:
+    """SATISFIED iff every required criterion meets tau; FAILED iff any definitely fails. MATH_SPEC §4."""
+    tau = tau_for(alt["required_level"])
+    crit = alt_criteria(alt, rubrics)
+    ids = [c for c, _ in crit]
+    sts = [mandatory_status(scores.get(c), tau) for c in ids]
+    if all(st == "SATISFIED" for st in sts):
+        status = "SATISFIED"
+    elif any(st == "FAILED" for st in sts):
+        status = "FAILED"
     else:
-        group_status = "UNRESOLVED"
-    return GroupEval(group_status, lower, upper, frozenset(open_alts))
+        status = "UNRESOLVED"
+    lo, up = fulfilment_bounds(scores, {c: tau for c in ids}, dict(crit), ids)
+    return GroupEval(status, lo, up, frozenset() if status == "FAILED" else frozenset({alt["competency_id"]}))
 
 
-def planner_state(revisions: Sequence[Mapping], scores: Mapping[str, float | None]) -> tuple[OpenState, dict]:
+def eval_group(alts: Sequence[Mapping], scores: Mapping[str, float | None], rubrics: RubricMap) -> GroupEval:
+    """OR over alternatives: SATISFIED if any satisfies, FAILED only if all fail."""
+    evs = [eval_alternative(a, scores, rubrics) for a in alts]
+    statuses = [e.status for e in evs]
+    if "SATISFIED" in statuses:
+        status = "SATISFIED"
+    elif statuses and all(st == "FAILED" for st in statuses):
+        status = "FAILED"
+    else:
+        status = "UNRESOLVED"
+    open_alts = frozenset().union(*(e.open_alternatives for e in evs)) if evs else frozenset()
+    return GroupEval(status, max((e.lower for e in evs), default=0.0),
+                     max((e.upper for e in evs), default=0.0), open_alts)
+
+
+def _used_criteria(groups: Sequence[Mapping], rubrics: RubricMap) -> set[str]:
+    return {c for g in groups for a in g["alternatives"] for c, _ in alt_criteria(a, rubrics)}
+
+
+def planner_state(revisions: Sequence[Mapping], scores: Mapping[str, float | None], rubrics: RubricMap,
+                  self_flags: frozenset[str] = frozenset()) -> tuple[OpenState, dict]:
     open_groups: set[tuple[str, int]] = set()
     open_alts: dict[tuple[str, int], frozenset[str]] = {}
     mandatory: set[tuple[str, int]] = set()
@@ -62,21 +90,22 @@ def planner_state(revisions: Sequence[Mapping], scores: Mapping[str, float | Non
             weights[key] = 1.0 / (n * len(v["groups"])) if n and v["groups"] else 0.0
             if g["kind"] == "MANDATORY":
                 mandatory.add(key)
-            ev = eval_group(g["alternatives"], scores)
+            ev = eval_group(g["alternatives"], scores, rubrics)
             if ev.status != "SATISFIED":
                 open_groups.add(key)
                 open_alts[key] = ev.open_alternatives
-    state = OpenState(frozenset(open_groups), open_alts, frozenset(mandatory), frozenset())
+    state = OpenState(frozenset(open_groups), open_alts, frozenset(mandatory), frozenset(self_flags))
     return state, weights
 
 
-def rank_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], user_years: int | None) -> VacancyRanking:
+def rank_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], rubrics: RubricMap,
+                 user_years: int | None, self_ratings: Mapping[str, float | None] | None = None) -> VacancyRanking:
     groups = vacancy["groups"]
     if not groups:
         return VacancyRanking(vacancy["id"], 1, 1, 0.0, 0.0, 0.0, 0.0, False, False, "NOT_EVALUABLE")
     m_L, m_U, p_L, p_U, m_status = [], [], [], [], []
     for g in groups:
-        ev = eval_group(g["alternatives"], scores)
+        ev = eval_group(g["alternatives"], scores, rubrics)
         if g["kind"] == "MANDATORY":
             m_L.append(ev.lower); m_U.append(ev.upper); m_status.append(ev.status)
         else:
@@ -85,15 +114,15 @@ def rank_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], user_year
     l_m, l_p = mean(m_L), mean(p_L)
     w_m = mean([u - l for u, l in zip(m_U, m_L)])
     w_p = mean([u - l for u, l in zip(p_U, p_L)])
-    any_score = any(scores.get(a["competency_id"]) is not None for g in groups for a in g["alternatives"])
+    any_score = any(scores.get(c) is not None for c in _used_criteria(groups, rubrics))
     x = experience_status(user_years, vacancy["years_min"], True)
     share = mean(m_L + p_L)
     return VacancyRanking(vacancy["id"], z_status(m_status), x, l_m, l_p, w_m, w_p,
                           bool(m_L), bool(p_L), "RANKED" if any_score else "LOW_INFORMATION", share)
 
 
-def explain_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], names: Mapping[str, str],
-                    limit: int = 3) -> dict:
+def explain_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], rubrics: RubricMap,
+                    names: Mapping[str, str], limit: int = 3) -> dict:
     """Human-readable strengths, gaps and unknown count from the same group evaluation as the ranking."""
     strengths: list[str] = []
     gaps: list[str] = []
@@ -102,14 +131,14 @@ def explain_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], names:
     assessed = 0
     tags: list[str] = []
     for g in vacancy["groups"]:
-        if any(scores.get(a["competency_id"]) is not None for a in g["alternatives"]):
+        if any(scores.get(c) is not None for c in _used_criteria([g], rubrics)):
             assessed += 1
         label = " / ".join(names.get(a["competency_id"], a["competency_id"]) for a in g["alternatives"])
         for a in g["alternatives"]:
             n = names.get(a["competency_id"], a["competency_id"])
             if n not in tags:
                 tags.append(n)
-        ev = eval_group(g["alternatives"], scores)
+        ev = eval_group(g["alternatives"], scores, rubrics)
         if ev.status == "SATISFIED":
             strengths.append(label)
             met_total += 1
