@@ -4,7 +4,9 @@ from types import SimpleNamespace
 import pytest
 
 from backend.agents.graphs import REFUSAL, run_answer, run_ask, validate_question
-from backend.api.core import criteria_for, latest_scores
+from sqlalchemy import select
+
+from backend.api.core import action_summary, criteria_for, latest_scores
 from backend.models import CriterionAssessment, Rubric, RubricCriterion, User
 
 ACTION = "postgres_query_design"
@@ -182,13 +184,17 @@ def test_action_score_is_mean_of_non_null_latest_criteria(db):
         add("b", 0.8, 1)
         add("c", None, 1)  # null ignored
         s.commit()
-        assert latest_scores(s, u)[ACTION] == pytest.approx(0.6)
+        def m():  # latest_scores is criterion-keyed; action M_c comes from action_summary
+            rows = s.scalars(select(CriterionAssessment).order_by(CriterionAssessment.revision)).all()
+            return action_summary(rows, {})[ACTION].m
+        assert latest_scores(s, u) == {"a": 0.4, "b": 0.8, "c": None}
+        assert m() == pytest.approx(0.6)
         add("a", None, 3)
         s.commit()
-        assert latest_scores(s, u)[ACTION] == pytest.approx(0.8)  # a now null: only b counts
+        assert m() == pytest.approx(0.8)  # a now null: only b counts
         add("b", None, 2)
         s.commit()
-        assert latest_scores(s, u)[ACTION] is None
+        assert m() is None
 
 
 @pytest.mark.parametrize("ok", [

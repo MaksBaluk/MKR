@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from backend.api.cohorts import _market_input, get_or_create_cohort
 from backend.api.common import create_attempt, open_attempt
-from backend.api.core import _action_scores, _names, _revisions, attempt_scores, current_criteria_rows
+from backend.api.core import _names, _revisions, action_summary, attempt_scores, cohort_actions, current_criteria_rows, rubric_map
 from backend.api.recommendations import NOTE, rank_items
 from backend.db import get_db
 from backend.domain.core_flow import eval_group, tau_for
@@ -211,15 +211,16 @@ def _competencies(db: Session, iv: CoreInterview) -> list[dict]:
     for r in rows:
         latest_rev[r.action_id] = max(latest_rev.get(r.action_id, 0), r.revision)
     cur = [r for r in rows if r.revision == latest_rev[r.action_id]]
-    scores = _action_scores(rows)
+    cscores = attempt_scores(db, iv.id)
+    summaries = action_summary(rows, rubric_map(db, {r.action_id for r in rows}, cscores))
     names = _names(db)
     ratings = _latest_profile_ratings(db, iv.profile_id)
     out = []
-    for action in scores:
+    for action, t in summaries.items():
         mine = [r for r in cur if r.action_id == action]
         scored = [r for r in mine if r.score is not None] or mine
-        out.append({"action_id": action, "action_name": names.get(action, action), "score": scores[action],
-                    "interview_score": scores[action], "self_rating": ratings.get(action),
+        out.append({"action_id": action, "action_name": names.get(action, action), "score": t.m,
+                    "interview_score": t.m, "coverage": t.e, "overall_level_allowed": t.overall_level_allowed, "self_rating": ratings.get(action),
                     "reason": _short_reason([r.reason for r in scored if r.reason]),
                     "sufficient_evidence": bool(mine) and all(bool(r.sufficient_evidence) for r in mine),
                     "evidence": [e for r in scored for e in (r.evidence or [])]})
@@ -290,11 +291,12 @@ def result_detail(profile_id: str, vacancy_id: str, db: Session = Depends(get_db
     if revision is None:
         raise HTTPException(404, "Вакансії немає у вашій добірці")
     scores = attempt_scores(db, iv.id)
+    rubrics = rubric_map(db, cohort_actions(_revisions(snap)), scores)
     names = _names(db)
     item = next(_with_fit(i) for i in rank_items(db, prof.years_experience, snap, scores) if i["vacancy_id"] == vacancy_id)
     groups = []
     for g in revision["groups"]:
-        ev = eval_group(g["alternatives"], scores)
+        ev = eval_group(g["alternatives"], scores, rubrics)
         alternatives = []
         for a in g["alternatives"]:
             tau = tau_for(a["required_level"])

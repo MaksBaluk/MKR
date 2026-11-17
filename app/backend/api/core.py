@@ -4,6 +4,8 @@ Budgets: ≤10 distinct actions, ≤5 shown questions per action. Pending questi
 """
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
@@ -12,7 +14,8 @@ from sqlalchemy.orm import Session
 
 from backend.api.common import create_attempt, default_profile
 from backend.db import get_db
-from backend.domain.core_flow import planner_state
+from backend.domain.core_flow import RubricMap, planner_state
+from backend.domain.topic_summary import TopicSummary, topic_summary
 from backend.domain.candidate_level import resolve_level
 from backend.domain.interview_budget import needs_min_followup, topic_open_for_question
 from backend.domain.market import VacancyInput, compute_market
@@ -51,31 +54,45 @@ def current_criteria_rows(rows) -> list:
     return [r for r in rows if not (r.action_id in dotted and r.criterion_id == r.action_id)]
 
 
+def criterion_scores(rows) -> dict[str, float | None]:
+    """Latest revision per criterion_id (rows arrive oldest first); legacy holistic rows per current_criteria_rows."""
+    return {r.criterion_id: r.score for r in current_criteria_rows(rows)}
+
+
+def action_summary(rows, rubrics: RubricMap) -> dict[str, TopicSummary]:
+    """Per action M_c / E_c from criterion scores. A legacy holistic row (criterion_id == action_id) scores the action."""
+    cur = current_criteria_rows(rows)
+    scores = criterion_scores(rows)
+    out = {}
+    for a in dict.fromkeys(r.action_id for r in cur):
+        seen = [(c, 1.0) for c in dict.fromkeys(r.criterion_id for r in cur if r.action_id == a)]
+        rubric = rubrics.get(a) or seen  # no rubric known: weight 1 over the criteria seen
+        if a in scores and not any(c in scores for c, _ in rubric):
+            rubric = [(a, 1.0)]
+        out[a] = topic_summary(rubric, scores)
+    return out
+
+
 def _action_scores(rows) -> dict[str, float | None]:
-    """Per action: mean (weights 1) of non-null scores of the latest revision per criterion; None if all null."""
-    latest: dict[tuple[str, str], float | None] = {}
-    for r in current_criteria_rows(rows):  # rows arrive oldest first
-        latest[(r.action_id, r.criterion_id)] = r.score
-    by_action: dict[str, list[float]] = {}
-    for (action, _), score in latest.items():
-        vals = by_action.setdefault(action, [])
-        if score is not None:
-            vals.append(score)
-    return {a: (sum(v) / len(v) if v else None) for a, v in by_action.items()}
+    """Display score per action: M_c with default weights (weighted by beta when a rubric is passed via action_summary)."""
+    return {a: t.m for a, t in action_summary(rows, {}).items()}
+
+
+def _rows_for_user(db: Session, user: User) -> list:
+    return db.scalars(select(CriterionAssessment).where(CriterionAssessment.user_id == user.id)
+                      .order_by(CriterionAssessment.created_at, CriterionAssessment.revision)).all()
 
 
 def latest_scores(db: Session, user: User) -> dict[str, float | None]:
-    """Action score per action (MATH_SPEC §3 M_c), across this user's interviews."""
-    rows = db.scalars(select(CriterionAssessment).where(CriterionAssessment.user_id == user.id)
-                      .order_by(CriterionAssessment.created_at, CriterionAssessment.revision)).all()
-    return _action_scores(rows)
+    """Criterion scores (MATH_SPEC §3), across this user's interviews."""
+    return criterion_scores(_rows_for_user(db, user))
 
 
 def attempt_scores(db: Session, interview_id: str) -> dict[str, float | None]:
-    """Action scores from one attempt only."""
+    """Criterion scores from one attempt only."""
     rows = db.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == interview_id)
                       .order_by(CriterionAssessment.created_at, CriterionAssessment.revision)).all()
-    return _action_scores(rows)
+    return criterion_scores(rows)
 
 
 SEEDED_SOURCES = ("CURATED", "CURATED_TEMPLATE", "REVIEWED")
@@ -94,6 +111,20 @@ def _seeded_criteria(db: Session, action_id: str) -> list[RubricCriterion]:
         return []
     return list(db.scalars(select(RubricCriterion).where(RubricCriterion.rubric_id == rubric.id)
                            .order_by(RubricCriterion.criterion_id)).all())
+
+
+def rubric_map(db: Session, action_ids: Iterable[str], scores: Mapping[str, float | None] | None = None) -> RubricMap:
+    """action_id -> [(criterion_id, weight)] from seeded rubrics. Actions with only a legacy holistic score keep [(a,1)]."""
+    out = {}
+    for a in dict.fromkeys(action_ids):
+        crit = [(c.criterion_id, c.weight) for c in _seeded_criteria(db, a)]
+        if crit and not (scores and a in scores and not any(c in scores for c, _ in crit)):
+            out[a] = crit
+    return out
+
+
+def cohort_actions(revisions) -> set[str]:
+    return {x["competency_id"] for r in revisions for g in r["groups"] for x in g["alternatives"]}
 
 
 def criteria_for(db: Session, action_id: str) -> list[str]:
@@ -195,7 +226,8 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         return {"turn": _turn_dict(pending, _names(db)), "version": iv.version}  # never regenerate a shown question
     snap = db.get(CohortSnapshot, iv.cohort_id)
     revisions = _revisions(snap)
-    state, weights = planner_state(revisions, attempt_scores(db, iv.id))
+    cscores = attempt_scores(db, iv.id)
+    state, weights = planner_state(revisions, cscores, rubric_map(db, cohort_actions(revisions), cscores))
     shown: dict[str, int] = {}
     for t in turns:
         shown[t.action_id] = shown.get(t.action_id, 0) + 1
@@ -205,7 +237,8 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         for r in revisions])}
     session_rows = db.scalars(select(CriterionAssessment).where(
         CriterionAssessment.session_id == iv.id).order_by(CriterionAssessment.revision)).all()
-    latest_in_session = _action_scores(session_rows)
+    latest_in_session = {a: t.m for a, t in action_summary(
+        session_rows, rubric_map(db, {r.action_id for r in session_rows}, cscores)).items()}
     sufficient = {r.action_id: bool(r.sufficient_evidence) for r in session_rows}  # latest revision wins
 
     def needs_second(a: str) -> bool:
