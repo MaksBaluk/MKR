@@ -20,7 +20,7 @@ Source request: thesis chapters 2.3.2–2.3.5 and 3 (`Балук_Диплом.do
 
 `CONFIRMED_SCORE=0.75`, `DECLINED_SCORE=0.05` (already in `interview_budget.py`), `MIN_COVERAGE_FOR_OVERALL=0.6`, `SELF_CLAIM_THRESHOLD=0.7`, `SELF_GAP=0.25`.
 
-## Phase 2 — DifficultyController (outline)
+## Phase 2 — DifficultyController (DONE 2026-11-17; see `docs/tasks/STATUS.md`, `MATH_SPEC.md` §3c)
 
 Files: create `app/backend/domain/difficulty.py`, `app/tests/test_difficulty.py`, `app/tests/test_difficulty_flow.py`; modify `models.py` + migration `0010` (core_turns: `difficulty`, `difficulty_reason`, `controller_before`, `controller_after` JSON), `agents/prompts.py` (Interviewer gets difficulty + definition of each level), `api/core.py`.
 

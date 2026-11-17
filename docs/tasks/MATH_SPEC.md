@@ -84,6 +84,46 @@ These are author's policy values, not statistically calibrated; they need expert
 
 **`D_vga` limitation.** By default `D_vga` is **all** rubric criteria of the alternative's action, with target `τ` derived by requirement level (policy-derived, not an employer statement). An optional per-alternative `criterion_ids` subset is supported **in the domain layer only** (`alt_criteria`): there is no persistence or snapshot path yet (cohort snapshot builders emit only `competency_id`/`required_level`, no model column), so vacancy-specific criteria are not available through the API; **the 90 fixtures do not contain it**, so every fixture alternative uses the whole rubric. Fixture requirements are therefore harder to satisfy than a vacancy-specific criterion list would be. An invalid `criterion_ids` currently falls back silently to the whole rubric.
 
+## 3c. Difficulty controller
+
+Implemented in `app/backend/domain/difficulty.py` (pure, no DB/API), wired in `app/backend/api/core.py` `next_question`.
+
+**Extension of the thesis model.** The thesis (chapter 2) has no question-difficulty controller. This section is an extension that needs a chapter-2 paragraph (DOCX not edited; for later synchronization).
+
+**Principle.** Difficulty only chooses how hard the next question is. It never sets or caps a criterion score, never changes any target `τ`, and never changes ranking. Scores come from the Evaluator's grading of the supplied answers. Caps are unchanged: 5 shown questions per topic, 10 topics, min two shown questions while criteria stay open (§3a).
+
+**Levels** (`Difficulty`): `BASIC` = recall and recognition of core terms, simple standard tasks; `INTERMEDIATE` = applying the skill to a realistic task, trade-offs; `ADVANCED` = design under constraints, edge cases, failure analysis, justification of decisions. Definitions are given to the Interviewer in the prompt, with the rule that difficulty never changes grading.
+
+**Initial hypothesis** (`initial_difficulty`, start of each topic): candidate level `junior`->`BASIC`, `middle`->`INTERMEDIATE`, `senior`->`ADVANCED` (reason `LEVEL:<level>`). Only if the level is unknown, the market level from the median of known `years_min` of the cohort (`<2` junior, `<5` middle, else senior; reason `MARKET:<level>`). Otherwise `INTERMEDIATE` (`DEFAULT`). Seniority is only a starting guess; evidence moves the level.
+
+**`next_step` rules** (first match wins; `targeted` = criteria the last question aimed at; `known` = their non-null scores):
+
+1. No open criteria: `CLOSE`, reason `NO_OPEN_CRITERIA`.
+2. Question cap reached (`can_ask_question` false): `CLOSE`, `QUESTION_CAP`.
+3. `enough` = min-two not owed (`needs_min_followup`), topic score known, and no still-open validated follow-up goal.
+4. No known targeted score (bank or untargeted question, all null): level unchanged; `CLOSE` with `NO_EVIDENCE+ENOUGH` if `enough`, else `FOLLOWUP` with `NO_EVIDENCE`.
+5. `STRONG`: evidence `sufficient`, known share `>= min_known_share`, mean known `>= up_score`: level +1 (max `ADVANCED`).
+6. `WEAK`: all targeted known (share 1.0) and mean `< down_score`: level -1, not below `diagnostic_floor`.
+   Otherwise `PARTIAL`: level unchanged.
+7. If `enough`: `CLOSE` with reason + `+ENOUGH` (e.g. `STRONG+ENOUGH`). Else `CONTINUE` if the level changed, `FOLLOWUP` if not.
+
+Level moves at most one step per answer. Targets of the next question are the open criteria.
+
+**`DifficultyConfig` defaults** (policy, not calibration; need expert review):
+
+| Field | Default | Role |
+|---|---|---|
+| `up_score` | 0.75 | mean targeted score for `STRONG` (equals `CONFIRMED_SCORE`) |
+| `down_score` | 0.50 | mean below it gives `WEAK` |
+| `min_known_share` | 0.5 | share of targeted criteria with known score needed for `STRONG` |
+| `diagnostic_floor` | `BASIC` | lowest level a weak run can reach |
+
+**Persistence.** Each `core_turns` row stores `difficulty`, `difficulty_reason`, `controller_before`, `controller_after` (migration 0010). Bank-fallback questions advance the state with reason `FALLBACK:<reason>`. A legacy topic whose last turn has NULL difficulty restarts at the initial level (`LEGACY_RESTART`).
+
+**Accepted behaviour (recorded, not a bug).**
+(a) A strong sufficient first answer while a validated follow-up goal is still open gets a second question: the min-two rule and the open goal keep the topic open (bounded by caps). Cost if wrong: one extra question in a rare case.
+(b) `next_level` on a `CLOSE` decision is informational only: the next topic starts from the initial difficulty, not from the closed topic's level.
+
 ## 4. Requirement thresholds and interval fulfilment
 
 Each alternative `(v,g,a)` lists required **criterion IDs** `D_vga` and a documented target `τ_vgad∈(0,1]` per criterion. ESCO URI does not determine targets. If the vacancy states no level, apply an explicitly named **policy-derived rubric threshold** or mark the target unavailable; never report such a value as an employer statement. For existing integer requirements, a documented migration may convert `1→.50`, `2→.75`, `3→.90`, tagged `POLICY_DERIVED_LEGACY`; never silently reinterpret stored values. Rubrics/target versions must be compatible or the item is `NOT_EVALUABLE`.
