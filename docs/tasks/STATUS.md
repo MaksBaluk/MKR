@@ -165,3 +165,34 @@
 - у режимі B складність фіксована на початковій гіпотезі (`FIXED:<причина>`), контролер складності не працює;
 - режим A: рейтинг тим самим ключем (2.15) з усіма критеріями невідомими, самооцінки лише як tie-break `T_v`/`J_v`;
 - реальні результати цієї хвилі — лише перевірка конвеєра на сценарних відповідях і фейковій моделі; порівняльних висновків про режими немає (потрібні експертні мітки, фаза 4).
+
+## Фаза 4 «Метрики й експертні дані» (2026-11-17, гілка `feat/criterion-core`)
+
+План: `docs/superpowers/plans/2026-11-17-phase4-metrics-expert-data.md`. Специфікація: `MATH_SPEC.md` §6b; потік: `architecture.md` («Evaluation flow»); використання: `README.md` («Evaluation»).
+
+Що змінено:
+- запис запуску: `relevant_criteria`, `qa[i]["sufficient_criteria_after"]`, колонки `answer_source` і `relevant_criteria` (міграція `0012`); виправлено `evaluator_rejections` без моделі;
+- `experiments/expert_labels.py`: схеми міток (релевантність 0..3, оцінка критерію [0,1] або порожньо), анотатори, `data_status` (`EXPERT` / `SYNTHETIC_TEST_DATA`), подвійна анотація, арбітраж (арбітр відмінний від обох анотаторів), узгодженість (точна, зважена каппа);
+- `experiments/metrics.py`: P@5, NDCG@10 (лінійний приріст за замовчуванням, опція `exp`), покриття критеріїв, частка невизначених вимог, питання до покриття, тривалість без LLM, MAE оцінювача з окремими лічильниками;
+- `experiments/report.py` і `scripts/evaluate_experiments.py`: `report.json`, `report.csv`, `charts.json`; без міток `data_status = NO_EXPERT_LABELS` і твердження «method quality is not established»; синтетичні мітки відхиляються без `--allow-synthetic-labels`;
+- порожні шаблони міток `app/experiments/templates/` (без жодної мітки);
+- тести: `test_expert_labels.py`, `test_metrics.py`, `test_experiment_report.py`, `test_migration_0012.py`, `test_evaluation_honesty.py`; розширено AST-перевірку (`test_no_expert_labels_import_in_engine`): `domain`, `api`, `experiments.{planning,runner}` не імпортують `expert_labels`, `metrics`, `report`.
+
+Перевірки (реально виконані, `LLM_PROVIDER=disabled`, тимчасові файли поза репозиторієм і без продуктової БД):
+- `cd app && uv run pytest -q` -> `511 passed, 47 warnings in 115.49s`;
+- `uv run python scripts/run_experiment.py --db sqlite:///<tmp>/exp.db --candidates c.json --answers a.json --out <tmp>/out` (режим A, 1 кандидат) -> код 0, 1 запуск;
+- `uv run python scripts/evaluate_experiments.py --runs <tmp>/out/runs.json --out <tmp>/report` без міток -> код 0; вивід: `data_status: NO_EXPERT_LABELS`, твердження «No expert labels were supplied: ranking metrics and evaluator MAE are not computed, so method quality is not established.»; створено `report.json`, `report.csv`, `charts.json`; `precision_at_5_paired`/`ndcg_at_10_paired` порожні, `criterion_coverage_mean` = 0.0 (без відповідей), `unresolved_requirements_rate_mean` = 1.0.
+
+НЕ виконувалось: Docker/PostgreSQL, браузерні перевірки, справжній LLM, будь-які реальні експертні дані й реальні кандидати. Жодних результатів якості методу немає.
+
+Відкладені дрібниці: тест `test_unseeded_action_criterion_is_relevant_and_sufficient` порожній, якщо жодна неseeded-дія не задавалась; `store._csv_row` не містить `evaluator_rejections` у `runs.csv`; `errors` має нечисловий ключ `criteria_outside_relevant` (звіт сумує чотири іменовані ключі); речення про парні середні спрацьовує за різними `n_included`, а не за різними множинами (непересічні множини дають `None` без попередження); у CSV немає непарних P@5/NDCG; парний перетин охоплює всі режими звіту, включно з абляціями; `store` імпортує об'єкт engine з `backend.db` (без з'єднання); тести арбітра (збіг з анотатором, критерії), валідація входів `adjudicate`/`agreement`, граничні значення (bool/NaN/inf) і правило арбітра в README шаблонів частково не покриті.
+
+Синхронізація з текстом диплома (DOCX не редагувався, потрібно оновити вручну): вказати вибір приросту NDCG (лінійний `g`, альтернатива `2^g−1`) та ідеальне ранжування по всіх розмічених вакансіях кандидата; парні середні (кандидати, включені в усі режими) для порівняння режимів; правила виключення (менше 10 розмічених, нерозмічені в топ-10, нульові мітки дають NDCG `None`, порожні `relevant_criteria` виключаються з покриття); протокол двох анотаторів і незалежного арбітра; розрізнення `SYNTHETIC_TEST_DATA` і `EXPERT`.
+
+Готовність до розділу 4:
+
+| Категорія | Що |
+|---|---|
+| 1. Підтверджено автоматичними тестами зараз | коректність формул P@5, NDCG@10, покриття, MAE на ручних прикладах; правила виключення та `None`; схеми й валідація міток, арбітраж; відсутність витоку міток у рушій; чесний статус без міток і з синтетичними мітками; відтворюваність ранжування за збереженими оцінками; конвеєр запуск -> експорт -> звіт |
+| 2. Вимірюваність після підготовки еталонного набору | P@5 і NDCG@10 для режимів A/B/C та абляцій; MAE оцінювача проти експертів; покриття й питання до покриття як ефективність; потрібні арбітровані (ADJUDICATED) мітки двох незалежних анотаторів і третього арбітра і реальні (не сценарні) відповіді |
+| 3. Потребує реальних учасників або незалежних експертів | оцінка якості методу для реальних кандидатів; узгодженість експертів; користувацька корисність, довіра, час на відповіді; будь-які твердження про розгортання (90 синтетичних вакансій не дають такого доказу) |

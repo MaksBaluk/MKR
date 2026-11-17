@@ -7,7 +7,7 @@ Source request: thesis chapters 2.3.2–2.3.5 and 3 (`Балук_Диплом.do
 | 1 | Criterion-level core: `D_vga`, coverage vs score, structured `followup_goal`, `T_v`/`J_v`, self-rating tie-break | `2026-11-17-phase1-criterion-core.md` | detailed, ready |
 | 2 | `DifficultyController` (BASIC/INTERMEDIATE/ADVANCED) | this file, below | outline |
 | 3 | Modes A/B/C, ablation flags, reproducible runner | `2026-11-17-phase3-modes-runner.md` | DONE 2026-11-17 (see `docs/tasks/STATUS.md`) |
-| 4 | Metrics, expert dataset, report export | this file, below | outline |
+| 4 | Metrics, expert dataset, report export | `2026-11-17-phase4-metrics-expert-data.md` | DONE 2026-11-17 (see `docs/tasks/STATUS.md`; no real expert data yet) |
 
 ## Decisions already made (owner)
 

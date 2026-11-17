@@ -118,6 +118,26 @@ Options: `--flags no_adaptive_topics no_adaptive_followup no_adaptive_difficulty
 
 Results with scripted answers are only a pipeline check: they are not evidence of real-candidate performance, and the 90 synthetic vacancies cannot show deployment quality. Mode comparison needs independent expert labels (not yet collected). LLM calls are not deterministic. See `docs/tasks/MATH_SPEC.md` §6a.
 
+## Evaluation
+
+Build the evaluation report from exported runs (reads files only: no database, model or network). From `app/`:
+
+```bash
+uv run python scripts/evaluate_experiments.py --runs out/runs.json --out report/
+uv run python scripts/evaluate_experiments.py --runs out/runs.json --relevance relevance.csv \
+    --criteria criteria.csv --out report/ [--coverage-threshold 0.8] [--min-labeled-vacancies 10] \
+    [--allow-synthetic-labels]
+```
+
+Label files (CSV or JSON, optional) hold final adjudicated expert labels; formats and the two-annotator plus adjudication protocol are in `app/experiments/templates/README.md` (header-only templates, no labels are shipped). Without labels `data_status` is `NO_EXPERT_LABELS` and only label-free metrics are computed. `SYNTHETIC_TEST_DATA` labels are refused unless `--allow-synthetic-labels` is given. Exit codes: 0 ok, 2 refused (one `error: ...` line). Mode keys are `INITIAL_PROFILE`, `STATIC_INTERVIEW`, `ADAPTIVE_INTERVIEW`, with a `-topics`/`-followup`/`-difficulty` suffix per disabled ablation flag.
+
+Outputs in `--out`:
+- `report.json`: keys `data_status`, `quality_statement`, `answer_sources`, `experiment_ids`, `coverage_threshold`, `min_labeled_vacancies`, `labels`, `modes`, `excluded_candidates`.
+- `report.csv`, one row per mode, columns: `mode, data_status, n_candidates, n_included, n_excluded_lt_10_labeled, n_excluded_unlabeled_in_top, n_excluded_labels_not_adjudicated, n_ndcg_undefined, n_paired, precision_at_5_paired, ndcg_at_10_paired, n_excluded_no_relevant_criteria, criterion_coverage_mean, unresolved_requirements_rate_mean, questions_mean, questions_to_coverage_mean, n_reached, total_s_mean, llm_wait_s_mean, excluding_llm_s_mean, llm_errors, mae, mae_n_compared, mae_n_evaluator_unknown, mae_n_expert_unknown, mae_n_missing_expert, mae_n_rubric_version_mismatch, answer_sources, config`. An empty cell means not computed, never 0.
+- `charts.json`, each entry `{"data_status", "data"}`: `ranking_by_mode`, `coverage_vs_questions`, `questions_static_vs_adaptive`, `evaluator_quality_by_criterion`.
+
+Runs with scripted answers are only a pipeline check, not evidence of real-candidate performance. Method quality is established only by a report with `data_status` `EXPERT` from adjudicated labels and real candidate answers. Definitions: `docs/tasks/MATH_SPEC.md` §6b.
+
 ## Data and implementation
 
 - `app/fixtures/vacancies.json` — **90** invented, curated vacancies (30 Python, 30 marketing, 30 design), each with ~11 structured S/F/U requirement groups, descriptions, responsibilities, benefits, salaries and seniority.

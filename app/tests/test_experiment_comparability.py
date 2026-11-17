@@ -165,7 +165,7 @@ def test_ranking_deterministic_same_snapshot(abc, db, monkeypatch):
 BACKEND = Path(backend.__file__).parent
 SCANNED = [*sorted((BACKEND / "domain").rglob("*.py")), *sorted((BACKEND / "api").rglob("*.py")),
            BACKEND / "experiments" / "planning.py", BACKEND / "experiments" / "runner.py"]
-FORBIDDEN = ("expert", "labels")
+FORBIDDEN = ("expert", "labels", "expert_labels", "metrics", "report")
 
 
 def forbidden_imports(source: str) -> list[str]:
@@ -190,5 +190,9 @@ def test_no_expert_labels_import_in_engine():
     assert forbidden_imports("from backend.labels import x")
     assert forbidden_imports("from backend import expert_scores")
     assert forbidden_imports("import os\nfrom backend.domain import ranking") == []
+    for name in ("expert_labels", "metrics", "report"):  # new Phase 4 modules are flagged in each import form
+        assert forbidden_imports(f"import backend.experiments.{name}")
+        assert forbidden_imports(f"from backend.experiments.{name} import x")
+        assert forbidden_imports(f"from backend.experiments import {name}")
     offenders = {str(p.relative_to(BACKEND)): forbidden_imports(p.read_text(encoding="utf-8")) for p in SCANNED}
     assert {k: v for k, v in offenders.items() if v} == {}

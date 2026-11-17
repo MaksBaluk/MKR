@@ -196,3 +196,33 @@ Existing formulas are unchanged. Modes only switch which planner/controller step
 - LLM calls (interviewer, evaluator) are not deterministic. Only the ranking recomputation from stored scores is reproducible; two runs of the same mode may differ.
 - Interview modes need an explicit `--llm configured` (the configured provider receives questions, answers, vacancy and rubric text) or `--llm none --allow-ungraded` (no model: answers are stored ungraded and questions come from the bank); ungraded runs say nothing about assessment quality.
 
+
+## 6b. Metrics and expert reference data (implemented in Phase 4)
+
+Existing formulas are unchanged. Code: `backend/experiments/{expert_labels,metrics,report}.py`. These modules are evaluation-only: `backend.domain`, `backend.api` and `backend.experiments.{planning,runner}` must not import them (AST test `test_no_expert_labels_import_in_engine`), so expert labels never reach ranking, planning or scoring.
+
+**Ranking metrics.** Expert relevance grade `g ∈ {0,1,2,3}` per (candidate, vacancy); relevant means `g ≥ 2`. Let `r_1..r_n` be the vacancies in the run's ranking.
+- `P@5 = |{i ≤ 5 : g(r_i) ≥ 2}| / 5`. The denominator is always 5.
+- `NDCG@10 = DCG@10 / IDCG@10`, `DCG@k = Σ_{i=1..k} gain(g(r_i)) / log2(i+1)`. Default gain is linear, `gain = g`; option `exp`, `gain = 2^g − 1`. The thesis must state which gain is used (the code default is linear). IDCG is the DCG of the ideal ordering of **all labelled vacancies of that candidate** (labels restricted to the vacancies the run ranked), top 10. IDCG = 0 (all labels zero) gives `None`, never 1 or 0; P@5 of that candidate is still computed.
+- Inclusion rule: a candidate counts only with at least 10 labelled vacancies (`min_labeled_vacancies`, default 10) **and** every vacancy in the top 10 labelled. Otherwise the candidate is excluded and counted (`n_excluded_lt_10_labeled`, `n_excluded_unlabeled_in_top`, ids listed under `excluded_candidates`). One rule covers P@5 and NDCG@10, so both use one sample. Unlabelled vacancies are never given a grade. A `skip` mode exists in `metrics.py` (unlabelled ids dropped before taking top k) but it is pooling-biased and the report does not use it.
+- Unpaired mean (`precision_at_5`, `ndcg_at_10` in `report.json`): mean over the candidates included in that mode; the sets can differ between modes. Paired mean (`precision_at_5_paired`, `ndcg_at_10_paired`, `n_paired`): mean over the candidates included in **every** mode of the report. Compare modes only through the paired values; the `ranking_by_mode` chart and `report.csv` carry them. The paired intersection spans all modes of the report including ablations.
+
+**Criterion coverage.** `coverage = |sufficient ∩ relevant| / |relevant|` where `relevant` is the set of rubric criteria of the actions in the cohort (`relevant_criteria` of the run) and `sufficient` is `qa[i]["sufficient_criteria_after"]`, the criteria sufficient by §3a after question `i`. Empty `relevant` gives `None`; such runs (and records exported before the field existed) are excluded from `criterion_coverage_mean`, `questions_to_coverage_mean` and `n_reached` and counted in `n_excluded_no_relevant_criteria`. An interview with no answers has coverage 0.0. **Questions to coverage** is the 1-based index of the first question whose coverage reaches the threshold (default 0.8, `--coverage-threshold`); `None` if never reached.
+
+**Unresolved requirements rate** = `Σ unknown_count / Σ groups_total` over the ranked vacancies with `groups_total > 0` (§4–§5 counts); `None` if no vacancy has groups.
+
+**Duration.** `total_s`, `llm_wait_s` and `excluding_llm_s = max(total_s − llm_wait_s, 0)`; missing keys count 0, negative or non-finite values are rejected.
+
+**Evaluator MAE.** MAE of `|evaluator score − expert score|` over (action, criterion) pairs where both are non-null. Counted separately and never treated as 0: `n_evaluator_unknown` (evaluator `null`, checked first), `n_expert_unknown` (expert `null`), `n_missing_expert` (no expert row), `n_compared`, and `n_rubric_version_mismatch` (expert labels written for another rubric version than the run used; dropped). MAE is `None` when `n_compared = 0`. Pooled MAE weights by `n_compared`.
+
+**None policy.** `None` means "not computed or undefined" and is written as an empty CSV cell; it is never replaced by 0 in means, counters or charts.
+
+**Expert data protocol.** (1) Two annotators label the same keys independently (relevance: 0..3 with rationale; criterion: score in [0,1] or empty, with `evidence_reference` when set). Agreement is computed before adjudication (exact agreement and quadratic weighted kappa). (2) An adjudicator **distinct from both annotators** produces the final labels (`review_status = ADJUDICATED`, adjudicator as `annotator_id`) for exactly the shared keys. (3) The report uses final labels. If some labels are `ADJUDICATED`, only those are used, the candidates whose other labels were ignored are listed, and a candidate left without any relevance label is excluded as `LABELS_NOT_ADJUDICATED`. If none is adjudicated, labels are used and flagged preliminary. Each key may appear once in the set used. (4) `data_status` is `EXPERT` for real annotation and `SYNTHETIC_TEST_DATA` for fixtures; the two cannot mix in one report. Synthetic labels are refused by the CLI without `--allow-synthetic-labels`, and every output (`report.json`, `report.csv` column `data_status`, each chart dataset) carries the status. Without labels `data_status` is `NO_EXPERT_LABELS` and the statement says that method quality is not established. No label is invented, generated or defaulted; the repository ships only header-only templates.
+
+**What each metric can and cannot show.**
+- P@5, NDCG@10: agreement of the ranking with expert relevance for the labelled candidates; valid only with real adjudicated labels. They do not show employment outcomes or hiring probability. Different modes use different interview data, so a difference shows ranking quality under that mode, not a causal effect on its own.
+- Coverage, questions to coverage: how much of the rubric the interview evidenced (by LLM-graded sufficiency) and how fast; not whether the grades are right.
+- Unresolved rate: how many requirement groups stay unknown; low is not "good" unless grades are correct.
+- Duration: machine time only; it ignores candidate typing time and LLM latency differences between providers.
+- Evaluator MAE: distance of LLM grades from expert grades on commonly graded criteria; it hides disagreements about what is unknown (separate counters).
+- With scripted or simulated answers every metric is a pipeline check, not evidence about real candidates. The 90 synthetic vacancies cannot show deployment quality.
