@@ -59,14 +59,15 @@ def criterion_scores(rows) -> dict[str, float | None]:
     return {r.criterion_id: r.score for r in current_criteria_rows(rows)}
 
 
-def action_summary(rows, rubrics: RubricMap) -> dict[str, TopicSummary]:
+def action_summary(rows, rubrics: RubricMap, fallback: Mapping[str, list[str]] | None = None) -> dict[str, TopicSummary]:
     """Per action M_c / E_c from criterion scores. A legacy holistic row (criterion_id == action_id) scores the action."""
     cur = current_criteria_rows(rows)
     scores = criterion_scores(rows)
     out = {}
     for a in dict.fromkeys(r.action_id for r in cur):
         seen = [(c, 1.0) for c in dict.fromkeys(r.criterion_id for r in cur if r.action_id == a)]
-        rubric = rubrics.get(a) or seen  # no rubric known: weight 1 over the criteria seen
+        # No rubric: weight 1 over fallback criteria (criteria_for) so E_c has the full denominator; else criteria seen.
+        rubric = rubrics.get(a) or ([(c, 1.0) for c in fallback[a]] if fallback and a in fallback else seen)
         if a in scores and not any(c in scores for c, _ in rubric):
             rubric = [(a, 1.0)]
         out[a] = topic_summary(rubric, scores)

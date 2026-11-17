@@ -50,3 +50,31 @@ def test_criterion_subset_requirement_is_met(client, auth, db, finished):
     action, vid = _setup(db, finished, criterion_ids=True)
     item = next(i for i in _get(client, auth, finished["id"])["items"] if i["vacancy_id"] == vid)
     assert item["met_count"] == 1 and item["strengths"]
+
+
+def test_detail_shows_score_and_state_for_seeded_rubric(client, auth, db, finished):
+    action, vid = _setup(db, finished, criterion_ids=True)
+    d = client.get(f"{API}/profiles/{finished['id']}/results/{vid}", headers=auth).json()
+    alt = d["groups"][0]["alternatives"][0]
+    assert alt["candidate_score"] == 0.95 and alt["state"] == "MET"
+
+
+def test_detail_partial_topic_not_met(client, auth, db, finished):
+    action, vid = _setup(db, finished)
+    alt = client.get(f"{API}/profiles/{finished['id']}/results/{vid}", headers=auth).json()["groups"][0]["alternatives"][0]
+    assert alt["candidate_score"] == 0.95 and alt["state"] != "MET"
+
+
+def test_recommendations_one_of_five_not_met(client, auth, db, finished):
+    action, vid = _setup(db, finished)
+    with db() as s:
+        cid = s.scalars(select(CoreInterview)).first().cohort_id
+    r = client.post(f"{API}/recommendations", json={"cohort_id": cid}, headers=auth).json()
+    from backend.api.recommendations import rank_items
+    with db() as s:
+        from backend.models import User
+        u = s.scalars(select(User)).first()
+        from backend.api.core import latest_scores
+        item = next(i for i in rank_items(s, u.years_experience, s.get(CohortSnapshot, cid), latest_scores(s, u))
+                    if i["vacancy_id"] == vid)
+    assert item["met_count"] == 0 and item["z"] != 2 and r["items"] is not None
