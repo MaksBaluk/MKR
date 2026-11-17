@@ -249,7 +249,8 @@ def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(
                 "competencies": [],
                 "market": [], **base}
     snap = db.get(CohortSnapshot, iv.cohort_id)
-    items = [_with_fit(i) for i in rank_items(db, prof.years_experience, snap, attempt_scores(db, iv.id))]
+    items = [_with_fit(i) for i in rank_items(db, prof.years_experience, snap, attempt_scores(db, iv.id),
+                                         _latest_profile_ratings(db, prof.id))]
     # Product order: highest confirmed share first; ties by fewer mandatory failures (z), experience (x), id.
     items.sort(key=lambda i: (-i["confirmed_share"], -i["z"], -i["x"], i["vacancy_id"]))
     if work_mode:
@@ -295,7 +296,7 @@ def result_detail(profile_id: str, vacancy_id: str, db: Session = Depends(get_db
                       .order_by(CriterionAssessment.created_at, CriterionAssessment.revision)).all()
     mc = {a: t.m for a, t in action_summary(rows, rubrics).items()}  # candidate_score stays M_c
     names = _names(db)
-    item = next(_with_fit(i) for i in rank_items(db, prof.years_experience, snap, scores) if i["vacancy_id"] == vacancy_id)
+    item = next(_with_fit(i) for i in rank_items(db, prof.years_experience, snap, scores, _latest_profile_ratings(db, prof.id)) if i["vacancy_id"] == vacancy_id)
     groups = []
     for g in revision["groups"]:
         ev = eval_group(g["alternatives"], scores, rubrics)

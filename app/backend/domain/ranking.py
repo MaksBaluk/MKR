@@ -21,6 +21,8 @@ class VacancyRanking:
     has_mandatory: bool
     has_preferred: bool
     label: Label
+    t_v: float = 0.0  # self-claim tie-break only (2.3.5); never shown as a percent
+    j_v: float = 0.0
     confirmed_share: float = 0.0  # mean lower bound over all groups; display only, not a probability
 
 
@@ -34,8 +36,8 @@ def z_status(mandatory_group_statuses: Sequence[str]) -> Literal[0, 1, 2]:
 
 
 def sort_key(r: VacancyRanking) -> tuple:
-    """Ascending sort key equivalent to (Z DESC, X DESC, L^M DESC, L^P DESC, W^M ASC, W^P ASC, id ASC)."""
-    return (-r.z, -r.x, -r.l_m, -r.l_p, r.w_m, r.w_p, r.vacancy_id)
+    """Ascending sort key equivalent to (Z DESC, X DESC, L^M DESC, L^P DESC, W^M ASC, W^P ASC, T_v DESC, J_v DESC, id ASC)."""
+    return (-r.z, -r.x, -r.l_m, -r.l_p, r.w_m, r.w_p, -r.t_v, -r.j_v, r.vacancy_id)
 
 
 def rank(rankings: Sequence[VacancyRanking]) -> list[VacancyRanking]:

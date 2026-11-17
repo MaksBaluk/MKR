@@ -16,7 +16,7 @@ from backend.api.common import create_attempt, default_profile
 from backend.db import get_db
 from backend.domain.core_flow import RubricMap, planner_state
 from backend.domain.assessment import FollowupGoal, sanitize_goal
-from backend.domain.topic_summary import TopicSummary, open_criteria, topic_summary
+from backend.domain.topic_summary import TopicSummary, needs_verification, open_criteria, topic_summary
 from backend.domain.candidate_level import resolve_level
 from backend.domain.interview_budget import needs_min_followup, topic_open_for_question
 from backend.domain.market import VacancyInput, compute_market
@@ -24,7 +24,7 @@ from backend.domain.planner import choose_next
 from backend.agents.graphs import run_answer, run_ask
 from backend.agents.model import get_chat_model
 from backend.models import (CandidateProfile, CohortSnapshot, CoreInterview, CoreTurn, Competency,
-                            CriterionAssessment, Rubric, RubricCriterion, User)
+                            CandidateSelfRating, CriterionAssessment, Rubric, RubricCriterion, User)
 from backend.security import current_user
 
 router = APIRouter(tags=["adaptive interview"])
@@ -219,6 +219,16 @@ def get_interview(interview_id: str, db: Session = Depends(get_db), user: User =
             "topics_used": len({t.action_id for t in turns})}
 
 
+def _profile_ratings(db: Session, iv: CoreInterview, user: User) -> dict[str, float | None]:
+    """Self-ratings of the attempt's own profile only (legacy attempts without profile: user's default profile)."""
+    if iv.profile_id is None:
+        from backend.api.profile import latest_self_ratings
+        return latest_self_ratings(db, user)
+    rows = db.scalars(select(CandidateSelfRating).where(CandidateSelfRating.profile_id == iv.profile_id)
+                      .order_by(CandidateSelfRating.revision)).all()
+    return {r.action_id: r.value for r in rows}
+
+
 @router.post("/interviews/{interview_id}/next-question")
 def next_question(interview_id: str, data: VersionBody, db: Session = Depends(get_db),
                   user: User = Depends(current_user)):
@@ -234,7 +244,14 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     snap = db.get(CohortSnapshot, iv.cohort_id)
     revisions = _revisions(snap)
     cscores = attempt_scores(db, iv.id)
-    state, weights = planner_state(revisions, cscores, rubric_map(db, cohort_actions(revisions), cscores))
+    session_rows = db.scalars(select(CriterionAssessment).where(
+        CriterionAssessment.session_id == iv.id).order_by(CriterionAssessment.revision)).all()
+    summaries = action_summary(session_rows, rubric_map(db, {r.action_id for r in session_rows}, cscores))
+    own = _profile_ratings(db, iv, user)
+    state, weights = planner_state(revisions, cscores, rubric_map(db, cohort_actions(revisions), cscores),
+                                   frozenset(a for a in {a for s in revisions for g in s["groups"] for al in g["alternatives"]
+                                                         for a in [al["competency_id"]]}
+                                             if needs_verification(own.get(a), summaries.get(a))))
     shown: dict[str, int] = {}
     for t in turns:
         shown[t.action_id] = shown.get(t.action_id, 0) + 1
@@ -242,10 +259,7 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     mass = {e.action_id: e.mass for e in compute_market([
         VacancyInput(r["id"], tuple(tuple(a["competency_id"] for a in g["alternatives"]) for g in r["groups"]))
         for r in revisions])}
-    session_rows = db.scalars(select(CriterionAssessment).where(
-        CriterionAssessment.session_id == iv.id).order_by(CriterionAssessment.revision)).all()
-    latest_in_session = {a: t.m for a, t in action_summary(
-        session_rows, rubric_map(db, {r.action_id for r in session_rows}, cscores)).items()}
+    latest_in_session = {a: t.m for a, t in summaries.items()}
     sufficient = {r.action_id: bool(r.sufficient_evidence) for r in session_rows}  # latest revision wins
 
     open_memo: dict[str, list[str]] = {}

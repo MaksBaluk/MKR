@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from backend.api.common import source_label
 from backend.api.core import _owned_cohort, _revisions, cohort_actions, latest_scores, rubric_map
+from backend.api.profile import latest_self_ratings
 from backend.db import get_db
 from backend.domain.core_flow import explain_vacancy, rank_vacancy
 from backend.domain.ranking import rank as order
@@ -23,12 +24,12 @@ class RankBody(BaseModel):
 
 
 def rank_items(db: Session, years_experience: int | None, snap: CohortSnapshot,
-               scores: dict[str, float | None]) -> list[dict]:
+               scores: dict[str, float | None], self_ratings: dict[str, float | None] | None = None) -> list[dict]:
     """All vacancies of a frozen cohort in deterministic ranking order (shared by legacy and profile results)."""
     by_id = {r["id"]: r for r in _revisions(snap)}
     rubrics = rubric_map(db, cohort_actions(by_id.values()), scores)
     ranked = [rank_vacancy({"id": vid, "years_min": by_id[vid]["years_min"], "groups": by_id[vid]["groups"]},
-                           scores, rubrics, years_experience) for vid in snap.vacancy_ids]
+                           scores, rubrics, years_experience, self_ratings) for vid in snap.vacancy_ids]
     names = {c.id: c.label_uk for c in db.query(Competency).all()}
     # Provenance is looked up live (one query), never frozen into cohort revisions.
     sources = {v.id: source_label(v) for v in db.query(Vacancy).filter(Vacancy.id.in_(list(snap.vacancy_ids)))}
@@ -48,7 +49,7 @@ def rank_items(db: Session, years_experience: int | None, snap: CohortSnapshot,
 def rank(data: RankBody, db: Session = Depends(get_db), user: User = Depends(current_user)):
     snap = _owned_cohort(db, user, data.cohort_id)
     scores = latest_scores(db, user)
-    ordered = rank_items(db, user.years_experience, snap, scores)
+    ordered = rank_items(db, user.years_experience, snap, scores, latest_self_ratings(db, user))
     return {"cohort_id": snap.id, "policy": "ORDER_LEXICOGRAPHIC_V1", "items": ordered[:TOP_N],
             "total": len(ordered), "assessed_actions": sum(1 for v in scores.values() if v is not None),
             "note": NOTE}

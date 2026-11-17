@@ -11,6 +11,8 @@ RubricCriteria = Sequence[tuple[str, float]]  # (criterion_id, weight beta > 0)
 CONFIRMED_SCORE = 0.75
 DECLINED_SCORE = 0.05
 MIN_COVERAGE_FOR_OVERALL = 0.6
+SELF_CLAIM_THRESHOLD = 0.7
+SELF_GAP = 0.25
 
 CriterionState = Literal["UNKNOWN", "WEAK", "CONFIRMED", "DECLINED"]
 
@@ -61,3 +63,12 @@ def topic_summary(rubric: RubricCriteria, scores: Mapping[str, float | None]) ->
     )
     e = known_w / total
     return TopicSummary(m, e, assessed, unknown, e >= MIN_COVERAGE_FOR_OVERALL)
+
+
+def needs_verification(self_rating: float | None, summary: TopicSummary | None) -> bool:
+    """High self-claim not yet backed by enough evidence, or contradicted by M_c. Planner tie-break only."""
+    if self_rating is None or self_rating < SELF_CLAIM_THRESHOLD:
+        return False
+    if summary is None or summary.e < MIN_COVERAGE_FOR_OVERALL:
+        return True
+    return summary.m is not None and self_rating - summary.m >= SELF_GAP

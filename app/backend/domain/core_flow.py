@@ -98,6 +98,19 @@ def planner_state(revisions: Sequence[Mapping], scores: Mapping[str, float | Non
     return state, weights
 
 
+def self_claim_metrics(groups: Sequence[Mapping], self_ratings: Mapping[str, float | None]) -> tuple[float, float]:
+    """(T_v, J_v): b_vg = best known self-rating among group alternatives; normalised by all |G_v| groups."""
+    if not groups:
+        return 0.0, 0.0
+    bs = []
+    for g in groups:
+        known = [self_ratings[a["competency_id"]] for a in g["alternatives"]
+                 if self_ratings.get(a["competency_id"]) is not None]
+        if known:
+            bs.append(max(known))
+    return sum(bs) / len(groups), len(bs) / len(groups)
+
+
 def rank_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], rubrics: RubricMap,
                  user_years: int | None, self_ratings: Mapping[str, float | None] | None = None) -> VacancyRanking:
     groups = vacancy["groups"]
@@ -117,8 +130,9 @@ def rank_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], rubrics: 
     any_score = any(scores.get(c) is not None for c in _used_criteria(groups, rubrics))
     x = experience_status(user_years, vacancy["years_min"], True)
     share = mean(m_L + p_L)
+    t_v, j_v = self_claim_metrics(groups, self_ratings or {})
     return VacancyRanking(vacancy["id"], z_status(m_status), x, l_m, l_p, w_m, w_p,
-                          bool(m_L), bool(p_L), "RANKED" if any_score else "LOW_INFORMATION", share)
+                          bool(m_L), bool(p_L), "RANKED" if any_score else "LOW_INFORMATION", t_v, j_v, share)
 
 
 def explain_vacancy(vacancy: Mapping, scores: Mapping[str, float | None], rubrics: RubricMap,
