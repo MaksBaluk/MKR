@@ -343,7 +343,8 @@ class CoreTurn(Base):
 
 
 class ExperimentRun(Base):
-    """One reproducible experiment run. No foreign keys: records must survive cohort/interview cleanup."""
+    """One reproducible experiment run. No foreign keys: records must survive cohort/interview cleanup.
+    `config` is ExperimentConfig.to_json() plus the run's `answer_source` key (no own column; see experiments/store.py)."""
     __tablename__ = "experiment_runs"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
     experiment_id: Mapped[str] = mapped_column(String(64), index=True)

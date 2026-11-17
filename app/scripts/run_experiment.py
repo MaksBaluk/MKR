@@ -22,6 +22,7 @@ if __package__ in (None, ""):  # direct `python scripts/run_experiment.py`: make
 
 from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy import create_engine  # noqa: E402
+from sqlalchemy.engine import make_url  # noqa: E402
 from sqlalchemy.orm import sessionmaker  # noqa: E402
 from sqlalchemy.pool import StaticPool  # noqa: E402
 
@@ -62,11 +63,34 @@ def _config(mode: InterviewMode, flags: Sequence[str], total_budget: int | None)
     return config_for(mode, total_budget=total_budget)
 
 
+def _sqlite_target(url: str) -> str | None:
+    """Resolved file path of a sqlite URL, ":memory:" for in-memory, None when not sqlite (or unparsable)."""
+    try:
+        u = make_url(url)
+    except Exception:  # noqa: BLE001 - any unparsable URL is simply refused
+        return None
+    if u.get_backend_name() != "sqlite":
+        return None
+    db = u.database or ""
+    return ":memory:" if db in ("", ":memory:") else str(Path(db).expanduser().resolve())
+
+
+def _db_error(url: str) -> str | None:
+    target = _sqlite_target(url)
+    if target is None:
+        return "--db must be a sqlite URL"
+    product = get_settings().database_url
+    if _sqlite_target(product) == target or url == product:  # same file under any spelling, or both in-memory
+        return "--db resolves to the product database configured in settings; use a separate file"
+    return None
+
+
 def main(argv: Sequence[str] | None = None, model_factory: Callable[[], object] | None = None) -> int:
     """model_factory: test hook replacing the configured chat model for this call only (no env, no network)."""
     args = _parser().parse_args(argv)
-    if not args.db.startswith("sqlite") or args.db == get_settings().database_url:
-        print("error: --db must be a separate sqlite URL (never the product database)", file=sys.stderr)
+    problem = _db_error(args.db)
+    if problem:
+        print(f"error: {problem}", file=sys.stderr)
         return 2
     modes = [InterviewMode(m) for m in args.modes]
     configs = [_config(m, args.flags, args.total_budget) for m in modes]
@@ -81,7 +105,7 @@ def main(argv: Sequence[str] | None = None, model_factory: Callable[[], object] 
             return 2
         candidates = [CandidateSpec.from_json(d) for d in json.loads(args.candidates.read_text(encoding="utf-8"))]
         provider = ScriptedProvider.from_file(args.answers)
-        memory = args.db.rstrip("/") in ("sqlite://", "sqlite+pysqlite://") or ":memory:" in args.db
+        memory = _sqlite_target(args.db) == ":memory:"  # one shared connection, else each session sees an empty DB
         engine = create_engine(args.db, connect_args={"check_same_thread": False},
                                **({"poolclass": StaticPool} if memory else {}))
         Base.metadata.create_all(engine)
@@ -96,14 +120,18 @@ def main(argv: Sequence[str] | None = None, model_factory: Callable[[], object] 
         experiment_id = args.experiment_id or time.strftime("exp-%Y%m%dT%H%M%S")
         saved = dict(app.dependency_overrides)
         app.dependency_overrides[get_db] = override
-        records, run_ids = [], []
+        records, run_ids, failures = [], [], []
         try:
             with TestClient(app) as client, Session() as db:
                 for cand in candidates:
                     for cfg in configs:
-                        rec = run_experiment(experiment_id, cfg, cand, provider, client, db)
-                        records.append(rec)
-                        run_ids.append(save_record(db, rec))
+                        try:  # one failing run must not discard the batch
+                            rec = run_experiment(experiment_id, cfg, cand, provider, client, db)
+                            run_ids.append(save_record(db, rec))
+                            records.append(rec)
+                        except Exception as exc:  # noqa: BLE001 - reported below, exit code non-zero
+                            db.rollback()
+                            failures.append(f"{cand.candidate_id} {cfg.mode.value}: {type(exc).__name__}: {exc}")
         finally:
             app.dependency_overrides.clear()
             app.dependency_overrides.update(saved)
@@ -112,7 +140,9 @@ def main(argv: Sequence[str] | None = None, model_factory: Callable[[], object] 
         print(f"experiment {experiment_id}: {len(records)} runs written to {args.out}")
         for rid, rec in zip(run_ids, records):
             print(f"run {rid} {rec.candidate_id} {rec.mode} errors={rec.errors}")
-        return 0
+        for f in failures:
+            print(f"FAILED {f}")
+        return 1 if failures else 0
     finally:
         core.get_chat_model = original
 

@@ -12,7 +12,9 @@ from sqlalchemy.orm import Session
 
 from backend.models import ExperimentRun
 
-_SOURCE_KEY = "answer_source"  # experiment_runs has no own column for it: stored inside the config JSON
+# experiment_runs has no own column for it: stored inside the config JSON and popped by load_record.
+# ExperimentConfig.from_json ignores this key, so a raw row's config can still be parsed directly.
+_SOURCE_KEY = "answer_source"
 
 
 @dataclass

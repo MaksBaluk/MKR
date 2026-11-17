@@ -44,6 +44,8 @@ class ExperimentConfig:
 
     @classmethod
     def from_json(cls, d: dict) -> "ExperimentConfig":
+        """Also reads a raw experiment_runs.config, which carries the run's `answer_source` (ignored here)."""
+        d = {k: v for k, v in d.items() if k != "answer_source"}
         return cls(**{**d, "mode": InterviewMode(d["mode"])})
 
 

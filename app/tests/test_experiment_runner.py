@@ -10,7 +10,7 @@ from sqlalchemy import select
 import backend.api.core as core
 from backend.api.core import _revisions
 from backend.domain.core_flow import self_claim_metrics
-from backend.experiments.config import InterviewMode, config_for
+from backend.experiments.config import ExperimentConfig, InterviewMode, config_for
 from backend.experiments.providers import CandidateSpec, ScriptedProvider
 from backend.experiments.runner import ALGORITHM_VERSION, rerank, run_experiment
 from backend.experiments.store import CSV_FIELDS, export_records, load_record, save_record
@@ -95,6 +95,7 @@ def test_run_static_and_adaptive_record_everything(client, db, monkeypatch, mode
     assert rec.assessments and all({"criterion_id", "score", "sufficient_evidence", "revision"} <= set(a)
                                    for a in rec.assessments)
     assert set(rec.timings) == {"total_s", "llm_wait_s", "calls"} and rec.timings["calls"] > 0
+    assert 0 <= rec.timings["llm_wait_s"] <= rec.timings["total_s"]
     assert rec.errors == {"ungraded_answers": 0, "fallback_questions": 0, "llm_exceptions": 0, "empty_cohort": False}
     assert rec.model_info["client_class"] == "PolicyChat"
     assert rec.rubric_versions and set(rec.rubric_versions.values()) <= {"v1", "auto-1"}
@@ -111,11 +112,21 @@ def test_rerank_reproduces_ranking_without_llm(client, db, monkeypatch):
         raise AssertionError("rerank must not call the model")
 
     monkeypatch.setattr("backend.api.core.get_chat_model", boom)
+    assert any(i["label"] == "RANKED" for i in rec.ranking)
     with db() as s:
         assert rerank(rec, s) == rec.ranking
         assert rerank(load_record(s, save_record(s, rec)), s) == rec.ranking
         with pytest.raises(ValueError):
             rerank(replace(rec, cohort_sha256="0" * 64), s)
+        # recomputed, not echoed: without assessments every vacancy falls back to LOW_INFORMATION
+        blank = rerank(replace(rec, assessments=[]), s)
+        assert blank != rec.ranking and all(i["label"] == "LOW_INFORMATION" for i in blank)
+        # one stored criterion score lowered 0.95 -> 0.0 changes the l_* values of the vacancies needing it
+        target = next(a for a in rec.assessments if a["score"] is not None)
+        changed = [{**a, "score": 0.0} if a is target else a for a in rec.assessments]
+        moved = {i["vacancy_id"]: (i["l_mandatory"], i["l_preferred"]) for i in rerank(replace(rec, assessments=changed), s)}
+        before = {i["vacancy_id"]: (i["l_mandatory"], i["l_preferred"]) for i in rec.ranking}
+        assert any(moved[v] != before[v] for v in before)
 
 
 def test_save_load_roundtrip_and_export(client, db, monkeypatch, tmp_path):
@@ -127,6 +138,9 @@ def test_save_load_roundtrip_and_export(client, db, monkeypatch, tmp_path):
         assert [load_record(s, i) for i in ids] == recs
         rows = s.scalars(select(ExperimentRun).where(ExperimentRun.experiment_id == "exp-io")).all()
         assert len(rows) == 2 and {r.interview_id for r in rows} == {None, recs[1].interview_id}
+        for r in rows:  # answer_source rides in the raw config JSON; from_json still parses it
+            assert "answer_source" in r.config and ExperimentConfig.from_json(r.config).to_json() == {
+                k: v for k, v in r.config.items() if k != "answer_source"}
     export_records(recs, tmp_path / "out")
     data = json.loads((tmp_path / "out" / "runs.json").read_text(encoding="utf-8"))
     assert [d["mode"] for d in data] == ["INITIAL_PROFILE", "STATIC_INTERVIEW"]
@@ -198,6 +212,8 @@ def test_cli_runs_modes_with_injected_model(tmp_path, capsys):
     assert [d["mode"] for d in data] == ["INITIAL_PROFILE", "STATIC_INTERVIEW", "ADAPTIVE_INTERVIEW"]
     assert all(len(d["qa"]) <= 3 for d in data) and data[2]["config"]["adaptive_difficulty"] is False
     assert data[2]["config"]["adaptive_topics"] is True and data[1]["config"]["adaptive_topics"] is False
+    assert data[0]["assessments"] == [] and all(d["assessments"] and d["timings"]["calls"] > 0 for d in data[1:])
+    assert all(d["model_info"]["client_class"] == "PolicyChat" for d in data[1:])  # the injected model graded
     out = capsys.readouterr().out
     assert str(tmp_path / "out") in out and len(re.findall(r"run [0-9a-f-]{36}", out)) == 3
 
@@ -213,3 +229,43 @@ def test_cli_refuses_interview_without_llm_unless_allowed(tmp_path, capsys):
     with pytest.raises(SystemExit):
         main(["--candidates", "x.json", "--answers", "y.json", "--out", str(tmp_path)])  # --db is required
     assert main(["--db", "postgresql://x/y"] + _cli_inputs(tmp_path)[2:]) == 2
+
+
+def _settings_url(monkeypatch, url):
+    from types import SimpleNamespace
+    monkeypatch.setattr("scripts.run_experiment.get_settings", lambda: SimpleNamespace(database_url=url))
+
+
+@pytest.mark.parametrize("spelling", ["sqlite+pysqlite:///./prod.db", "sqlite:///prod.db", "sqlite:///./prod.db",
+                                      "sqlite:///{abs}", "sqlite+pysqlite:///{abs}", "sqlite:///sub/../prod.db"])
+def test_cli_refuses_product_db_under_any_spelling(tmp_path, monkeypatch, spelling):
+    from scripts.run_experiment import main
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "sub").mkdir()
+    _settings_url(monkeypatch, "sqlite+pysqlite:///./prod.db")  # the product default URL shape
+    args = _cli_inputs(tmp_path)[2:] + ["--modes", "INITIAL_PROFILE"]
+    assert main(["--db", spelling.format(abs=tmp_path / "prod.db")] + args) == 2
+    assert not (tmp_path / "prod.db").exists() and not (tmp_path / "out").exists()
+
+
+def test_cli_refuses_in_memory_when_product_is_in_memory(tmp_path, monkeypatch):
+    from scripts.run_experiment import main
+    _settings_url(monkeypatch, "sqlite+pysqlite://")
+    args = _cli_inputs(tmp_path)[2:] + ["--modes", "INITIAL_PROFILE"]
+    assert main(["--db", "sqlite://"] + args) == 2 and main(["--db", "sqlite:///:memory:"] + args) == 2
+    _settings_url(monkeypatch, "sqlite+pysqlite:///./prod.db")
+    assert main(["--db", "sqlite://"] + args) == 0  # a separate in-memory DB is fine when the product is a file
+
+
+def test_cli_failing_run_keeps_batch_and_exits_nonzero(tmp_path, capsys):
+    from scripts.run_experiment import main
+    args = _cli_inputs(tmp_path)
+    bad = {"candidate_id": "bad", "desired_title": "X", "years_experience": 1, "target_level": "junior",
+           "track": "astronomy", "location": "", "work_mode": None, "self_ratings": {}}  # profile PUT -> 422
+    good = json.loads((tmp_path / "candidates.json").read_text(encoding="utf-8"))
+    (tmp_path / "candidates.json").write_text(json.dumps([bad] + good), encoding="utf-8")
+    assert main(args + ["--modes", "INITIAL_PROFILE"]) == 1
+    data = json.loads((tmp_path / "out" / "runs.json").read_text(encoding="utf-8"))
+    assert [d["candidate_id"] for d in data] == ["c1"]
+    out = capsys.readouterr().out
+    assert "FAILED bad INITIAL_PROFILE: RuntimeError" in out and "422" in out

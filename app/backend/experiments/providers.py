@@ -31,7 +31,7 @@ class CandidateSpec:
 
 
 class AnswerProvider(Protocol):
-    source: str  # "SCRIPTED" | "HUMAN" | "SIMULATED"
+    source: str  # "SCRIPTED" | "HUMAN" | "SIMULATED"; records also use "NONE" (no interview) and "UNKNOWN"
 
     def answer(self, candidate: CandidateSpec, turn: Mapping[str, Any]) -> str:
         """turn has action_id, question_text, ordinal_in_topic (1-based)."""

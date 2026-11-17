@@ -78,7 +78,7 @@ def _timed_model(stats: _LlmStats):
         model = original()
         return None if model is None else _TimedModel(model, stats)
 
-    core.get_chat_model = wrapped
+    core.get_chat_model = wrapped  # module-global patch: not safe for concurrent runs in one process
     try:
         yield original
     finally:
@@ -245,7 +245,7 @@ def run_experiment(experiment_id: str, cfg: ExperimentConfig, candidate: Candida
         algorithm_version=ALGORITHM_VERSION, qa=qa, assessments=assessments, ranking=ranking,
         timings={"total_s": round(time.perf_counter() - started, 6), "llm_wait_s": round(stats.wait_s, 6),
                  "calls": stats.calls},
-        errors=errors, answer_source=getattr(provider, "source", "SIMULATED") if interviewing else "NONE",
+        errors=errors, answer_source=getattr(provider, "source", "UNKNOWN") if interviewing else "NONE",
         interview_id=interview_id)
 
 
