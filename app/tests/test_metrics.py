@@ -175,3 +175,14 @@ def test_duration_validation():
             interview_duration({"total_s": bad})
         with pytest.raises(ValueError):
             interview_duration({"total_s": 1, "llm_wait_s": bad})
+
+
+def test_mae_counts_expert_keys_without_evaluator_row():
+    asm = [{"action_id": "x", "criterion_id": "1", "score": 0.5},
+           {"action_id": "x", "criterion_id": "2", "score": None}]
+    exp = {("x", "1"): 0.25, ("x", "2"): 0.5, ("x", "3"): 0.1, ("y", "1"): None}
+    r = evaluator_mae(asm, exp)
+    assert r.n_evaluator_missing == 2 and r.n_compared == 1 and r.n_evaluator_unknown == 1
+    assert r.mae == 0.25
+    assert evaluator_mae([], {("x", "1"): 0.5}).n_evaluator_missing == 1
+    assert evaluator_mae(asm, {}).n_evaluator_missing == 0

@@ -142,6 +142,7 @@ class MaeResult:
     n_evaluator_unknown: int
     n_expert_unknown: int
     n_missing_expert: int  # evaluator criteria with no expert row at all
+    n_evaluator_missing: int = 0  # expert-labelled (action, criterion) keys with no evaluator row at all
 
 
 def evaluator_mae(
@@ -152,11 +153,13 @@ def evaluator_mae(
 
     Evaluator score None -> n_evaluator_unknown (checked first). Otherwise no expert key ->
     n_missing_expert; expert None -> n_expert_unknown. None is never treated as 0.
+    Expert keys matched by no assessment row -> n_evaluator_missing.
     mae is None when no pair is compared. Scores must be finite floats in [0,1]
     (bool/NaN/out-of-range, evaluator or expert) -> ValueError.
     """
     errs: list[float] = []
     ev_unk = ex_unk = missing = 0
+    seen = {(a["action_id"], a["criterion_id"]) for a in assessments}
     for a in assessments:
         score = a.get("score")
         if score is not None:
@@ -174,4 +177,4 @@ def evaluator_mae(
         else:
             errs.append(abs(score - expert[key]))
     mae = sum(errs) / len(errs) if errs else None
-    return MaeResult(mae, len(errs), ev_unk, ex_unk, missing)
+    return MaeResult(mae, len(errs), ev_unk, ex_unk, missing, sum(1 for k in expert if k not in seen))

@@ -163,9 +163,10 @@ def test_ranking_deterministic_same_snapshot(abc, db, monkeypatch):
 
 
 BACKEND = Path(backend.__file__).parent
-SCANNED = [*sorted((BACKEND / "domain").rglob("*.py")), *sorted((BACKEND / "api").rglob("*.py")),
-           BACKEND / "experiments" / "planning.py", BACKEND / "experiments" / "runner.py"]
-FORBIDDEN = ("expert", "labels", "expert_labels", "metrics", "report")
+EVALUATION = {"expert_labels", "metrics", "report"}  # evaluation-only modules (plus scripts/evaluate_experiments.py)
+SCANNED = sorted(p for p in BACKEND.rglob("*.py")
+                 if not (p.parent.name == "experiments" and p.stem in EVALUATION))
+FORBIDDEN = ("expert", "labels")
 
 
 def forbidden_imports(source: str) -> list[str]:
@@ -182,17 +183,53 @@ def forbidden_imports(source: str) -> list[str]:
     return bad
 
 
+def evaluation_refs(source: str) -> list[str]:
+    """Every reference to backend.experiments.{expert_labels,metrics,report}: absolute/relative imports,
+    `from backend.experiments import metrics`, `import backend.experiments as ex` + `ex.metrics`, and any
+    dotted name in the text (strings, importlib.import_module)."""
+    bad = [f"text:experiments.{m}" for m in sorted(EVALUATION) if f"experiments.{m}" in source]
+    pkg_aliases = {"backend.experiments"}
+    tree = ast.parse(source)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for a in node.names:
+                if a.name == "backend.experiments":
+                    pkg_aliases.add(a.asname or a.name)
+                elif a.name.startswith("backend.experiments.") and a.asname and a.name.split(".")[2] in EVALUATION:
+                    bad.append(f"import:{a.name}")
+        elif isinstance(node, ast.ImportFrom):
+            mod = node.module or ""
+            if node.level and (mod.split(".")[-1] in EVALUATION or (not mod and any(a.name in EVALUATION
+                                                                                    for a in node.names))):
+                bad.append(f"relative:{'.' * node.level}{mod}")
+            if mod in ("backend.experiments", "experiments") and any(a.name in EVALUATION for a in node.names):
+                bad.append(f"from:{mod}")
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in EVALUATION and ast.unparse(node.value) in pkg_aliases:
+            bad.append(f"attr:{ast.unparse(node)}")
+    return bad
+
+
 def test_no_expert_labels_import_in_engine():
-    assert len(SCANNED) >= 15 and all(p.is_file() for p in SCANNED)
-    assert {p.name for p in SCANNED} >= {"planner.py", "core.py", "planning.py", "runner.py"}
-    # the helper is not vacuous: it flags each import form
+    assert len(SCANNED) >= 30 and all(p.is_file() for p in SCANNED)
+    names = {str(p.relative_to(BACKEND)) for p in SCANNED}
+    assert {"domain/planner.py", "api/core.py", "experiments/planning.py", "experiments/runner.py",
+            "experiments/store.py", "main.py"} <= names
+    assert not names & {f"experiments/{m}.py" for m in EVALUATION}
+    # the helpers are not vacuous: they flag each import form
     assert forbidden_imports("import backend.expert_labels") == ["backend.expert_labels"]
     assert forbidden_imports("from backend.labels import x")
     assert forbidden_imports("from backend import expert_scores")
     assert forbidden_imports("import os\nfrom backend.domain import ranking") == []
-    for name in ("expert_labels", "metrics", "report"):  # new Phase 4 modules are flagged in each import form
-        assert forbidden_imports(f"import backend.experiments.{name}")
-        assert forbidden_imports(f"from backend.experiments.{name} import x")
-        assert forbidden_imports(f"from backend.experiments import {name}")
-    offenders = {str(p.relative_to(BACKEND)): forbidden_imports(p.read_text(encoding="utf-8")) for p in SCANNED}
+    for name in sorted(EVALUATION):
+        for src in (f"import backend.experiments.{name}", f"import backend.experiments.{name} as m",
+                    f"from backend.experiments.{name} import x", f"from backend.experiments import {name}",
+                    f"import backend.experiments as ex\nex.{name}.f()", f"import backend.experiments\nbackend.experiments.{name}",
+                    f"from . import {name}", f"from .{name} import x", f"from ..experiments.{name} import x",
+                    f"importlib.import_module('backend.experiments.{name}')"):
+            assert evaluation_refs(src), src
+    assert evaluation_refs("import backend.experiments.config\nfrom backend.domain.core_flow import "
+                           "self_claim_metrics\nx.report = 1") == []
+    offenders = {str(p.relative_to(BACKEND)): forbidden_imports(p.read_text(encoding="utf-8"))
+                 + evaluation_refs(p.read_text(encoding="utf-8")) for p in SCANNED}
     assert {k: v for k, v in offenders.items() if v} == {}

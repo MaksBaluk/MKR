@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from backend.experiments.expert_labels import (
-    DataStatus, ExpertRelevanceLabel, LabelError, ReviewStatus, SyntheticDataError, adjudicate,
+    ExpertCriterionLabel, ExpertRelevanceLabel, LabelError, ReviewStatus, SyntheticDataError, adjudicate,
     agreement_report, load_criterion_labels, load_relevance_labels, relevance_map,
     require_expert_data, split_by_annotator, validate_label_set,
 )
@@ -160,3 +160,84 @@ def test_templates_header_only():
         assert p.read_text().strip().split(",") == header
         assert loader(p) == []
     assert (TEMPLATES / "README.md").exists()
+
+
+# --- final-review wave: adjudication/agreement input validation, edge values ------------------------------------
+
+def test_adjudicate_cannot_turn_synthetic_into_expert():
+    a, b = sets([3, 2], [3, 1])
+    final = [lab("c", "v0", 3, "j", "EXPERT"), lab("c", "v1", 2, "j", "EXPERT")]
+    with pytest.raises(LabelError, match="data_status differs"):
+        adjudicate(a, b, final, "j")
+
+
+def test_adjudicate_rejects_differing_label_version():
+    a, b = sets([3, 2], [3, 1])
+    final = [ExpertRelevanceLabel(**rel_row(candidate_id="c", vacancy_id=f"v{i}", grade=2, annotator_id="j",
+                                            label_version="t2")) for i in range(2)]
+    with pytest.raises(LabelError, match="label_version differs"):
+        adjudicate(a, b, final, "j")
+
+
+def test_adjudicator_must_differ_from_annotators():
+    a, b = sets([3, 2], [3, 1])
+    final = [lab("c", "v0", 3, "a"), lab("c", "v1", 2, "a")]
+    with pytest.raises(LabelError, match="adjudicator must differ"):
+        adjudicate(a, b, final, "a")
+
+
+def _crit(ann, criterion="k", score=0.5, rubric="r1", action="x"):
+    return ExpertCriterionLabel(**crit_row(annotator_id=ann, criterion_id=criterion, expert_score=score,
+                                           rubric_version=rubric, action_id=action))
+
+
+def test_adjudicate_criterion_labels():
+    a = [_crit("a", "k1", 0.2), _crit("a", "k2", None)]
+    b = [_crit("b", "k1", 0.6), _crit("b", "k2", 0.4)]
+    out = adjudicate(a, b, [_crit("j", "k1", 0.4), _crit("j", "k2", None)], "j")
+    assert [x.expert_score for x in out] == [0.4, None]
+    assert all(x.review_status is ReviewStatus.ADJUDICATED for x in out)
+    with pytest.raises(LabelError, match="different keys"):
+        adjudicate(a, [_crit("b", "k1", 0.6), _crit("b", "k3", 0.4)], [_crit("j", "k1", 0.4)], "j")
+    with pytest.raises(LabelError, match="rubric_version differs"):
+        adjudicate(a, b, [_crit("j", "k1", 0.4, rubric="r2"), _crit("j", "k2", None, rubric="r2")], "j")
+
+
+def test_agreement_validates_inputs():
+    a, b = sets([3, 2], [3, 1])
+    with pytest.raises(LabelError, match="duplicate"):
+        agreement_report(a, b + [lab("c", "v1", 3, "b")])
+    with pytest.raises(LabelError, match="different keys"):
+        agreement_report(a, b[:1])
+    with pytest.raises(LabelError, match="distinct"):
+        agreement_report(a, [lab("c", f"v{i}", 1, "a") for i in range(2)])
+    with pytest.raises(LabelError, match="data_status"):
+        agreement_report(a, [lab("c", f"v{i}", 1, "b", "EXPERT") for i in range(2)])
+
+
+@pytest.mark.parametrize("bad", [True, False, float("nan"), float("inf"), 2.5])
+def test_bad_grade_values_json(tmp_path, bad):
+    import json
+    p = tmp_path / "r.json"
+    p.write_text(json.dumps([rel_row(grade=3), rel_row(vacancy_id="v2", grade=bad)]))
+    with pytest.raises(LabelError) as e:
+        load_relevance_labels(p)
+    assert len(e.value.errors) == 1 and e.value.errors[0].startswith("row 3:")
+
+
+@pytest.mark.parametrize("bad", [True, float("nan"), float("inf"), float("-inf")])
+def test_bad_score_values_json(tmp_path, bad):
+    import json
+    p = tmp_path / "c.json"
+    p.write_text(json.dumps([crit_row(expert_score=bad)]))
+    with pytest.raises(LabelError) as e:
+        load_criterion_labels(p)
+    assert e.value.errors[0].startswith("row 2:")
+
+
+def test_missing_csv_column_row_numbered(tmp_path):
+    header = [h for h in REL if h != "rationale"]
+    rows = [{k: v for k, v in rel_row().items() if k != "rationale"}]
+    with pytest.raises(LabelError) as e:
+        load_relevance_labels(write(tmp_path, header, rows))
+    assert e.value.errors[0].startswith("row 2:") and "rationale" in e.value.errors[0]

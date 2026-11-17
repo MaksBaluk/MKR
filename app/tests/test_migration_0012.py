@@ -1,3 +1,5 @@
+import json
+
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
@@ -41,6 +43,9 @@ def test_0012_upgrade_downgrade_keeps_rows(tmp_path, monkeypatch):
         assert not (NEW & _cols(eng))
         with Session(eng) as s:
             assert s.execute(sa.text("SELECT experiment_id FROM experiment_runs")).scalars().all() == ["e1"]
+            # provenance survives the downgrade in the pre-0012 location
+            config = s.execute(sa.text("SELECT config FROM experiment_runs")).scalar_one()
+            assert json.loads(config) == {"a": 1, "answer_source": "SCRIPTED"}
         command.upgrade(cfg, "head")
         assert NEW <= _cols(eng)
         command.upgrade(cfg, "head")

@@ -23,12 +23,12 @@ V = [f"v{i:02d}" for i in range(12)]
 
 
 def rec(cid, mode=ADAPTIVE, ranking=V, sufficient=(), relevant=("a", "b", "c", "d"), errors=None, timings=None,
-        assessments=(), rubric_versions=None, source="SCRIPTED", **flags):
+        assessments=(), rubric_versions=None, source="SCRIPTED", provider="injected", **flags):
     cfg = config_for(mode, **flags)
     return ExperimentRecord(
         experiment_id="exp-t", candidate_id=cid, mode=mode.value, config=cfg.to_json(), cohort_id="coh",
         cohort_sha256="sha", profile_snapshot={}, rubric_versions=rubric_versions or {}, prompt_version="p",
-        model_info={}, algorithm_version="alg",
+        model_info={"provider": None if mode is INITIAL else provider}, algorithm_version="alg",
         qa=[{"action_id": "A", "sufficient_criteria_after": list(s)} for s in sufficient],
         assessments=list(assessments),
         ranking=[{"vacancy_id": v, "unknown_count": 1, "groups_total": 4} for v in ranking],
@@ -141,7 +141,9 @@ def test_coverage_errors_and_duration_hand_values():
     m = build_report(ReportInputs(records))["modes"]["ADAPTIVE_INTERVIEW"]
     assert m["criterion_coverage_mean"] == pytest.approx((1.0 + 0.25) / 2)
     assert m["questions_to_coverage_mean"] == 3 and m["n_reached"] == 1
-    assert m["n_excluded_no_relevant_criteria"] == 1 and m["llm_errors"] == 10
+    # llm_errors = llm_exceptions (3) + evaluator_rejections (4); ungraded (1) and fallback (2) reported apart
+    assert m["n_excluded_no_relevant_criteria"] == 1 and m["llm_errors"] == 7
+    assert (m["ungraded_answers"], m["fallback_questions"]) == (1, 2)
     assert m["questions_mean"] == pytest.approx(5 / 3)
     assert m["duration"]["excluding_llm_s_mean"] == pytest.approx((6.0 + 0.0 + 6.0) / 3)
     charts = chart_data(build_report(ReportInputs(records)))
@@ -380,24 +382,11 @@ def test_cli_end_to_end_from_runner(client, db, monkeypatch, tmp_path, capsys):
 
 
 def test_engine_never_imports_report_or_metrics():
-    """Ground-truth evaluation code stays out of recommendation/ranking code (extends the expert-label AST scan)."""
-    import ast
-
-    from tests.test_experiment_comparability import SCANNED, BACKEND
-    banned = {"backend.experiments.report", "backend.experiments.metrics", "backend.experiments.expert_labels"}
-
-    def imports(src):
-        out = []
-        for node in ast.walk(ast.parse(src)):
-            if isinstance(node, ast.Import):
-                out += [a.name for a in node.names]
-            elif isinstance(node, ast.ImportFrom):
-                out += [node.module or "", *(f"{node.module or ''}.{a.name}" for a in node.names)]
-        return out
-
-    assert imports("from backend.experiments import report") == ["backend.experiments", "backend.experiments.report"]
-    offenders = {str(p.relative_to(BACKEND)): sorted(set(imports(p.read_text(encoding="utf-8"))) & banned)
-                 for p in SCANNED}
+    """Ground-truth evaluation code stays out of every other backend module (shared scan, all import forms)."""
+    from tests.test_experiment_comparability import BACKEND, SCANNED, evaluation_refs
+    assert (BACKEND / "experiments" / "report.py") not in SCANNED and len(SCANNED) >= 30
+    assert evaluation_refs("from backend.experiments import report")
+    offenders = {str(p): evaluation_refs(p.read_text(encoding="utf-8")) for p in SCANNED}
     assert {k: v for k, v in offenders.items() if v} == {}
 
 
@@ -493,3 +482,57 @@ def test_cli_out_is_existing_file(tmp_path, capsys):
     (tmp_path / "taken").write_text("x", encoding="utf-8")
     assert main(["--runs", str(tmp_path / "runs" / "runs.json"), "--out", str(tmp_path / "taken")]) == 2
     assert capsys.readouterr().err.startswith("error: cannot write report")
+
+
+# --- final-review wave: disjoint pairing, error counters, provenance, ungraded runs, evaluator-missing ------------
+
+def test_disjoint_candidates_warn_and_paired_none():
+    labels = rel("c1", grades({"v00": 3})) + rel("c2", grades({"v00": 3}))
+    r = build_report(ReportInputs([rec("c1", ADAPTIVE), rec("c2", STATIC)], labels))
+    for m in r["modes"].values():
+        assert m["n_included"] == 1 and m["n_paired"] == 0
+        assert m["precision_at_5_paired"] is None and m["ndcg_at_10_paired"] is None
+    assert "compare the paired values" in r["quality_statement"]
+
+
+def test_error_counters_distinct_in_json_and_csv(tmp_path):
+    errs = {"ungraded_answers": 2, "fallback_questions": 3, "llm_exceptions": 5, "evaluator_rejections": 7,
+            "empty_cohort": False, "criteria_outside_relevant": ["q"]}
+    r = build_report(ReportInputs([rec("c1", errors=errs), rec("c2", errors=errs)]))
+    m = r["modes"]["ADAPTIVE_INTERVIEW"]
+    assert (m["llm_errors"], m["ungraded_answers"], m["fallback_questions"]) == (24, 4, 6)
+    write_report(r, chart_data(r), tmp_path)
+    with open(tmp_path / "report.csv", encoding="utf-8", newline="") as f:
+        row = next(csv.DictReader(f))
+    assert (row["llm_errors"], row["ungraded_answers"], row["fallback_questions"], row["n_ungraded_runs"]) == (
+        "24", "4", "6", "0")
+
+
+def test_runs_without_model_flagged_and_not_llm_errors():
+    errs = {"ungraded_answers": 3, "fallback_questions": 3, "llm_exceptions": 0, "evaluator_rejections": 0,
+            "empty_cohort": False, "criteria_outside_relevant": []}
+    r = build_report(ReportInputs([rec("c1", errors=errs, provider=None, sufficient=[[], [], []]),
+                                   rec("c1", INITIAL)]))
+    m = r["modes"]["ADAPTIVE_INTERVIEW"]
+    assert m["n_ungraded_runs"] == 1 and m["llm_errors"] == 0 and m["ungraded_answers"] == 3
+    assert r["modes"]["INITIAL_PROFILE"]["n_ungraded_runs"] == 0  # profile-only runs never interview
+    assert "reflects no evaluation, not missed criteria" in r["quality_statement"]
+    clean = build_report(ReportInputs([rec("c1")]))
+    assert "no evaluation" not in clean["quality_statement"]
+
+
+def test_unknown_answer_source_statement():
+    r = build_report(ReportInputs([rec("c1", source="UNKNOWN")]))
+    assert "answer provenance unknown; not evidence of real-candidate performance" in r["quality_statement"]
+    assert "provenance unknown" not in build_report(ReportInputs([rec("c1")]))["quality_statement"]
+
+
+def test_report_counts_expert_keys_without_evaluator_row(tmp_path):
+    assess = [{"action_id": "A", "criterion_id": "A.1", "score": 0.8}]
+    labels = [crit("c1", "A", "A.1", 0.6), crit("c1", "A", "A.2", 0.5), crit("c1", "B", "B.1", None)]
+    r = build_report(ReportInputs([rec("c1", assessments=assess, rubric_versions={"A": "v1"})], criteria=labels))
+    mae = r["modes"]["ADAPTIVE_INTERVIEW"]["evaluator_mae"]
+    assert mae["n_evaluator_missing"] == 2 and mae["n_compared"] == 1
+    write_report(r, chart_data(r), tmp_path)
+    with open(tmp_path / "report.csv", encoding="utf-8", newline="") as f:
+        assert next(csv.DictReader(f))["mae_n_evaluator_missing"] == "2"

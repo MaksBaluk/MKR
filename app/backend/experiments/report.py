@@ -34,9 +34,16 @@ mode, data_status, n_candidates, n_included, n_excluded_lt_10_labeled, n_exclude
 n_excluded_labels_not_adjudicated, n_ndcg_undefined, n_paired, precision_at_5_paired, ndcg_at_10_paired,
 n_excluded_no_relevant_criteria, criterion_coverage_mean,
 unresolved_requirements_rate_mean, questions_mean, questions_to_coverage_mean, n_reached, total_s_mean,
-llm_wait_s_mean, excluding_llm_s_mean, llm_errors, mae, mae_n_compared, mae_n_evaluator_unknown,
-mae_n_expert_unknown, mae_n_missing_expert, mae_n_rubric_version_mismatch, answer_sources (";"-joined),
-config (JSON). Empty cell = None (not computed / undefined), never 0.
+llm_wait_s_mean, excluding_llm_s_mean, llm_errors, ungraded_answers, fallback_questions, n_ungraded_runs, mae,
+mae_n_compared, mae_n_evaluator_unknown, mae_n_expert_unknown, mae_n_missing_expert, mae_n_evaluator_missing,
+mae_n_rubric_version_mismatch, answer_sources (";"-joined), config (JSON). Empty cell = None (not computed /
+undefined), never 0.
+
+Error counters per mode (sums over runs): llm_errors = llm_exceptions + evaluator_rejections (provider exceptions and
+evaluator outputs rejected by validation). ungraded_answers and fallback_questions are reported apart: one provider
+exception also produces an ungraded answer, and a run without a model (n_ungraded_runs: interview runs whose
+model_info.provider is None) has every answer ungraded and every question from the bank without any LLM error.
+Runs without a model say nothing about assessment quality.
 """
 
 from __future__ import annotations
@@ -59,17 +66,20 @@ if TYPE_CHECKING:
     from backend.experiments.store import ExperimentRecord
 
 NO_EXPERT_LABELS = "NO_EXPERT_LABELS"
-LLM_ERROR_KEYS = ("ungraded_answers", "fallback_questions", "llm_exceptions", "evaluator_rejections")
+LLM_ERROR_KEYS = ("llm_exceptions", "evaluator_rejections")
+SEPARATE_COUNTERS = ("ungraded_answers", "fallback_questions")
 _ABLATIONS = (("adaptive_topics", "topics"), ("adaptive_followup", "followup"), ("adaptive_difficulty", "difficulty"))
 _BASE_ORDER = ("INITIAL_PROFILE", "STATIC_INTERVIEW", "ADAPTIVE_INTERVIEW")
-_MAE_FIELDS = ("mae", "n_compared", "n_evaluator_unknown", "n_expert_unknown", "n_missing_expert")
+_MAE_FIELDS = ("mae", "n_compared", "n_evaluator_unknown", "n_expert_unknown", "n_missing_expert",
+               "n_evaluator_missing")
 REPORT_CSV_FIELDS = [
     "mode", "data_status", "n_candidates", "n_included", "n_excluded_lt_10_labeled", "n_excluded_unlabeled_in_top",
     "n_excluded_labels_not_adjudicated", "n_ndcg_undefined", "n_paired", "precision_at_5_paired", "ndcg_at_10_paired",
     "n_excluded_no_relevant_criteria", "criterion_coverage_mean",
     "unresolved_requirements_rate_mean", "questions_mean", "questions_to_coverage_mean", "n_reached",
-    "total_s_mean", "llm_wait_s_mean", "excluding_llm_s_mean", "llm_errors", "mae", "mae_n_compared",
-    "mae_n_evaluator_unknown", "mae_n_expert_unknown", "mae_n_missing_expert", "mae_n_rubric_version_mismatch",
+    "total_s_mean", "llm_wait_s_mean", "excluding_llm_s_mean", "llm_errors", "ungraded_answers",
+    "fallback_questions", "n_ungraded_runs", "mae", "mae_n_compared", "mae_n_evaluator_unknown",
+    "mae_n_expert_unknown", "mae_n_missing_expert", "mae_n_evaluator_missing", "mae_n_rubric_version_mismatch",
     "answer_sources", "config"]
 CHART_KEYS = ("ranking_by_mode", "coverage_vs_questions", "questions_static_vs_adaptive",
               "evaluator_quality_by_criterion")
@@ -167,6 +177,8 @@ def _candidate(rec: ExperimentRecord, labels: dict | None, inp: ReportInputs, ig
             "questions_to_coverage": None if curve is None else questions_to_coverage(curve, inp.coverage_threshold),
             "n_questions": len(rec.qa), "unresolved_requirements_rate": unresolved_requirements_rate(rec.ranking),
             **dur, "llm_errors": sum(int(rec.errors.get(k) or 0) for k in LLM_ERROR_KEYS),
+            **{k: int(rec.errors.get(k) or 0) for k in SEPARATE_COUNTERS},
+            "ungraded_run": rec.mode != "INITIAL_PROFILE" and (rec.model_info or {}).get("provider") is None,
             "answer_source": rec.answer_source}
 
 
@@ -192,6 +204,8 @@ def _mode(recs: list[ExperimentRecord], rel: list | None, crit: list | None, inp
         "questions_to_coverage_mean": _mean(reached), "n_reached": len(reached),
         "duration": {f"{k}_mean": _mean([c[k] for c in rows]) for k in ("total_s", "llm_wait_s", "excluding_llm_s")},
         "llm_errors": sum(c["llm_errors"] for c in rows),
+        **{k: sum(c[k] for c in rows) for k in SEPARATE_COUNTERS},
+        "n_ungraded_runs": sum(c["ungraded_run"] for c in rows),
         "answer_sources": sorted({r.answer_source for r in recs}),
         "config": recs[0].config, "evaluator_mae": None, "evaluator_mae_by_criterion": None, "candidates": rows}
     if crit is not None:
@@ -234,6 +248,12 @@ def _statement(status: str, adjudicated: dict, ignored: dict, sources: list[str]
         parts.append("Scripted or simulated answers are pipeline checks, not evidence of real-candidate performance.")
     if "HUMAN" in sources:
         parts.append("LLM evaluator grades assess the supplied answers only, not verified employment history.")
+    if "UNKNOWN" in sources:
+        parts.append("Some runs have answer provenance unknown; not evidence of real-candidate performance.")
+    ungraded = sum(m["n_ungraded_runs"] for m in modes.values())
+    if ungraded:
+        parts.append(f"{ungraded} interview run(s) had no model: their answers are ungraded, so their coverage "
+                     "reflects no evaluation, not missed criteria, and they say nothing about assessment quality.")
     sums = Counter()
     for m in modes.values():
         for k in ("n_excluded_lt_10_labeled", "n_excluded_unlabeled_in_top", "n_excluded_labels_not_adjudicated",
@@ -247,8 +267,7 @@ def _statement(status: str, adjudicated: dict, ignored: dict, sources: list[str]
     if sums["n_excluded_labels_not_adjudicated"]:
         parts.append(f"Ranking metrics exclude {sums['n_excluded_labels_not_adjudicated']} candidate run(s) whose "
                      "relevance labels are all non-adjudicated.")
-    included = {m["n_included"] for m in modes.values()}
-    if adjudicated["relevance"] is not None and len(included) > 1:
+    if adjudicated["relevance"] is not None and any(m["n_paired"] != m["n_included"] for m in modes.values()):
         parts.append("Per-mode means cover different candidate subsets; compare the paired values "
                      f"({next(iter(modes.values()))['n_paired']} candidate(s) included in every mode).")
     mismatch = sum((m["evaluator_mae"] or {}).get("n_rubric_version_mismatch", 0) for m in modes.values())
@@ -388,7 +407,8 @@ def _csv_row(key: str, m: dict, status: str) -> dict:
     mae = m["evaluator_mae"] or {}
     return {"mode": key, "data_status": status,
             **{f: m[f] for f in REPORT_CSV_FIELDS[2:REPORT_CSV_FIELDS.index("total_s_mean")]},
-            **m["duration"], "llm_errors": m["llm_errors"], "mae": mae.get("mae"),
+            **m["duration"], **{k: m[k] for k in ("llm_errors", *SEPARATE_COUNTERS, "n_ungraded_runs")},
+            "mae": mae.get("mae"),
             **{f"mae_{f}": mae.get(f) for f in (*_MAE_FIELDS[1:], "n_rubric_version_mismatch")},
             "answer_sources": ";".join(m["answer_sources"]), "config": json.dumps(m["config"], sort_keys=True)}
 

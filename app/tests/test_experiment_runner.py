@@ -444,16 +444,24 @@ def test_rerank_refuses_changed_rubric_versions(client, db, monkeypatch):
 
 
 def test_unseeded_action_criterion_is_relevant_and_sufficient(client, db, monkeypatch):
-    """criteria_for grades an action without a seeded rubric as the single criterion == action_id."""
+    """criteria_for grades an action without a seeded rubric as the single criterion == action_id.
+    The seeded catalog covers every action, so the first interviewed action is forced unseeded."""
+    import backend.experiments.runner as runner
     _use(monkeypatch, PolicyChat(strong, sufficient=True))
+    cfg = config_for(ADAPTIVE, total_budget=6)
     with db() as s:
-        rec = run_experiment("exp-unseeded", config_for(ADAPTIVE, total_budget=6), cand(), SCRIPT, client, s)
-        seeded = {a for a in {q["action_id"] for q in rec.qa} if core._seeded_rubric(s, a) is not None}
-    unseeded = {q["action_id"] for q in rec.qa} - seeded
-    for a in unseeded:
-        assert a in rec.relevant_criteria
-    graded = {c for q in rec.qa for c in q["sufficient_criteria_after"]}
-    assert unseeded <= graded or not unseeded
+        first = run_experiment("exp-seeded", cfg, cand(), SCRIPT, client, s).qa[0]["action_id"]
+    real_rubric, real_criteria = core._seeded_rubric, core._seeded_criteria
+    monkeypatch.setattr(core, "_seeded_rubric", lambda d, a: None if a == first else real_rubric(d, a))
+    monkeypatch.setattr(core, "_seeded_criteria", lambda d, a: [] if a == first else real_criteria(d, a))
+    monkeypatch.setattr(runner, "_seeded_rubric", core._seeded_rubric)
+    with db() as s:
+        rec = run_experiment("exp-unseeded", cfg, cand(), SCRIPT, client, s)
+        unseeded = {q["action_id"] for q in rec.qa if core._seeded_rubric(s, q["action_id"]) is None}
+    assert unseeded == {first}
+    assert first in rec.relevant_criteria
+    assert any(first in q["sufficient_criteria_after"] for q in rec.qa)
+    assert first not in rec.errors["criteria_outside_relevant"]
     assert all(set(q["sufficient_criteria_after"]) <= set(rec.relevant_criteria) for q in rec.qa)
     assert rec.errors["criteria_outside_relevant"] == []
 

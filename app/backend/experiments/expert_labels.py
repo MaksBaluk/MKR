@@ -190,8 +190,38 @@ def _keyset(labels: Sequence[_Label]) -> set[tuple]:
     return {lb.key() for lb in labels}
 
 
+def _consistency(sets: dict[str, Sequence]) -> list[str]:
+    """One data_status and one label_version across all sets; criterion labels: one rubric_version per action."""
+    labels = [lb for s in sets.values() for lb in s]
+    errors = []
+    for name, s in sets.items():
+        try:
+            validate_label_set(s)
+        except LabelError as exc:
+            errors += [f"{name}: {e}" for e in exc.errors]
+    statuses = sorted({lb.data_status.value for lb in labels})
+    if len(statuses) > 1:
+        errors.append(f"data_status differs across annotator and final sets: {statuses}")
+    versions = sorted({lb.label_version for lb in labels})
+    if len(versions) > 1:
+        errors.append(f"label_version differs across annotator and final sets: {versions}")
+    rubric: dict[str, set[str]] = defaultdict(set)
+    for lb in labels:
+        if isinstance(lb, ExpertCriterionLabel):
+            rubric[lb.action_id].add(lb.rubric_version)
+    mixed = sorted(a for a, v in rubric.items() if len(v) > 1)
+    if mixed:
+        errors.append(f"rubric_version differs across sets for action(s) {mixed}")
+    if len({type(lb) for lb in labels}) > 1:
+        errors.append("relevance and criterion labels cannot be mixed")
+    return errors
+
+
 def adjudicate(a: Sequence, b: Sequence, final: Sequence, adjudicator_id: str) -> list:
-    errors: list[str] = []
+    """Final labels from adjudicator_id (distinct from both annotators) for exactly the shared keys.
+    The three sets must agree on data_status and label_version (criterion labels: rubric_version per action),
+    so adjudication can never turn SYNTHETIC_TEST_DATA into EXPERT."""
+    errors: list[str] = _consistency({"annotator A": a, "annotator B": b, "final": final})
     ids_a, ids_b = {lb.annotator_id for lb in a}, {lb.annotator_id for lb in b}
     if len(ids_a) != 1 or len(ids_b) != 1:
         errors.append("each annotator set must come from exactly one annotator")
@@ -217,6 +247,21 @@ def adjudicate(a: Sequence, b: Sequence, final: Sequence, adjudicator_id: str) -
 
 
 def agreement_report(a: Sequence[ExpertRelevanceLabel], b: Sequence[ExpertRelevanceLabel]) -> dict:
+    """Agreement of two annotators over the same keys. Each set: one annotator, distinct from the other, unique keys,
+    identical key sets, one data_status and label_version; otherwise LabelError (never a silent overwrite)."""
+    errors = _consistency({"annotator A": a, "annotator B": b})
+    ids_a, ids_b = {lb.annotator_id for lb in a}, {lb.annotator_id for lb in b}
+    if (a or b) and (len(ids_a) != 1 or len(ids_b) != 1):
+        errors.append("each annotator set must come from exactly one annotator")
+    elif a and ids_a == ids_b:
+        errors.append(f"annotators must be distinct, both are {next(iter(ids_a))!r}")
+    for name, s in (("annotator A", a), ("annotator B", b)):
+        if len(_keyset(s)) != len(s):
+            errors.append(f"{name}: duplicate keys")
+    if _keyset(a) != _keyset(b):
+        errors.append(f"annotators labelled different keys: {len(_keyset(a) ^ _keyset(b))} differ")
+    if errors:
+        raise LabelError(errors)
     gb = {lb.key(): lb.grade for lb in b}
     pairs = [(lb.grade, gb[lb.key()]) for lb in a if lb.key() in gb]
     n = len(pairs)
