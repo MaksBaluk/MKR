@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -20,13 +20,19 @@ class CriterionResult(BaseModel):
     evidence: list[EvidenceRef]
 
 
+class FollowupGoal(BaseModel):
+    criterion_ids: list[str] = Field(min_length=1)
+    reason: str = Field(min_length=1)
+    expected_evidence: str = ""
+
+
 class EvaluatorOutput(BaseModel):
     action_id: str
     rubric_version: str
     criteria: list[CriterionResult]
     sufficient_evidence: bool = False
     needs_followup: bool = False
-    followup_goal: str | None = None
+    followup_goal: FollowupGoal | None = None
     limitations: str = ""
     off_topic: bool = False
 
@@ -43,7 +49,13 @@ class EvaluatorOutput(BaseModel):
     @field_validator("followup_goal", mode="before")
     @classmethod
     def _coerce_goal(cls, v):
-        return "; ".join(str(x) for x in v) if isinstance(v, list) else v
+        """Legacy free-text/list goals carry no concrete gap; malformed dicts must not discard the assessment."""
+        if not isinstance(v, dict):
+            return None
+        try:
+            return FollowupGoal.model_validate(v)
+        except ValueError:
+            return None
 
 
 def validate_against_context(
@@ -65,3 +77,13 @@ def validate_against_context(
             elif ev.exact_excerpt not in text:
                 errors.append(f"excerpt not in turn {ev.turn_id}")
     return errors
+
+
+def sanitize_goal(
+    goal: FollowupGoal | None, allowed: set[str], open_ids: Sequence[str]
+) -> FollowupGoal | None:
+    """Keep only criteria that are allowed and still open; no remainder means no goal."""
+    if goal is None:
+        return None
+    keep = [c for c in goal.criterion_ids if c in allowed and c in set(open_ids)]
+    return goal.model_copy(update={"criterion_ids": keep}) if keep else None

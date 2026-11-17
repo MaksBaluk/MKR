@@ -20,7 +20,7 @@ from pydantic import ValidationError
 
 from backend.agents.prompts import (EVALUATOR_SYSTEM, INTERVIEWER_SYSTEM, format_evaluator_input,
                                     format_interviewer_input)
-from backend.domain.assessment import EvaluatorOutput, validate_against_context
+from backend.domain.assessment import EvaluatorOutput, sanitize_goal, validate_against_context
 from backend.providers.questions import next_question as bank_question
 
 log = logging.getLogger("competencematch.llm")
@@ -85,6 +85,7 @@ class AnswerState(TypedDict, total=False):
     allowed_criterion_ids: list[str]
     bands: dict[str, str] | None  # per-criterion anchored bands of a seeded rubric
     turns: dict[str, str]
+    open_criterion_ids: list[str] | None  # None/absent: every allowed criterion is open
     attempt: int
     output: EvaluatorOutput | None
     status: str
@@ -214,7 +215,7 @@ def _build_answer(model):
             return {"status": "UNGRADED", "reason": "NO_MODEL", "retryable": False, "output": None}
         user = format_evaluator_input(action_id=s["action_id"], rubric_version=s["rubric_version"],
                                       allowed_criterion_ids=s["allowed_criterion_ids"], bands=s.get("bands"),
-                                      turns=s["turns"])
+                                      turns=s["turns"], open_criterion_ids=s.get("open_criterion_ids"))
         try:
             raw = _text(_invoke(model, [SystemMessage(EVALUATOR_SYSTEM), HumanMessage(user)]))
         except Exception as exc:  # noqa: BLE001 - timeouts/connection errors are not retried
@@ -237,6 +238,10 @@ def _build_answer(model):
         if errors:
             log.warning("evaluator output invalid action=%s count=%d", s["action_id"], len(errors))
             return {"output": None, "status": "UNGRADED", "reason": "INVALID", "retryable": True}
+        allowed = set(s["allowed_criterion_ids"])
+        open_ids = s.get("open_criterion_ids")
+        goal = sanitize_goal(out.followup_goal, allowed, allowed if open_ids is None else open_ids)
+        out = out.model_copy(update={"followup_goal": goal})
         if out.off_topic:  # nothing from an off-topic answer may reach ranking
             out = out.model_copy(update={"criteria": [c.model_copy(update={"score": None, "evidence": []})
                                                      for c in out.criteria]})
