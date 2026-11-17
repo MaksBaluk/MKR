@@ -169,3 +169,28 @@ Potential trade-off: conservative sorting favors observed evidence; another set 
 Research conditions: (A) initial self-report, (B) fixed question selection, (C) adaptive topic selection. **Identical** candidate set, immutable vacancy set, target/rubric versions, scoring policy and ranking implementation; B and C have equal question/topic caps. If A is scored from self-report, use a declared **provisional projection** from action self-rating to rubric criteria with `SELF_REPORT_UNVERIFIED` provenance; do not equate it with interviewed evidence and do not use it silently in final live recommendations. Report both assessment agreement with independent experts and NDCG@10 / Precision@5 only with independently labeled vacancy relevance. The synthetic fixture corpus alone cannot demonstrate deployment quality.
 
 Must test: `N=0`, duplicated text and whole-vacancy duplicates, AND/OR groups, unknown vs zero, all-unknown, no mandatory groups, borderlines, `τ→0`, mixed UUID IDs, nonempty rubric weights, topic cap 10 and per-topic cap 5, idempotency, historical cohort immutability, monotonic interval narrowing and fixed-t submodularity. Run a separate expert assessment to determine whether the rubric bands/thresholds and ranking are empirically useful.
+
+## 6a. Experiment modes (implemented in Phase 3)
+
+Existing formulas are unchanged. Modes only switch which planner/controller steps run; all modes share the same candidate profile, immutable cohort snapshot, rubrics, evaluator, scoring (§3a), ranking (§5) and the 10-topic / 5-question-per-topic caps.
+
+**Modes** (`backend/experiments/config.py`, `ExperimentConfig`):
+
+- **A `INITIAL_PROFILE`**: no interview. Ranking uses the same key (2.15) with every criterion unknown (scores `{}`); self-ratings act only through the `T_v`/`J_v` tie-break (§5). No projection of self-ratings to criteria scores is made.
+- **B `STATIC_INTERVIEW`**: the three adaptive flags are fixed off (`config_for` rejects overrides). The topic list is fixed once before the first answer by `plan_topics` (greedy coverage over the cohort with no scores, a chosen topic closes every group it appears in) and stored as `core_interviews.static_plan`; it is never rebuilt. Each topic gets exactly `static_questions_per_topic` (default 2) questions, slot `i` of `k` targets the round-robin share `criteria[i::k]` of the rubric (all criteria if the share is empty). No goal-driven follow-up, no early close, no difficulty controller: difficulty stays at the initial hypothesis (`reason = FIXED:<initial reason>`).
+- **C `ADAPTIVE_INTERVIEW`**: the product behaviour. Ablation flags, each defaulting to true: `adaptive_topics` (planner `choose_next` vs fixed list), `adaptive_followup` (goal/open-criteria follow-up, early close vs fixed slots), `adaptive_difficulty` (controller §3c vs fixed initial level). Turning a flag off applies the static behaviour of that dimension only.
+- `total_budget` (optional): max shown questions per interview; when spent the interview finishes like plan exhaustion and unasked criteria stay null. `max_topics`/`max_per_topic` may only lower the product caps (10 / 5).
+
+**Equal-conditions rules.** Per candidate, every mode uses the same profile (set once, never edited during the run), the same auto-selected cohort (id + sha256 recorded), the same rubrics, evaluator prompts and ranking code. B and C use the same `max_topics`, `max_per_topic` and `total_budget` when given. The experiment config is written server-side on the interview row by the runner; it is not a public API field.
+
+**Run record** (`experiment_runs`, migration 0011): experiment id, candidate id, mode, config JSON (plus `answer_source`), cohort id and sha256, profile snapshot, rubric versions, prompt version, model info, algorithm version, question/answer sequence (action, ordinal, text, source, difficulty, target criteria, assessment status), latest criterion assessments, ranking, timings (total, LLM wait, calls), error counters (`ungraded_answers`, `fallback_questions`, `llm_exceptions`, `empty_cohort`), `interview_id`. `answer_source` is `SCRIPTED` for scripted answers, `NONE` for mode A and `UNKNOWN` for a provider without a declared source.
+
+**Rerank.** `rerank(record, db)` recomputes the ranking from the stored assessments, profile snapshot and cohort snapshot with no model call; it fails if the cohort snapshot is missing or its sha256 differs. Same stored scores give the same ranking.
+
+**Honesty.**
+- Scripted answers are fixtures, not evidence of real-candidate performance; a run with them only checks the pipeline.
+- The synthetic fixture corpus cannot demonstrate deployment quality.
+- Claims about which mode is better need independent expert labels of vacancy relevance (Phase 4: NDCG@10, Precision@5); none exist yet and no such comparison is reported.
+- LLM calls (interviewer, evaluator) are not deterministic. Only the ranking recomputation from stored scores is reproducible; two runs of the same mode may differ.
+- Without a configured LLM, interview modes are refused (or, with `--allow-ungraded`, answers are stored ungraded and questions come from the bank): such runs say nothing about assessment quality.
+

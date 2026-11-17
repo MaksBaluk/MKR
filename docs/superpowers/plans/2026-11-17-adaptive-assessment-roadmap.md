@@ -6,7 +6,7 @@ Source request: thesis chapters 2.3.2–2.3.5 and 3 (`Балук_Диплом.do
 |---|---|---|---|
 | 1 | Criterion-level core: `D_vga`, coverage vs score, structured `followup_goal`, `T_v`/`J_v`, self-rating tie-break | `2026-11-17-phase1-criterion-core.md` | detailed, ready |
 | 2 | `DifficultyController` (BASIC/INTERMEDIATE/ADVANCED) | this file, below | outline |
-| 3 | Modes A/B/C, ablation flags, reproducible runner | this file, below | outline |
+| 3 | Modes A/B/C, ablation flags, reproducible runner | `2026-11-17-phase3-modes-runner.md` | DONE 2026-11-17 (see `docs/tasks/STATUS.md`) |
 | 4 | Metrics, expert dataset, report export | this file, below | outline |
 
 ## Decisions already made (owner)
@@ -36,7 +36,9 @@ def next_step(state, cfg, *, targeted: Sequence[str], scores: Mapping[str,float|
 ```
 Rules (tests): junior strong BASIC→INTERMEDIATE→ADVANCED; senior weak ADVANCED→INTERMEDIATE→BASIC (diagnostic); incomplete answer with open targeted criterion ⇒ FOLLOWUP, level unchanged; all-null ⇒ no level change; score of a BASIC question confirms only its `targeted` criteria; τ never changed by seniority; 5-question and 10-topic caps hold. Reuses `open_criteria` from Phase 1.
 
-## Phase 3 — Modes and runner (outline)
+## Phase 3 — Modes and runner (DONE 2026-11-17; block below is the original outline, superseded by code where signatures differ: see `app/backend/experiments/` and `MATH_SPEC.md` §6a)
+
+Actual differences: modes live in `config.py` (no `modes.py`); planning in `planning.py` (`plan_topics`, `slot_targets`); `run_experiment(experiment_id, cfg, candidate, provider, client, db)` drives the HTTP API; `rerank(record, db)` takes a DB session; answers via a scripted `AnswerProvider` only; `answer_source` is stored in the config JSON.
 
 Files: create `app/backend/experiments/{__init__,config,modes,runner,store}.py`, `app/scripts/run_experiment.py`, migration `0011` (`experiment_runs`), tests `test_modes.py`, `test_experiment_runner.py`.
 

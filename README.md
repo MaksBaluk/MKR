@@ -89,6 +89,32 @@ npm run build
 
 Run the backend from `app/`. On a non-Docker local installation, update `DATABASE_URL` in `app/.env` to point to a local PostgreSQL instance. For repeatability, generate and commit `app/uv.lock` using `cd app && uv lock` when registry access is available; this environment could not resolve dependencies online or offline. Frontend also does not yet contain a `package-lock.json` because npm registry access was unavailable; generate one via `npm install --package-lock-only` and commit it after first successful online install.
 
+## Experiments
+
+Compare three interview modes (A `INITIAL_PROFILE`, B `STATIC_INTERVIEW`, C `ADAPTIVE_INTERVIEW`) on a separate SQLite database (never the product DB). From `app/`:
+
+```bash
+uv run python scripts/run_experiment.py --db sqlite:///experiments.db --candidates candidates.json \
+    --answers answers.json --modes INITIAL_PROFILE STATIC_INTERVIEW ADAPTIVE_INTERVIEW --out out/
+```
+
+Options: `--flags no_adaptive_topics no_adaptive_followup no_adaptive_difficulty` (ablations of mode C), `--total-budget N`, `--experiment-id`, `--allow-ungraded` (interview modes without an LLM: answers stay ungraded). Output: `out/runs.json`, `out/runs.csv` and rows in `experiment_runs`.
+
+`candidates.json`:
+
+```json
+[{"candidate_id": "c1", "desired_title": "Python Developer", "years_experience": 3, "target_level": "middle",
+  "track": "python", "location": "Київ", "work_mode": "remote", "self_ratings": {}}]
+```
+
+`answers.json` (per candidate: list of answers per action id in question order, plus `default`):
+
+```json
+{"c1": {"default": "Працював з цим на робочих проєктах."}}
+```
+
+Results with scripted answers are only a pipeline check: they are not evidence of real-candidate performance, and the 90 synthetic vacancies cannot show deployment quality. Mode comparison needs independent expert labels (not yet collected). LLM calls are not deterministic. See `docs/tasks/MATH_SPEC.md` §6a.
+
 ## Data and implementation
 
 - `app/fixtures/vacancies.json` — **90** invented, curated vacancies (30 Python, 30 marketing, 30 design), each with ~11 structured S/F/U requirement groups, descriptions, responsibilities, benefits, salaries and seniority.

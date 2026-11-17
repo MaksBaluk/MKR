@@ -127,3 +127,26 @@
 Не виконувалось: Docker/PostgreSQL (міграція `0010` лише тестом `test_migration_0010.py`), smoke у браузері, справжній LLM-провайдер (моки).
 
 Відкладені дрібниці (з рев'ю): граничні тести рівно на `up_score`/`down_score` і `min_known_share`; тест міграції без рядка зі стану 0009; тест приховування мав би перевіряти й ненульові колонки БД.
+
+## Фаза 3 «Режими A/B/C і runner» (2026-11-17, гілка `feat/criterion-core`)
+
+План: `docs/superpowers/plans/2026-11-17-phase3-modes-runner.md`. Специфікація: `MATH_SPEC.md` §6a; потік: `architecture.md` («Experiment engine flow»); використання: `README.md` («Experiments»).
+
+Зроблено: `app/backend/experiments/{config,planning,providers,runner,store}.py` (режими `INITIAL_PROFILE`, `STATIC_INTERVIEW`, `ADAPTIVE_INTERVIEW`; прапорці `adaptive_topics`/`adaptive_followup`/`adaptive_difficulty`; `total_budget`; статичний план тем і слотів; сценарні відповіді `ScriptedProvider`; запис запуску; `rerank` без LLM); CLI `app/scripts/run_experiment.py` (окрема SQLite БД, захист від продуктової БД, експорт `runs.json`/`runs.csv`); міграція `0011` (`core_interviews.mode_config`, `static_plan`, таблиця `experiment_runs`); прапорці в рушії `api/core.py` (без `mode_config` поведінка продукту не змінена). `answer_source`: `SCRIPTED` / `NONE` (режим A) / `UNKNOWN`. Конфіг експерименту записується на сервері, публічним полем API не є.
+
+Чесність: сценарні відповіді не є свідченням якості для реальних кандидатів; синтетичні 90 вакансій не показують якість у експлуатації; порівняння режимів потребує незалежних експертних міток (фаза 4, ще немає); виклики LLM недетерміновані, відтворюється лише перерахунок рейтингу зі збережених оцінок. Метрик (NDCG/Precision) ще немає.
+
+Перевірки (реально виконані):
+- `cd app && uv run pytest -q` -> `402 passed, 41 warnings in 100.43s (0:01:40)`
+- CLI, режим A, тимчасова SQLite БД, `LLM_PROVIDER=disabled`: `uv run python scripts/run_experiment.py --db sqlite:///<tmp>/a.db --candidates <tmp>/candidates.json --answers <tmp>/answers.json --modes INITIAL_PROFILE --out <tmp>/oa` -> `1 runs written`, `errors={'ungraded_answers': 0, 'fallback_questions': 0, 'llm_exceptions': 0, 'empty_cohort': False}`.
+- Той самий CLI з `--modes STATIC_INTERVIEW` без LLM -> `error: no LLM configured for interview modes; set LLM_* or pass --allow-ungraded`, код виходу 2.
+- CLI з `--allow-ungraded --total-budget 2` (усі три режими, без LLM): `3 runs written`; режими B і C: по 2 питання, `ungraded_answers=2`, `fallback_questions=2` (питання з банку, відповіді не оцінено), `answer_source=SCRIPTED`; у кожному запуску 60 вакансій у рейтингу. Це лише перевірка конвеєра, не оцінка якості.
+- Фронтенд (`typecheck`, `npm test`, `build`) не запускався: у цій фазі фронтенд не змінено.
+
+Не виконувалось: Docker/PostgreSQL (міграція `0011` лише тестами на SQLite), smoke у браузері, справжній LLM-провайдер (у `app/.env` налаштований провайдер, але запуски CLI виконано з `LLM_PROVIDER=disabled`; жодного мережевого виклику не було).
+
+Відкладені дрібниці (з рев'ю):
+- T1: тест `max_topics=2` з точним списком; `from_json` кидає `TypeError`/`KeyError`, а не `ValueError`; не тестуються нижні межі та `static_questions>max_per_topic`.
+- T2: тавтологічна перевірка в `test_migration_0011.py:195`; немає повторного upgrade і SELECT NULL після downgrade у тесті 2; `drop_index` захищено лише наявністю таблиці (перевіряти інспектором); downgrade відкидає `experiment_runs` (описати в docstring).
+- T3: початковий рівень складності при FIXED перераховується щоразу з профілю (зберегти один раз, якщо профіль може змінюватись); рушій бере `k` з конфігу, а не зі збереженого `static_plan`; `can_start_topic` не використовується; тест «adaptive відрізняється» використовує різні відповіді для static і adaptive (слабше за задум).
+- T4: перевірка шляху БД чутлива до регістру й не враховує URI-форми sqlite; runner імпортує приватні функції `api/core` (`_revisions`, `_seeded_rubric`); `llm_exceptions` занижує таймаути/помилки валідації; `model_info` може показувати налаштовану модель при ін'єкції фабрики; часткові рядки невдалого запуску не чистяться (scratch БД).
