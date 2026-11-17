@@ -174,7 +174,8 @@ def _stored(db, shown):
 
 
 def test_junior_strong_answers_progress_basic_to_advanced(client, auth, db, monkeypatch):
-    # every criterion graded each time (so evidence stays sufficient); the first n+1 are strong, the rest stay weak/open
+    # every criterion graded each time (so evidence stays sufficient); row(n, goal): the first n criteria score strong,
+    # the rest stay weak/open; `goal` is the open criterion the next follow-up targets
     def row(strong_n, goal):
         return {i: 0.95 if i < strong_n else 0.7 for i in range(40)}, goal
     strong = row(1, 1), row(2, 2), row(3, 3)
@@ -185,6 +186,9 @@ def test_junior_strong_answers_progress_basic_to_advanced(client, auth, db, monk
     assert len({t.action_id for t in turns}) == 1
     assert [t.difficulty for t in turns] == ["BASIC", "INTERMEDIATE", "ADVANCED"]
     assert [t.difficulty_reason for t in turns][1:] == ["STRONG", "STRONG"]
+    crit = turns[0].target_criteria  # q1 targets all, each later turn the one criterion the previous answer left open
+    assert [t.target_criteria for t in turns[1:]] == [[crit[1]], [crit[2]]]
+    assert turns[0].target_criteria == crit and len(crit) >= 4
 
 
 def test_senior_weak_answer_gets_diagnostic_question(client, auth, db, monkeypatch):
@@ -193,7 +197,7 @@ def test_senior_weak_answer_gets_diagnostic_question(client, auth, db, monkeypat
     _set_level(db, "senior")
     turns = _stored(db, _play(client, auth, iv, 4, "dia"))
     assert [t.difficulty for t in turns] == ["ADVANCED", "INTERMEDIATE", "BASIC", "BASIC"]
-    assert [t.difficulty_reason for t in turns][1:3] == ["WEAK", "WEAK"]
+    assert [t.difficulty_reason for t in turns][1:] == ["WEAK", "WEAK", "WEAK"]
     assert all(t.difficulty != "ADVANCED" for t in turns[1:])  # never below BASIC, never back up
 
 
@@ -238,7 +242,7 @@ def test_caps_hold_with_controller(client, auth, db, monkeypatch):
     per_topic: dict[str, int] = {}
     for t in shown:
         per_topic[t["action_id"]] = per_topic.get(t["action_id"], 0) + 1
-    assert max(per_topic.values()) <= 5 and len(per_topic) <= 10
+    assert max(per_topic.values()) == 5 and len(per_topic) == 10  # both caps are actually reached, never exceeded
 
 
 def test_tau_not_changed_by_level(client, auth, db, monkeypatch):
@@ -247,15 +251,21 @@ def test_tau_not_changed_by_level(client, auth, db, monkeypatch):
     from backend.models import CohortSnapshot, CoreInterview
 
     results = {}
-    for level in ("junior", "senior"):
-        _use(monkeypatch, _script([(_uniform(0.8), None)]))
-        iv = _start(client, auth)
-        _set_level(db, level)
-        _play(client, auth, iv, 3, f"tau-{level}")
-        with db() as s:
-            snap = s.get(CohortSnapshot, s.get(CoreInterview, iv["id"]).cohort_id)
-            scores = attempt_scores(s, iv["id"])
-            items = rank_items(s, 3, snap, scores)
-        results[level] = (scores, [(i["vacancy_id"], i["z"], i["x"], i["l_mandatory"], i["l_preferred"]) for i in items])
-    assert results["junior"][0] and results["junior"][0] == results["senior"][0]  # same assessments in
-    assert results["junior"][1] == results["senior"][1]  # same Z/X/L out
+    for score in (0.8, 0.6):  # two score levels: thresholds stay fixed across a range of scores
+        for level in ("junior", "senior"):
+            _use(monkeypatch, _script([(_uniform(score), None)]))
+            iv = _start(client, auth)
+            _set_level(db, level)
+            _play(client, auth, iv, 3, f"tau-{level}-{score}")
+            with db() as s:
+                snap = s.get(CohortSnapshot, s.get(CoreInterview, iv["id"]).cohort_id)
+                scores = attempt_scores(s, iv["id"])
+                items = rank_items(s, 3, snap, scores)
+            results[score, level] = (scores, [(i["vacancy_id"], i["z"], i["x"], i["l_mandatory"], i["l_preferred"])
+                                              for i in items])
+    for score in (0.8, 0.6):
+        jr, sr = results[score, "junior"], results[score, "senior"]
+        assert jr[0] and jr[0] == sr[0]  # same assessments in
+        assert jr[1] and jr[1] == sr[1]  # same Z/X/L out
+        assert any(row[3] > 0 or row[4] > 0 for row in jr[1])  # not trivially zero
+    assert results[0.8, "junior"][1] != results[0.6, "junior"][1]  # the scores do move the values
