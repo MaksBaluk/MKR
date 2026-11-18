@@ -224,3 +224,19 @@
 - `backend/domain/vacancy_import.py` (парсер, аліаси, валідація), `scripts/import_djinni.py` (лише з `--confirm-permission`, `robots.txt`, 2 с між запитами), міграція 0014 (`retrieved_at`, `date_posted`, `import_version`), `fixtures/vacancies_real.json` (49: python 30, marketing 14, design 5), `fixtures/vacancies_real_import_report.json`.
 - «Djinni» в UI лише для `REAL_IMPORTED`; фікстурам призначено robota.ua/work.ua/DOU (заява власника на рівні каталогу, `fixtures/vacancy_sources.json`, міграція 0015), підказка й сторінка вакансії називають їх адаптованими прикладами (скасовує попереднє «усі з Djinni»).
 - Обмеження: низький вихід для marketing/design (пороги валідації не знижувались), зіставлення через аліаси, рівні/D_vga/τ — правила, `work_mode` не розрізняє HYBRID, знімок на одну дату. Дозвіл Djinni підтверджено власником у чаті.
+
+## Оцінений професійний рівень (SeniorityEstimator, 2026-11-18)
+
+- Реалізовано:
+  - версійована політика `python-backend/v1` (WORKING_ASSUMPTION);
+  - детермінований оцінювач без LLM;
+  - шість критеріїв практики, які Evaluator оцінює в тому самому виклику;
+  - пріоритет критичних критеріїв у межах поточної теми;
+  - незмінна таблиця `seniority_assessments` (міграція 0016) і API рівня;
+  - блок рівня й розділи на екрані результатів.
+- Правила описано в `docs/tasks/MATH_SPEC.md` §3e. Звіт, сценарії та обмеження наведено в `docs/tasks/SENIORITY_REPORT.md`. Нотатки для диплома лежать у `docs/tasks/THESIS_SYNC_SENIORITY.md` (DOCX не редагувався).
+- Головне обмеження. На повній добірці python теми вибирає Q_t за ринком, тож навіть рівномірно сильні відповіді дають не вище Junior. Це показав симульований прогін. Middle і Senior досягнуто лише у звуженій сценарній добірці.
+- Не виконувалось:
+  - реальна LLM для рівня;
+  - експертна валідація політики й рубрик;
+  - реальні кандидати.

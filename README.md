@@ -41,6 +41,8 @@ Verified on this machine: `docker compose up --build -d` starts `db`, `migrate` 
 6. Typed answers are saved as **pending evaluation**. With an LLM configured you can request a rubric proposal (levels 0–3, quoted evidence, uncertainty). A proposal changes the profile **only after you confirm it**.
 7. After finishing, the **Results** screen shows the baseline ranking and the post-interview ranking over the same frozen cohort, with rank changes. If nothing was confirmed, it says so explicitly.
 
+**Assessed level.** For the python track the results also show the level the interview evidence supports (Junior/Middle/Senior or "insufficient data") next to the desired level. It comes from a deterministic estimator over cited criterion grades and a versioned policy that is a working assumption without expert validation; marketing and design get no level. It is an assessment of the supplied answers, not verified work history, and it never changes the vacancy order. Topics are chosen by market value (max 10), so on the full python cohort the interview does not reach enough Middle/Senior-critical criteria: in a simulated run even uniformly strong answers stopped at Junior. Details: `docs/tasks/MATH_SPEC.md` §3e and `docs/tasks/SENIORITY_REPORT.md`.
+
 These are **invented, curated demonstration vacancies** with realistic details. They are not Djinni postings, even if some company names or job titles happen to sound real. Live scraping, external vacancy parsing and automatic ESCO normalization are *not implemented*. Competencies are pre-normalized within a local catalog.
 
 ## LLM question generation (optional)

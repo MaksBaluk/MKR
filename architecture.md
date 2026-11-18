@@ -94,6 +94,10 @@ Difficulty is chosen by the deterministic `DifficultyController` (`domain/diffic
 
 `scripts/evaluate_experiments.py` reads `runs.json` (from `export_records`) and optional relevance and criterion label files; it opens no database, model or network. `experiments/expert_labels.py` validates labels (schemas, annotator ids, data status, double annotation, adjudication), `experiments/metrics.py` holds pure metric functions, `experiments/report.py` groups records by mode key, applies the inclusion and exclusion rules and writes `report.json`, `report.csv` and `charts.json`. Records carry `relevant_criteria` and `qa[i]["sufficient_criteria_after"]` (migration 0012 also adds `answer_source`) so coverage is computed offline. Expert labels are evaluation ground truth only: `domain`, `api` and `experiments.{planning,runner}` never import these modules (AST test). Definitions and protocol: `MATH_SPEC.md` §6b.
 
+### Assessed level flow (SeniorityEstimator)
+
+Three values stay separate: desired level (profile `target_level`), assessed level and vacancy fit. In the same Evaluator call as the topic answer, python-track interviews also grade six professional-practice criteria (`practice-backend.*`, stored as `criterion_assessments` of that pseudo-action, never a vacancy competency, never a planner, D_vga or ranking input). During the interview `domain/level_probe.py` only reorders the current topic's unmet criteria and passes up to two unassessed practice criteria to the Interviewer; Q_t, caps and difficulty are unchanged. On every transition to FINISHED `api/level.finalize_level` builds evidence from that attempt only (`core.seniority_evidence`) and runs the pure `domain/seniority.estimate` with the versioned policy (`domain/seniority_policy.py`, `python-backend/v1`, WORKING_ASSUMPTION; marketing/design: none → `UNKNOWN`/`POLICY_UNAVAILABLE`). The result is stored once per (attempt, policy version) in `seniority_assessments` (migration 0016) and never updated; a failure never blocks finishing, and a finished attempt without a row is assessed lazily on first read. Owner-only API: `GET /interviews/{id}/level`, `GET /profiles/{id}/level`, plus a `level` block and per-item `section` labels in `/profiles/{id}/results` (order unchanged). Rules: `MATH_SPEC.md` §3e; limits: `docs/tasks/SENIORITY_REPORT.md`.
+
 ## 5. Suggested persisted entities
 
 - `CandidateProfile`, `CandidateSelfRating` (editable, action-level), `ProfileVersion` (immutable).
@@ -101,6 +105,7 @@ Difficulty is chosen by the deterministic `DifficultyController` (`domain/diffic
 - `CompetencyConcept` (ESCO URI nullable, normalized labels/aliases), `CompetencyAction` (specific assessable professional activity), `Rubric`, `RubricCriterion` (stable IDs, descriptions, anchors, weights, version).
 - `MarketProfile` (snapshot, policy, order and internal weights).
 - `InterviewSession` (owner, state, version, snapshot, budgets), `InterviewTurn` (action, question, answer, index, idempotency key), `CriterionAssessment` (score/null, reason, evidence turn/excerpt, provider, rubric revision, assessment revision), `AssessmentReviewRequest` (optional disputes).
+- `SeniorityAssessment` (immutable per attempt and policy version: assessed level, status, full result, rubric versions, desired level copy).
 - `RankingRun`, `RankingItem` (snapshot/profile/policy, key components, explanations).
 - `IngestionJob` and `NormalizationCandidate` for scalable source processing and reviewable ambiguous matches.
 
