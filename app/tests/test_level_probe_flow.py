@@ -139,3 +139,16 @@ def test_track_without_policy_sends_no_practice_gaps(client, db, monkeypatch, as
     rec = _run(client, db, monkeypatch, "probe-marketing", track="marketing")
     assert rec.qa and ask_log
     assert all(not s.get("practice_gaps") for s in ask_log)
+
+
+def test_followup_goal_wins_over_practice_gaps(client, db, monkeypatch, ask_log):
+    def goal_on_weak(allowed, n):
+        scores = {c: (0.95 if i == 0 else 0.4) for i, c in enumerate(allowed)}
+        return scores, [allowed[-1]] if len(allowed) > 1 else []
+
+    _use(monkeypatch, PolicyChat(goal_on_weak))  # practice never graded: practice gaps stay open all interview
+    with db() as s:
+        rec = run_experiment("probe-goal", config_for(ADAPTIVE), cand(), GOOD, client, s)
+    with_goal = [s for s in ask_log if s.get("followup_goal")]
+    assert rec.qa and with_goal and any(s.get("practice_gaps") for s in ask_log)
+    assert all(not s.get("practice_gaps") for s in with_goal)  # the goal's criterion, not practice, drives the question

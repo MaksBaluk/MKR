@@ -435,8 +435,9 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
             probe = estimate(policy, seniority_evidence(session_rows)) if policy else None
         except ValueError:  # a malformed legacy score must never block the next question: probe off, order unchanged
             probe = None
-        unmet, gaps = prioritize_unmet(open_ids(action), policy, probe), practice_gaps(policy, probe)
         goal = goal_for(action)  # the Evaluator may have just confirmed the criterion it named: re-checked in goal_for
+        # a validated follow-up goal wins: practice gaps are hinted only when no goal drives the question
+        unmet, gaps = prioritize_unmet(open_ids(action), policy, probe), [] if goal else practice_gaps(policy, probe)
     else:  # slot i of k targets a fixed round-robin share of the rubric (all criteria if the share is empty)
         crit = criteria_for(db, action)
         unmet, goal = list(slot_targets(crit, k, shown.get(action, 0)) or crit), None

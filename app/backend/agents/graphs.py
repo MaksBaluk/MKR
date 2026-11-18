@@ -120,10 +120,25 @@ def _text(resp) -> str:
 
 
 # ---- ask graph
-def validate_question(text: str, off_topic: bool) -> str | None:
-    """Return a rejection reason, or None when the question is acceptable."""
+def _echoes_criterion_id(text: str, criterion_ids) -> bool:
+    """True when the question shows an internal criterion id: a known id, or `<known prefix>.<slug>` shaped like one."""
+    ids = {c.lower() for c in criterion_ids if "." in c}
+    if not ids:
+        return False
+    low = text.lower()
+    if any(c in low for c in ids):
+        return True
+    prefixes = "|".join(sorted({re.escape(c.split(".", 1)[0]) for c in ids}, key=len, reverse=True))
+    return re.search(rf"(?<![\w.-])(?:{prefixes})\.[a-z][\w-]*", low) is not None
+
+
+def validate_question(text: str, off_topic: bool, criterion_ids=()) -> str | None:
+    """Return a rejection reason, or None when the question is acceptable. `criterion_ids` are internal ids the
+    Interviewer saw (unmet criteria, goal, practice gaps): a question must never echo one."""
     if not text.strip():
         return "EMPTY"
+    if _echoes_criterion_id(text, criterion_ids):
+        return "ECHOES_CRITERION_ID"
     flat = _ABBREV_RE.sub(lambda m: m.group(0).replace(".", "").replace(" ", ""), text.strip())
     sentences = [s for s in re.split(r"(?<=[.!?…])\s+", flat) if s.strip()]
     if len(sentences) > (3 if off_topic else 2) or len(flat.split()) > (50 if off_topic else 35):
@@ -178,7 +193,9 @@ def _build_ask(model):
         q = s.get("question")
         if q is None:
             return {}
-        reason = validate_question(q, s.get("off_topic_detected", False))
+        goal = s.get("followup_goal") or {}
+        known = [*s.get("unmet_criteria", []), *(goal.get("criterion_ids") or []), *(s.get("practice_gaps") or [])]
+        reason = validate_question(q, s.get("off_topic_detected", False), known)
         if reason:
             log.warning("interviewer question rejected action=%s kind=%s", s.get("action_id"), reason)
             return {"question": None}

@@ -80,8 +80,49 @@ def test_interviewer_input_lists_practice_gaps_as_ids_only():
     assert "priority order" in INTERVIEWER_SYSTEM
 
 
-def test_evaluator_shape_mentions_optional_practice():
+def test_evaluator_shape_line_is_valid_and_practice_is_clearly_optional():
+    import json as _json
+    import re as _re
+
     from backend.agents.prompts import EVALUATOR_SYSTEM
-    shape = next(line for line in EVALUATOR_SYSTEM.splitlines() if line.strip().startswith('{"action_id": "..."'))
-    assert '"practice":' in shape
-    assert "optional" in EVALUATOR_SYSTEM[EVALUATOR_SYSTEM.index(shape):EVALUATOR_SYSTEM.index(shape) + len(shape) + 200]
+    from backend.domain.assessment import EvaluatorOutput
+    lines = EVALUATOR_SYSTEM.splitlines()
+    i = next(i for i, line in enumerate(lines) if line.strip().startswith('{"action_id": "..."'))
+    assert '"practice"' not in lines[i] and "items shaped like" not in EVALUATOR_SYSTEM
+    optional = lines[i + 1]
+    assert optional.strip().lower().startswith("optional") and "practice_criterion_ids" in optional
+    fragment = optional[optional.index('"practice":'):].rstrip(" .")
+    practice = _json.loads("{" + fragment + "}")["practice"]  # the documented entry is valid JSON
+    assert practice and set(practice[0]) == {"criterion_id", "score", "reason", "evidence"}
+    examples = [_json.loads(m) for m in _re.findall(r"^Output: (\{.*\})$", EVALUATOR_SYSTEM, _re.M)]
+    assert any("practice" in e for e in examples) and all(EvaluatorOutput.model_validate(e) for e in examples)
+
+
+def test_followup_goal_wins_over_practice_gaps_in_interviewer_input():
+    goal = {"criterion_ids": ["a.x"], "reason": "r", "expected_evidence": "e"}
+    out = format_interviewer_input(**{**BASE, "followup_goal": goal}, practice_gaps=["practice-backend.rationale"])
+    assert "practice_gaps" not in out and "<followup_goal>" in out
+    rule = INTERVIEWER_SYSTEM[INTERVIEWER_SYSTEM.index("practice_gaps (optional"):]
+    assert "followup_goal" in rule[:600] and "ignore practice_gaps" in rule[:600]
+
+
+def test_question_echoing_a_criterion_id_falls_back_to_bank():
+    from types import SimpleNamespace
+
+    from backend.agents.graphs import run_ask, validate_question
+
+    known = ["postgresql.indexes", "practice-backend.rationale"]
+    assert validate_question("Як ви добирали індекси в PostgreSQL?", False, known) is None
+    for bad in ("Розкажіть про postgresql.indexes у вашому проєкті?",
+                "Як ви показували practice-backend.rationale у роботі?",
+                "Що ви знаєте про postgresql.vacuum у PostgreSQL?"):  # id-like pattern of a known competency prefix
+        assert validate_question(bad, False, known) == "ECHOES_CRITERION_ID", bad
+
+    class Echo:
+        def invoke(self, messages, *a, **k):
+            return SimpleNamespace(content="Розкажіть, як ви застосовували postgresql.indexes на практиці?")
+
+    out = run_ask({"action_id": "postgresql", "action_name": "PostgreSQL", "summary": "",
+                   "unmet_criteria": ["postgresql.indexes"], "previous_answers": [], "followup_goal": None,
+                   "off_topic_detected": False, "practice_gaps": ["practice-backend.rationale"]}, Echo())
+    assert out.source == "FALLBACK_UNGRADED" and "postgresql.indexes" not in out.question_text
