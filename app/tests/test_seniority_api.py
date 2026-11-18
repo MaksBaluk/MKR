@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 
 from backend.api.core import seniority_evidence
 from backend.api.level import attempt_evidence, finalize_level
@@ -218,12 +219,67 @@ def test_sections_partition_same_items(client, auth, db, chat):
     assert [i["vacancy_id"] for i in plain["items"]] == ids[:50]  # sections are labels: order unchanged
 
 
-def test_lead_counts_as_senior_section(client, auth, db, chat):
-    iv = _finished(client, auth)
-    client.put(f"{API}/profiles/{iv['profile_id']}", headers=auth, json={
-        "name": "Профіль python", "track": "python", "target_level": "lead", "years_experience": 3})
+def _profile_with_level(client, auth, target):
+    iv = _attempt(client, auth, "python")
+    r = client.put(f"{API}/profiles/{iv['profile_id']}", headers=auth, json={
+        "name": "Профіль python", "track": "python", "target_level": target, "years_experience": 3})
+    assert r.status_code == 200, r.text
+    _answer(client, auth, iv, iv["version"])
+    _finish(client, auth, iv["id"])
+    return iv
+
+
+@pytest.mark.parametrize("target", ["lead", "senior"])
+def test_lead_vacancies_count_as_senior_for_desired_section(client, auth, db, chat, target):
+    iv = _profile_with_level(client, auth, target)
     items, _ = _all_items(client, auth, iv["profile_id"])
-    assert all((i["section"] == "DESIRED_LEVEL") == ((i["seniority"] or "").upper() == "SENIOR") for i in items)
+    levels = {(i["seniority"] or "").upper() for i in items}
+    assert {"SENIOR", "LEAD"} <= levels  # the fixture cohort has both
+    assert all((i["section"] == "DESIRED_LEVEL") == ((i["seniority"] or "").upper() in ("SENIOR", "LEAD"))
+               for i in items)
+
+
+def test_sections_use_stored_desired_level_like_level_block(client, auth, db, chat):
+    iv = _finished(client, auth)  # finished with target_level middle
+    client.put(f"{API}/profiles/{iv['profile_id']}", headers=auth, json={
+        "name": "Профіль python", "track": "python", "target_level": "senior", "years_experience": 3})
+    items, res = _all_items(client, auth, iv["profile_id"])
+    assert res["level"]["desired_level"] == "middle"
+    assert all((i["section"] == "DESIRED_LEVEL") == ((i["seniority"] or "").upper() == "MIDDLE") for i in items)
+
+
+def test_level_failure_never_blocks_finish_or_results(client, auth, db, chat, monkeypatch):
+    def boom(*a, **k):
+        raise RuntimeError("unexpected")
+
+    iv = _attempt(client, auth, "python")
+    _answer(client, auth, iv, iv["version"])
+    monkeypatch.setattr("backend.api.level.estimate", boom)
+    _finish(client, auth, iv["id"])
+    with db() as s:
+        assert s.get(CoreInterview, iv["id"]).status == "FINISHED"
+    assert _rows(db, iv["id"]) == []
+    res = client.get(f"{API}/profiles/{iv['profile_id']}/results", params={"fitting": "all"}, headers=auth)
+    assert res.status_code == 200 and res.json()["level"] is None and res.json()["items"]
+    assert all(i["section"] for i in res.json()["items"])
+    monkeypatch.undo()
+    monkeypatch.setattr("backend.api.core.get_chat_model", lambda: chat)
+    got = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth)  # lazy compute once the fault is gone
+    assert got.status_code == 200 and len(_rows(db, iv["id"])) == 1
+
+
+def test_no_policy_row_is_unique_per_attempt_in_db(client, auth, db, chat):
+    iv = _finished(client, auth, track="marketing")
+    [row] = _rows(db, iv["id"])
+    assert row.policy_version is None
+    with db() as s:
+        assert finalize_level(s, s.get(CoreInterview, iv["id"])).id == row.id
+        s.add(SeniorityAssessment(user_id=row.user_id, profile_id=row.profile_id, interview_id=row.interview_id,
+                                  track="marketing", assessed_level="UNKNOWN", highest_supported_level="UNKNOWN",
+                                  assessment_status="POLICY_UNAVAILABLE", result=row.result, rubric_versions={}))
+        with pytest.raises(IntegrityError):
+            s.commit()
+    assert len(_rows(db, iv["id"])) == 1
 
 
 def test_results_level_block_for_marketing_is_unknown_policy_unavailable(client, auth, db, chat):

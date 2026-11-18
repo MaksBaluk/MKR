@@ -222,16 +222,17 @@ def _competencies(db: Session, iv: CoreInterview) -> list[dict]:
     return out
 
 
-def _desired_seniority(target_level: str | None) -> str | None:
-    """Vacancy seniority matching the candidate's desired level (lead counts as SENIOR)."""
-    if not target_level:
+def _seniority_band(level: str | None) -> str | None:
+    """JUNIOR | MIDDLE | SENIOR; lead (candidate or vacancy) counts as SENIOR."""
+    if not level:
         return None
-    return "SENIOR" if target_level.lower() == "lead" else target_level.upper()
+    up = level.upper()
+    return "SENIOR" if up == "LEAD" else up
 
 
 def _section(item: dict, desired: str | None) -> str:
     """A label over the unchanged ranking (no new order): desired level, other fitting, or unresolved/gaps."""
-    if desired and (item["seniority"] or "").upper() == desired:
+    if desired and _seniority_band(item["seniority"]) == desired:
         return "DESIRED_LEVEL"
     return "OTHER_FITTING" if item["fits"] and item["z"] != 0 else "UNRESOLVED_OR_GAPS"
 
@@ -259,7 +260,9 @@ def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(
                 "competencies": [], "level": None,
                 "market": [], **base}
     snap = db.get(CohortSnapshot, iv.cohort_id)
-    desired = _desired_seniority(prof.target_level)
+    level = level_for_attempt(db, iv)
+    # the desired level stored with the attempt's level (shown in the level block); profile value only without one
+    desired = _seniority_band(level["desired_level"] if level else prof.target_level)
     items = [{**f, "section": _section(f, desired)} for f in (
         _with_fit(i) for i in rank_items(db, prof.years_experience, snap, attempt_scores(db, iv.id),
                                          profile_self_ratings(db, prof.id)))]
@@ -285,7 +288,7 @@ def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(
     market = compute_market(_market_input(_revisions(snap)))
     return {"has_results": True, "attempt_id": iv.id, "total": len(items), "fitting_total": fitting_total,
             "all_total": all_total, "items": items[start:start + page_size],
-            "competencies": _competencies(db, iv), "level": level_for_attempt(db, iv),
+            "competencies": _competencies(db, iv), "level": level,
             "market": [{"order": i + 1, "action_id": e.action_id, "name": names.get(e.action_id, e.action_id)}
                        for i, e in enumerate(market)], **base}
 

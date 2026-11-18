@@ -42,11 +42,12 @@ def upgrade():
     )
     for col in ("user_id", "profile_id", "interview_id"):
         op.create_index(f"ix_{TABLE}_{col}", TABLE, [col])
+    # one no-policy row per attempt: NULL policy_version escapes the unique constraint above
+    op.create_index("uq_seniority_attempt_no_policy", TABLE, ["interview_id"], unique=True,
+                    sqlite_where=sa.text("policy_version IS NULL"), postgresql_where=sa.text("policy_version IS NULL"))
 
 
 def downgrade():
     if not _has_table():
         return
-    for col in ("user_id", "profile_id", "interview_id"):
-        op.drop_index(f"ix_{TABLE}_{col}", table_name=TABLE)
-    op.drop_table(TABLE)
+    op.drop_table(TABLE)  # drops its indexes too, including ones an earlier revision of 0016 did not create

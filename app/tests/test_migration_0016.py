@@ -30,6 +30,8 @@ def test_0016_adds_seniority_table_and_is_reversible(tmp_path, monkeypatch):
         assert {"interview_id", "policy_version", "result", "rubric_versions", "created_at"} <= cols
         uniques = [set(u["column_names"]) for u in sa.inspect(eng).get_unique_constraints(TABLE)]
         assert {"interview_id", "policy_version"} in uniques
+        partial = [i for i in sa.inspect(eng).get_indexes(TABLE) if i["name"] == "uq_seniority_attempt_no_policy"]
+        assert partial and partial[0]["unique"] and partial[0]["column_names"] == ["interview_id"]
         command.upgrade(cfg, "head")  # idempotent
         command.downgrade(cfg, "0015_vacancy_source_name")
         assert TABLE not in _tables(eng)

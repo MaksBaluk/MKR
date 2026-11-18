@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 from sqlalchemy import Boolean, DateTime, false, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, Index
+from sqlalchemy import text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .db import Base
 
@@ -373,7 +374,10 @@ class SeniorityAssessment(Base):
     rubric_versions: Mapped[dict] = mapped_column(JSON, nullable=False)  # {action_id: rubric version} of the evidence
     desired_level: Mapped[str | None] = mapped_column(String(16), nullable=True)  # display copy only, never an input
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, nullable=False)
-    __table_args__ = (UniqueConstraint("interview_id", "policy_version", name="uq_seniority_attempt_policy"),)
+    # NULL policy_version (track without a policy) is not caught by the unique constraint: a partial unique index is.
+    __table_args__ = (UniqueConstraint("interview_id", "policy_version", name="uq_seniority_attempt_policy"),
+                      Index("uq_seniority_attempt_no_policy", "interview_id", unique=True,
+                            sqlite_where=text("policy_version IS NULL"), postgresql_where=text("policy_version IS NULL")))
 
 
 class ExperimentRun(Base):

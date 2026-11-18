@@ -115,7 +115,7 @@ def test_question_echoing_a_criterion_id_falls_back_to_bank():
     assert validate_question("Як ви добирали індекси в PostgreSQL?", False, known) is None
     for bad in ("Розкажіть про postgresql.indexes у вашому проєкті?",
                 "Як ви показували practice-backend.rationale у роботі?",
-                "Що ви знаєте про postgresql.vacuum у PostgreSQL?"):  # id-like pattern of a known competency prefix
+                "Як ви показували practice-backend.ownership у роботі?"):  # any practice-* id-like token
         assert validate_question(bad, False, known) == "ECHOES_CRITERION_ID", bad
 
     class Echo:
@@ -126,3 +126,16 @@ def test_question_echoing_a_criterion_id_falls_back_to_bank():
                    "unmet_criteria": ["postgresql.indexes"], "previous_answers": [], "followup_goal": None,
                    "off_topic_detected": False, "practice_gaps": ["practice-backend.rationale"]}, Echo())
     assert out.source == "FALLBACK_UNGRADED" and "postgresql.indexes" not in out.question_text
+
+
+def test_module_qualified_api_names_are_not_criterion_echoes():
+    from backend.agents.graphs import validate_question
+
+    known = ["pytest.structure", "pytest.isolation", "sqlalchemy.session", "redis.reliability", "django.orm",
+             "celery.idempotency", "postgresql.indexes", "practice-backend.rationale"]
+    for ok in ("Як ви використовували pytest.raises у тестах сервісу?",
+               "Як ви параметризували тести через pytest.mark.parametrize?",
+               "Що ви імпортували з sqlalchemy.orm для роботи із сесіями?",
+               "Як ви підключали клієнт redis.py до сервісу?",
+               "Коли ви застосовували django.db.transaction.atomic у Django?"):
+        assert validate_question(ok, False, known) != "ECHOES_CRITERION_ID", ok  # other rules may still apply

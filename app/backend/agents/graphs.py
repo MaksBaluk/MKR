@@ -120,16 +120,16 @@ def _text(resp) -> str:
 
 
 # ---- ask graph
+_PRACTICE_ID_RE = re.compile(r"(?<![\w.-])practice-[a-z][\w-]*\.[a-z]", re.I)
+
+
 def _echoes_criterion_id(text: str, criterion_ids) -> bool:
-    """True when the question shows an internal criterion id: a known id, or `<known prefix>.<slug>` shaped like one."""
-    ids = {c.lower() for c in criterion_ids if "." in c}
-    if not ids:
-        return False
+    """True when the question shows an internal criterion id: an exact known id (whole token) or any `practice-*.<slug>`
+    token. Module-qualified API names (pytest.raises, sqlalchemy.orm, django.db...) are legitimate and pass."""
     low = text.lower()
-    if any(c in low for c in ids):
+    if _PRACTICE_ID_RE.search(low):
         return True
-    prefixes = "|".join(sorted({re.escape(c.split(".", 1)[0]) for c in ids}, key=len, reverse=True))
-    return re.search(rf"(?<![\w.-])(?:{prefixes})\.[a-z][\w-]*", low) is not None
+    return any(re.search(rf"(?<![\w.-]){re.escape(c.lower())}(?![\w-])", low) for c in criterion_ids if "." in c)
 
 
 def validate_question(text: str, off_topic: bool, criterion_ids=()) -> str | None:

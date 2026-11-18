@@ -84,11 +84,13 @@ def finalize_level(db: Session, iv: CoreInterview, policy: SeniorityPolicy | Non
 
 
 def finalize_on_finish(db: Session, iv: CoreInterview) -> None:
-    """Hook for every transition to FINISHED: storing the level must never block finishing the interview."""
+    """Hook for every transition to FINISHED: storing the level must never block finishing the interview (any error is
+    logged and the level is left to the lazy computation on first read)."""
     try:
-        finalize_level(db, iv)
-    except ValueError:
-        log.warning("level not stored for a finished attempt: malformed score")
+        with db.begin_nested():  # a failure rolls back only the level write, never the finish itself
+            finalize_level(db, iv)
+    except Exception as exc:  # noqa: BLE001 - the level is computed lazily on first read instead
+        log.warning("level not stored for a finished attempt kind=%s", type(exc).__name__)
 
 
 def _titles(db: Session) -> dict[str, str]:
@@ -148,14 +150,15 @@ def level_for_attempt(db: Session, iv: CoreInterview) -> dict | None:
         return None
     row = db.scalar(select(SeniorityAssessment).where(SeniorityAssessment.interview_id == iv.id)
                     .order_by(SeniorityAssessment.created_at.desc()))
-    if row is None:
-        try:
-            row = finalize_level(db, iv)
-        except ValueError:
-            log.warning("level not computed for a finished attempt: malformed score")
-            return None
-        db.commit()
-    return level_payload(db, row)
+    try:
+        if row is None:
+            with db.begin_nested():
+                row = finalize_level(db, iv)
+            db.commit()
+        return level_payload(db, row)
+    except Exception as exc:  # noqa: BLE001 - a level failure never breaks results; the endpoint answers 409
+        log.warning("level not available for a finished attempt kind=%s", type(exc).__name__)
+        return None
 
 
 @router.get("/interviews/{interview_id}/level")
