@@ -128,7 +128,7 @@ def test_seed_is_idempotent_with_rubrics(db):
     with db() as s:
         before = (s.scalar(select(func.count(Vacancy.id))), s.scalar(select(func.count(Rubric.id))),
                   s.scalar(select(func.count(RubricCriterion.id))))
-        assert before[0] == len(read_fixture("vacancies.json")) + len(real_fixture()) and before[1] == 60
+        assert before[0] == len(read_fixture("vacancies.json")) + len(real_fixture()) and before[1] == 61
         again = seed_database(s, demo_mode=False)
         assert all(value == 0 for key, value in again.items() if key.endswith("_added")), again
         after = (s.scalar(select(func.count(Vacancy.id))), s.scalar(select(func.count(Rubric.id))),

@@ -57,6 +57,7 @@ def seed_database(db: Session, *, demo_mode: bool | None = None, demo_password: 
         db.add(vacancy)
         counts["vacancies_added"] += 1
     seed_rubrics(db, counts)
+    seed_practice_rubrics(db, counts)
     if demo_mode:
         email = settings.demo_email.lower()
         from sqlalchemy import select
@@ -92,11 +93,11 @@ def _backfill_requirements(db: Session, record: dict, criteria: dict) -> None:
                     setattr(row, key, value)
 
 
-def seed_rubrics(db: Session, counts: dict) -> None:
+def seed_rubrics(db: Session, counts: dict, filename: str = "rubrics.json") -> None:
     """Curated-template starter rubrics; an existing (action_id, version) rubric is never modified."""
     from sqlalchemy import select
     existing = {(r.action_id, r.version) for r in db.scalars(select(Rubric)).all()}
-    for record in read_fixture("rubrics.json")["rubrics"]:
+    for record in read_fixture(filename)["rubrics"]:
         if (record["action_id"], record["version"]) in existing:
             continue
         rubric = Rubric(action_id=record["action_id"], version=record["version"], source=record["source"])
@@ -107,6 +108,11 @@ def seed_rubrics(db: Session, counts: dict) -> None:
                                    anchors={"title": c["title"], "bands": c["anchors"]}))
             counts["rubric_criteria_added"] += 1
         counts["rubrics_added"] += 1
+
+
+def seed_practice_rubrics(db: Session, counts: dict) -> None:
+    """Professional-practice rubric (not a Competency: never planned, ranked or matched against vacancies)."""
+    seed_rubrics(db, counts, "practice_rubrics.json")
 
 
 def main():
