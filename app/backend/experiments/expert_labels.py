@@ -282,6 +282,40 @@ def agreement_report(a: Sequence[ExpertRelevanceLabel], b: Sequence[ExpertReleva
     }
 
 
+def criterion_agreement(a: Sequence[ExpertCriterionLabel], b: Sequence[ExpertCriterionLabel]) -> dict:
+    """Agreement of two annotators on criterion scores (same validation as agreement_report).
+
+    Only keys scored by both enter the numeric statistics; an empty score is unknown, never 0, so unknown-vs-scored
+    disagreements are counted separately. `pearson` is None without variance in either annotator."""
+    errors = _consistency({"annotator A": a, "annotator B": b})
+    ids_a, ids_b = {lb.annotator_id for lb in a}, {lb.annotator_id for lb in b}
+    if (a or b) and (len(ids_a) != 1 or len(ids_b) != 1):
+        errors.append("each annotator set must come from exactly one annotator")
+    elif a and ids_a == ids_b:
+        errors.append(f"annotators must be distinct, both are {next(iter(ids_a))!r}")
+    for name, s in (("annotator A", a), ("annotator B", b)):
+        if len(_keyset(s)) != len(s):
+            errors.append(f"{name}: duplicate keys")
+    if _keyset(a) != _keyset(b):
+        errors.append(f"annotators labelled different keys: {len(_keyset(a) ^ _keyset(b))} differ")
+    if errors:
+        raise LabelError(errors)
+    sb = {lb.key(): lb.expert_score for lb in b}
+    both = [(lb.expert_score, sb[lb.key()]) for lb in a if lb.expert_score is not None and sb[lb.key()] is not None]
+    n_null_both = sum(1 for lb in a if lb.expert_score is None and sb[lb.key()] is None)
+    n_one_null = sum(1 for lb in a if (lb.expert_score is None) != (sb[lb.key()] is None))
+    n = len(both)
+    pearson = None
+    if n >= 2:
+        ma, mb = sum(x for x, _ in both) / n, sum(y for _, y in both) / n
+        va, vb = sum((x - ma) ** 2 for x, _ in both), sum((y - mb) ** 2 for _, y in both)
+        if va > 0 and vb > 0:
+            pearson = sum((x - ma) * (y - mb) for x, y in both) / math.sqrt(va * vb)
+    return {"n_keys": len(a), "n_scored_by_both": n, "n_unknown_by_both": n_null_both, "n_unknown_by_one": n_one_null,
+            "mean_abs_diff": sum(abs(x - y) for x, y in both) / n if n else None,
+            "share_within_0_25": sum(abs(x - y) <= 0.25 for x, y in both) / n if n else None, "pearson": pearson}
+
+
 def relevance_map(final: Sequence[ExpertRelevanceLabel], candidate_id: str) -> dict[str, int]:
     return {lb.vacancy_id: lb.grade for lb in final if lb.candidate_id == candidate_id}
 

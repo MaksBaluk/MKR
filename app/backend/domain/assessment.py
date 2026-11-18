@@ -76,14 +76,22 @@ def validate_against_context(
 ) -> list[str]:
     """Return a list of errors; empty means the output is structurally acceptable."""
     errors: list[str] = []
+    seen: set[str] = set()
     for c in out.criteria:
+        if c.criterion_id in seen:
+            errors.append(f"duplicate criterion {c.criterion_id}")
+        seen.add(c.criterion_id)
         if c.criterion_id not in allowed_criteria:
             errors.append(f"unknown criterion {c.criterion_id}")
         if c.score is not None and (not math.isfinite(c.score) or not 0.0 <= c.score <= 1.0):
             errors.append(f"score out of range for {c.criterion_id}")
+        if c.score is not None and not any(ev.exact_excerpt.strip() for ev in c.evidence):
+            errors.append(f"score without evidence for {c.criterion_id}")  # a number must rest on a quoted excerpt
         for ev in c.evidence:
             text = turn_texts.get(ev.turn_id)
-            if text is None:
+            if not ev.exact_excerpt.strip():
+                errors.append(f"blank excerpt for {c.criterion_id}")
+            elif text is None:
                 errors.append(f"unknown turn {ev.turn_id}")
             elif ev.exact_excerpt not in text:
                 errors.append(f"excerpt not in turn {ev.turn_id}")

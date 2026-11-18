@@ -94,6 +94,11 @@ export function CompetencyRatings({ track, profileId, competencies }: {
   return (
     <div className="flex flex-col gap-3">
       {saveError && <Alert role="alert" variant="danger">{saveError}</Alert>}
+      <p className="text-xs text-ink-muted">
+        {graded && <>Чорна риска і кольорова смуга зверху — оцінка співбесіди (LLM), її змінити не можна. </>}
+        Фіолетова смуга знизу і кружок — ваша самооцінка: пересуньте кружок від 0% («не володію») до 100% («впевнено володію»).
+        Самооцінка не впливає на оцінку співбесіди.
+      </p>
       <ul className="grid gap-3 lg:grid-cols-2">
         {shown.map((r) => {
           const id = `cr-${r.id}`;
@@ -112,32 +117,45 @@ export function CompetencyRatings({ track, profileId, competencies }: {
                       орієнтовна<span className="sr-only">: замало свідчень у відповідях</span>
                     </span>
                   )}
-                  <span className="font-medium text-ink">Я {r.self === null ? '—' : `${pct(r.self)}%`}</span>
+                  <span className="font-medium text-violet-700" title="Ваша самооцінка">Ви {r.self === null ? '—' : `${pct(r.self)}%`}</span>
                   {r.diff !== null && (() => { const c = diffChip(r.diff); return (
                     <span className="rounded-full bg-surface-muted px-1.5 py-0.5 text-ink" title={c.hint}>{c.text}<span className="sr-only">: {c.hint}</span></span>
                   ); })()}
                 </span>
               </div>
-              <div className="flex items-center gap-1">
-                <div className="relative h-11 min-w-0 flex-1" role="group" aria-label={rowSummary(r.llm, r.self)}>
+              <div className="flex items-start gap-1">
+                <div className="min-w-0 flex-1">
+                <div className="relative h-11" role="group" aria-label={rowSummary(r.llm, r.self)}>
                   <div className="pointer-events-none absolute inset-x-3.5 top-1/2 h-2.5 -translate-y-1/2 overflow-hidden rounded-full bg-surface-muted">
-                    {r.llm === null ? (
-                      graded && <span className="absolute inset-0 bg-[repeating-linear-gradient(135deg,var(--color-line-strong)_0_2px,transparent_2px_6px)]" />
-                    ) : (
+                    {r.llm !== null && (
                       <span className={`absolute inset-y-0 left-0 ${band!.bar} transition-[width] motion-reduce:transition-none`} style={{ width: `${pct(r.llm)}%` }} />
                     )}
                   </div>
+                  {r.self !== null && (
+                    <div className="pointer-events-none absolute inset-x-3.5 top-[calc(50%+9px)] h-1.5 overflow-hidden rounded-full bg-violet-600/15" aria-hidden="true">
+                      <span className="absolute inset-y-0 left-0 bg-violet-600 transition-[width] motion-reduce:transition-none" style={{ width: `${pct(r.self)}%` }} />
+                    </div>
+                  )}
+                  {r.llm !== null && (
+                    <div className="pointer-events-none absolute inset-x-3.5 inset-y-0" aria-hidden="true">
+                      <span className="absolute top-1/2 h-6 w-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink" style={{ left: `${pct(r.llm)}%` }} />
+                    </div>
+                  )}
                   <input id={id} type="range" min={0} max={100} step={5} value={r.self === null ? 0 : pct(r.self)}
                     onChange={(e) => change(r.id, Number(e.target.value) / 100)}
                     aria-valuetext={r.self === null ? 'не вказано' : `${pct(r.self)} зі 100`}
                     className={`absolute inset-0 m-0 h-full w-full cursor-pointer appearance-none bg-transparent focus-visible:outline-none
                       [&::-webkit-slider-runnable-track]:h-11 [&::-webkit-slider-runnable-track]:bg-transparent
                       [&::-moz-range-track]:h-11 [&::-moz-range-track]:bg-transparent
-                      [&::-webkit-slider-thumb]:mt-2 [&::-webkit-slider-thumb]:size-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-[3px] [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-canvas [&::-webkit-slider-thumb]:shadow-sm
-                      [&::-moz-range-thumb]:size-6 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-[3px] [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-canvas
+                      [&::-webkit-slider-thumb]:mt-2 [&::-webkit-slider-thumb]:size-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-[3px] [&::-webkit-slider-thumb]:border-violet-600 [&::-webkit-slider-thumb]:bg-canvas [&::-webkit-slider-thumb]:shadow-sm
+                      [&::-moz-range-thumb]:size-6 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-[3px] [&::-moz-range-thumb]:border-violet-600 [&::-moz-range-thumb]:bg-canvas
                       focus-visible:[&::-webkit-slider-thumb]:ring-2 focus-visible:[&::-webkit-slider-thumb]:ring-ring focus-visible:[&::-webkit-slider-thumb]:ring-offset-2
                       focus-visible:[&::-moz-range-thumb]:outline-2 focus-visible:[&::-moz-range-thumb]:outline-ring
                       ${r.self === null ? '[&::-webkit-slider-thumb]:border-dashed [&::-webkit-slider-thumb]:border-line-strong [&::-moz-range-thumb]:border-dashed [&::-moz-range-thumb]:border-line-strong' : ''}`} />
+                </div>
+                <div className="mx-3.5 flex justify-between text-[11px] leading-none text-ink-subtle" aria-hidden="true">
+                  <span>0% — не володію</span><span>100% — впевнено володію</span>
+                </div>
                 </div>
                 <button type="button" onClick={() => change(r.id, null)} disabled={r.self === null}
                   className="min-h-11 shrink-0 cursor-pointer rounded-md px-2 text-xs text-ink-muted hover:bg-surface-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:invisible">

@@ -1,0 +1,47 @@
+[
+  {
+    "import_version": "djinni-import-v1",
+    "track": "python",
+    "date": "2026-11-18",
+    "listed": 90,
+    "fetched": 72,
+    "accepted": 30,
+    "duplicates": 0,
+    "rejected": {
+      "fewer than 3 requirement groups": 42,
+      "fewer than 2 mandatory groups": 40,
+      "fewer than 3 distinct competencies": 41
+    },
+    "http_errors": 0
+  },
+  {
+    "import_version": "djinni-import-v1",
+    "track": "marketing",
+    "date": "2026-11-18",
+    "listed": 90,
+    "fetched": 90,
+    "accepted": 14,
+    "duplicates": 0,
+    "rejected": {
+      "fewer than 3 requirement groups": 75,
+      "fewer than 2 mandatory groups": 72,
+      "fewer than 3 distinct competencies": 74
+    },
+    "http_errors": 0
+  },
+  {
+    "import_version": "djinni-import-v1",
+    "track": "design",
+    "date": "2026-11-18",
+    "listed": 193,
+    "fetched": 103,
+    "accepted": 5,
+    "duplicates": 0,
+    "rejected": {
+      "fewer than 3 requirement groups": 98,
+      "fewer than 2 mandatory groups": 97,
+      "fewer than 3 distinct competencies": 98
+    },
+    "http_errors": 0
+  }
+]

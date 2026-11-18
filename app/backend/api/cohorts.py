@@ -34,7 +34,9 @@ def _vacancy_revisions(db: Session, track: str) -> list[dict]:
             "groups": [
                 {"id": g.id, "kind": g.kind,
                  "alternatives": sorted(
-                     ({"competency_id": a.competency_id, "required_level": a.required_level} for a in g.alternatives),
+                     ({"competency_id": a.competency_id, "required_level": a.required_level,
+                       "criterion_ids": a.criterion_ids, "criteria_source": a.criteria_source,
+                       "tau": a.tau, "tau_source": a.tau_source} for a in g.alternatives),
                      key=lambda a: a["competency_id"])}
                 for g in v.groups
             ],

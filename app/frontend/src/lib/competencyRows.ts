@@ -39,6 +39,6 @@ export function mergeCompetencyRows(
 }
 
 export function diffLabel(diff: number): string {
-  if (diff === 0) return '0 в.п. — оцінки збігаються';
-  return diff > 0 ? `+${diff} в.п. — самооцінка вища` : `−${Math.abs(diff)} в.п. — самооцінка нижча`;
+  if (diff === 0) return 'оцінки збігаються';
+  return diff > 0 ? `самооцінка вища на ${diff}%` : `самооцінка нижча на ${Math.abs(diff)}%`;
 }

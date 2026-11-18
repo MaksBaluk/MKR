@@ -1,7 +1,7 @@
 """Relational entities. Immutable vacancy snapshots store revision-safe JSON copies."""
 from datetime import datetime, timezone
 from uuid import uuid4
-from sqlalchemy import Boolean, DateTime, false, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, Index
+from sqlalchemy import Boolean, DateTime, false, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .db import Base
 
@@ -84,6 +84,10 @@ class Vacancy(Base):
     source_type: Mapped[str] = mapped_column(String(30), default="DEMO_CURATED")
     source_url: Mapped[str | None] = mapped_column(String(600), nullable=True)
     fixture_version: Mapped[str] = mapped_column(String(32), default="fixtures-v1")
+    # provenance of REAL_IMPORTED rows (NULL for fixtures): when fetched, when posted, importer + level-rule version
+    retrieved_at: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    date_posted: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    import_version: Mapped[str | None] = mapped_column(String(60), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     groups: Mapped[list["RequirementGroup"]] = relationship(
         back_populates="vacancy", cascade="all,delete-orphan", order_by="RequirementGroup.sort_order"
@@ -111,6 +115,11 @@ class RequirementAlternative(Base):
     competency_id: Mapped[str] = mapped_column(ForeignKey("competencies.id"), index=True)
     required_level: Mapped[int] = mapped_column(Integer)
     normalization_status: Mapped[str] = mapped_column(String(25), default="ACCEPTED_CURATED")
+    # D_vga: rubric criteria this requirement needs (None = legacy row, whole rubric). tau: pass threshold with its source.
+    criterion_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    criteria_source: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    tau: Mapped[float | None] = mapped_column(Float, nullable=True)
+    tau_source: Mapped[str | None] = mapped_column(String(40), nullable=True)
     group: Mapped[RequirementGroup] = relationship(back_populates="alternatives")
 
 

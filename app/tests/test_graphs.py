@@ -191,10 +191,11 @@ def test_action_score_is_mean_of_non_null_latest_criteria(db):
         assert m() == pytest.approx(0.6)
         add("a", None, 3)
         s.commit()
-        assert m() == pytest.approx(0.8)  # a now null: only b counts
+        assert m() == pytest.approx(0.6)  # a newer null revision never erases the earlier score (history is kept)
         add("b", None, 2)
         s.commit()
-        assert m() is None
+        assert m() == pytest.approx(0.6)
+        assert len(s.scalars(select(CriterionAssessment)).all()) == 6  # every revision stays stored
 
 
 @pytest.mark.parametrize("ok", [

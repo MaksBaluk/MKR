@@ -140,7 +140,8 @@ Runs with scripted answers are only a pipeline check, not evidence of real-candi
 
 ## Data and implementation
 
-- `app/fixtures/vacancies.json` — **90** invented, curated vacancies (30 Python, 30 marketing, 30 design), each with ~11 structured S/F/U requirement groups, descriptions, responsibilities, benefits, salaries and seniority.
+- `app/fixtures/vacancies.json` — **180** invented vacancies (90 `DEMO_CURATED` + 90 `SYNTHETIC_GENERATED`; 60 per track), each with structured S/F/U requirement groups. They are not real postings and the UI labels them «Приклад» (вигадана вакансія; примітка про це в підказці).
+- `app/fixtures/vacancies_real.json` — **49** public Djinni postings (`REAL_IMPORTED`: 30 Python, 14 marketing, 5 design) fetched on 2026-11-18 with the site owner's permission (stated by the project owner) by `app/scripts/import_djinni.py`: structured fields, `source_url`, retrieval date and verbatim requirement excerpts only, never the full text. Run `cd app && uv run python scripts/import_djinni.py --confirm-permission --track python --limit 30` (refuses without the flag, checks `robots.txt`, 1 request per 2 s, stops on HTTP 403/429), then `uv run python scripts/derive_vacancy_criteria.py`. Requirement matching is the alias table in `backend/domain/vacancy_import.py`; levels, `D_vga` and τ are documented rules, not employer data. Import report: `app/fixtures/vacancies_real_import_report.json`.
 - `app/fixtures/competencies.json` — **60** local canonical action-level competencies; this is a curated catalog, **not an ESCO import**.
 - `app/fixtures/questions.json` — **120** curated interview questions.
 - `app/backend/` — API, auth, candidate profiles, immutable vacancy snapshots, interviews, match explanations, optional LLM adapter.

@@ -43,8 +43,8 @@ describe('reason and certainty', () => {
 
 describe('diffLabel', () => {
   it('uses sign and words', () => {
-    expect(diffLabel(15)).toBe('+15 в.п. — самооцінка вища');
-    expect(diffLabel(-10)).toBe('−10 в.п. — самооцінка нижча');
-    expect(diffLabel(0)).toBe('0 в.п. — оцінки збігаються');
+    expect(diffLabel(15)).toBe('самооцінка вища на 15%');
+    expect(diffLabel(-10)).toBe('самооцінка нижча на 10%');
+    expect(diffLabel(0)).toBe('оцінки збігаються');
   });
 });

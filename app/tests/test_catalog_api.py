@@ -78,7 +78,8 @@ def test_salary_min_semantics(client, db):
     assert all(i["salary_max"] is None or i["salary_max"] >= 2500 for i in items)
     assert len(items) < get(client)["total"]
     huge = all_items(client, salary_min=10**9)
-    assert [i["id"] for i in huge] == ["nosal-1"]
+    assert "nosal-1" in [i["id"] for i in huge]
+    assert all(i["salary_max"] is None for i in huge)  # unknown salary passes; imported postings without salary too
 
 
 def test_sorts_are_ordered(client):
@@ -142,7 +143,7 @@ def test_detail_shape(client):
     for key in ["description", "responsibilities", "benefits", "stack", "summary", "source_type",
                 "source_label", "source_url", "fixture_version", "requirements_count", "requirements"]:
         assert key in d
-    assert d["source_label"] == "Djinni"
+    assert d["source_label"] == "Приклад"  # python-01 is an invented fixture
     assert d["requirements_count"] == len(d["requirements"]) > 0
     kinds = {r["kind"] for r in d["requirements"]}
     assert kinds == {"MANDATORY", "DESIRED"}
@@ -163,16 +164,16 @@ def test_detail_404(client, db):
 
 
 def test_source_label(client, db):
-    assert client.get(f"{URL}/python-01").json()["source_label"] == "Djinni"
-    assert client.get(f"{URL}/python-31").json()["source_label"] == "Djinni"
+    assert client.get(f"{URL}/python-01").json()["source_label"] == "Приклад"
+    assert client.get(f"{URL}/python-31").json()["source_label"] == "Приклад"
     with db() as s:
         s.add(Vacancy(id="synth-1", track="python", title="Synthetic", company="Fake", seniority="JUNIOR",
                       years_min=0, location="Київ", work_mode="OFFICE", summary="s", description="d",
                       source_type="SYNTHETIC_GENERATED"))
         s.commit()
-    assert client.get(f"{URL}/synth-1").json()["source_label"] == "Djinni"
+    assert client.get(f"{URL}/synth-1").json()["source_label"] == "Приклад"
     item = next(i for i in all_items(client, q="Synthetic") if i["id"] == "synth-1")
-    assert item["source_label"] == "Djinni"
+    assert item["source_label"] == "Приклад"
 
 
 def test_competencies_unchanged(client):

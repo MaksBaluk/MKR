@@ -16,10 +16,19 @@ from .topic_summary import RubricCriteria
 RubricMap = Mapping[str, RubricCriteria]  # action_id -> criteria; missing action => [(action_id, 1.0)]
 
 TAU_BY_LEVEL = {1: 0.50, 2: 0.75, 3: 0.90}  # LEGACY_MIGRATION: 1→.50, 2→.75, 3→.90
+TAU_SOURCE_LEVEL_MAP = "WORKING_ASSUMPTION_LEVEL_MAP"  # vacancies carry no employer-stated threshold: tau is a working assumption
 
 
 def tau_for(level: int) -> float:
     return TAU_BY_LEVEL.get(level, 0.75)
+
+
+def alt_tau(alt: Mapping) -> float | None:
+    """Pass threshold of one requirement alternative: its own explicit `tau`, else the working-assumption level map.
+    A level outside the map with no explicit tau has no reliable threshold: the alternative is not evaluable (None)."""
+    if alt.get("tau") is not None:
+        return float(alt["tau"])
+    return TAU_BY_LEVEL.get(alt["required_level"])
 
 
 @dataclass(frozen=True)
@@ -31,21 +40,28 @@ class GroupEval:
 
 
 def alt_criteria(alt: Mapping, rubrics: RubricMap) -> list[tuple[str, float]]:
-    """Criteria one alternative requires: its criterion_ids subset of the rubric, else the whole rubric."""
+    """D_vga: the rubric criteria this requirement needs, in rubric order, with rubric weights.
+
+    An explicit `criterion_ids` is authoritative: ids missing from the rubric are dropped and an empty result means the
+    requirement cannot be assessed (never widened to the whole rubric). Only a legacy alternative with no
+    `criterion_ids` at all (rows created before migration 0013) falls back to the whole rubric."""
     cid = alt["competency_id"]
     rubric = list(rubrics.get(cid) or [(cid, 1.0)])
     ids = alt.get("criterion_ids")
-    if ids:
-        sub = [(c, w) for c, w in rubric if c in set(ids)]
-        if sub:
-            return sub
-    return rubric
+    if ids is None:
+        return rubric
+    wanted = set(ids)
+    return [(c, w) for c, w in rubric if c in wanted]
 
 
 def eval_alternative(alt: Mapping, scores: Mapping[str, float | None], rubrics: RubricMap) -> GroupEval:
-    """SATISFIED iff every required criterion meets tau; FAILED iff any definitely fails. MATH_SPEC §4."""
-    tau = tau_for(alt["required_level"])
+    """SATISFIED iff every required criterion meets tau; FAILED iff any definitely fails. MATH_SPEC §4.
+
+    No resolvable D_vga or no reliable tau => UNRESOLVED with the widest interval [0, 1]: unknown stays unknown."""
+    tau = alt_tau(alt)
     crit = alt_criteria(alt, rubrics)
+    if tau is None or not crit:
+        return GroupEval("UNRESOLVED", 0.0, 1.0, frozenset({alt["competency_id"]}))
     ids = [c for c, _ in crit]
     sts = [mandatory_status(scores.get(c), tau) for c in ids]
     if all(st == "SATISFIED" for st in sts):

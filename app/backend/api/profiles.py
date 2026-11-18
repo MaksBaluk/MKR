@@ -11,10 +11,12 @@ from sqlalchemy.orm import Session
 from backend.api.cohorts import _market_input, get_or_create_cohort
 from backend.api.common import create_attempt, open_attempt
 from backend.api.core import (_names, _revisions, action_summary, attempt_scores, cohort_actions, current_criteria_rows,
+                              effective_rows,
                               profile_self_ratings, rubric_map)
 from backend.api.recommendations import NOTE, rank_items
 from backend.db import get_db
-from backend.domain.core_flow import alt_criteria, eval_alternative, eval_group, tau_for
+from backend.domain.core_flow import (TAU_SOURCE_LEVEL_MAP, alt_criteria, alt_tau, eval_alternative, eval_group,
+                                      tau_for)
 from backend.domain.topic_summary import topic_summary
 from backend.domain.market import compute_market
 from backend.models import (CandidateProfile, CandidateSelfRating, CohortSnapshot, Competency, CoreInterview,
@@ -202,10 +204,7 @@ def _competencies(db: Session, iv: CoreInterview) -> list[dict]:
     rows = current_criteria_rows(db.scalars(
         select(CriterionAssessment).where(CriterionAssessment.session_id == iv.id)
         .order_by(CriterionAssessment.revision, CriterionAssessment.created_at)).all())
-    latest_rev: dict[str, int] = {}
-    for r in rows:
-        latest_rev[r.action_id] = max(latest_rev.get(r.action_id, 0), r.revision)
-    cur = [r for r in rows if r.revision == latest_rev[r.action_id]]
+    cur = effective_rows(rows)  # current score per criterion across all revisions (a later null never erases one)
     cscores = attempt_scores(db, iv.id)
     summaries = action_summary(rows, rubric_map(db, {r.action_id for r in rows}, cscores))
     names = _names(db)
@@ -249,6 +248,7 @@ def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(
                                          profile_self_ratings(db, prof.id))]
     # Display order (owner decision, deviates from thesis (2.15)): displayed confirmed_share percent first. The sort is
     # stable over rank_items' (2.15) + T_v/J_v + id order, so equal percents keep that key. Filters keep relative order.
+    # POST /recommendations keeps the pure (2.15) key.
     items.sort(key=lambda i: -i["confirmed_share"])
     if work_mode:
         items = [i for i in items if (i["work_mode"] or "").lower() == work_mode.lower()]
@@ -296,8 +296,10 @@ def result_detail(profile_id: str, vacancy_id: str, db: Session = Depends(get_db
         ev = eval_group(g["alternatives"], scores, rubrics)
         alternatives = []
         for a in g["alternatives"]:
-            tau = tau_for(a["required_level"])
-            req = topic_summary(alt_criteria(a, rubrics), scores)  # M_c / E_c over the alternative's required criteria
+            tau = alt_tau(a)
+            tau = tau_for(a["required_level"]) if tau is None else tau
+            required = alt_criteria(a, rubrics)
+            req = topic_summary(required, scores)  # M_c / E_c over the alternative's required criteria
             score = req.m
             status = eval_alternative(a, scores, rubrics).status  # criterion-level, same as ranking
             # BORDERLINE only when every required criterion is graded; a partly graded topic stays UNKNOWN.
@@ -306,6 +308,8 @@ def result_detail(profile_id: str, vacancy_id: str, db: Session = Depends(get_db
             level = min(3, max(1, a["required_level"]))
             alternatives.append({"competency_id": a["competency_id"], "name": names.get(a["competency_id"], a["competency_id"]),
                                  "required_level": level, "required_label": LEVEL_WORDS[level], "threshold": tau,
+                                 "threshold_source": a.get("tau_source") or TAU_SOURCE_LEVEL_MAP,
+                                 "required_criteria": [c for c, _ in required],
                                  "candidate_score": score, "coverage": req.e, "state": state})
         groups.append({"id": g.get("id"), "kind": g["kind"], "label": g.get("label", ""), "excerpt": g.get("excerpt", ""),
                        "status": ev.status, "alternatives": alternatives})

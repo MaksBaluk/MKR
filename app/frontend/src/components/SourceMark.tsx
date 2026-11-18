@@ -11,8 +11,9 @@ export function SourceMark({ label }: { label: string | null }) {
       </span>
     );
   return (
-    <span className={`${base} border border-line bg-canvas text-ink-subtle`}>
+    <span className={`${base} border border-line bg-canvas text-ink-subtle`} title={label === 'Приклад' ? 'Приклад вакансії для демонстрації, не реальне оголошення' : label ? `Джерело: ${label}` : undefined}>
       <Building2 className="size-6" aria-hidden="true" />
+      {label && <span className="sr-only">{label === 'Приклад' ? 'Приклад вакансії, не реальне оголошення' : `Джерело: ${label}`}</span>}
     </span>
   );
 }

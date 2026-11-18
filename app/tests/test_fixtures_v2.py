@@ -117,11 +117,18 @@ def test_every_action_has_five_distinct_free_text_questions():
             assert q["id"].endswith("-v2") and q["rubric_version"] == "v1" and q["options"] == []
 
 
+def real_fixture():
+    try:
+        return read_fixture("vacancies_real.json")
+    except FileNotFoundError:
+        return []
+
+
 def test_seed_is_idempotent_with_rubrics(db):
     with db() as s:
         before = (s.scalar(select(func.count(Vacancy.id))), s.scalar(select(func.count(Rubric.id))),
                   s.scalar(select(func.count(RubricCriterion.id))))
-        assert before[0] == len(read_fixture("vacancies.json")) and before[1] == 60
+        assert before[0] == len(read_fixture("vacancies.json")) + len(real_fixture()) and before[1] == 60
         again = seed_database(s, demo_mode=False)
         assert all(value == 0 for key, value in again.items() if key.endswith("_added")), again
         after = (s.scalar(select(func.count(Vacancy.id))), s.scalar(select(func.count(Rubric.id))),

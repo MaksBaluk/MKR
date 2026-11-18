@@ -1,0 +1,45 @@
+{
+ "base": "http://localhost:8000 (Docker, PostgreSQL)",
+ "results": [
+  {
+   "check": "profile created on PostgreSQL",
+   "status": "PASS",
+   "detail": "201"
+  },
+  {
+   "check": "resume: open interview returns the pending question from the server",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "stale version rejected (409)",
+   "status": "PASS",
+   "detail": "409"
+  },
+  {
+   "check": "answer accepted",
+   "status": "PASS",
+   "detail": "200 UNGRADED"
+  },
+  {
+   "check": "replay with the same idempotency key returns the same result",
+   "status": "PASS",
+   "detail": "200 v2 vs v2"
+  },
+  {
+   "check": "answer text persisted even when the evaluator is unavailable/ungraded",
+   "status": "PASS",
+   "detail": "status=UNGRADED"
+  },
+  {
+   "check": "isolation: another user cannot read the interview",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "isolation: another user cannot read the profile results",
+   "status": "PASS",
+   "detail": ""
+  }
+ ]
+}

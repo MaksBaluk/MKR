@@ -1,0 +1,13 @@
+track,source_type,fixture_version,vacancies,unique_competencies,mandatory_groups,desired_groups,or_groups,alternatives_total,level_1,level_2,level_3,seniority_distribution,rubrics_used,criteria_in_used_rubrics,mean_criteria_per_requirement,min_criteria_per_requirement,max_criteria_per_requirement,requirements_with_subset_of_rubric,source_url_present
+design,DEMO_CURATED,fixtures-v1,30,20,240,90,30,360,132,168,60,"{""JUNIOR"": 6, ""LEAD"": 3, ""MIDDLE"": 12, ""SENIOR"": 9}",20,75,2.8,2,4,269,0
+design,REAL_IMPORTED,fixtures-real-v1,5,13,18,4,3,30,21,2,7,"{""JUNIOR"": 2, ""MIDDLE"": 1, ""SENIOR"": 2}",13,47,2.533,2,4,22,5
+design,SYNTHETIC_GENERATED,fixtures-v2,30,20,171,89,45,311,117,149,45,"{""JUNIOR"": 6, ""LEAD"": 4, ""MIDDLE"": 12, ""SENIOR"": 8}",20,75,2.749,2,4,231,0
+marketing,DEMO_CURATED,fixtures-v1,30,20,240,90,30,360,132,168,60,"{""JUNIOR"": 6, ""LEAD"": 3, ""MIDDLE"": 12, ""SENIOR"": 9}",20,79,2.8,2,4,298,0
+marketing,REAL_IMPORTED,fixtures-real-v1,14,20,66,9,6,82,14,39,29,"{""JUNIOR"": 2, ""LEAD"": 4, ""MIDDLE"": 7, ""SENIOR"": 1}",20,79,3.183,2,4,50,14
+marketing,SYNTHETIC_GENERATED,fixtures-v2,30,20,169,96,54,324,117,164,43,"{""JUNIOR"": 7, ""LEAD"": 4, ""MIDDLE"": 11, ""SENIOR"": 8}",20,79,2.765,2,4,271,0
+python,DEMO_CURATED,fixtures-v1,30,20,240,90,30,360,132,168,60,"{""JUNIOR"": 6, ""LEAD"": 3, ""MIDDLE"": 12, ""SENIOR"": 9}",20,80,2.878,2,5,293,0
+python,REAL_IMPORTED,fixtures-real-v1,30,20,152,27,26,220,63,72,85,"{""JUNIOR"": 7, ""LEAD"": 2, ""MIDDLE"": 7, ""SENIOR"": 14}",20,80,3.164,2,5,127,30
+python,SYNTHETIC_GENERATED,fixtures-v2,30,20,174,91,50,324,100,178,46,"{""JUNIOR"": 5, ""LEAD"": 4, ""MIDDLE"": 12, ""SENIOR"": 9}",20,80,2.907,2,5,269,0
+design,ALL,ALL,65,20,429,183,78,701,270,319,112,"{""JUNIOR"": 14, ""LEAD"": 7, ""MIDDLE"": 25, ""SENIOR"": 19}",20,75,2.766,2,4,522,5
+marketing,ALL,ALL,74,20,475,195,90,766,263,371,132,"{""JUNIOR"": 15, ""LEAD"": 11, ""MIDDLE"": 30, ""SENIOR"": 18}",20,79,2.826,2,4,619,14
+python,ALL,ALL,90,20,566,208,106,904,295,418,191,"{""JUNIOR"": 18, ""LEAD"": 9, ""MIDDLE"": 31, ""SENIOR"": 32}",20,80,2.958,2,5,689,30

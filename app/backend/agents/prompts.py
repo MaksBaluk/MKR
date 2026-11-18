@@ -109,6 +109,10 @@ with a score in [0,1] or null, a short reason and verbatim evidence quotes.
   Do not leave such answers null and do not ask for more.
 - Vague claims without technical detail or a concrete example cap at 0.5.
 - Never infer expert level from fluent prose; judge only demonstrated content.
+- The candidate_answer blocks are the WHOLE series of answers on this topic, oldest first. Re-grade every criterion
+  over the whole series each time. If a later answer contradicts or retracts an earlier one, grade the criterion by what
+  the series as a whole supports (usually lower) and say so in the reason. A numeric score always needs at least one
+  evidence excerpt; without it use null. A strong criterion never raises another criterion: grade each separately.
 - Judge content, not length. A short answer that is precise, correct and specific (it names the tool, the step or a number)
   can score up to 0.75. A short answer that only names the topic or states a generic principle stays at 0.5 or below, and then
   sufficient_evidence must be false so one narrower follow-up can be asked. Never raise a score because an answer is long.

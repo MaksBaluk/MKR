@@ -1,0 +1,27 @@
+tests/test_interview_flow.py::test_resume_returns_open_interview_without_browser_storage PASSED
+tests/test_interview_flow.py::test_answer_replay_same_key_returns_same_turn PASSED
+tests/test_interview_flow.py::test_stale_version_rejected PASSED
+tests/test_interview_flow.py::test_ungraded_answer_moves_to_next_topic PASSED
+tests/test_interview_completion.py::test_parallel_next_question_returns_the_winner_not_a_500 PASSED
+tests/test_graphs.py::test_timeout_not_retried PASSED
+tests/test_graphs.py::test_unknown_id_retried_once_then_ungraded PASSED
+tests/test_graphs.py::test_rate_limited_calls_are_retried_after_a_wait PASSED
+tests/test_graphs.py::test_rate_limit_that_never_clears_ends_as_a_provider_failure PASSED
+tests/test_graphs.py::test_no_model_ungraded PASSED
+tests/test_followup_flow.py::test_provider_failure_is_ungraded_without_goal PASSED
+tests/test_experiment_runner.py::test_llm_failure_creates_no_grades PASSED
+tests/test_profiles_api.py::test_owner_isolation PASSED
+tests/test_audit_regressions.py::test_valid_output_passes PASSED
+tests/test_audit_regressions.py::test_score_without_evidence_rejected PASSED
+tests/test_audit_regressions.py::test_blank_excerpt_rejected PASSED
+tests/test_audit_regressions.py::test_duplicate_criterion_rejected PASSED
+tests/test_audit_regressions.py::test_unknown_criterion_unknown_turn_and_foreign_quote_rejected PASSED
+tests/test_audit_regressions.py::test_score_out_of_range_rejected[1.2] PASSED
+tests/test_audit_regressions.py::test_score_out_of_range_rejected[-0.1] PASSED
+tests/test_audit_regressions.py::test_score_out_of_range_rejected[nan] PASSED
+tests/test_audit_regressions.py::test_one_strong_criterion_does_not_make_topic_strong PASSED
+tests/test_audit_regressions.py::test_off_topic_and_null_never_erase_confirmed_scores_and_history_is_kept PASSED
+tests/test_audit_regressions.py::test_contradicting_answer_is_regraded_over_whole_series PASSED
+tests/test_audit_regressions.py::test_partial_null_in_new_revision_keeps_earlier_score PASSED
+tests/test_cohorts_api.py::test_post_is_idempotent PASSED
+============================== 26 passed in 4.10s ==============================

@@ -1,0 +1,174 @@
+{
+  "generated": "2026-11-18T18:32:49+0100",
+  "kind": "SIMULATED_CONTROLLED_RUNS",
+  "answer_source": "SIMULATED",
+  "evaluator": "SIMULATED_STUB (deterministic, not an LLM)",
+  "real_llm_calls": 0,
+  "claim_scope": "pipeline behaviour of planner, difficulty controller, follow-up targeting and ranking only; no statement about real candidates, real evaluator quality or real vacancies",
+  "algorithm_version": "rank-2.15+tv-jv/v1",
+  "total_budget": 12,
+  "max_topics": 10,
+  "max_per_topic": 5,
+  "static_questions_per_topic": 2,
+  "database": "SQLite in-memory per batch (product database never used)",
+  "configs": [
+    {
+      "label": "A",
+      "mode": "INITIAL_PROFILE"
+    },
+    {
+      "label": "B",
+      "mode": "STATIC_INTERVIEW",
+      "total_budget": 12
+    },
+    {
+      "label": "C",
+      "mode": "ADAPTIVE_INTERVIEW",
+      "total_budget": 12
+    },
+    {
+      "label": "C-difficulty",
+      "mode": "ADAPTIVE_INTERVIEW",
+      "total_budget": 12,
+      "adaptive_difficulty": false
+    },
+    {
+      "label": "C-followup",
+      "mode": "ADAPTIVE_INTERVIEW",
+      "total_budget": 12,
+      "adaptive_followup": false
+    },
+    {
+      "label": "C-topics",
+      "mode": "ADAPTIVE_INTERVIEW",
+      "total_budget": 12,
+      "adaptive_topics": false
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "sim-junior",
+      "desired_title": "Junior Python Developer",
+      "years_experience": 1,
+      "target_level": "junior",
+      "track": "python",
+      "location": "Київ",
+      "work_mode": "remote",
+      "self_ratings": {
+        "python-core": 0.6,
+        "git": 0.5,
+        "pytest": 0.4,
+        "kafka": 0.8
+      },
+      "hidden_truth": {
+        "default": 0.45,
+        "base": {
+          "python-core": 0.7,
+          "git": 0.7,
+          "rest-api": 0.65,
+          "pytest": 0.6,
+          "sql": 0.6,
+          "kafka": 0.1,
+          "kubernetes": 0.05,
+          "redis": 0.15,
+          "aws": 0.1,
+          "ci-cd": 0.2
+        }
+      }
+    },
+    {
+      "candidate_id": "sim-middle",
+      "desired_title": "Python Backend Developer",
+      "years_experience": 4,
+      "target_level": "middle",
+      "track": "python",
+      "location": "Київ",
+      "work_mode": "remote",
+      "self_ratings": {
+        "python-core": 0.8,
+        "fastapi": 0.8,
+        "postgresql": 0.8,
+        "redis": 0.7
+      },
+      "hidden_truth": {
+        "default": 0.65,
+        "base": {
+          "fastapi": 0.9,
+          "django": 0.85,
+          "postgresql": 0.9,
+          "sql": 0.9,
+          "python-core": 0.9,
+          "kafka": 0.2,
+          "kubernetes": 0.3
+        }
+      }
+    },
+    {
+      "candidate_id": "sim-senior",
+      "desired_title": "Senior Python Engineer",
+      "years_experience": 8,
+      "target_level": "senior",
+      "track": "python",
+      "location": "Київ",
+      "work_mode": "remote",
+      "self_ratings": {
+        "python-core": 0.9,
+        "postgresql": 0.9,
+        "kubernetes": 0.9,
+        "kafka": 0.9
+      },
+      "hidden_truth": {
+        "default": 0.85,
+        "base": {
+          "kafka": 0.2,
+          "kubernetes": 0.25,
+          "redis": 0.5
+        }
+      }
+    }
+  ],
+  "run_count": 18,
+  "runs_per_candidate_config": 1,
+  "reproducibility": {
+    "batches": 2,
+    "normalized_sha256_batch1": "8b1985a0262d76ee",
+    "normalized_sha256_batch2": "8b1985a0262d76ee",
+    "identical": true,
+    "rerank_without_llm_matches_stored_order": true,
+    "wall_s": 12.6
+  },
+  "equal_conditions_check": {
+    "sim-junior": {
+      "same_cohort_sha256_all_modes": true,
+      "same_rubric_versions_interview_modes": true,
+      "same_total_budget_interview_modes": true,
+      "same_model_info_interview_modes": true,
+      "same_algorithm_version": true,
+      "same_profile_all_modes_except_generated_id": true
+    },
+    "sim-middle": {
+      "same_cohort_sha256_all_modes": true,
+      "same_rubric_versions_interview_modes": true,
+      "same_total_budget_interview_modes": true,
+      "same_model_info_interview_modes": true,
+      "same_algorithm_version": true,
+      "same_profile_all_modes_except_generated_id": true
+    },
+    "sim-senior": {
+      "same_cohort_sha256_all_modes": true,
+      "same_rubric_versions_interview_modes": true,
+      "same_total_budget_interview_modes": true,
+      "same_model_info_interview_modes": true,
+      "same_algorithm_version": true,
+      "same_profile_all_modes_except_generated_id": true
+    }
+  },
+  "rubric_versions": [
+    "v1"
+  ],
+  "prompt_version": "d1aec7a48cbcd16133dd55a1ee0f34e10021cc3b0e106e569d8c577971be3870",
+  "cohort_sha256": [
+    "bee5974491cd55994de7801ec1677f0b8f741e45e2dfb11200b6eecc2fbabcb7"
+  ],
+  "command": "cd app && uv run python -m scripts.chapter4.build_all"
+}

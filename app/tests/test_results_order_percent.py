@@ -51,3 +51,11 @@ def test_other_profile_ratings_do_not_change_order(client, auth, finished):  # n
         client.put(f"{API}/profiles/{finished['id']}/self-ratings/{c['action_id']}", json={"value": 0.95}, headers=auth)
     assert [i["vacancy_id"] for i in items(client, auth, b["id"])] == before
     assert client.get(f"{API}/profiles/{b['id']}/self-ratings", headers=auth).json()["items"] == []
+
+
+def test_domain_key_z0_high_percent_after_z2_low_percent():
+    """The pure (2.15) key used by /recommendations has no percent term: Z decides first."""
+    from backend.domain.ranking import VacancyRanking, rank
+    hi_pct_z0 = VacancyRanking("a", 0, 0, 0.9, 0.9, 0, 0, True, True, "RANKED", confirmed_share=0.9)
+    lo_pct_z2 = VacancyRanking("b", 2, 0, 0.1, 0.0, 0, 0, True, False, "RANKED", confirmed_share=0.1)
+    assert [r.vacancy_id for r in rank([hi_pct_z0, lo_pct_z2])] == ["b", "a"]

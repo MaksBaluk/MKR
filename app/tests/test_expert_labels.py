@@ -241,3 +241,28 @@ def test_missing_csv_column_row_numbered(tmp_path):
     with pytest.raises(LabelError) as e:
         load_relevance_labels(write(tmp_path, header, rows))
     assert e.value.errors[0].startswith("row 2:") and "rationale" in e.value.errors[0]
+
+
+def _agr_crit(annotator, cand, crit, score):
+    from backend.experiments.expert_labels import ExpertCriterionLabel
+    return ExpertCriterionLabel(candidate_id=cand, action_id="a", criterion_id=crit, rubric_version="v1", expert_score=score,
+                                evidence_reference="цитата з відповіді" if score is not None else "", annotator_id=annotator,
+                                label_version="g1", data_status="SYNTHETIC_TEST_DATA")
+
+
+def test_criterion_agreement_hand_computed():
+    from backend.experiments.expert_labels import criterion_agreement
+    a = [_agr_crit("A", "c1", "k1", 0.8), _agr_crit("A", "c1", "k2", 0.4), _agr_crit("A", "c1", "k3", None), _agr_crit("A", "c1", "k4", 0.2)]
+    b = [_agr_crit("B", "c1", "k1", 0.6), _agr_crit("B", "c1", "k2", 0.4), _agr_crit("B", "c1", "k3", None), _agr_crit("B", "c1", "k4", None)]
+    r = criterion_agreement(a, b)
+    assert (r["n_keys"], r["n_scored_by_both"], r["n_unknown_by_both"], r["n_unknown_by_one"]) == (4, 2, 1, 1)
+    assert r["mean_abs_diff"] == pytest.approx(0.1) and r["share_within_0_25"] == 1.0
+    assert r["pearson"] is not None  # two points with variance
+
+
+def test_criterion_agreement_rejects_same_annotator_and_key_mismatch():
+    from backend.experiments.expert_labels import LabelError, criterion_agreement
+    with pytest.raises(LabelError):
+        criterion_agreement([_agr_crit("A", "c1", "k1", 0.5)], [_agr_crit("A", "c1", "k1", 0.5)])
+    with pytest.raises(LabelError):
+        criterion_agreement([_agr_crit("A", "c1", "k1", 0.5)], [_agr_crit("B", "c1", "k2", 0.5)])

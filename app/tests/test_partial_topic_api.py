@@ -23,7 +23,8 @@ def _setup(db, finished, criterion_ids=None):
         revs = {k: dict(v) for k, v in snap.requirement_revisions.items()}
         revs[vid] = {**revs[vid], "groups": [{"id": "g1", "kind": "MANDATORY", "label": "x", "excerpt": "x",
                                               "alternatives": [alt]}]}
-        snap.requirement_revisions = revs
+        snap.requirement_revisions = {vid: revs[vid]}  # a one-vacancy cohort: the test is about this vacancy only
+        snap.vacancy_ids = [vid]
         for r in s.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == iv.id)).all():
             s.delete(r)
         s.add(CriterionAssessment(user_id=iv.user_id, session_id=iv.id, action_id=action,

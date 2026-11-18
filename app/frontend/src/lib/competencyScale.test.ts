@@ -3,9 +3,9 @@ import { diffChip, rowSummary } from './competencyScale';
 
 describe('diffChip', () => {
   it('signs the difference with real minus', () => {
-    expect(diffChip(10)).toEqual({ text: '+10 в.п.', hint: 'Самооцінка вища за оцінку LLM' });
-    expect(diffChip(-15)).toEqual({ text: '−15 в.п.', hint: 'Самооцінка нижча за оцінку LLM' });
-    expect(diffChip(0)).toEqual({ text: '0 в.п.', hint: 'Оцінки збігаються' });
+    expect(diffChip(10)).toEqual({ text: 'вище за LLM на 10%', hint: 'Ваша самооцінка вища за оцінку LLM' });
+    expect(diffChip(-15)).toEqual({ text: 'нижче за LLM на 15%', hint: 'Ваша самооцінка нижча за оцінку LLM' });
+    expect(diffChip(0)).toEqual({ text: 'збігається з LLM', hint: 'Самооцінка дорівнює оцінці LLM' });
   });
 });
 

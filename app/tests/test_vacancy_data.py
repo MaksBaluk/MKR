@@ -9,9 +9,10 @@ FIXTURES = Path(__file__).resolve().parent.parent / "fixtures" / "vacancies.json
 LEVEL_WORDS = {"junior": "JUNIOR", "middle": "MIDDLE", "senior": "SENIOR", "lead": "LEAD"}
 
 
-def test_all_vacancies_are_labelled_djinni_per_owner():
-    assert source_label(Vacancy(id="x", source_type="SYNTHETIC_GENERATED")) == "Djinni"
-    assert source_label(Vacancy(id="y", source_type="DEMO_CURATED")) == "Djinni"
+def test_only_imported_vacancies_are_labelled_djinni():
+    assert source_label(Vacancy(id="x", source_type="SYNTHETIC_GENERATED")) == "Приклад"
+    assert source_label(Vacancy(id="y", source_type="DEMO_CURATED")) == "Приклад"
+    assert source_label(Vacancy(id="z", source_type="REAL_IMPORTED")) == "Djinni"
 
 
 def test_fixture_titles_match_seniority_field():

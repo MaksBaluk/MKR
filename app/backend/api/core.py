@@ -59,9 +59,22 @@ def current_criteria_rows(rows) -> list:
     return [r for r in rows if not (r.action_id in dotted and r.criterion_id == r.action_id)]
 
 
+def effective_rows(rows) -> list:
+    """Current assessment per (action, criterion) from the full revision history (rows arrive oldest first).
+
+    The latest row with a score wins; a later null row (off-topic answer, criterion not covered by the new answer) never
+    erases an earlier score, but every revision stays stored. If no revision ever had a score, the latest row stays."""
+    best: dict[tuple[str, str], object] = {}
+    for r in current_criteria_rows(rows):
+        key = (r.action_id, r.criterion_id)
+        if r.score is not None or key not in best or best[key].score is None:
+            best[key] = r
+    return list(best.values())
+
+
 def criterion_scores(rows) -> dict[str, float | None]:
-    """Latest revision per criterion_id (rows arrive oldest first); legacy holistic rows per current_criteria_rows."""
-    return {r.criterion_id: r.score for r in current_criteria_rows(rows)}
+    """Current score per criterion_id via effective_rows (history is kept, null never overrides a score)."""
+    return {r.criterion_id: r.score for r in effective_rows(rows)}
 
 
 def action_summary(rows, rubrics: RubricMap) -> dict[str, TopicSummary]:
@@ -477,12 +490,13 @@ def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -
         db.flush()
     rev = (db.scalar(select(func.max(CriterionAssessment.revision)).where(
         CriterionAssessment.session_id == iv.id, CriterionAssessment.action_id == action_id)) or 0) + 1
-    if result.off_topic:  # null scores make the planner re-ask this action; nothing reaches ranking
+    if result.off_topic:  # recorded as a null revision (history); effective_rows keeps earlier scores intact
         turn.off_topic = True
+        inherited = bool(prior and prior[-1].sufficient_evidence)
         for cid in criteria:
             db.add(CriterionAssessment(user_id=user.id, session_id=iv.id, action_id=action_id, criterion_id=cid,
                                        rubric_id=rubric.id, score=None, reason="Відповідь поза темою співбесіди.",
-                                       evidence=[], revision=rev, sufficient_evidence=False))
+                                       evidence=[], revision=rev, sufficient_evidence=inherited))
         return "ACCEPTED"
     for c in result.output.criteria:
         db.add(CriterionAssessment(user_id=user.id, session_id=iv.id, action_id=action_id,
