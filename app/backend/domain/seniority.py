@@ -82,7 +82,7 @@ def _coverage(rule: LevelRule, evidence: Mapping[str, CriterionEvidence]) -> Lev
         assessed += 1
         if item.score >= rule.tau and item.evidence_turns:  # a confirmation must cite at least one answer
             confirmed.append(cid)
-        elif item.score < rule.tau - epsilon(rule.tau):
+        elif item.score < rule.tau - epsilon(rule.tau) and item.evidence_turns:  # untraceable low score: unresolved
             gaps.append(cid)
     total = len(rule.critical)
     a_share, c_share = assessed / total, len(confirmed) / total

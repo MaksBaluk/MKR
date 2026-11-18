@@ -353,6 +353,29 @@ class CoreTurn(Base):
                       UniqueConstraint("interview_id", "idempotency_key", name="uq_core_turn_idem"))
 
 
+class SeniorityAssessment(Base):
+    """Assessed level of one finished attempt under one level-policy version. Immutable: written once, never updated.
+    A new policy version adds a row; it never rewrites an earlier one. Never an input of the vacancy ranking."""
+    __tablename__ = "seniority_assessments"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    profile_id: Mapped[str | None] = mapped_column(
+        ForeignKey("candidate_profiles.id", ondelete="CASCADE"), nullable=True, index=True)
+    interview_id: Mapped[str] = mapped_column(ForeignKey("core_interviews.id", ondelete="CASCADE"), index=True)
+    track: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    policy_id: Mapped[str | None] = mapped_column(String(64), nullable=True)  # NULL: no level policy for the track
+    policy_version: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    policy_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    assessed_level: Mapped[str] = mapped_column(String(16), nullable=False)
+    highest_supported_level: Mapped[str] = mapped_column(String(16), nullable=False)
+    assessment_status: Mapped[str] = mapped_column(String(32), nullable=False)
+    result: Mapped[dict] = mapped_column(JSON, nullable=False)  # result_to_json(SeniorityResult)
+    rubric_versions: Mapped[dict] = mapped_column(JSON, nullable=False)  # {action_id: rubric version} of the evidence
+    desired_level: Mapped[str | None] = mapped_column(String(16), nullable=True)  # display copy only, never an input
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, nullable=False)
+    __table_args__ = (UniqueConstraint("interview_id", "policy_version", name="uq_seniority_attempt_policy"),)
+
+
 class ExperimentRun(Base):
     """One reproducible experiment run. No foreign keys: records must survive cohort/interview cleanup.
     `config` is ExperimentConfig.to_json(); older rows (before 0012) also hold `answer_source` there."""

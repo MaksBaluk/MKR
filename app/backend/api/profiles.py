@@ -13,6 +13,7 @@ from backend.api.common import create_attempt, open_attempt
 from backend.api.core import (_names, _revisions, action_summary, attempt_scores, cohort_actions, current_criteria_rows,
                               effective_rows,
                               profile_self_ratings, rubric_map)
+from backend.api.level import level_for_attempt
 from backend.api.recommendations import NOTE, rank_items
 from backend.db import get_db
 from backend.domain.core_flow import (TAU_SOURCE_LEVEL_MAP, alt_criteria, alt_tau, eval_alternative, eval_group,
@@ -221,6 +222,20 @@ def _competencies(db: Session, iv: CoreInterview) -> list[dict]:
     return out
 
 
+def _desired_seniority(target_level: str | None) -> str | None:
+    """Vacancy seniority matching the candidate's desired level (lead counts as SENIOR)."""
+    if not target_level:
+        return None
+    return "SENIOR" if target_level.lower() == "lead" else target_level.upper()
+
+
+def _section(item: dict, desired: str | None) -> str:
+    """A label over the unchanged ranking (no new order): desired level, other fitting, or unresolved/gaps."""
+    if desired and (item["seniority"] or "").upper() == desired:
+        return "DESIRED_LEVEL"
+    return "OTHER_FITTING" if item["fits"] and item["z"] != 0 else "UNRESOLVED_OR_GAPS"
+
+
 def _with_fit(item: dict) -> dict:
     """Add fit flag (some requirement is confirmed) and short Ukrainian reasons."""
     reasons = [f"Підтверджено: {x}" for x in item["strengths"]] + [f"Прогалина: {x}" for x in item["gaps"]]
@@ -241,11 +256,13 @@ def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(
     base = {"profile_id": prof.id, "page": page, "page_size": page_size, "note": NOTE}
     if iv is None:
         return {"has_results": False, "attempt_id": None, "total": 0, "fitting_total": 0, "all_total": 0, "items": [],
-                "competencies": [],
+                "competencies": [], "level": None,
                 "market": [], **base}
     snap = db.get(CohortSnapshot, iv.cohort_id)
-    items = [_with_fit(i) for i in rank_items(db, prof.years_experience, snap, attempt_scores(db, iv.id),
-                                         profile_self_ratings(db, prof.id))]
+    desired = _desired_seniority(prof.target_level)
+    items = [{**f, "section": _section(f, desired)} for f in (
+        _with_fit(i) for i in rank_items(db, prof.years_experience, snap, attempt_scores(db, iv.id),
+                                         profile_self_ratings(db, prof.id)))]
     # Display order (owner decision, deviates from thesis (2.15)): displayed confirmed_share percent first. The sort is
     # stable over rank_items' (2.15) + T_v/J_v + id order, so equal percents keep that key. Filters keep relative order.
     # POST /recommendations keeps the pure (2.15) key.
@@ -268,7 +285,7 @@ def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(
     market = compute_market(_market_input(_revisions(snap)))
     return {"has_results": True, "attempt_id": iv.id, "total": len(items), "fitting_total": fitting_total,
             "all_total": all_total, "items": items[start:start + page_size],
-            "competencies": _competencies(db, iv),
+            "competencies": _competencies(db, iv), "level": level_for_attempt(db, iv),
             "market": [{"order": i + 1, "action_id": e.action_id, "name": names.get(e.action_id, e.action_id)}
                        for i, e in enumerate(market)], **base}
 

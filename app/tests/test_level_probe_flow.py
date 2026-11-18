@@ -129,8 +129,9 @@ def test_budget_exhausted_leaves_level_unknown_not_guessed(client, db, monkeypat
     with db() as s:
         rows = s.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == rec.interview_id)
                          .order_by(CriterionAssessment.created_at, CriterionAssessment.revision)).all()
+        topics = {t.id: t.action_id for t in s.scalars(select(CoreTurn).where(CoreTurn.interview_id == rec.interview_id))}
     assert all(r.score != 0 for r in rows)  # unasked criteria are never stored as 0
-    r = estimate(PYTHON_BACKEND_V1, core.seniority_evidence(rows))
+    r = estimate(PYTHON_BACKEND_V1, core.seniority_evidence(rows, topics))
     assert (r.assessed_level, r.assessment_status) == ("UNKNOWN", "INSUFFICIENT_DATA")
     assert r.critical_gaps == () and r.unassessed_criteria
 

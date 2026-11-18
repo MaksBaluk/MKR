@@ -162,3 +162,14 @@ def test_no_policy_marketing():
 def test_out_of_range_score_rejected(bad):
     with pytest.raises(ValueError):
         estimate(PYTHON_BACKEND_V1, ev({"sql.joins": bad}))
+
+
+def test_low_score_without_evidence_turn_is_unresolved_not_gap():
+    evidence = ev(all_of(JUNIOR, 0.9))
+    evidence[JUNIOR[0]] = CriterionEvidence(JUNIOR[0], 0.1, ())  # a number nobody can trace to an answer
+    r = estimate(PYTHON_BACKEND_V1, evidence)
+    j = r.coverage_by_level["JUNIOR"]
+    assert (j.assessed, j.confirmed, j.gaps) == (9, 8, 0) and j.status != "GAP"
+    assert JUNIOR[0] not in r.critical_gaps + r.confirmed_strengths + r.unassessed_criteria
+    traced = dict(evidence, **{JUNIOR[0]: CriterionEvidence(JUNIOR[0], 0.1, ("t9",))})
+    assert JUNIOR[0] in estimate(PYTHON_BACKEND_V1, traced).critical_gaps

@@ -95,12 +95,35 @@ def action_summary(rows, rubrics: RubricMap) -> dict[str, TopicSummary]:
     return out
 
 
-def seniority_evidence(rows) -> dict[str, CriterionEvidence]:
-    """Estimator input from one attempt's rows (topic and practice): effective score per criterion and the turn ids its
-    stored evidence quotes. Null stays null (unknown), never 0."""
-    return {r.criterion_id: CriterionEvidence(r.criterion_id, r.score, tuple(dict.fromkeys(
-        e["turn_id"] for e in (r.evidence or []) if isinstance(e, dict) and e.get("turn_id"))))
-        for r in effective_rows(rows)}
+def _turn_ids(row) -> list[str]:
+    return [e["turn_id"] for e in (row.evidence or []) if isinstance(e, dict) and e.get("turn_id")]
+
+
+def seniority_evidence(rows, turn_topics: Mapping[str, str]) -> dict[str, CriterionEvidence]:
+    """Estimator input from ONE attempt's rows (oldest first). Null stays null (unknown), never 0.
+
+    evidence_turns = distinct turn ids quoted by every non-null revision of the criterion (sorted).
+    Topic criteria: effective_rows score. Practice criteria (graded alongside every topic) are combined order-
+    independently: per source topic (the topic of the quoted turns, `turn_topics`) the latest non-null score wins, then
+    the max over topics, so one topic's confirmation is never erased by a later, weaker topic. A non-null score that
+    quotes no turn is kept only when no traced score exists; it then has no evidence turn and stays unresolved."""
+    turns: dict[str, set[str]] = {}
+    for r in current_criteria_rows(rows):
+        if r.score is not None:
+            turns.setdefault(r.criterion_id, set()).update(_turn_ids(r))
+    out = {r.criterion_id: r.score for r in effective_rows(rows) if r.action_id != PRACTICE_ACTION}
+    per_topic: dict[str, dict[str | None, float]] = {}
+    for r in rows:
+        if r.action_id == PRACTICE_ACTION:
+            per_topic.setdefault(r.criterion_id, {})
+            if r.score is not None:
+                topic = next((turn_topics[t] for t in _turn_ids(r) if t in turn_topics), None)
+                per_topic[r.criterion_id][topic] = r.score
+    for cid, by_topic in per_topic.items():
+        traced = [v for k, v in by_topic.items() if k is not None]
+        out[cid] = max(traced) if traced else by_topic.get(None)
+    return {cid: CriterionEvidence(cid, score, tuple(sorted(turns.get(cid, ()))) if score is not None else ())
+            for cid, score in out.items()}
 
 
 def _action_scores(rows) -> dict[str, float | None]:
@@ -422,6 +445,7 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         # Plan exhausted: the interview completes itself, so results open and answers stop.
         iv.status = "FINISHED"
         iv.version += 1
+        _store_level(db, iv)
         db.commit()
         return {"turn": None, "version": iv.version, "done": True, "status": iv.status}
     label = _label(db, action)
@@ -432,7 +456,8 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         # Level probe: only reorders this topic's open criteria and hints practice gaps (no policy: unchanged, none).
         policy = policy_for(_interview_track(db, iv))
         try:
-            probe = estimate(policy, seniority_evidence(session_rows)) if policy else None
+            probe = (estimate(policy, seniority_evidence(session_rows, {t.id: t.action_id for t in turns}))
+                     if policy else None)
         except ValueError:  # a malformed legacy score must never block the next question: probe off, order unchanged
             probe = None
         goal = goal_for(action)  # the Evaluator may have just confirmed the criterion it named: re-checked in goal_for
@@ -478,6 +503,12 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         db.refresh(iv)
         return {"turn": _turn_dict(winner, _names(db)), "version": iv.version, "done": False}
     return {"turn": _turn_dict(turn, _names(db)), "version": iv.version, "done": False}
+
+
+def _store_level(db: Session, iv: CoreInterview) -> None:
+    """Immutable assessed-level row for the attempt that just finished (never an input of the ranking)."""
+    from backend.api.level import finalize_on_finish  # level builds on this module's helpers
+    finalize_on_finish(db, iv)
 
 
 def _controller_json(st: ControllerState) -> dict:
@@ -607,6 +638,8 @@ def lifecycle(interview_id: str, action: str, data: VersionBody, db: Session = D
         raise HTTPException(409, "Недопустимий перехід стану")
     iv.status = target
     iv.version += 1
+    if target == "FINISHED":
+        _store_level(db, iv)
     db.commit()
     return {"id": iv.id, "status": iv.status, "version": iv.version}
 
