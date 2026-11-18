@@ -32,6 +32,8 @@ test('results show desired vs assessed level and sections never hide vacancies',
   await expect(page.locator('dd').filter({ hasText: /^Недостатньо даних$/ })).toBeVisible();
   await expect(page.getByText(/%.*(найм|працевлашт)/i)).toHaveCount(0);
 
+  await expect(page.getByText(/місце в загальному списку, упорядкованому за відсотком/)).toBeVisible();
+
   // Sections are labels over the same page: every vacancy the API returned is shown exactly once.
   const cards = page.getByRole('link', { name: /^Деталі вакансії/ });
   await expect(cards).toHaveCount(api.items.length);

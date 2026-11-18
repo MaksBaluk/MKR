@@ -90,7 +90,7 @@ def finalize_on_finish(db: Session, iv: CoreInterview) -> None:
         with db.begin_nested():  # a failure rolls back only the level write, never the finish itself
             finalize_level(db, iv)
     except Exception as exc:  # noqa: BLE001 - the level is computed lazily on first read instead
-        log.warning("level not stored for a finished attempt kind=%s", type(exc).__name__)
+        log.warning("level not stored for a finished attempt kind=%s", type(exc).__name__, exc_info=True)
 
 
 def _titles(db: Session) -> dict[str, str]:
@@ -157,7 +157,7 @@ def level_for_attempt(db: Session, iv: CoreInterview) -> dict | None:
             db.commit()
         return level_payload(db, row)
     except Exception as exc:  # noqa: BLE001 - a level failure never breaks results; the endpoint answers 409
-        log.warning("level not available for a finished attempt kind=%s", type(exc).__name__)
+        log.warning("level not available for a finished attempt kind=%s", type(exc).__name__, exc_info=True)
         return None
 
 

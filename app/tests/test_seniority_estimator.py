@@ -173,3 +173,14 @@ def test_low_score_without_evidence_turn_is_unresolved_not_gap():
     assert JUNIOR[0] not in r.critical_gaps + r.confirmed_strengths + r.unassessed_criteria
     traced = dict(evidence, **{JUNIOR[0]: CriterionEvidence(JUNIOR[0], 0.1, ("t9",))})
     assert JUNIOR[0] in estimate(PYTHON_BACKEND_V1, traced).critical_gaps
+
+
+@pytest.mark.parametrize("desired", ["junior", "senior"])
+def test_middle_confirmed_even_if_desired_junior_or_senior(desired):
+    """The desired level is not an estimator input: the same evidence gives MIDDLE whatever the candidate wanted."""
+    evidence = ev(all_of(JUNIOR + MIDDLE, 0.8))
+    assert "desired" not in " ".join(signature(estimate).parameters)
+    r = estimate(PYTHON_BACKEND_V1, evidence)
+    assert (r.assessed_level, r.assessment_status) == ("MIDDLE", "ASSESSED")
+    assert r.coverage_by_level["MIDDLE"].status == "SUPPORTED" and r.coverage_by_level["SENIOR"].status == "UNVERIFIED"
+    assert r.explanation[0] == "Підтверджено Middle за перевіреними критеріями. Для висновку про Senior недостатньо даних."

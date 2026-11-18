@@ -1,5 +1,7 @@
 """Assessed level (Task 5): stored on finish, immutable per (attempt, policy version), owner-only API, results views."""
 import dataclasses
+import json
+import logging
 from types import SimpleNamespace
 
 import pytest
@@ -248,14 +250,19 @@ def test_sections_use_stored_desired_level_like_level_block(client, auth, db, ch
     assert all((i["section"] == "DESIRED_LEVEL") == ((i["seniority"] or "").upper() == "MIDDLE") for i in items)
 
 
-def test_level_failure_never_blocks_finish_or_results(client, auth, db, chat, monkeypatch):
+def test_level_failure_never_blocks_finish_or_results(client, auth, db, chat, monkeypatch, caplog):
     def boom(*a, **k):
         raise RuntimeError("unexpected")
 
     iv = _attempt(client, auth, "python")
     _answer(client, auth, iv, iv["version"])
     monkeypatch.setattr("backend.api.level.estimate", boom)
-    _finish(client, auth, iv["id"])
+    # alembic's fileConfig (migration tests) disables existing loggers; re-enable this one for the assertion
+    monkeypatch.setattr(logging.getLogger("competencematch.level"), "disabled", False)
+    with caplog.at_level("WARNING", logger="competencematch.level"):
+        _finish(client, auth, iv["id"])
+    [record] = [r for r in caplog.records if r.name == "competencematch.level"]
+    assert record.exc_info and record.exc_info[0] is RuntimeError  # the traceback is logged, not only the class
     with db() as s:
         assert s.get(CoreInterview, iv["id"]).status == "FINISHED"
     assert _rows(db, iv["id"]) == []
@@ -336,3 +343,73 @@ def test_competency_evidence_keeps_effective_rows_and_all_turns():
     assert ev.score == 0.4 and set(ev.evidence_turns) == {"a1", "a2"}
     untraced = seniority_evidence([_row(PRACTICE_ACTION, "practice-backend.ownership", 0.1, None, 1)], {})
     assert untraced["practice-backend.ownership"].evidence_turns == ()  # unresolved, never an established gap
+
+
+def _level_without_timestamp(payload):
+    return {k: v for k, v in payload.items() if k != "created_at"}
+
+
+def test_self_rating_and_years_do_not_raise_level(client, auth, db, chat):
+    iv = _finished(client, auth)
+    before = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
+    pid = iv["profile_id"]
+    r = client.put(f"{API}/profiles/{pid}", headers=auth, json={
+        "name": "Профіль python", "track": "python", "target_level": "middle", "years_experience": 15})
+    assert r.status_code == 200, r.text
+    for action in ("python-core", "postgresql", "sqlalchemy", "redis", "celery", "observability"):
+        r = client.put(f"{API}/profiles/{pid}/self-ratings/{action}", headers=auth, json={"value": 1.0})
+        assert r.status_code == 200, r.text
+    with db() as s:  # force the lazy recomputation after the profile change: evidence is the only input
+        s.execute(delete(SeniorityAssessment))
+        s.commit()
+    after = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
+    assert _level_without_timestamp(after) == _level_without_timestamp(before)
+    assert after["assessed_level"] != "SENIOR"
+
+
+class PartialChat:
+    """PracticeChat that grades only the first allowed criterion of a topic (every E_c < 0.6), practice as usual."""
+
+    def __init__(self):
+        self.inner = PracticeChat(score=0.9, practice=0.9)
+
+    def invoke(self, messages, *a, **k):
+        resp = self.inner.invoke(messages, *a, **k)
+        try:
+            out = json.loads(resp.content)
+        except ValueError:
+            return resp  # Interviewer question
+        out["criteria"] = [c if i == 0 else {**c, "score": None, "evidence": []} for i, c in enumerate(out["criteria"])]
+        return SimpleNamespace(content=json.dumps(out))
+
+
+def test_level_independent_of_partial_topic_coverage(client, auth, db, monkeypatch):
+    from backend.domain import topic_summary as ts
+    from backend.models import CriterionAssessment, Rubric, RubricCriterion
+
+    monkeypatch.setattr("backend.api.core.get_chat_model", lambda: PartialChat())
+    iv = _attempt(client, auth, "python")
+    v = iv["version"]
+    for _ in range(3):
+        _, v = _answer(client, auth, iv, v)
+    _finish(client, auth, iv["id"])
+    level = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
+    with db() as s:
+        rows = s.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == iv["id"],
+                                                           CriterionAssessment.action_id != PRACTICE_ACTION)).all()
+        topics = {r.action_id for r in rows}
+        for action in topics:
+            rubric = [(c.criterion_id, c.weight) for c in s.scalars(select(RubricCriterion).join(
+                Rubric, Rubric.id == RubricCriterion.rubric_id).where(Rubric.action_id == action,
+                                                                      Rubric.version == "v1"))]
+            scores = {r.criterion_id: r.score for r in rows if r.action_id == action and r.score is not None}
+            assert ts.topic_summary(rubric, scores).e < ts.MIN_COVERAGE_FOR_OVERALL, action
+        expected = result_to_json(estimate(PYTHON_BACKEND_V1, attempt_evidence(s, iv["id"])))
+    assert topics and _rows(db, iv["id"])[0].result == expected
+    assert expected["coverage_by_level"]["JUNIOR"]["assessed"] > 0  # partial topic evidence still counts
+    monkeypatch.setattr("backend.domain.topic_summary.MIN_COVERAGE_FOR_OVERALL", 0.0)
+    with db() as s:
+        s.execute(delete(SeniorityAssessment))
+        s.commit()
+    again = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
+    assert _level_without_timestamp(again) == _level_without_timestamp(level)

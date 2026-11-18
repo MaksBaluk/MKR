@@ -327,6 +327,9 @@ export function ResultsScreen({ profile }: { profile: CandidateProfile }) {
           <h2 id="vacancies-title" ref={listHeading} tabIndex={-1} className="scroll-mt-24 text-xl font-semibold tracking-tight text-ink">
             Вакансії вашої добірки
           </h2>
+          <p className="-mt-2 text-sm text-ink-muted">
+            Номер картки — це її місце в загальному списку, упорядкованому за відсотком. Розділи лише групують вакансії й не змінюють порядку.
+          </p>
           <Card className="p-4 sm:p-5"><FilterBar filters={filters} onChange={update} /></Card>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm text-ink-muted" role="status" aria-live="polite">
