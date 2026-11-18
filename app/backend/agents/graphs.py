@@ -76,6 +76,7 @@ class AskState(TypedDict, total=False):
     candidate_level: str | None
     years_experience: int | None
     difficulty: str | None  # BASIC | INTERMEDIATE | ADVANCED from the DifficultyController
+    practice_gaps: list[str]  # level probe: unassessed practice criteria of the lowest unsupported level; empty: none
     question: str | None
     source: str
 
@@ -159,7 +160,8 @@ def _build_ask(model):
                 unmet_criteria=s.get("unmet_criteria", []), previous_answers=s.get("previous_answers", [])[-3:],
                 followup_goal=s.get("followup_goal"), off_topic_detected=s.get("off_topic_detected", False),
                 candidate_level=s.get("candidate_level"), years_experience=s.get("years_experience"),
-                asked_questions=s.get("asked_questions", []), difficulty=s.get("difficulty"))
+                asked_questions=s.get("asked_questions", []), difficulty=s.get("difficulty"),
+                practice_gaps=s.get("practice_gaps"))
             resp = _invoke(model, [SystemMessage(INTERVIEWER_SYSTEM), HumanMessage(user)])
             question = _text(resp).strip().strip('"«»').strip()
             if validate_question(question, s.get("off_topic_detected", False)) in ("TOO_LONG", "MULTI_PART"):

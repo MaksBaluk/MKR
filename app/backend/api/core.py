@@ -23,6 +23,8 @@ from backend.domain.difficulty import (DEFAULT_CONFIG, ControllerState, Difficul
 from backend.domain.interview_budget import MIN_SHOWN_QUESTIONS_PER_ACTION, topic_open_for_question
 from backend.domain.market import VacancyInput, compute_market
 from backend.domain.planner import choose_next
+from backend.domain.level_probe import practice_gaps, prioritize_unmet
+from backend.domain.seniority import CriterionEvidence, estimate
 from backend.domain.seniority_policy import PRACTICE_ACTION, policy_for
 from backend.experiments.config import ExperimentConfig, InterviewMode
 from backend.experiments.planning import plan_topics, slot_targets, static_plan_json
@@ -91,6 +93,14 @@ def action_summary(rows, rubrics: RubricMap) -> dict[str, TopicSummary]:
             rubric = [(a, 1.0)]
         out[a] = topic_summary(rubric, scores)
     return out
+
+
+def seniority_evidence(rows) -> dict[str, CriterionEvidence]:
+    """Estimator input from one attempt's rows (topic and practice): effective score per criterion and the turn ids its
+    stored evidence quotes. Null stays null (unknown), never 0."""
+    return {r.criterion_id: CriterionEvidence(r.criterion_id, r.score, tuple(dict.fromkeys(
+        e["turn_id"] for e in (r.evidence or []) if isinstance(e, dict) and e.get("turn_id"))))
+        for r in effective_rows(rows)}
 
 
 def _action_scores(rows) -> dict[str, float | None]:
@@ -417,8 +427,15 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     label = _label(db, action)
     answered = [t for t in turns if t.action_id == action and t.answer_text]
     comp = db.get(Competency, action)
+    gaps: list[str] = []
     if cfg.adaptive_followup:
-        unmet = open_ids(action)
+        # Level probe: only reorders this topic's open criteria and hints practice gaps (no policy: unchanged, none).
+        policy = policy_for(_interview_track(db, iv))
+        try:
+            probe = estimate(policy, seniority_evidence(session_rows)) if policy else None
+        except ValueError:  # a malformed legacy score must never block the next question: probe off, order unchanged
+            probe = None
+        unmet, gaps = prioritize_unmet(open_ids(action), policy, probe), practice_gaps(policy, probe)
         goal = goal_for(action)  # the Evaluator may have just confirmed the criterion it named: re-checked in goal_for
     else:  # slot i of k targets a fixed round-robin share of the rubric (all criteria if the share is empty)
         crit = criteria_for(db, action)
@@ -434,7 +451,7 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
                       "asked_questions": [t.question_text for t in turns if t.action_id == action],
                       "followup_goal": goal_dict,
                       "off_topic_detected": bool(answered and answered[-1].off_topic),
-                      "difficulty": level.value, **level_ctx}, get_chat_model())
+                      "difficulty": level.value, "practice_gaps": gaps, **level_ctx}, get_chat_model())
     question, source = result.question_text, result.source
     targeted = source == "LLM_INTERVIEWER"  # a bank fallback question is not aimed at specific criteria
     after = ControllerState(level, before.shown + 1, before.history + (level,))
