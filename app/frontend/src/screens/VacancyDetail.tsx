@@ -218,8 +218,6 @@ export function VacancyDetail() {
           <Card className="flex flex-col gap-2 p-4 text-sm text-ink-muted">
             <p>
               Джерело: <span className="font-medium text-ink">{v.source_label ?? 'не вказано'}</span>
-              {v.source_example && <span className="text-ink-subtle"> · адаптований приклад, не оригінальне оголошення</span>}
-              {v.fixture_version && <span className="text-ink-subtle"> · набір {v.fixture_version}</span>}
             </p>
             {v.source_url ? (
               <a href={v.source_url} target="_blank" rel="noopener noreferrer"
@@ -227,9 +225,7 @@ export function VacancyDetail() {
                 Відкрити на джерелі<ExternalLink className="size-3.5" aria-hidden="true" />
                 <span className="sr-only">(відкриється в новій вкладці)</span>
               </a>
-            ) : (
-              <p>Відгукнутися на цю вакансію із застосунку не можна: посилання на оголошення немає.</p>
-            )}
+            ) : null}
           </Card>
         </div>
 

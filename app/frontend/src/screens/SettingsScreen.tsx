@@ -23,6 +23,7 @@ export function SettingsScreen() {
   }
 
   return (
+    <div className="flex flex-col gap-4">
     <Card className="max-w-2xl">
       <CardHeader>
         <CardTitle>Тема</CardTitle>
@@ -47,5 +48,15 @@ export function SettingsScreen() {
         <p role="status" aria-live="polite" className="text-sm text-ink-muted">{notice}</p>
       </CardContent>
     </Card>
+    <Card className="max-w-2xl">
+      <CardHeader>
+        <CardTitle>Про каталог вакансій</CardTitle>
+        <CardDescription>
+          Каталог складається з публічних оголошень Djinni (з посиланням на оригінал) та адаптованих прикладів вакансій,
+          підготовлених для демонстрації. Адаптовані приклади не є оригінальними оголошеннями.
+        </CardDescription>
+      </CardHeader>
+    </Card>
+    </div>
   );
 }
