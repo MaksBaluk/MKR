@@ -82,6 +82,33 @@
 
 **Сценарна добірка** відхиляється від продуктового контракту, і це позначено у виводі як `SCENARIO_SUB_COHORT`. Вона містить ті самі 10 засіяних вакансій без змін вимог: кожна має ≥5 тем політики і ≤2 інших теми. Без такої добірки Middle і Senior через API показати неможливо (див. наступний розділ).
 
+## Відповідність 12 обов'язкових вимог тестам
+
+Нумерація відповідає розподілу з плану (задача 7, крок 1). Назви тестів перевірено через `grep` у `app/tests/`. Файли: `est` = `test_seniority_estimator.py`, `api` = `test_seniority_api.py`, `flow` = `test_level_probe_flow.py`, `scn` = `test_seniority_scenarios.py`.
+
+| # | Вимога | Тести (файл::назва) | Сценарій |
+|---|---|---|---|
+| 1 | Зміна бажаного рівня не змінює оцінений рівень | `api::test_desired_level_change_does_not_change_result`, `est::test_estimator_has_no_desired_level_years_or_self_rating_parameter` | S1 (бажаний Senior → MIDDLE): `scn::test_s1_desired_senior_confirms_middle_senior_unverified` |
+| 2 | Один сильний критерій нічого не підтверджує; Junior не призначається за замовчуванням | `est::test_one_of_five_criteria_confirms_nothing`, `est::test_junior_requires_minimum_coverage_never_default`, `est::test_min_competencies_blocks_single_competency_proof` | S3: `scn::test_s3_strong_answers_without_coverage_stay_unknown` |
+| 3 | Невідомий критерій не є прогалиною; встановлена прогалина ≠ відсутність доказів | `est::test_unknown_is_not_a_gap`, `est::test_established_gap_differs_from_missing_evidence`, `est::test_low_score_without_evidence_turn_is_unresolved_not_gap` | S1 (прогалин 0 при неперевіреному Senior) |
+| 4 | Middle підтверджується незалежно від бажаного Junior чи Senior | `est::test_middle_confirmed_even_if_desired_junior_or_senior`, `est::test_middle_confirmed_senior_unverified_sentence` | S1 |
+| 5 | Відсутня компенсація: сильні базові чи другорядні оцінки не закривають критичне Senior; Senior потребує всіх нижчих рівнів | `est::test_high_basics_do_not_compensate_unverified_critical_senior`, `est::test_secondary_high_scores_do_not_offset_a_critical_gap`, `est::test_senior_requires_all_hierarchical_levels` | S2: `scn::test_s2_senior_needs_every_level_supported` |
+| 6 | Поріг `τ` і смуга `ε`; підтвердження потребує доказової відповіді | `est::test_tau_epsilon_borderline_is_unresolved_not_gap`, `est::test_score_without_evidence_turn_is_not_counted_confirmed` | S1 (критерії Senior 0.72 у смузі) |
+| 7 | Самооцінки й роки досвіду не підвищують рівень | `api::test_self_rating_and_years_do_not_raise_level` | — |
+| 8 | Нова версія політики не переписує історію; рядок містить версію політики й спробу | `api::test_policy_version_change_does_not_rewrite_history`, `api::test_level_stored_on_finish_with_policy_version_and_attempt` | — |
+| 9 | Спроби не змішуються; докази практики не залежать від порядку тем | `api::test_attempts_are_not_mixed`, `api::test_practice_evidence_is_topic_order_independent` | — |
+| 10 | Рівень не змінює ранжування; розділи лише групують ті самі вакансії | `api::test_level_does_not_change_ranking_key`, `api::test_sections_partition_same_items` | топ-5 вакансій у виводі S1–S3 |
+| 11 | Доступ лише власника; маркетинг і дизайн → UNKNOWN / POLICY_UNAVAILABLE | `api::test_owner_isolation_level_endpoint`, `api::test_unauthenticated_level_401`, `api::test_results_level_block_for_marketing_is_unknown_policy_unavailable`, `est::test_no_policy_marketing` | — |
+| 12 | Співбесіда з пріоритетом рівня не порушує лімітів, Q_t і бюджету; вичерпаний бюджет дає UNKNOWN, а не здогад | `flow::test_interview_never_exceeds_caps_with_level_probing`, `flow::test_no_question_targets_criterion_with_sufficient_evidence`, `flow::test_q_t_choice_identical_with_and_without_probing`, `flow::test_budget_exhausted_leaves_level_unknown_not_guessed` | S3 (бюджет 3) |
+| + | Рівень не залежить від `E_c` і `MIN_COVERAGE_FOR_OVERALL` | `api::test_level_independent_of_partial_topic_coverage` | — |
+
+Усі чотири сценарії перевіряє `scn::test_scenario_level_and_status`.
+
+## Відомі обмеження (коротко)
+
+- Практика агрегується максимумом між темами. Одна тема, що підтверджує критерій, переважує іншу тему, що показує прогалину. Це зміщення вгору: оптимістична асиметрія порівняно з правилом «остання ненульова оцінка» для критеріїв тем.
+- З політикою v1 Middle (і тим більше Senior) структурно недосяжний на повній добірці python. Подробиці — у пункті 1 наступного розділу.
+
 ## Головний результат і обмеження
 
 1. **На повній добірці python Middle і Senior практично недосяжні.**
