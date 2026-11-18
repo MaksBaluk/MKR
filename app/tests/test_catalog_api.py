@@ -143,7 +143,7 @@ def test_detail_shape(client):
     for key in ["description", "responsibilities", "benefits", "stack", "summary", "source_type",
                 "source_label", "source_url", "fixture_version", "requirements_count", "requirements"]:
         assert key in d
-    assert d["source_label"] == "Приклад"  # python-01 is an invented fixture
+    assert d["source_label"] in ("robota.ua", "work.ua", "DOU") and d["source_example"] is True  # python-01 is an adapted example
     assert d["requirements_count"] == len(d["requirements"]) > 0
     kinds = {r["kind"] for r in d["requirements"]}
     assert kinds == {"MANDATORY", "DESIRED"}
@@ -164,8 +164,8 @@ def test_detail_404(client, db):
 
 
 def test_source_label(client, db):
-    assert client.get(f"{URL}/python-01").json()["source_label"] == "Приклад"
-    assert client.get(f"{URL}/python-31").json()["source_label"] == "Приклад"
+    assert client.get(f"{URL}/python-01").json()["source_label"] in ("robota.ua", "work.ua", "DOU")
+    assert client.get(f"{URL}/python-31").json()["source_label"] in ("robota.ua", "work.ua", "DOU")
     with db() as s:
         s.add(Vacancy(id="synth-1", track="python", title="Synthetic", company="Fake", seniority="JUNIOR",
                       years_min=0, location="Київ", work_mode="OFFICE", summary="s", description="d",

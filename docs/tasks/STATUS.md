@@ -222,5 +222,5 @@
 ## Імпорт реальних вакансій Djinni (2026-11-18)
 
 - `backend/domain/vacancy_import.py` (парсер, аліаси, валідація), `scripts/import_djinni.py` (лише з `--confirm-permission`, `robots.txt`, 2 с між запитами), міграція 0014 (`retrieved_at`, `date_posted`, `import_version`), `fixtures/vacancies_real.json` (49: python 30, marketing 14, design 5), `fixtures/vacancies_real_import_report.json`.
-- «Djinni» в UI лише для `REAL_IMPORTED`; фікстури підписані «Приклад» (вигадана вакансія; примітка про це в підказці) (скасовує попереднє «усі з Djinni»).
+- «Djinni» в UI лише для `REAL_IMPORTED`; фікстурам призначено robota.ua/work.ua/DOU (заява власника на рівні каталогу, `fixtures/vacancy_sources.json`, міграція 0015), підказка й сторінка вакансії називають їх адаптованими прикладами (скасовує попереднє «усі з Djinni»).
 - Обмеження: низький вихід для marketing/design (пороги валідації не знижувались), зіставлення через аліаси, рівні/D_vga/τ — правила, `work_mode` не розрізняє HYBRID, знімок на одну дату. Дозвіл Djinni підтверджено власником у чаті.

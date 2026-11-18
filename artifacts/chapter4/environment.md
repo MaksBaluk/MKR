@@ -1,29 +1,16 @@
 # Експериментальне середовище (CompetenceMatch, розділ 4)
 
-Згенеровано: `2026-11-18 18:32:52 +0100` скриптом `app/scripts/chapter4/environment.py`.
+Згенеровано: `2026-11-18 18:58:43 +0100` скриптом `app/scripts/chapter4/environment.py`.
 
 ## Версія коду
 
-- Commit SHA: `1ed85b6dea5a4bd532182d630e06ef23e4d84955` (гілка `feat/criterion-core`).
-- Робоче дерево: **НЕ чисте**. Змінені відстежувані файли: 28; невідстежувані: 17. SHA-256 (перші 16 символів) `git diff HEAD`: `37d7e64d7263cc39`.
+- Commit SHA: `8bbe67d9bb109f3df274e0dd1bfd072077c06fca` (гілка `feat/criterion-core`).
+- Робоче дерево: **НЕ чисте**. Змінені відстежувані файли: 27; невідстежувані: 4. SHA-256 (перші 16 символів) `git diff HEAD`: `b213529c1d2b2ff0`.
 - Невідстежувані файли (частина доказів і виправлень аудиту ще не закомічена):
-  - `app/alembic/versions/0013_requirement_criteria_tau.py`
-  - `app/alembic/versions/0014_vacancy_provenance.py`
-  - `app/backend/domain/vacancy_criteria.py`
-  - `app/backend/domain/vacancy_import.py`
-  - `app/fixtures/vacancies_real.json`
-  - `app/fixtures/vacancies_real_import_report.json`
-  - `app/fixtures/vacancy_criteria.json`
-  - `app/frontend/e2e/`
-  - `app/scripts/chapter4/`
-  - `app/scripts/derive_vacancy_criteria.py`
-  - `app/scripts/import_djinni.py`
-  - `app/scripts/rewrite_real_descriptions.py`
-  - `app/tests/test_audit_regressions.py`
-  - `app/tests/test_dvga.py`
-  - `app/tests/test_vacancy_import.py`
-  - `artifacts/`
-  - `docs/audit/2026-11-17-independent-audit.md`
+  - `app/alembic/versions/0015_vacancy_source_name.py`
+  - `app/fixtures/vacancy_sources.json`
+  - `app/scripts/assign_vacancy_sources.py`
+  - `app/tests/test_vacancy_sources.py`
 
 Результати нижче відповідають коду `HEAD` **плюс** незакомічені зміни, ідентифіковані хешем diff. Для відтворюваності закомітьте зміни й повторіть `python -m scripts.chapter4.build_all`.
 
@@ -63,7 +50,7 @@ Frontend (`app/frontend/package.json`, задані діапазони верс�
 | Контекст | Що фактично використано |
 |---|---|
 | Автотести backend | SQLite (in-memory, `StaticPool`), схема з `Base.metadata.create_all` |
-| Продуктовий стек (Docker Compose) | PostgreSQL: `postgres (PostgreSQL) 16.15 (Debian 16.15-1.pgdg12+2)`; міграції Alembic до голови `0014_vacancy_provenance (head)` |
+| Продуктовий стек (Docker Compose) | PostgreSQL: `postgres (PostgreSQL) 16.15 (Debian 16.15-1.pgdg12+2)`; міграції Alembic до голови `0015_vacancy_source_name (head)` |
 | Експериментальні прогони цього пакета | окрема SQLite-БД у тимчасовому каталозі (ніколи не продуктова) |
 | pgvector / HNSW | схема підготовлена, **не заповнена і не використовується** в експериментах |
 

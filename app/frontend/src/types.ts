@@ -77,6 +77,8 @@ export interface RankedItem {
   tags: string[];
   /** Provenance label; currently «Djinni» for every catalog vacancy (owner statement); null if the vacancy row is gone. */
   source_label: string | null;
+  /** true for vacancies that are not imported postings: shown with a «приклад» note. */
+  source_example?: boolean;
   groups_total: number;
   /** Requirement groups with at least one assessed alternative. */
   groups_assessed: number;
@@ -172,6 +174,8 @@ export interface CatalogVacancy {
   years_min: number | null;
   years_max: number | null;
   source_label: string | null;
+  /** true for vacancies that are not imported postings: shown with a «приклад» note. */
+  source_example?: boolean;
   requirements_count: number;
 }
 

@@ -305,10 +305,10 @@ def test_results_items_have_source_and_group_counts(client, auth, finished, db):
         kinds = {v.id: v.source_type for v in s.query(Vacancy).all()}
     assert items
     for i in items:
-        assert i["source_label"] == ("Djinni" if kinds[i["vacancy_id"]] == "REAL_IMPORTED" else "Приклад")
+        assert (i["source_label"] == "Djinni") == (kinds[i["vacancy_id"]] == "REAL_IMPORTED") and i["source_example"] == (kinds[i["vacancy_id"]] != "REAL_IMPORTED")
         assert isinstance(i["groups_total"], int) and isinstance(i["groups_assessed"], int)
         assert i["groups_total"] >= i["groups_assessed"] >= 0 and i["groups_total"] > 0
-    assert {i["source_label"] for i in items} <= {"Djinni", "Приклад"}
+    assert {i["source_label"] for i in items} <= {"Djinni", "robota.ua", "work.ua", "DOU", "Приклад"}
     assert any(i["groups_assessed"] > 0 for i in items)
 
 
@@ -328,5 +328,5 @@ def test_legacy_recommendations_have_source_and_group_counts(client, auth, finis
     r = client.post(f"{API}/recommendations", json={"cohort_id": cohort}, headers=auth)
     assert r.status_code == 200, r.text
     for i in r.json()["items"]:
-        assert i["source_label"] in ("Djinni", "Приклад")
+        assert i["source_label"] in ("Djinni", "robota.ua", "work.ua", "DOU", "Приклад")
         assert i["groups_total"] >= i["groups_assessed"] >= 0

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from backend.api.common import source_label
+from backend.api.common import source_is_example, source_label
 from backend.api.core import _owned_cohort, _revisions, cohort_actions, latest_scores, rubric_map
 from backend.api.profile import latest_self_ratings
 from backend.db import get_db
@@ -32,11 +32,13 @@ def rank_items(db: Session, years_experience: int | None, snap: CohortSnapshot,
                            scores, rubrics, years_experience, self_ratings) for vid in snap.vacancy_ids]
     names = {c.id: c.label_uk for c in db.query(Competency).all()}
     # Provenance is looked up live (one query), never frozen into cohort revisions.
-    sources = {v.id: source_label(v) for v in db.query(Vacancy).filter(Vacancy.id.in_(list(snap.vacancy_ids)))}
+    rows = db.query(Vacancy).filter(Vacancy.id.in_(list(snap.vacancy_ids))).all()
+    sources = {v.id: source_label(v) for v in rows}
+    examples = {v.id: source_is_example(v) for v in rows}
     return [{"vacancy_id": r.vacancy_id,
              **{k: by_id[r.vacancy_id].get(k) for k in ("title", "company", "location", "work_mode", "seniority",
                                                           "years_min")},
-             "source_label": sources.get(r.vacancy_id),
+             "source_label": sources.get(r.vacancy_id), "source_example": examples.get(r.vacancy_id, False),
              "label": r.label, "z": r.z, "x": r.x,
              "confirmed_share": round(r.confirmed_share * 100),
              **explain_vacancy(by_id[r.vacancy_id], scores, rubrics, names),

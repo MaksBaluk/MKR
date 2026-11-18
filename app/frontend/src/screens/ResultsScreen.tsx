@@ -98,7 +98,7 @@ function VacancyCard({ item, rank }: { item: ResultVacancy; rank: number }) {
         <div className="flex shrink-0 flex-col items-center gap-2">
           <span className="flex size-9 items-center justify-center rounded-lg bg-primary-soft text-sm font-semibold tabular-nums text-primary"
             aria-label={`Місце ${rank}`}>{rank}</span>
-          <SourceMark label={item.source_label} />
+          <SourceMark label={item.source_label} example={item.source_example} />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-semibold text-ink [overflow-wrap:anywhere]">

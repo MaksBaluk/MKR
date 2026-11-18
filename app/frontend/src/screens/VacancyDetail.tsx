@@ -183,7 +183,7 @@ export function VacancyDetail() {
     <article aria-labelledby="vacancy-title" className="flex flex-col gap-4">
       {backLink}
       <Card className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:p-6">
-        <SourceMark label={v.source_label} />
+        <SourceMark label={v.source_label} example={v.source_example} />
         <div className="min-w-0 flex-1">
           <h2 id="vacancy-title" className="text-xl font-bold tracking-tight text-ink [overflow-wrap:anywhere] sm:text-2xl">{v.title}</h2>
           <p className="mt-1 text-sm font-medium text-ink-muted">{v.company} · {trackLabel(v.track)}</p>
@@ -218,6 +218,7 @@ export function VacancyDetail() {
           <Card className="flex flex-col gap-2 p-4 text-sm text-ink-muted">
             <p>
               Джерело: <span className="font-medium text-ink">{v.source_label ?? 'не вказано'}</span>
+              {v.source_example && <span className="text-ink-subtle"> · адаптований приклад, не оригінальне оголошення</span>}
               {v.fixture_version && <span className="text-ink-subtle"> · набір {v.fixture_version}</span>}
             </p>
             {v.source_url ? (

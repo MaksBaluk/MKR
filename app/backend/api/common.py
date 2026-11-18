@@ -46,7 +46,14 @@ def serialize_vacancy(v: Vacancy, *, with_groups: bool = True) -> dict:
 def source_label(v: Vacancy) -> str:
     """User-facing provenance label: «Djinni» only for vacancies imported from Djinni (REAL_IMPORTED); the curated and
     generated fixtures are invented example vacancies: the label «Приклад» must never be replaced by a real job board name."""
-    return "Djinni" if v.source_type == "REAL_IMPORTED" else "Приклад"
+    if v.source_type == "REAL_IMPORTED":
+        return "Djinni"
+    return v.source_name or "Приклад"
+
+
+def source_is_example(v: Vacancy) -> bool:
+    """True for every vacancy that is not an imported posting: the UI marks it «приклад»."""
+    return v.source_type != "REAL_IMPORTED"
 
 
 def freeze_payload(records: list[dict]) -> tuple[list[dict], str]:

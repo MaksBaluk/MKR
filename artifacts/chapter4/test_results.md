@@ -4,7 +4,7 @@
 
 | # | Команда (каталог) | Час запуску | Результат | Обмеження |
 |---|---|---|---|---|
-| 1 | `uv run pytest -q` (`app/`) | 18:01 | **575 passed**, 55 warnings, 107 с | SQLite in-memory; **не PostgreSQL**; LLM підміняється заглушками тестів |
+| 1 | `uv run pytest -q` (`app/`) | 18:01 | **578 passed**, 59 warnings, 100 с | SQLite in-memory; **не PostgreSQL**; LLM підміняється заглушками тестів |
 | 2 | `npm run typecheck` (`app/frontend/`) | 17:17 | без помилок (`tsc -b`) | — |
 | 3 | `npm test` (`app/frontend/`) | 17:17 | **19 файлів, 155 тестів passed** (vitest) | unit-тести бібліотек UI, не браузер |
 | 4 | `npm run build` (`app/frontend/`) | 17:17 | збірка успішна (`built in 1.64s`) | — |

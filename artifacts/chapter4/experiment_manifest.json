@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-18T18:32:49+0100",
+  "generated": "2026-11-18T18:58:39+0100",
   "kind": "SIMULATED_CONTROLLED_RUNS",
   "answer_source": "SIMULATED",
   "evaluator": "SIMULATED_STUB (deterministic, not an LLM)",
@@ -135,7 +135,7 @@
     "normalized_sha256_batch2": "8b1985a0262d76ee",
     "identical": true,
     "rerank_without_llm_matches_stored_order": true,
-    "wall_s": 12.6
+    "wall_s": 13.3
   },
   "equal_conditions_check": {
     "sim-junior": {

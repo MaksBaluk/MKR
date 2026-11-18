@@ -85,6 +85,8 @@ class Vacancy(Base):
     source_url: Mapped[str | None] = mapped_column(String(600), nullable=True)
     fixture_version: Mapped[str] = mapped_column(String(32), default="fixtures-v1")
     # provenance of REAL_IMPORTED rows (NULL for fixtures): when fetched, when posted, importer + level-rule version
+    # display source of fixture vacancies: owner statement at catalog level, not a per-posting provenance (see vacancy_sources.json)
+    source_name: Mapped[str | None] = mapped_column(String(40), nullable=True)
     retrieved_at: Mapped[str | None] = mapped_column(String(10), nullable=True)
     date_posted: Mapped[str | None] = mapped_column(String(10), nullable=True)
     import_version: Mapped[str | None] = mapped_column(String(60), nullable=True)

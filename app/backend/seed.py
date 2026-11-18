@@ -29,17 +29,21 @@ def seed_database(db: Session, *, demo_mode: bool | None = None, demo_password: 
             counts["competencies_added"] += 1
     db.flush()
     criteria = read_fixture("vacancy_criteria.json")
+    sources = read_fixture("vacancy_sources.json")["by_vacancy"]
     columns = {c.name for c in Vacancy.__table__.columns}
     for record in read_fixture("vacancies.json") + (read_fixture("vacancies_real.json") if (FIXTURES / "vacancies_real.json").exists() else []):
         existing = db.get(Vacancy, record["id"])
         if existing is not None:
             # Keep existing rows (and their snapshots); only sync the display title from the fixture.
             existing.title = record["title"]
+            if existing.source_name is None and record["id"] in sources:
+                existing.source_name = sources[record["id"]]
             if record.get("source_type") == "REAL_IMPORTED":  # texts composed from stored fields may be regenerated
                 existing.summary, existing.description = record["summary"], record["description"]
             _backfill_requirements(db, record, criteria)
             continue
         vacancy_data = {k: v for k, v in record.items() if k in columns}  # extra provenance keys outside the table are dropped
+        vacancy_data["source_name"] = sources.get(record["id"])
         vacancy = Vacancy(**vacancy_data)
         for sort_order, group in enumerate(record["groups"]):
             group_model = RequirementGroup(id=group["id"], kind=group["kind"], label=group["label"],

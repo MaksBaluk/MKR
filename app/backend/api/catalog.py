@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 from backend.db import get_db
 from backend.models import Competency, RequirementGroup, Vacancy
 
-from .common import source_label
+from .common import source_is_example, source_label
 
 router = APIRouter(tags=["catalog"])
 
@@ -33,6 +33,7 @@ def _like(text: str) -> str:
 def _list_item(v: Vacancy) -> dict:
     data = {key: getattr(v, key) for key in LIST_FIELDS}
     data["source_label"] = source_label(v)
+    data["source_example"] = source_is_example(v)
     data["requirements_count"] = len(v.groups)
     return data
 

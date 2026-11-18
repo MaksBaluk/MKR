@@ -30,7 +30,7 @@ function VacancyRow({ v, fromList }: { v: CatalogVacancy; fromList: string }) {
   const { shown, rest } = stackPreview(v.stack);
   return (
     <Card className="flex gap-3 p-4 transition-colors hover:border-primary-line sm:gap-4 sm:p-5">
-      <SourceMark label={v.source_label} />
+      <SourceMark label={v.source_label} example={v.source_example} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
           <h2 className="min-w-0 text-base font-semibold text-ink [overflow-wrap:anywhere]">
