@@ -88,6 +88,8 @@ class AnswerState(TypedDict, total=False):
     turns: dict[str, str]
     open_criterion_ids: list[str] | None  # None/absent: every allowed criterion is open
     turn_meta: dict[str, dict] | None  # turn_id -> {target_criteria}; context, never a score
+    allowed_practice_ids: list[str]  # professional-practice criteria to grade from the same answers; empty: none
+    practice_bands: dict[str, str] | None
     attempt: int
     output: EvaluatorOutput | None
     status: str
@@ -219,7 +221,9 @@ def _build_answer(model):
         user = format_evaluator_input(action_id=s["action_id"], rubric_version=s["rubric_version"],
                                       allowed_criterion_ids=s["allowed_criterion_ids"], bands=s.get("bands"),
                                       turns=s["turns"], open_criterion_ids=s.get("open_criterion_ids"),
-                                      turn_meta=s.get("turn_meta"))
+                                      turn_meta=s.get("turn_meta"),
+                                      practice_criterion_ids=s.get("allowed_practice_ids") or None,
+                                      practice_bands=s.get("practice_bands"))
         try:
             raw = _text(_invoke(model, [SystemMessage(EVALUATOR_SYSTEM), HumanMessage(user)]))
         except Exception as exc:  # noqa: BLE001 - timeouts/connection errors are not retried
@@ -236,7 +240,8 @@ def _build_answer(model):
         out = s.get("output")
         if out is None:
             return {}
-        errors = validate_against_context(out, set(s["allowed_criterion_ids"]), s["turns"])
+        errors = validate_against_context(out, set(s["allowed_criterion_ids"]), s["turns"],
+                                          frozenset(s.get("allowed_practice_ids") or ()))
         if not out.criteria and not out.off_topic:
             errors.append("no criteria")
         if errors:
@@ -249,8 +254,8 @@ def _build_answer(model):
         if not out.off_topic and any(c.score is None for c in out.criteria):
             out = out.model_copy(update={"sufficient_evidence": False})  # a null criterion is never sufficient evidence
         if out.off_topic:  # nothing from an off-topic answer may reach ranking
-            out = out.model_copy(update={"criteria": [c.model_copy(update={"score": None, "evidence": []})
-                                                     for c in out.criteria]})
+            out = out.model_copy(update={k: [c.model_copy(update={"score": None, "evidence": []})
+                                                for c in getattr(out, k)] for k in ("criteria", "practice")})
         return {"output": out, "status": "ACCEPTED", "reason": None}
 
     def retry_once(s: AnswerState) -> dict:

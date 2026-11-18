@@ -23,6 +23,7 @@ from backend.domain.difficulty import (DEFAULT_CONFIG, ControllerState, Difficul
 from backend.domain.interview_budget import MIN_SHOWN_QUESTIONS_PER_ACTION, topic_open_for_question
 from backend.domain.market import VacancyInput, compute_market
 from backend.domain.planner import choose_next
+from backend.domain.seniority_policy import PRACTICE_ACTION, policy_for
 from backend.experiments.config import ExperimentConfig, InterviewMode
 from backend.experiments.planning import plan_topics, slot_targets, static_plan_json
 from backend.agents.graphs import run_answer, run_ask
@@ -78,8 +79,9 @@ def criterion_scores(rows) -> dict[str, float | None]:
 
 
 def action_summary(rows, rubrics: RubricMap) -> dict[str, TopicSummary]:
-    """Per action M_c / E_c from criterion scores. A legacy holistic row (criterion_id == action_id) scores the action."""
-    cur = current_criteria_rows(rows)
+    """Per action M_c / E_c from criterion scores. A legacy holistic row (criterion_id == action_id) scores the action.
+    Professional-practice rows (PRACTICE_ACTION) are not a competency: never summarised here."""
+    cur = [r for r in current_criteria_rows(rows) if r.action_id != PRACTICE_ACTION]
     scores = criterion_scores(rows)
     out = {}
     for a in dict.fromkeys(r.action_id for r in cur):
@@ -177,6 +179,23 @@ def criterion_bands(db: Session, action_id: str) -> dict[str, str] | None:
         text = " ".join(f"{BAND_LABELS.get(k, k)} {v}" for k, v in bands.items())
         out[c.criterion_id] = f"{(c.anchors or {}).get('title', c.criterion_id)}. {text}".strip()
     return out or None
+
+
+def practice_criteria_for(db: Session, track: str | None) -> list[str]:
+    """Practice criterion ids graded alongside topic answers: only for tracks with a level policy and a seeded rubric."""
+    return [c.criterion_id for c in _seeded_criteria(db, PRACTICE_ACTION)] if policy_for(track) else []
+
+
+def is_practice(criterion_id: str) -> bool:
+    return criterion_id.startswith(f"{PRACTICE_ACTION}.")
+
+
+def _interview_track(db: Session, iv: CoreInterview) -> str | None:
+    prof = db.get(CandidateProfile, iv.profile_id) if iv.profile_id else None
+    if prof is not None:
+        return prof.track
+    user = db.get(User, iv.user_id)
+    return user.track if user else None
 
 
 def _label(db: Session, action_id: str) -> str:
@@ -474,10 +493,13 @@ def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -
         CriterionAssessment.session_id == iv.id, CriterionAssessment.action_id == action_id)
         .order_by(CriterionAssessment.created_at, CriterionAssessment.revision)).all()
     open_ids = open_criteria_for(db, action_id, criterion_scores(prior), bool(prior and prior[-1].sufficient_evidence))
+    practice_ids = practice_criteria_for(db, _interview_track(db, iv))
     result = run_answer({"action_id": action_id, "rubric_version": version, "allowed_criterion_ids": criteria,
                          "bands": criterion_bands(db, action_id), "turns": {t.id: t.answer_text for t in turns},
                          "open_criterion_ids": open_ids,
-                         "turn_meta": {t.id: {"target_criteria": t.target_criteria} for t in turns}}, model)
+                         "turn_meta": {t.id: {"target_criteria": t.target_criteria} for t in turns},
+                         "allowed_practice_ids": practice_ids,
+                         "practice_bands": criterion_bands(db, PRACTICE_ACTION) if practice_ids else None}, model)
     if result.status != "ACCEPTED":
         return "UNGRADED"
     goal = result.output.followup_goal  # already sanitized against allowed + open criteria by the answer graph
@@ -490,6 +512,7 @@ def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -
         db.flush()
     rev = (db.scalar(select(func.max(CriterionAssessment.revision)).where(
         CriterionAssessment.session_id == iv.id, CriterionAssessment.action_id == action_id)) or 0) + 1
+    _store_practice(db, user, iv, result.output.practice)  # already nulled by the answer graph when off-topic
     if result.off_topic:  # recorded as a null revision (history); effective_rows keeps earlier scores intact
         turn.off_topic = True
         inherited = bool(prior and prior[-1].sufficient_evidence)
@@ -504,6 +527,21 @@ def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -
                                    reason=c.reason, evidence=[e.model_dump() for e in c.evidence], revision=rev,
                                    sufficient_evidence=result.output.sufficient_evidence))
     return "ACCEPTED"
+
+
+def _store_practice(db: Session, user: User, iv: CoreInterview, practice) -> None:
+    """One practice revision per Evaluator call under PRACTICE_ACTION with its own revision counter, so it never mixes
+    with a topic's M_c/E_c; a null item is history only (effective_rows keeps an earlier score)."""
+    rubric = _seeded_rubric(db, PRACTICE_ACTION) if practice else None
+    if rubric is None:
+        return
+    rev = (db.scalar(select(func.max(CriterionAssessment.revision)).where(
+        CriterionAssessment.session_id == iv.id, CriterionAssessment.action_id == PRACTICE_ACTION)) or 0) + 1
+    for c in practice:
+        db.add(CriterionAssessment(user_id=user.id, session_id=iv.id, action_id=PRACTICE_ACTION,
+                                   criterion_id=c.criterion_id, rubric_id=rubric.id, score=c.score, reason=c.reason,
+                                   evidence=[e.model_dump() for e in c.evidence], revision=rev,
+                                   sufficient_evidence=None))
 
 
 @router.post("/interviews/{interview_id}/answers")

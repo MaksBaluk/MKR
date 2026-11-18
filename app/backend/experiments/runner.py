@@ -23,6 +23,7 @@ import backend.agents.prompts as prompts
 import backend.api.core as core
 from backend.api.core import (_revisions, _seeded_rubric, cohort_actions, current_criteria_rows, rubric_map,
                               static_plan_for)
+from backend.domain.seniority_policy import PRACTICE_ACTION
 from backend.api.recommendations import rank_items
 from backend.config import get_settings
 from backend.experiments.config import ExperimentConfig, InterviewMode
@@ -172,11 +173,14 @@ def _scores(assessments: list[dict]) -> dict[str, float | None]:
 
 
 def _latest_assessments(db: Session, interview_id: str) -> list[dict]:
-    """Latest revision per criterion (same rows and order as attempt_scores)."""
+    """Latest revision per topic criterion (same rows and order as attempt_scores); practice criteria are not
+    competencies and stay out of the experiment's ranking inputs and metrics."""
     rows = db.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == interview_id)
                       .order_by(CriterionAssessment.created_at, CriterionAssessment.revision)).all()
     out: dict[str, dict] = {}
     for r in current_criteria_rows(rows):
+        if r.action_id == PRACTICE_ACTION:
+            continue
         out[r.criterion_id] = {"action_id": r.action_id, "criterion_id": r.criterion_id, "score": r.score,
                                "sufficient_evidence": bool(r.sufficient_evidence), "revision": r.revision}
     return list(out.values())
@@ -201,7 +205,8 @@ def _seeded_versions(db: Session, snap: CohortSnapshot) -> dict[str, str]:
 def _rubric_versions(db: Session, snap: CohortSnapshot, interview_id: str | None) -> dict[str, str]:
     out = _seeded_versions(db, snap)
     if interview_id:
-        for r in db.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == interview_id)):
+        for r in db.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == interview_id,
+                                                              CriterionAssessment.action_id != PRACTICE_ACTION)):
             rubric = db.get(Rubric, r.rubric_id)
             if rubric is not None:
                 out[r.action_id] = rubric.version

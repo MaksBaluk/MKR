@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, Sequence, Set
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -46,6 +46,13 @@ class EvaluatorOutput(BaseModel):
     followup_goal: FollowupGoal | None = None
     limitations: str = ""
     off_topic: bool = False
+    practice: list[CriterionResult] = []  # professional-practice criteria graded from the same answers (optional)
+
+    @field_validator("practice", mode="before")
+    @classmethod
+    def _coerce_practice(cls, v):
+        """A missing/null practice list means "not graded"; its items are still validated strictly."""
+        return [] if v is None else v
 
     @field_validator("limitations", mode="before")
     @classmethod
@@ -73,15 +80,18 @@ def validate_against_context(
     out: EvaluatorOutput,
     allowed_criteria: set[str],
     turn_texts: Mapping[str, str],
+    allowed_practice: Set[str] = frozenset(),
 ) -> list[str]:
-    """Return a list of errors; empty means the output is structurally acceptable."""
+    """Return a list of errors; empty means the output is structurally acceptable.
+
+    Practice criteria (optional, possibly a subset) follow the same id, range and verbatim-evidence rules."""
     errors: list[str] = []
     seen: set[str] = set()
-    for c in out.criteria:
+    for c, allowed in [(c, allowed_criteria) for c in out.criteria] + [(c, allowed_practice) for c in out.practice]:
         if c.criterion_id in seen:
             errors.append(f"duplicate criterion {c.criterion_id}")
         seen.add(c.criterion_id)
-        if c.criterion_id not in allowed_criteria:
+        if c.criterion_id not in allowed:
             errors.append(f"unknown criterion {c.criterion_id}")
         if c.score is not None and (not math.isfinite(c.score) or not 0.0 <= c.score <= 1.0):
             errors.append(f"score out of range for {c.criterion_id}")

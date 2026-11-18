@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from backend.api.common import source_is_example, source_label
-from backend.api.core import _owned_cohort, _revisions, cohort_actions, latest_scores, rubric_map
+from backend.api.core import _owned_cohort, _revisions, cohort_actions, is_practice, latest_scores, rubric_map
 from backend.api.profile import latest_self_ratings
 from backend.db import get_db
 from backend.domain.core_flow import explain_vacancy, rank_vacancy
@@ -53,5 +53,6 @@ def rank(data: RankBody, db: Session = Depends(get_db), user: User = Depends(cur
     scores = latest_scores(db, user)
     ordered = rank_items(db, user.years_experience, snap, scores, latest_self_ratings(db, user))
     return {"cohort_id": snap.id, "policy": "ORDER_LEXICOGRAPHIC_V1", "items": ordered[:TOP_N],
-            "total": len(ordered), "assessed_actions": sum(1 for v in scores.values() if v is not None),
+            "total": len(ordered),
+            "assessed_actions": sum(1 for k, v in scores.items() if v is not None and not is_practice(k)),
             "note": NOTE}
