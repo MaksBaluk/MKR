@@ -88,7 +88,52 @@ export interface RankedItem {
   reasons: string[];
 }
 
+/** Display label over the unchanged percent-first order (server rule); never a new ranking. */
+export type ResultSection = 'DESIRED_LEVEL' | 'OTHER_FITTING' | 'UNRESOLVED_OR_GAPS';
+export type LevelName = 'JUNIOR' | 'MIDDLE' | 'SENIOR' | 'UNKNOWN';
+
+export interface LevelCriterion {
+  id: string;
+  /** Ukrainian criterion title (falls back to the id on the server when no title is known). */
+  title: string;
+  kind: 'PRACTICE' | 'COMPETENCY';
+}
+
+export interface LevelCoverage {
+  status: 'SUPPORTED' | 'GAP' | 'UNVERIFIED';
+  critical_total: number;
+  assessed_count: number;
+  confirmed_count: number;
+  gap_count: number;
+  confirmed: LevelCriterion[];
+  gaps: LevelCriterion[];
+  unassessed: LevelCriterion[];
+}
+
+/** Assessed professional level of one finished attempt: evidence-based, never an input of the vacancy order. */
+export interface AssessedLevel {
+  interview_id: string;
+  /** Profile value copied at finish: junior | middle | senior | lead, or null. */
+  desired_level: string | null;
+  assessed_level: LevelName;
+  highest_supported_level: LevelName;
+  assessment_status: 'ASSESSED' | 'INSUFFICIENT_DATA' | 'GAPS_AT_JUNIOR' | 'POLICY_UNAVAILABLE';
+  policy: { id: string | null; version: string | null; status: string | null };
+  coverage_by_level: Record<string, LevelCoverage>;
+  confirmed_strengths: LevelCriterion[];
+  critical_gaps: LevelCriterion[];
+  unassessed_criteria: LevelCriterion[];
+  evidence_references: (LevelCriterion & { turn_ids: string[] })[];
+  /** Ukrainian lines; criterion ids are already replaced by titles on the server. */
+  explanation: string[];
+  /** Policy note (e.g. «Потребує експертної валідації») or null. */
+  note: string | null;
+  created_at: string | null;
+}
+
 export interface ResultVacancy extends RankedItem {
+  /** Optional for older API responses; a missing value is shown in the last section. */
+  section?: ResultSection;
   title: string;
   company: string;
   location: string;
@@ -128,6 +173,8 @@ export interface ProfileResults {
   page_size: number;
   items: ResultVacancy[];
   competencies: CompetencyResult[];
+  /** null when there is no finished attempt or the level could not be determined; absent on older responses. */
+  level?: AssessedLevel | null;
   market: MarketSkill[];
   note: string;
 }
