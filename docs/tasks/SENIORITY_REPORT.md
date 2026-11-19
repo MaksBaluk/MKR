@@ -2,9 +2,72 @@
 
 Гілка `feat/criterion-core`, коміти від `1e8c250` до фінального коміту задачі 7 (2026-11-18). Дизайн: `docs/superpowers/specs/2026-11-18-seniority-estimator-design.md`. План: `docs/superpowers/plans/2026-11-18-seniority-estimator.md`. Правила: `docs/tasks/MATH_SPEC.md` §3e.
 
+## Оновлення 2026-11-19 (третє): політика `python-backend/v4` — виправлення незалежного аудиту (WP-A)
+
+Поточна політика python — `python-backend/v4`. Підстава: `docs/audit/seniority-independent-audit.md` (дефекти D-1…D-12). Правила: `docs/tasks/MATH_SPEC.md` §3e, пункт «Policy v4». Статус WORKING_ASSUMPTION; потрібна експертна валідація; реальна LLM не запускалась.
+
+**Що змінено** (оцінювач, політика, агрегування, збереження, UI; потік співбесіди не змінювався).
+
+| Дефект | Було (v3) | Стало (v4) | Доказ |
+|---|---|---|---|
+| D-1 / UR-1 Senior без Kafka | JUNIOR | SENIOR (пули «Споживачі подій», «Обробка збоїв» = DECLINED) | `test_ur1_…`, realistic `no-kafka-2` |
+| UR-2 Senior без AWS | MIDDLE | SENIOR («Вартість і надійність» = {aws.cost, kubernetes.resources}, DECLINED) | `test_ur2_…`, realistic `no-aws-2` |
+| UR-3 / UR-7 одна часткова 0.6 | JUNIOR | межово (UNRESOLVED), SENIOR | `test_ur3_ur7_…` |
+| D-10 / UR-4 слабкий git 0.4 | UNKNOWN | SENIOR, git у прогалинах як дозволена | `test_ur4_…`, realistic `weak-git-2` |
+| D-4 / WS-1 2 технічні пули Senior | SENIOR | MIDDLE (`TECHNICAL_POOLS_BELOW_MIN`) | `test_ws1_…`, realistic `weak-senior-*` |
+| WS-2 без підтвердженої практики | SENIOR | не SENIOR (`PRACTICE_POOLS_BELOW_MIN`) | `test_ws2_…` |
+| WS-3 лише sql у шарі даних | SENIOR | MIDDLE (`REQUIRED_CAPABILITY_UNCONFIRMED`) | `test_ws3_…` |
+| WS-4 6 щедрих відповідей (P5) | SENIOR | MIDDLE (немає пулу даних Senior) — **частково**: з postgresql серед 6 тем щедрий оцінювач дав би SENIOR | `test_p5_…` |
+| UNRESOLVED у мінімумі | рахувався | не рахується | `test_unresolved_pools_never_fill_a_minimum` |
+| D-5 практика максимумом | 0.9/0.3/0.3/0.3 → підтверджено | медіана → прогалина | `test_d5_…`, `test_practice_topic_scores_…` |
+| D-9 текст MATH_SPEC | «never without practice evidence» | виправлено («оцінено» ≠ «підтверджено») | MATH_SPEC §3e |
+| D-11 / D-12 | бажаний рівень і політика на момент завершення | фіксуються на старті (міграція 0017) | `test_desired_level_is_captured_at_attempt_start`, `test_attempt_started_under_older_policy_…`, `test_migration_0017` |
+| UI `highest_supported_level` | лише рядок пояснення | окремий блок «Найвищий рівень із доказами» | vitest `levelView.test.ts`, e2e |
+
+**Пороги v4** (τ / g, `K`, `T` технічних, `P` практики, `m`, обов'язковий пул шару даних): Junior .50/.50, 6, 5, 0, 3; Middle .75/.50, 7, 5, 2, 4; Senior .75/.50, 7, 4, 3, 3. Одна нежорстка прогалина на рівень дозволена (жорсткі: ідіоматичний код Python і обробка помилок у Junior). Обрано за реалістичним виміром (нижче) з кількох варіантів; Middle 9/7/1 (перший варіант) давав справжньому Middle лише JUNIOR за вузьких питань, тому поріг знижено до 7/5/2. Senior не підганявся: досяжність за вузьких питань лишилася неповною.
+
+### Реалістичний вимір (SIMULATED, `cd app && uv run python scripts/seniority_reachability.py`, розділ 6, реальний прогін 2026-11-19)
+
+Стенд `scripts/seniority_realistic.py` (перенесено з аудиту): Interviewer питає 1 або 2 критерії за назвою; кандидат відповідає лише на них; Evaluator оцінює лише зачеплені критерії; мети follow-up GAP_ONLY (буквальний промпт) або OPEN; практика лише коли питання до неї підводить. 96 співбесід через справжній API (Q_t, ≤10 тем, ≤5 питань на тему), 20–47 питань на співбесіду. Кількості — за трьома бажаними рівнями.
+
+| Профіль | 1 критерій/питання (GAP_ONLY + OPEN, 6 прогонів) | 2 критерії/питання (6 прогонів) | v3 на тих самих доказах (2 крит.) |
+|---|---|---|---|
+| справжній Senior | SENIOR 3, MIDDLE 3 | SENIOR 6 | SENIOR 6 |
+| Senior без AWS | SENIOR 2, MIDDLE 4 | SENIOR 6 | MIDDLE 6 |
+| Senior без Kafka | MIDDLE 6 | SENIOR 6 | JUNIOR 6 |
+| Senior зі слабким git | SENIOR 2, MIDDLE 4 | SENIOR 6 | UNKNOWN 6 |
+| справжній Middle | MIDDLE 6 | MIDDLE 6 | MIDDLE 6 |
+| WS-1 (Middle + 2 здатності Senior) | MIDDLE 6 | MIDDLE 6 | MIDDLE 6 |
+| справжній Junior | UNKNOWN 6 | JUNIOR 6 | JUNIOR 3, UNKNOWN 3 |
+| слабкий | UNKNOWN 6 | UNKNOWN 6 | UNKNOWN 6 |
+
+- **Middle:** досягається у 12/12 прогонів справжнього Middle; хибного Middle для Junior чи слабкого немає.
+- **Senior:** 24/24 для чотирьох Senior-профілів за 2 критеріїв на питання; 7/24 за 1 критерію (решта MIDDLE). Хибного Senior немає (WS-1: 0/12). Причина неповної досяжності — потік співбесіди (D-2: тема закривається після 2 питань, критерії Senior не питають; D-6: підказки практики), а не пороги; це WP-B.
+- **Junior за 1 критерію на питання** — UNKNOWN за всіх версій v1–v4: мети GAP_ONLY повторно питають той самий слабкий критерій, інші критерії Junior теми не питаються. Обмеження потоку (WP-B).
+- **Верхня межа** (усі критерії перших k тем, уся практика, 14 послідовностей): Senior за v4 — k = 6..9 (v3: 6), Middle — k = 4..6; без практики Middle і Senior за v4 недосяжні (практика обов'язкова з v4: Middle ≥ 2, Senior ≥ 3 пули).
+- Числа залежать від поведінки заглушки, а не реальної LLM.
+
+### Перевірки (реальні команди, 2026-11-19)
+
+- `cd app && uv run pytest -q` → `752 passed, 71 warnings in 144.11s` (було 708 до змін).
+- `cd app/frontend && npm run typecheck && npx vitest run && npm run build` → вихід 0; `Tests 165 passed (165)`; build успішний.
+- `cd app && docker compose up -d --build api web`; `docker compose exec api alembic current` → `0017_attempt_start_snapshot (head)` на PostgreSQL проєкту; колонки `start_*` nullable.
+- `cd app/frontend && npx playwright test` → `8 passed`.
+- Golden-дайджести v1, v2 і v3 (91 випадок кожен) незмінні; v3 golden створено з коду коміту `27a7fe5` до змін.
+
+### Обмеження v4
+
+- Пороги й пули — робоче припущення, не калібрування; експертна валідація потрібна.
+- DECLINED визначається детермінованим шаблоном цитати (`seniority.DECLINE_RE`) за оцінки < 0.25. Інше формулювання відмови буде прогалиною (якщо слабке) — консервативно, але можливе заниження; реальна LLM не перевірялась.
+- Медіана практики для однієї теми дорівнює цій оцінці (одна тема вирішує сама). Правило «≥ 2 теми» відхилено, бо підказки практики (D-6) його блокували.
+- Одна дозволена прогалина на рівень — компроміс проти обвалу рівня через одну відповідь; вона показується в прогалинах і поясненні.
+- WS-4 виправлено лише частково (див. таблицю): щедрий оцінювач, що оцінює всю тему з однієї відповіді, політикою не відрізняється.
+- `unresolved_pools` у відповіді API об'єднує рівні: пул практики може бути межовим для одного рівня і підтвердженим для іншого (у v2/v3 τ різні).
+- Не виправлено (WP-B): D-2, D-3, D-6, D-7, D-8 частково (стенд `seniority_scenarios.py` лишився як верхня межа, реалістичний стенд додано).
+
 ## Оновлення 2026-11-19 (друге): політика `python-backend/v3` (§v3)
 
-Поточна політика напряму python тепер `python-backend/v3`. Це рішення власника: знизити поріг Senior. Політики v1 і v2 лишаються доступними за версією, а збережені рядки v1 і v2 не переписуються й показуються за власними порогами. Правила описано в `docs/tasks/MATH_SPEC.md` §3e, пункт «Policy v3».
+(Історичний розділ: з третього оновлення поточна — v4.) Поточна політика напряму python тоді стала `python-backend/v3`. Це рішення власника: знизити поріг Senior. Політики v1 і v2 лишаються доступними за версією, а збережені рядки v1 і v2 не переписуються й показуються за власними порогами. Правила описано в `docs/tasks/MATH_SPEC.md` §3e, пункт «Policy v3».
 
 **Що змінено.** Лише правило Senior. Пули, τ, правила Junior і Middle, код оцінювача, Q_t, бюджети й ранжування (2.15) не змінювалися. Міграції немає.
 
