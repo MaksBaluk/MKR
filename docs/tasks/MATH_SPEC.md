@@ -133,7 +133,7 @@ Level moves at most one step per answer. Targets of the next question are the cr
 - **Revisions.** Every evaluation appends a revision per criterion; nothing is deleted. The current value of a criterion is the latest revision **with a score** (`effective_rows`). A later `null` revision (off-topic answer, or an answer that does not evidence the criterion) is stored for history but never erases an earlier score. An off-topic revision inherits the previous `sufficient_evidence`. When a later answer contradicts an earlier one the Evaluator receives the whole series of answers on the topic and re-grades every criterion over it; the new, usually lower, score becomes current and the superseded revision stays in history.
 - **Evaluator validation** (`validate_against_context`; a violation rejects the output, one retry, then `UNGRADED`): unknown criterion id; duplicate criterion id; score outside [0,1] or non-finite; a numeric score without at least one non-blank evidence excerpt; blank excerpt; unknown turn id; excerpt that is not a verbatim substring of that turn. Missing criteria are allowed (they stay unknown). Score and coverage stay separate (§3a): one strong criterion raises `E_c` by its weight only and never makes the topic confirmed (`overall_level_allowed` needs `E_c ≥ MIN_COVERAGE_FOR_OVERALL`).
 
-## 3e. Assessed professional level (SeniorityEstimator; policies `python-backend/v1` 2026-11-18 and `python-backend/v2` 2026-11-19, current: v2)
+## 3e. Assessed professional level (SeniorityEstimator; policies `python-backend/v1` 2026-11-18, `python-backend/v2` and `python-backend/v3` 2026-11-19, current: v3)
 
 Three quantities stay separate: `desired_level` (the profile's `target_level`; it seeds only the first question's difficulty and labels a results section), `assessed_level` (this section) and vacancy fit (§4–§5, unchanged). The estimator (`backend/domain/seniority.py`) is pure and deterministic: its only inputs are the level policy and per-criterion evidence `{c: (s_c, T_c)}` from **one** attempt, where `s_c ∈ [0,1] ∪ {null}` and `T_c` is a set of evidence turn ids. Desired level, years, title, self-ratings, vacancy data, ranking and `E_c` are not parameters. A non-finite or out-of-range score raises an error (never guessed).
 
@@ -147,7 +147,7 @@ Three quantities stay separate: `desired_level` (the profile's `target_level`; i
 - **Interview integration.** Only the order of the current topic's unmet criteria changes (critical criteria of the lowest non-supported level first) and up to two unassessed practice criteria are passed to the Interviewer (a validated follow-up goal always wins). Q_t, caps, `total_budget` and difficulty are unchanged, so topic choice is market-driven, not level-driven (consequence in `docs/tasks/SENIORITY_REPORT.md`).
 - **Not affected.** Ranking (2.15), the results percent order, `/recommendations`, D_vga, the planner and `E_c`/`MIN_COVERAGE_FOR_OVERALL` ignore the level and practice criteria; results sections are labels over the unchanged order.
 - **Validation side effects.** Practice items use the same evaluator validation as topic criteria (§3d); one invalid practice item rejects the whole output, so after the retry the topic answer is `UNGRADED`. The Evaluator and Interviewer system prompts changed for **all** tracks, so `prompt_version` changed: experiment runs before and after this change are not comparable on prompts.
-- **Policy v2 (current for python, 2026-11-19): pooled critical units.** v1 put Middle/Senior evidence on topics that Q_t almost never chooses, because Q_t follows the market (measured: `app/scripts/seniority_reachability.py`, report §v2). So with at most 10 topics, Middle was structurally impossible. v2 keeps every rule above (classes, ε, evidence turns, hierarchy), but the critical unit of a level is a **pool** `P ⊆ C`.
+- **Policy v2 (2026-11-19; current until v3 the same day, still addressable for stored rows): pooled critical units.** v1 put Middle/Senior evidence on topics that Q_t almost never chooses, because Q_t follows the market (measured: `app/scripts/seniority_reachability.py`, report §v2). So with at most 10 topics, Middle was structurally impossible. v2 keeps every rule above (classes, ε, evidence turns, hierarchy), but the critical unit of a level is a **pool** `P ⊆ C`.
   - A pool holds equivalent alternatives **across different tools**. Its members always have distinct competency prefixes (test-enforced). Example: «Конфігурація та розгортання» = {`docker.runtime`, `ci-cd.deploy`, `aws.deploy`, `kubernetes.workloads`}.
   - Two skills of one tool are never alternatives: each is its own pool (`sql.joins` and `sql.correctness` are separate Junior pools), so a gap in one is never hidden by the other. This was review fix I-1: same-tool any-of pools masked established gaps.
   - The level's critical family is `𝒫_L = {P_1..P_n}`, and every pool has a Ukrainian `title`. A criterion is in at most one pool per level. One pool id has the same members at every level. Practice criteria are singleton pools.
@@ -179,14 +179,36 @@ Three quantities stay separate: `desired_level` (the profile's `target_level`; i
     - Two Senior pools («Конкурентний доступ і паралельність», «Розслідування інцидентів у продакшені») are never assessable, because Q_t never picks their topics.
     - The 12 assessable pools are 7 technical plus 5 practice. So Senior needs at least 4 practice pools assessed (`A^min` = 11) and at least 3 practice pools confirmed (`K^min` = 10).
     - `m_L` for Senior (4) is below v1 (6).
+- **Policy v3 (current for python, 2026-11-19): v2 with a lower Senior bar.** Owner decision: under v2 Senior needed all criteria of 8–9 topics plus all practice, which the 10-topic budget rarely leaves room for. v3 changes **only the Senior counts and `m_L`**. The pools, every τ, the Junior and Middle rules (the same objects as v2), the estimator, Q_t, budgets and ranking are unchanged.
+
+  | Level | τ | pools | `A^min` (share) | `K^min` (share) | `m_L` |
+  |---|---|---|---|---|---|
+  | Junior | .50 | 9 (1 practice) | 7 (.75) | 7 (.75) | 3 |
+  | Middle | .70 | 14 (3 practice) | 10 (.70) | 9 (.60) | 5 |
+  | Senior | .75 | 14 (5 practice) | **9 (.60)** | **7 (.50)** | **3** |
+
+  - Counts are `⌈share × 14⌉`: `⌈8.4⌉ = 9`, `⌈7.0⌉ = 7`. The shares .60/.50 are an owner-chosen **working assumption**, not measured or calibrated. Status stays `WORKING_ASSUMPTION`; expert validation is required.
+  - **What lowering means.** Senior now needs less evidence: 9 of 14 capabilities assessed instead of 11, and 7 confirmed instead of 10. A v3 Senior is therefore a weaker claim than a v2 Senior on the same scale. Results of different versions must not be compared as if they were one scale.
+  - **Why `m_L` = 3 (v2: 4).** With 4 the shares alone do not move the bar: the first 6 market topics confirm Senior pools from only 3 tools (kafka, ci-cd, aws), so Senior would still need 8 topics. One topic confirms at most two Senior pools (test-enforced), so `m_L` = 3 still requires at least three different tools: a single topic, or two tools, never give Senior coverage (`kafka` + `aws` + all practice: 9/9 pools, but 2 tools, `TOO_FEW_COMPETENCIES`, tested).
+  - **Guards kept.** Hierarchy (Senior requires the Junior and Middle chain `SUPPORTED`); no compensation across pools (one established gap is `GAP`); a confirmation needs an evidence turn; Senior practice pools count like any pool, so weak Senior practice is a `GAP` (tested); no data-layer evidence still gives `UNKNOWN` (tested).
+  - **Practice dependence.** On the system cohort only 7 non-practice Senior pools are assessable, so `A^min` = 9 still needs at least 2 practice pools assessed. On the market topics Senior is never reached without practice evidence (tested). With every rubric topic (not reachable under Q_t on this cohort) 9 technical pools exist and Senior would not need practice.
+  - **Implications** (`uv run python scripts/seniority_reachability.py`, SIMULATED, every chosen criterion at 0.9, 14 measured topic sequences). Minimal `k` (all criteria of the first k picked topics):
+
+    | policy | practice 0 | first 3 practice | all 6 practice |
+    |---|---|---|---|
+    | v2 Middle / Senior | 7–9 / never | 5–6 / never | 5–6 / 7–9 |
+    | v3 Middle / Senior | 7–9 / never | 5–6 / 7–9 | 5–6 / **6** |
+
+    - Partial grading (v3, all practice): Senior with 6 topics × 4 criteria, 8 topics × 3 criteria, or 10 × 3; v2 needed 10 × 4.
+    - New disclosed effect: 8 topics with sql but no postgresql/django, plus all practice, give **SENIOR** under v3 (v2: MIDDLE), with `data-consistency`, `schema-design` (Middle) and `db-operations`, `schema-migrations` (Senior) unassessed.
 - **Disclosed weaknesses (not rule changes).**
   - **M-1: Middle alone ignores data evidence.** Middle coverage can be `SUPPORTED` with every Middle data pool unassessed (`query-efficiency`, `data-consistency`, `schema-design`) when the other pools and practice are strong. The assigned level still needs Junior, and Junior includes the SQL pools `sql-joins` and `sql-correctness`, so no data-layer evidence means no level (tested).
   - Middle can, however, be assigned with sql but **no** postgresql/django/sqlalchemy evidence. Measured: 8 topics including sql but not postgresql, plus all practice, give MIDDLE. Then `data-consistency` and `schema-design` stay unassessed.
   - **M-2: one topic, several pools.** One topic can confirm several pools of the same level, because each pool is a different skill of it. For example, postgresql confirms three Middle pools, fastapi three and docker two; aws (`aws.iam`, `aws.cost`) and kafka (`kafka.semantics`, `kafka.schemas`) confirm two Senior pools each. This is per-skill counting, like v1. Breadth is enforced only through `m_L`.
 - **Versions and rows.**
-  - `policy_for(track)` returns the current policy (python: v2). `policy_by_version(id, version)` resolves every version ever stored (v1, v2), so `finalize_level(policy=v1)` still works.
-  - Stored v1 rows are never rewritten. Their JSON has no `pools` key, and v1 results are byte-identical to the pre-v2 code (golden test).
-  - `GET …/level` returns the attempt's row of the current policy if one exists, otherwise the latest stored row. So an attempt finished before v2 keeps showing its v1 row. Only an attempt with no row is assessed lazily, under the current policy.
+  - `policy_for(track)` returns the current policy (python: v3). `policy_by_version(id, version)` resolves every version ever stored (v1, v2, v3), so `finalize_level(policy=v1)` still works.
+  - Stored v1 and v2 rows are never rewritten. v1 JSON has no `pools` key, and v1 results are byte-identical to the pre-v2 code (golden test). v2 results are byte-identical to the pre-v3 code (golden digest over 91 cases).
+  - `GET …/level` returns the attempt's row of the current policy if one exists, otherwise the latest stored row. So an attempt finished before v3 keeps showing its v2 (or v1) row with that version's own thresholds. Only an attempt with no row is assessed lazily, under the current policy.
   - The level probe of a pooled policy prioritises the members of the target level's pools that are not yet `CONFIRMED`, within the topic Q_t already chose. Practice hints come from wholly unassessed practice pools.
 
 ## 4. Requirement thresholds and interval fulfilment
