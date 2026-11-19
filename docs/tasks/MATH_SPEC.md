@@ -147,25 +147,42 @@ Three quantities stay separate: `desired_level` (the profile's `target_level`; i
 - **Interview integration.** Only the order of the current topic's unmet criteria changes (critical criteria of the lowest non-supported level first) and up to two unassessed practice criteria are passed to the Interviewer (a validated follow-up goal always wins). Q_t, caps, `total_budget` and difficulty are unchanged, so topic choice is market-driven, not level-driven (consequence in `docs/tasks/SENIORITY_REPORT.md`).
 - **Not affected.** Ranking (2.15), the results percent order, `/recommendations`, D_vga, the planner and `E_c`/`MIN_COVERAGE_FOR_OVERALL` ignore the level and practice criteria; results sections are labels over the unchanged order.
 - **Validation side effects.** Practice items use the same evaluator validation as topic criteria (§3d); one invalid practice item rejects the whole output, so after the retry the topic answer is `UNGRADED`. The Evaluator and Interviewer system prompts changed for **all** tracks, so `prompt_version` changed: experiment runs before and after this change are not comparable on prompts.
-- **Policy v2 (current for python, 2026-11-19): pooled critical units.** v1 put Middle/Senior evidence on topics that Q_t, which follows the market, almost never chooses (measured: report §v2). So with at most 10 topics, Middle was structurally impossible. v2 keeps every rule above (classes, ε, evidence turns, hierarchy), but the critical unit of a level is a **pool** `P ⊆ C` of criteria that evidence one professional capability across tools. Example: «Конфігурація та розгортання» = {`docker.runtime`, `ci-cd.deploy`, `aws.deploy`, `kubernetes.workloads`}. The level's critical family is `𝒫_L = {P_1..P_n}`, and every pool has a Ukrainian `title`. A criterion is in at most one pool per level. One pool id has the same members at every level. Practice criteria are singleton pools. With a level's `τ_L` and `ε = ε(τ_L)`, the pool status is:
-  - `CONFIRMED` iff `∃ c ∈ P: s_c ≥ τ_L ∧ T_c ≠ ∅`. Any one member is enough: the alternatives are equivalent tools, as in an OR group (§4).
-  - `GAP` iff not confirmed, `∃ c ∈ P: s_c < τ_L − ε ∧ T_c ≠ ∅`, and no member is assessed-but-unresolved (a score in `[τ_L − ε, τ_L)`, or a score without an evidence turn). Unscored members neither block nor create a gap: missing evidence is not counter-evidence, and the assessed tool did show a failure. A singleton pool therefore behaves exactly like a v1 criterion.
-  - `UNRESOLVED`: assessed otherwise. `UNASSESSED`: no member has a score.
-  - The level counts pools: `a_L = |{P : status ≠ UNASSESSED}|`, `k_L = |{P : CONFIRMED}|`, `g_L = |{P : GAP}|`. `comp` is the number of distinct competency prefixes among the confirming members of all confirmed pools (practice excluded).
-  - `GAP` iff `g_L > 0`. No compensation across pools: a confirmed pool never offsets a gap pool. `SUPPORTED` iff `a_L ≥ A_L^min ∧ k_L ≥ K_L^min ∧ comp ≥ m_L`; otherwise `UNVERIFIED`. Reason codes: `CRITICAL_GAP`, `ASSESSED_COUNT_BELOW_MIN`, `CONFIRMED_COUNT_BELOW_MIN`, `TOO_FEW_COMPETENCIES`. Hierarchy, `UNKNOWN`, report scope and evidence rules are unchanged.
-  - Lists. `confirmed_ids` holds the confirming members. `gap_ids` holds gap members of `GAP` pools only: a failed alternative inside a confirmed or unresolved pool is not a level gap. `unassessed_ids` holds the members of `UNASSESSED` pools only. The API adds `pools` per level and `unassessed_pools` (id, title), and the UI lists unchecked capabilities by title.
-- **v2 thresholds** (counts over pools, `WORKING_ASSUMPTION`). Each count is `⌈share × |𝒫_L|⌉`, starting from v1's shares and lowering the Middle and Senior ones (owner option 2):
+- **Policy v2 (current for python, 2026-11-19): pooled critical units.** v1 put Middle/Senior evidence on topics that Q_t almost never chooses, because Q_t follows the market (measured: `app/scripts/seniority_reachability.py`, report §v2). So with at most 10 topics, Middle was structurally impossible. v2 keeps every rule above (classes, ε, evidence turns, hierarchy), but the critical unit of a level is a **pool** `P ⊆ C`.
+  - A pool holds equivalent alternatives **across different tools**. Its members always have distinct competency prefixes (test-enforced). Example: «Конфігурація та розгортання» = {`docker.runtime`, `ci-cd.deploy`, `aws.deploy`, `kubernetes.workloads`}.
+  - Two skills of one tool are never alternatives: each is its own pool (`sql.joins` and `sql.correctness` are separate Junior pools), so a gap in one is never hidden by the other. This was review fix I-1: same-tool any-of pools masked established gaps.
+  - The level's critical family is `𝒫_L = {P_1..P_n}`, and every pool has a Ukrainian `title`. A criterion is in at most one pool per level. One pool id has the same members at every level. Practice criteria are singleton pools.
+  - Pool status, with a level's `τ_L` and `ε = ε(τ_L)`:
+    - `CONFIRMED` iff `∃ c ∈ P: s_c ≥ τ_L ∧ T_c ≠ ∅` (any one cross-tool alternative, as in an OR group of §4).
+    - `GAP` iff not confirmed, `∃ c ∈ P: s_c < τ_L − ε ∧ T_c ≠ ∅`, and no member is assessed-but-unresolved (a score in `[τ_L − ε, τ_L)`, or a score without an evidence turn). Unscored members neither block nor create a gap, so a singleton pool behaves exactly like a v1 criterion.
+    - `UNRESOLVED`: assessed otherwise. `UNASSESSED`: no member scored.
+  - Level counts: `a_L = |{P : status ≠ UNASSESSED}|`, `k_L = |{P : CONFIRMED}|`, `g_L = |{P : GAP}|`. `comp` is the number of distinct competency prefixes among the confirming members (practice excluded).
+  - `GAP` iff `g_L > 0`, with no compensation across pools. `SUPPORTED` iff `a_L ≥ A_L^min ∧ k_L ≥ K_L^min ∧ comp ≥ m_L`, else `UNVERIFIED`. Reason codes: `CRITICAL_GAP`, `ASSESSED_COUNT_BELOW_MIN`, `CONFIRMED_COUNT_BELOW_MIN`, `TOO_FEW_COMPETENCIES`. Hierarchy, `UNKNOWN`, report scope and evidence rules are unchanged.
+  - Lists:
+    - `confirmed_ids` = the confirming members.
+    - `gap_ids` = gap members of `GAP` pools only. A failed cross-tool alternative inside a confirmed pool is not a level gap, because another tool showed the capability.
+    - `unassessed_ids` = members of `UNASSESSED` pools only.
+    - The API adds `pools` per level and `unassessed_pools` (id, title), and the UI lists unchecked capabilities by title.
+- **v2 thresholds** (counts over pools, `WORKING_ASSUMPTION`). Each count is `⌈share × |𝒫_L|⌉`. The shares are v1's for Junior and owner-lowered for Middle and Senior (review option 2). They are **chosen, not measured or calibrated**: the measurement only shows what they imply, and the thesis must not call them measured.
 
   | Level | τ | pools | `A^min` (share) | `K^min` (share) | `m_L` |
   |---|---|---|---|---|---|
-  | Junior | .50 | 6 | 5 (.75) | 5 (.75) | 3 |
-  | Middle | .70 | 13 (3 practice) | 10 (.70) | 8 (.60) | 5 |
-  | Senior | .75 | 13 (5 practice) | 10 (.75) | 10 (.70) | 4 |
+  | Junior | .50 | 9 (1 practice) | 7 (.75) | 7 (.75) | 3 |
+  | Middle | .70 | 14 (3 practice) | 10 (.70) | 9 (.60) | 5 |
+  | Senior | .75 | 14 (5 practice) | 11 (.75) | 10 (.70) | 4 |
 
-  Pool membership is in `backend/domain/seniority_policy.py`. Measured consequences are in `docs/tasks/SENIORITY_REPORT.md` §v2:
-  - Middle needs about 7–8 relevant topics with 3–4 criteria graded per topic.
-  - Senior needs about 8–10 topics plus most Senior practice pools. Two Senior pools («Конкурентний доступ і паралельність», «Розслідування інцидентів у продакшені») are never covered on the full python cohort, because Q_t does not pick their topics.
-  - `m_L` for Senior (4) is below v1 (6). Only four competencies (postgresql, kafka, ci-cd, aws) carry Senior pools among the topics Q_t always picks.
+  Membership: `backend/domain/seniority_policy.py`. Implications on the full python cohort (`uv run python scripts/seniority_reachability.py`, SIMULATED, every chosen criterion at 0.9):
+  - **Middle.** With all criteria of the 8 always-picked topics, Middle is reached even with no practice. With partial grading (the first n criteria of each of the k most frequent topics):
+    - 4 criteria per topic: 5–6 topics if at least 3 practice criteria are confirmed, 7 topics with 1;
+    - 3 criteria per topic: 7–8 topics with all 6 practice criteria, 10 topics with 1;
+    - 2 criteria per topic: never, and Junior then stays UNKNOWN too.
+  - **Senior.** It needs all criteria of 8 topics plus all practice, or 10 topics with 4 criteria each plus all practice.
+    - Two Senior pools («Конкурентний доступ і паралельність», «Розслідування інцидентів у продакшені») are never assessable, because Q_t never picks their topics.
+    - The 12 assessable pools are 7 technical plus 5 practice. So Senior needs at least 4 practice pools assessed (`A^min` = 11) and at least 3 practice pools confirmed (`K^min` = 10).
+    - `m_L` for Senior (4) is below v1 (6).
+- **Disclosed weaknesses (not rule changes).**
+  - **M-1: Middle alone ignores data evidence.** Middle coverage can be `SUPPORTED` with every Middle data pool unassessed (`query-efficiency`, `data-consistency`, `schema-design`) when the other pools and practice are strong. The assigned level still needs Junior, and Junior includes the SQL pools `sql-joins` and `sql-correctness`, so no data-layer evidence means no level (tested).
+  - Middle can, however, be assigned with sql but **no** postgresql/django/sqlalchemy evidence. Measured: 8 topics including sql but not postgresql, plus all practice, give MIDDLE. Then `data-consistency` and `schema-design` stay unassessed.
+  - **M-2: one topic, several pools.** One topic can confirm several pools of the same level, because each pool is a different skill of it. For example, postgresql confirms three Middle pools, fastapi three and docker two; aws (`aws.iam`, `aws.cost`) and kafka (`kafka.semantics`, `kafka.schemas`) confirm two Senior pools each. This is per-skill counting, like v1. Breadth is enforced only through `m_L`.
 - **Versions and rows.**
   - `policy_for(track)` returns the current policy (python: v2). `policy_by_version(id, version)` resolves every version ever stored (v1, v2), so `finalize_level(policy=v1)` still works.
   - Stored v1 rows are never rewritten. Their JSON has no `pools` key, and v1 results are byte-identical to the pre-v2 code (golden test).

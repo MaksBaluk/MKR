@@ -4,16 +4,23 @@
 
 ## Оновлення 2026-11-19: політика `python-backend/v2` (§v2)
 
-Поточна політика напряму python тепер `python-backend/v2`. Політика v1 лишається доступною за версією. Збережені рядки v1 не переписуються. Правила описано в `docs/tasks/MATH_SPEC.md` §3e (пункти «Policy v2», «v2 thresholds», «Versions and rows»). Q_t, вибір тем, бюджети, ранжування (2.15) та оцінки `E_c` не змінювалися.
+Поточна політика напряму python тепер `python-backend/v2`. Політика v1 лишається доступною за версією, а збережені рядки v1 не переписуються. Правила описано в `docs/tasks/MATH_SPEC.md` §3e: пункти «Policy v2», «v2 thresholds», «Disclosed weaknesses», «Versions and rows». Q_t, вибір тем, бюджети, ранжування (2.15) й `E_c` не змінювалися.
+
+**Виправлення після рев'ю (I-1).** Перша редакція v2 об'єднувала в один пул «будь-який із» різні навички одного інструмента, наприклад `sql.joins | sql.correctness` чи `python-core.idioms | errors`. Через це сильна навичка ховала встановлену прогалину сусідньої: `errors=0.1` і `sql.correctness=0.1` давали JUNIOR без прогалин.
+- Тепер пул містить лише альтернативи з різних інструментів, і тест це перевіряє. Кожна навичка одного інструмента стала окремим пулом.
+- Регресійний тест `test_same_tool_gap_is_never_hidden_by_a_sibling_skill` перевіряє цей випадок: результат GAPS_AT_JUNIOR, обидві прогалини у `critical_gaps`, як і у v1.
+- Нижче наведено виміри після виправлення.
 
 ### Вимірювання: які теми вибирає Q_t
 
-Вибір тем виміряно на повній системній добірці (90 засіяних вакансій python) через реальний API з симульованим Evaluator. Було 17 шаблонів відповідей:
+Команда (відтворювана, SIMULATED): `cd app && uv run python scripts/seniority_reachability.py`. Прогін триває близько 30 с.
+
+Співбесіди йшли через реальний API на повній системній добірці (90 засіяних вакансій python) із симульованим Evaluator. Шаблонів відповідей 17:
 - рівні оцінки 0.9, 0.75, 0.6, 0.4 і 0.2;
-- 8 псевдовипадкових наборів оцінок у діапазоні 0.3–1.0;
+- 8 псевдовипадкових наборів у діапазоні 0.3–1.0;
 - 4 такі самі набори, де частина оцінок дорівнює null.
 
-Кожен шаблон запускався з бажаним рівнем junior, middle і senior, тобто всього 51 співбесіда. Скрипт лежить поза репозиторієм, бо це разове вимірювання. Сценарії нижче відтворюють його ключові випадки.
+Кожен шаблон запускався з бажаним рівнем junior, middle і senior: усього 51 співбесіда.
 
 | Тема | Частка співбесід, де тему вибрано |
 |---|---|
@@ -21,112 +28,120 @@
 | django | 42/51 |
 | git | 24/51 |
 | redis | 24/51 |
-| rest-api | 12/51 (лише за сильних відповідей) |
-| sqlalchemy, celery, pytest, async-python, observability, app-security, kubernetes, linux | 0/51 |
+| rest-api | 12/51 |
+| app-security, async-python, celery, kubernetes, linux, observability, pytest, sqlalchemy | 0/51 |
 
-- Бажаний рівень на вибір тем не вплинув: послідовності для junior, middle і senior збігаються.
-- Порядок тем за ринковою вагою (`GET /cohorts/{id}/market`) такий: python-core, fastapi, kafka, django, docker, redis, aws, pytest, sql, postgresql, ci-cd, celery, rest-api, git, sqlalchemy, observability, async-python, app-security, kubernetes, linux.
-- pytest стоїть восьмим за ринком, але Q_t його не вибирає. Q_t максимізує приріст покриття груп вимог, а групи з pytest уже закриті іншими альтернативами.
-- Наслідок для v1: критичні множини Middle і Senior лежать переважно в темах, які Q_t не вибирає. Обмеження I-1 підтверджено.
+- Бажаний рівень на послідовність тем не вплинув.
+- Порядок тем за ринковою вагою (`GET /cohorts/{id}/market`): python-core, fastapi, kafka, django, docker, redis, aws, pytest, sql, postgresql, ci-cd, celery, rest-api, git, sqlalchemy, observability, async-python, app-security, kubernetes, linux.
+- pytest стоїть восьмим за ринком, але Q_t його не вибирає. Q_t максимізує приріст покриття груп, а групи з pytest уже закриті іншими альтернативами.
 
 ### Пули v2
 
-Критична одиниця рівня — це пул еквівалентних критеріїв, тобто одна професійна здатність, яку можна показати різними інструментами. Пул підтверджено, якщо його підтверджує будь-який член. Компенсації між пулами немає. Точні правила наведено в MATH_SPEC §3e.
+Пул — це одна професійна здатність, яку можна показати різними інструментами. Члени пулу завжди мають різні префікси компетентностей. Пул підтверджено, якщо його підтверджує будь-який член. Компенсації між пулами немає.
 
-Усі id існують у `fixtures/rubrics.json` або `fixtures/practice_rubrics.json`; це перевіряє тест `test_v2_pools_use_existing_ids_titles_and_hierarchy`. Нових критеріїв немає: усі взято з наявних рубрик.
+Усі id існують у фікстурах; це перевіряє тест `test_v2_pools_use_existing_ids_titles_and_hierarchy`. Нових критеріїв рубрик немає.
 
-- Повторно використано всі 34 критичні id v1. Лише `ci-cd.pipeline` змінив рівень: з Middle він перейшов на Junior, у пул «Збирання й запуск сервісу».
-- У політику рівнів додано 37 id, які у v1 не були критичними:
+- Із 34 критичних id v1 повторно використано 33.
+- `ci-cd.pipeline` змінив рівень: з Middle перейшов на Junior, у пул «Збирання сервісу».
+- `app-security.input` не увійшов до v2. Серед вибираних тем він не має альтернативи з іншого інструмента. Окремим пулом він був би завжди неоціненою одиницею, бо Q_t не вибирає app-security.
+- Додано 31 id, які у v1 не були критичними:
   - app-security.secrets;
-  - async-python.eventloop, .testing;
-  - aws.cost, .deploy, .iam, .services;
+  - async-python.testing;
+  - aws.cost, .deploy, .iam;
   - celery.design, .retries;
   - ci-cd.deploy;
   - django.architecture, .migrations, .orm, .permissions;
-  - docker.compose, .images, .runtime, .security;
+  - docker.images, .runtime, .security;
   - fastapi.async, .dependencies, .testing, .validation;
   - kafka.consumers, .errors, .schemas, .semantics;
   - kubernetes.security, .troubleshooting, .workloads;
   - linux.diagnostics;
-  - observability.tracing;
-  - redis.caching;
   - rest-api.versioning;
-  - sql.aggregation, .performance;
+  - sql.performance;
   - sqlalchemy.loading, .models.
 
-| Рівень (τ, мінімум оцінених / підтверджених пулів / компетентностей) | Пули (назва: члени) |
+| Рівень (τ; мін. оцінених / підтверджених пулів / компетентностей) | Пули (назва: члени) |
 |---|---|
-| Junior (0.50; 5 / 5 / 3 з 6) | Базове володіння Python: python-core.idioms, .errors · Запити до реляційних даних: sql.joins, .correctness, .aggregation · Контракт і валідація API: rest-api.contract, fastapi.validation · Перевірка коректності коду: python-core.testing, pytest.structure · Збирання й запуск сервісу: docker.images, docker.compose, ci-cd.pipeline, git.branching · Самостійність (практика) |
-| Middle (0.70; 10 / 8 / 5 з 13) | Типізація та контракти коду: python-core.typing · Ефективність запитів: postgresql.indexes, sql.performance, sqlalchemy.loading, django.orm · Транзакції та узгодженість: postgresql.transactions, sqlalchemy.session · Проєктування схеми: postgresql.schema, sqlalchemy.models · Структура сервісу та API: fastapi.dependencies, rest-api.pagination, django.architecture · Асинхронна робота без блокувань: fastapi.async, async-python.blocking, .eventloop · Ізольовані тести: pytest.isolation, fastapi.testing, async-python.testing · Конфігурація та розгортання: docker.runtime, ci-cd.deploy, aws.deploy, kubernetes.workloads · Обробка подій і фонових задач: kafka.consumers, celery.design, celery.retries, redis.caching · Безпека вхідних даних і секретів: app-security.input, .secrets, docker.security · практика: самостійність, обґрунтування, діагностика |
-| Senior (0.75; 10 / 10 / 4 з 13) | Експлуатація й безпечні зміни БД: postgresql.operations, .migrations, django.migrations · Конкурентний доступ і паралельність: sqlalchemy.concurrency, async-python.concurrency · Надійна доставка повідомлень і задач: kafka.semantics, kafka.errors, celery.idempotency, redis.reliability · Безпечні релізи та відкат: ci-cd.safety · Безпека доступу та авторизація: app-security.authz, rest-api.security, aws.iam, django.permissions, kubernetes.security · Розслідування інцидентів: observability.incidents, .tracing, linux.diagnostics, kubernetes.troubleshooting · Вибір інфраструктури з урахуванням вартості й надійності: aws.services, aws.cost · Сумісність контрактів під час змін: rest-api.versioning, kafka.schemas · практика: компроміси, невизначеність, відповідальність, діагностика, обґрунтування |
+| Junior (0.50; 7 / 7 / 3 з 9) | Ідіоматичний код Python: python-core.idioms · Обробка помилок у Python: python-core.errors · З'єднання таблиць у запитах: sql.joins · Коректність результатів запитів: sql.correctness · Контракт і валідація API: rest-api.contract, fastapi.validation · Перевірка коректності коду: python-core.testing, pytest.structure · Збирання сервісу: docker.images, ci-cd.pipeline · Робота з гілками в Git: git.branching · Самостійність (практика) |
+| Middle (0.70; 10 / 9 / 5 з 14) | Типізація та контракти коду: python-core.typing · Ефективність запитів і доступу до даних: postgresql.indexes, sql.performance, sqlalchemy.loading, django.orm · Транзакції та узгодженість: postgresql.transactions, sqlalchemy.session · Проєктування схеми: postgresql.schema, sqlalchemy.models · Структура сервісу та API: fastapi.dependencies, rest-api.pagination, django.architecture · Асинхронна робота без блокувань: fastapi.async, async-python.blocking · Ізольовані тести: pytest.isolation, fastapi.testing, async-python.testing · Конфігурація та розгортання: docker.runtime, ci-cd.deploy, aws.deploy, kubernetes.workloads · Споживачі подій і фонові задачі: kafka.consumers, celery.design · Обробка збоїв і повторні спроби: kafka.errors, celery.retries · Безпека контейнерів і секретів: docker.security, app-security.secrets · практика: самостійність, обґрунтування, діагностика |
+| Senior (0.75; 11 / 10 / 4 з 14) | Експлуатація бази даних: postgresql.operations · Безпечні зміни схеми: postgresql.migrations, django.migrations · Конкурентний доступ і паралельність: sqlalchemy.concurrency, async-python.concurrency · Гарантії доставки: kafka.semantics, celery.idempotency, redis.reliability · Безпечні релізи та відкат: ci-cd.safety · Безпека доступу та авторизація: app-security.authz, rest-api.security, aws.iam, django.permissions, kubernetes.security · Розслідування інцидентів: observability.incidents, linux.diagnostics, kubernetes.troubleshooting · Вартість і надійність інфраструктури: aws.cost · Сумісність контрактів: rest-api.versioning, kafka.schemas · практика: компроміси, невизначеність, відповідальність, діагностика, обґрунтування |
 
-**Як обрано пороги.** Кожен поріг дорівнює `⌈частка × кількість пулів⌉`. Частки Junior узято з v1 (0.75 / 0.75). Частки Middle (0.70 / 0.60) і Senior (0.75 / 0.70) знижено, як пропонував варіант 2 рев'ю. Мінімум компетентностей Senior знижено з 6 до 4: серед тем, які Q_t вибирає завжди, пули Senior мають лише postgresql, kafka, ci-cd і aws.
+**Пороги не виміряно й не калібровано.** Кожен поріг дорівнює `⌈частка × кількість пулів⌉`. Частки обрано:
+- Junior: 0.75 / 0.75, як у v1;
+- Middle: 0.70 / 0.60, знижено з 0.80 / 0.70 за варіантом 2 рев'ю;
+- Senior: 0.75 / 0.70, знижено з 0.80 / 0.80.
 
-Вимірювання верхньої межі: сильні оцінки 0.9 мають усі критерії перших k вибраних тем і вся практика. Результати таблиці отримано скриптом поза репозиторієм; тест `test_v2_middle_reachable_with_market_topics_only` перевіряє випадок «8 тем».
+Мінімум компетентностей Senior знижено з 6 до 4. Після розщеплення пулів частки не змінювалися: перераховано лише кількості. Вимірювання нижче показує наслідки цих порогів, а не обґрунтовує їх. У дипломі їх не можна називати виміряними.
 
-| Покриття | v1 | v2 |
+### Досяжність (вивід `scripts/seniority_reachability.py`, SIMULATED)
+
+**Верхня межа.** Оцінку 0.9 мають усі критерії перших k вибраних тем і вся практика. Наборів тем 14:
+
+| k | v1 | v2 |
 |---|---|---|
-| перші 6 тем, усі критерії | UNKNOWN (Junior 6/9 < 0.75) | MIDDLE |
-| перші 8 тем, усі критерії | UNKNOWN | SENIOR. Виняток — набір без postgresql і django (там rest-api): MIDDLE, бо пул «Експлуатація й безпечні зміни БД» не оцінено |
-| 10 тем, усі критерії | UNKNOWN або JUNIOR | SENIOR |
+| 6 | UNKNOWN 14 | MIDDLE 14 |
+| 8 | UNKNOWN 14 | SENIOR 13, MIDDLE 1 |
+| 10 | UNKNOWN 12, JUNIOR 2 | SENIOR 14 |
 
-Реальний Evaluator не оцінює всі критерії теми з однієї відповіді. Тому окремо перевірено часткове покриття: перші 10 тем із S2-product (з django і redis), оцінено 1–4 перші критерії кожної теми.
-- Middle з усіма 4 критеріями на тему потребує 5 тем, якщо підтверджено всі 6 критеріїв практики, і 7 тем за 3 критеріїв практики.
-- Middle з 3 критеріями на тему потребує 8 тем.
-- Із 2 критеріями на тему навіть 10 тем дають лише JUNIOR.
-- Senior потребує ≥8 тем із 4 критеріями і всієї практики Senior, або 10 тем із 3 критеріями і всієї практики.
+**Часткове оцінювання.** Оцінено перші n критеріїв кожної з k найчастіших тем: python-core, kafka, fastapi, ci-cd, sql, aws, docker, rest-api, postgresql, git. Підтверджено 1, 3 або 6 критеріїв практики. Результат v2:
+- 2 критерії на тему: UNKNOWN за будь-якої кількості тем.
+- 3 критерії на тему:
+  - 5–6 тем: JUNIOR;
+  - 7–8 тем: JUNIOR, а MIDDLE лише з усією практикою;
+  - 10 тем: MIDDLE.
+- 4 критерії на тему:
+  - 5–6 тем: MIDDLE за ≥3 критеріїв практики, інакше JUNIOR;
+  - 7–8 тем: MIDDLE;
+  - 10 тем: MIDDLE, а SENIOR лише з усією практикою.
 
-Отже, Middle досяжний за 7–8 релевантних тем із реалістичним частковим оцінюванням, але не тривіально. Нижня межа в 5 тем вимагає підтвердити всю практику. Senior досяжний лише з майже повним покриттям і сильною практикою.
+**Окремі випадки:**
+- 8 тем, які Q_t вибирає завжди, усі критерії, без практики: MIDDLE. З усією практикою: SENIOR (12/14 пулів; рівно 4 компетентності).
+- Без жодної теми даних (python-core, kafka, fastapi, ci-cd, aws, docker) навіть з усією практикою: UNKNOWN. Покриття Middle саме по собі має статус SUPPORTED, але пули SQL рівня Junior не оцінено, тому ланцюг рівнів обривається. Див. M-1 у MATH_SPEC §3e.
+- sql без postgresql і django (8 тем) з усією практикою: MIDDLE, хоча транзакції та схему даних не перевірено.
+
+**Висновок.**
+- Middle досяжний на системній добірці, якщо кожна тема має 3–4 оцінені критерії. Знадобиться від 5 до 10 тем, залежно від кількості критеріїв на тему й підтвердженої практики.
+- Senior досяжний лише з майже повним покриттям 8–10 тем і щонайменше 3 підтвердженими пулами практики.
+- Два пули Senior на системній добірці недосяжні.
 
 ### Сценарії v2 (SIMULATED, реальні прогони)
 
-Команда: `cd app && uv run python scripts/seniority_scenarios.py`. Усі сценарії використовують повну системну добірку: 90 вакансій, без `SCENARIO_SUB_COHORT`. Evaluator-заглушка оцінює кожен критерій теми з прихованої «істини» і цитує відповідь. Тому P1 і P2 показують верхню межу, а не якість оцінювання.
+Команда: `cd app && uv run python scripts/seniority_scenarios.py`. Усі сценарії використовують повну системну добірку (90 вакансій). Заглушка Evaluator оцінює всі критерії теми з прихованої «істини», тому P1 і P2 показують верхню межу.
 
-| Сценарій | Відповіді | Питань / тем | Теми (порядок Q_t) | Отримано |
-|---|---|---|---|---|
-| P1 | усе 0.9 | 10 / 10 | python-core, kafka, fastapi, ci-cd, sql, aws, docker, rest-api, postgresql, git | SENIOR, ASSESSED: Junior 6/6, Middle 13/13, Senior 11/13 оцінено й підтверджено; не перевірено: «Конкурентний доступ і паралельність», «Розслідування інцидентів у продакшені» |
-| P2 | Junior і Middle 0.9, критерії лише Senior 0.72, практика Senior без доказів; бажаний Senior | 10 / 10 | python-core, kafka, fastapi, ci-cd, aws, sql, docker, git, redis, postgresql | MIDDLE, ASSESSED: Senior UNVERIFIED (8/13 оцінено, 2 підтверджено, 6 UNRESOLVED), прогалин 0 |
-| P3 (контроль) | усе 0.3 | 20 / 10 | python-core, kafka, fastapi, django, sql, aws, ci-cd, postgresql, docker, redis | UNKNOWN, GAPS_AT_JUNIOR: усі 6 пулів Junior мають статус GAP |
-| P4 | критерії Junior і перших 5 пулів Middle 0.9, решта без доказів | 27 / 10 | python-core, kafka, fastapi, ci-cd, aws, django, sql, docker, redis, git | JUNIOR, ASSESSED: Middle UNVERIFIED (4/13 оцінено, прогалин 0) |
-| S3 | усе 0.95, бюджет 3 питання | 3 / 3 | python-core, kafka, fastapi | UNKNOWN, INSUFFICIENT_DATA: Junior 4/6 |
+| Сценарій | Відповіді | Питань / тем | Отримано |
+|---|---|---|---|
+| P1 | усе 0.9 | 10 / 10 | SENIOR: Junior 9/9, Middle 14/14, Senior 12/14; не перевірено: «Конкурентний доступ і паралельність», «Розслідування інцидентів у продакшені» |
+| P2 | Junior і Middle 0.9, критерії лише Senior 0.72, практика Senior без доказів; бажаний Senior | 10 / 10 | MIDDLE; Senior UNVERIFIED (9/14 оцінено, 2 підтверджено), прогалин 0 |
+| P3 (контроль) | усе 0.3 | 20 / 10 | UNKNOWN, GAPS_AT_JUNIOR: 8 з 8 оцінених пулів Junior мають статус GAP (git не вибрано) |
+| P4 | Junior і перші 5 пулів Middle 0.9, решта без доказів | 28 / 10 | JUNIOR; Middle UNVERIFIED (6/14 оцінено, прогалин 0) |
+| S3 | усе 0.95, бюджет 3 | 3 / 3 | UNKNOWN, INSUFFICIENT_DATA: Junior 5/9 |
 
-- Пояснення P2: «Підтверджено Middle за перевіреними критеріями. Для висновку про Senior недостатньо даних.»
-- Пояснення P4: «Підтверджено Junior за перевіреними критеріями. Для висновку про Middle недостатньо даних.»
-- S3 показує, як працює поріг. Із 3 тем Middle має 8 підтверджених пулів, тобто мінімум `K^min` виконано. Але Middle блокують «оцінено 8 < 10» і «компетентностей 3 < 5», а Junior має лише 4/6.
+Сценарії S1, S2 і S2-product на `SCENARIO_SUB_COHORT` прибрано: із v2 звужена добірка не потрібна. Їхні історичні результати для v1 наведено нижче.
 
-Сценарії S1, S2 і S2-product на `SCENARIO_SUB_COHORT` прибрано. Вони показували досяжність рівнів для v1 лише на звуженій добірці. Із v2 звужена добірка не потрібна. Їхні результати для v1 збережено в таблиці «Три сценарії» нижче як історичні.
+### Перевірки
 
-### Перевірки (2026-11-19, реальні команди)
-
-| Команда | Результат |
-|---|---|
-| `cd app && uv run pytest -q` | `687 passed, 65 warnings in 139.60s` |
-| `cd app && uv run pytest -q tests/test_seniority_policy_v2.py` | `15 passed` (зокрема золотий тест v1: 91 випадок, JSON байт у байт) |
-| `cd app && uv run pytest -q tests/test_seniority_scenarios.py` | `11 passed in 2.66s` |
-| `cd app/frontend && npm run typecheck` | код 0 |
-| `cd app/frontend && npm test` | `Test Files 20 passed (20)`, `Tests 163 passed (163)` |
-| `cd app/frontend && npm run build` | `✓ built in 1.86s` |
-| `cd app && docker compose up -d --build api web` | api `Healthy`, web запущено |
-| `cd app/frontend && npx playwright test` | `8 passed (3.9s)`; `level.spec.ts` перевіряє v2 і назву непокритої здатності українською |
-| PostgreSQL у Docker | рядки v1 (3) залишились, новий рядок v2 (1); `level_for_attempt` віддає для рядків v1 версію v1, для v2 — v2; міграція `0016`, схема не змінювалась |
-
-Мутаційна перевірка:
-- правило «пул підтверджено, лише коли немає прогалин» дало `2 failed`;
-- правило «прогалина навіть за наявності нерозв'язаного члена» дало `1 failed`;
-- після відновлення коду: `15 passed`.
+Реальні команди після виправлення, 2026-11-19, наведено в `.superpowers/sdd/2026-11-18-seniority-estimator/policy-v2-report.md` (розділ «Fix round 1»). Підсумок:
+- `cd app && uv run pytest -q`: усі тести пройшли;
+- фронтенд: typecheck, vitest і build пройшли;
+- Docker і Playwright: 8 passed.
 
 Не запускалось:
-- реальна LLM: оцінки рівня v2, практику та часткове оцінювання реальною моделлю не перевірено;
-- експертна валідація пулів і порогів;
+- реальна LLM;
+- експертна валідація;
 - Firefox і Safari.
 
 ### Обмеження v2
 
-- Пули, пороги й мінімуми компетентностей є робочим припущенням автора (WORKING_ASSUMPTION). Експертної валідації немає. Рубрики є шаблонами CURATED_TEMPLATE.
-- Рівень Senior сильно залежить від практики: це 5 з 13 пулів Senior. Серед тем, які Q_t вибирає, непрактичних пулів Senior може бути оцінено щонайбільше 6, тож мінімум 10 потребує ≥4 підтверджених пулів практики. Практику реальна модель не оцінювала. Крім того, практика агрегується максимумом між темами, тобто з оптимістичним зміщенням.
-- Два пули Senior на повній добірці python ніколи не оцінюються, бо Q_t не вибирає sqlalchemy, async-python, observability, linux і kubernetes.
-- Еквівалентність членів пулу — це судження автора. Наприклад, сильна відповідь про `aws.deploy` підтверджує «Конфігурацію та розгортання» так само, як `docker.runtime`.
-- Сценарії P1 і P2 є верхньою межею: заглушка оцінює всі критерії теми з однієї відповіді.
+- Пули, частки, пороги й мінімуми компетентностей є робочим припущенням (WORKING_ASSUMPTION). Експертної валідації немає. Рубрики є шаблонами CURATED_TEMPLATE.
+- Senior сильно залежить від практики: потрібно ≥4 оцінені й ≥3 підтверджені пули практики. Реальна модель практику не оцінювала. Практика агрегується максимумом між темами, тобто з оптимістичним зміщенням.
+- Одна тема може підтвердити кілька пулів одного рівня, бо це різні навички (M-2):
+  - postgresql — 3 пули Middle;
+  - fastapi — 3 пули Middle;
+  - aws і kafka — по 2 пули Senior.
+  Ширину забезпечує лише `m_L`.
+- Middle можна призначити без доказів про транзакції та схему даних, якщо оцінено sql (M-1).
+- Еквівалентність міжінструментних альтернатив — судження автора. Наприклад, `aws.deploy` і `docker.runtime` вважаються рівноцінними для «Конфігурація та розгортання».
+- Два пули Senior на повній добірці python ніколи не оцінюються.
 
 ## Що змінено
 
