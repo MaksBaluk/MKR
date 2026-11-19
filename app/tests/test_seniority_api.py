@@ -16,7 +16,7 @@ from backend.domain.seniority_policy import (PRACTICE_ACTION, PYTHON_BACKEND_V1,
                                              policy_for)
 from backend.experiments.config import InterviewMode, config_for
 from backend.experiments.runner import run_experiment
-from backend.models import CoreInterview, CoreTurn, SeniorityAssessment
+from backend.models import CoreInterview, CoreTurn, CriterionAssessment, SeniorityAssessment
 from tests.test_level_probe_flow import GOOD, ProbeChat, cand, mixed
 from tests.test_followup_flow import _use
 from tests.test_practice_criteria import API, PracticeChat, _answer, _attempt
@@ -503,19 +503,22 @@ def test_practice_topic_scores_are_order_independent_and_v4_uses_their_median():
     assert middle["practice-rationale"] == "GAP"  # median 0.3: one strong topic does not outweigh two weak ones
 
 
-def _quoted(action, cid, score, turn, created, text):
+def _quoted(action, cid, score, turn, created, text, no_experience=None):
     return SimpleNamespace(action_id=action, criterion_id=cid, score=score, created_at=created,
-                           evidence=[{"turn_id": turn, "exact_excerpt": text}])
+                           no_experience=no_experience, evidence=[{"turn_id": turn, "exact_excerpt": text}])
 
 
-def test_declined_flag_comes_from_the_effective_revision_quotes():
-    rows = [_quoted("kafka", "kafka.errors", 0.0, "k1", 1, "Не знаю цього і не працював з Kafka."),
-            _quoted("kafka", "kafka.consumers", 0.0, "k1", 1, "Не знаю, як працює rebalance."),
-            _quoted("sql", "sql.joins", 0.0, "s1", 1, "Не працював з SQL"),
+def test_declined_flag_comes_only_from_the_effective_revision_no_experience_flag():
+    rows = [_quoted("kafka", "kafka.errors", 0.0, "k1", 1, "з Kafka я не працював", True),
+            _quoted("kafka", "kafka.consumers", 0.0, "k1", 1, "Не знаю цього і не працював з Kafka."),  # no flag
+            _quoted("sql", "sql.joins", 0.0, "s1", 1, "Не працював з SQL", True),
             _quoted("sql", "sql.joins", 0.6, "s2", 2, "LEFT JOIN залишає рядки без пари")]
     ev = seniority_evidence(rows, {"k1": "kafka", "s1": "sql", "s2": "sql"})
-    assert ev["kafka.errors"].declined and not ev["kafka.consumers"].declined  # "не знаю X" is weak knowledge
+    assert ev["kafka.errors"].declined and not ev["kafka.consumers"].declined  # no phrase matching
     assert not ev["sql.joins"].declined and ev["sql.joins"].score == 0.6  # a later substantive answer wins
+    legacy = SimpleNamespace(action_id="kafka", criterion_id="kafka.semantics", score=0.0, created_at=1,
+                             evidence=[{"turn_id": "k1", "exact_excerpt": "x"}])  # row object without the attribute
+    assert seniority_evidence([legacy], {"k1": "kafka"})["kafka.semantics"].declined is False
 
 
 # --- start-time snapshot (audit D-11, D-12; migration 0017) ----------------------------------------------------------
@@ -559,19 +562,32 @@ def test_legacy_attempt_without_start_snapshot_uses_current_policy_and_profile(c
     assert level["policy"]["version"] == CURRENT.version and level["desired_level"] == "middle"
 
 
-def test_v4_payload_names_declined_and_unresolved_capabilities(client, auth, db, chat):
-    chat.score = 0.0  # the candidate says they never worked with the topic's tool: every criterion 0 with that quote
+def test_v4_payload_names_no_experience_and_unresolved_capabilities(client, auth, db, chat):
+    chat.score, chat.no_experience = 0.0, True  # the Evaluator flags a validated "no experience" declaration
     iv = _attempt(client, auth, "python")
     action, _ = _answer(client, auth, iv, iv["version"], text="Не знаю цього і не працював з цим інструментом.")
     _finish(client, auth, iv["id"])
+    with db() as s:
+        stored = s.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == iv["id"],
+                                                             CriterionAssessment.action_id == action)).all()
+        assert stored and all(r.no_experience is True for r in stored)
     level = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
     assert action == "python-core"
-    declined = {p["id"] for p in level["declined_pools"]}
-    assert "code-testing" in declined  # python-core.testing declined, pytest.structure never asked
+    assert "code-testing" in {p["id"] for p in level["no_experience_pools"]}  # pytest.structure never asked
     junior = level["coverage_by_level"]["JUNIOR"]
-    assert {c["id"] for c in junior["declined"]} == {"python-core.testing"}
-    assert {"technical_confirmed_count", "practice_confirmed_count", "tolerated_gaps"} <= set(junior)
-    # single-tool capabilities have no alternative: "never worked with Python errors" is a gap, not declined
-    assert {"python-core.errors", "python-core.idioms"} <= {c["id"] for c in level["critical_gaps"]}
+    assert {c["id"] for c in junior["no_experience"]} == {"python-core.testing"}
+    assert {"technical_confirmed_count", "practice_confirmed_count", "tolerated_gaps", "hard_gaps"} <= set(junior)
+    # single-tool hard capabilities: a declaration is a hard gap there
+    assert {"python-core.errors", "python-core.idioms"} <= {c["id"] for c in junior["hard_gaps"]}
     assert all("«" in line or "python-core" not in line for line in level["explanation"])
     assert isinstance(level["unresolved_pools"], list)
+
+
+def test_pool_confirmed_at_one_level_is_not_also_listed_as_unresolved():
+    """M-1: practice-independence confirms at Junior (tau .50) with a .6 median but is borderline at Middle (.75)."""
+    from backend.api.level import _pools_with
+    result = {"coverage_by_level": {
+        "JUNIOR": {"pools": [{"pool_id": "practice-independence", "title": "Самостійність", "status": "CONFIRMED"}]},
+        "MIDDLE": {"pools": [{"pool_id": "practice-independence", "title": "Самостійність", "status": "UNRESOLVED"},
+                             {"pool_id": "typed-contracts", "title": "Типізація", "status": "UNRESOLVED"}]}}}
+    assert _pools_with(result, "UNRESOLVED") == [{"id": "typed-contracts", "title": "Типізація"}]

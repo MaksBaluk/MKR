@@ -55,7 +55,8 @@ def test_p2_desired_senior_confirms_middle_senior_unverified(results):
 def test_p3_weak_answers_never_reach_a_level(results):
     lv = results["P3"]["level"]
     junior = lv["coverage_by_level"]["JUNIOR"]
-    assert junior["gap_count"] == junior["assessed_count"] >= 7 and lv["critical_gaps"]
+    # v4: a weak try is a gap only where every alternative was asked (or in a hard pool); 6 of 9 Junior pools here
+    assert junior["gap_count"] == junior["assessed_count"] >= 6 and lv["critical_gaps"] and junior["hard_gaps"]
     assert junior["status"] == "GAP" and "CRITICAL_GAP" in junior["reasons"]  # far more than one tolerated gap
 
 

@@ -14,19 +14,22 @@ TABLE = "core_interviews"
 COLUMNS = (("start_desired_level", 16), ("start_policy_id", 64), ("start_policy_version", 32))
 
 
-def _columns() -> set[str]:
-    return {c["name"] for c in sa.inspect(op.get_bind()).get_columns(TABLE)}
+def _columns() -> set[str] | None:
+    insp = sa.inspect(op.get_bind())
+    return {c["name"] for c in insp.get_columns(TABLE)} if TABLE in insp.get_table_names() else None
 
 
 def upgrade():
     have = _columns()
+    if have is None:  # partial legacy schema without the table: nothing to extend
+        return
     for name, size in COLUMNS:
         if name not in have:
             op.add_column(TABLE, sa.Column(name, sa.String(size), nullable=True))
 
 
 def downgrade():
-    drop = [name for name, _ in COLUMNS if name in _columns()]
+    drop = [name for name, _ in COLUMNS if name in (_columns() or set())]
     if drop:
         with op.batch_alter_table(TABLE) as batch:
             for name in drop:

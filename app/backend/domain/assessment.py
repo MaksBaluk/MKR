@@ -13,11 +13,22 @@ class EvidenceRef(BaseModel):
     exact_excerpt: str = Field(min_length=1)
 
 
+NO_EXPERIENCE_MAX_SCORE = 0.25  # a no-experience declaration grades the criterion in the lowest band only
+
+
 class CriterionResult(BaseModel):
     criterion_id: str
     score: float | None
     reason: str
     evidence: list[EvidenceRef]
+    # Topic criteria only: the quoted answer is the candidate's own statement of no experience with this criterion's
+    # tool. Optional; absent or false means "not declared". Checked in validate_against_context.
+    no_experience: bool = False
+
+    @field_validator("no_experience", mode="before")
+    @classmethod
+    def _coerce_no_experience(cls, v):
+        return False if v is None else v
 
 
 GOAL_TEXT_MAX = 200  # goal reason / expected_evidence are untrusted model text: bounded before storage and prompting
@@ -97,6 +108,10 @@ def validate_against_context(
             errors.append(f"score out of range for {c.criterion_id}")
         if c.score is not None and not any(ev.exact_excerpt.strip() for ev in c.evidence):
             errors.append(f"score without evidence for {c.criterion_id}")  # a number must rest on a quoted excerpt
+        if c.no_experience and (allowed is allowed_practice or c.score is None or c.score >= NO_EXPERIENCE_MAX_SCORE
+                                or not c.evidence):
+            # a declaration must be a quoted statement (verbatim, checked below) graded in the lowest band
+            errors.append(f"invalid no_experience for {c.criterion_id}")
         for ev in c.evidence:
             text = turn_texts.get(ev.turn_id)
             if not ev.exact_excerpt.strip():

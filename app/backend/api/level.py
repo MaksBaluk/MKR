@@ -111,7 +111,7 @@ def level_payload(db: Session, row: SeniorityAssessment) -> dict:
         return {"id": cid, "title": titles.get(cid, cid), "kind": "PRACTICE" if is_practice(cid) else "COMPETENCY"}
 
     ids = {c for cov in r["coverage_by_level"].values()
-           for key in ("confirmed_ids", "gap_ids", "unassessed_ids", "declined_ids") for c in cov.get(key) or ()}
+           for key in ("confirmed_ids", "gap_ids", "unassessed_ids", *_NO_EXP_KEYS) for c in cov.get(key) or ()}
     explanation = []
     for line in r["explanation"]:
         for cid in sorted(ids, key=len, reverse=True):
@@ -131,7 +131,9 @@ def level_payload(db: Session, row: SeniorityAssessment) -> dict:
                       **({"technical_confirmed_count": c["technical_confirmed"],
                           "practice_confirmed_count": c["practice_confirmed"],
                           "tolerated_gaps": [item(x) for x in c["tolerated_gap_ids"]],
-                          "declined": [item(x) for x in c["declined_ids"]]} if "technical_confirmed" in c else {})}
+                          "no_experience": [item(x) for x in _no_exp(c)],
+                          "hard_gaps": [item(x) for x in c.get("hard_gap_ids") or ()]}
+                         if "technical_confirmed" in c else {})}
                 for lvl, c in r["coverage_by_level"].items()}
     # Pooled policies (v2, v3): the "not checked" list names whole capabilities (pool titles), not every alternative tool.
     unassessed = set(r["unassessed_criteria"])
@@ -147,18 +149,30 @@ def level_payload(db: Session, row: SeniorityAssessment) -> dict:
             "critical_gaps": [item(c) for c in r["critical_gaps"]],
             "unassessed_criteria": [item(c) for c in r["unassessed_criteria"]],
             "unassessed_pools": unassessed_pools,
-            # Capabilities whose evidence did not decide them: borderline/untraced (UNRESOLVED) or a declined tool whose
+            # Capabilities whose evidence did not decide them: borderline/untraced (UNRESOLVED) or a no-experience tool whose
             # alternative was never asked (DECLINED, policy v4). Neither counts as confirmed nor as a gap.
-            "unresolved_pools": _pools_with(r, "UNRESOLVED"), "declined_pools": _pools_with(r, "DECLINED"),
+            "unresolved_pools": _pools_with(r, "UNRESOLVED"),
+            "no_experience_pools": _pools_with(r, "NO_EXPERIENCE", "DECLINED"),  # DECLINED: early v4 rows
             "evidence_references": [{**item(c), "turn_ids": t} for c, t in r["evidence_references"].items()],
             "explanation": explanation,
             "note": WORKING_ASSUMPTION_NOTE if row.policy_status == "WORKING_ASSUMPTION" else None,
             "created_at": _iso_utc(row.created_at)}
 
 
-def _pools_with(result: dict, status: str) -> list[dict]:
-    return list({p["pool_id"]: {"id": p["pool_id"], "title": p["title"]} for c in result["coverage_by_level"].values()
-                 for p in c.get("pools", ()) if p["status"] == status}.values())
+_NO_EXP_KEYS = ("no_experience_ids", "declined_ids")  # declined_ids: the one early v4 row stored before fix round 1
+
+
+def _no_exp(c: dict) -> list[str]:
+    return list(c.get("no_experience_ids") or c.get("declined_ids") or ())
+
+
+def _pools_with(result: dict, *statuses: str) -> list[dict]:
+    """Pools with one of `statuses` at some level, minus pools CONFIRMED at any level (a practice pool can confirm at
+    Junior, tau .50, and be borderline at Middle, tau .75: it is listed as confirmed only, audit M-1)."""
+    covs = result["coverage_by_level"].values()
+    confirmed = {p["pool_id"] for c in covs for p in c.get("pools", ()) if p["status"] == "CONFIRMED"}
+    return list({p["pool_id"]: {"id": p["pool_id"], "title": p["title"]} for c in covs for p in c.get("pools", ())
+                 if p["status"] in statuses and p["pool_id"] not in confirmed}.values())
 
 
 def _iso_utc(value: datetime | None) -> str | None:

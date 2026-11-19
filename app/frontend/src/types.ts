@@ -115,15 +115,17 @@ export interface LevelCoverage {
   confirmed: LevelCriterion[];
   gaps: LevelCriterion[];
   unassessed: LevelCriterion[];
-  /** Pooled policies only (v2-v4). DECLINED exists only from v4. */
-  pools?: (LevelPool & { status: 'CONFIRMED' | 'GAP' | 'UNRESOLVED' | 'UNASSESSED' | 'DECLINED'; criteria: LevelCriterion[] })[];
+  /** Pooled policies only (v2-v4). NO_EXPERIENCE exists only from v4 (DECLINED: one early v4 row). */
+  pools?: (LevelPool & { status: 'CONFIRMED' | 'GAP' | 'UNRESOLVED' | 'UNASSESSED' | 'NO_EXPERIENCE' | 'DECLINED'; criteria: LevelCriterion[] })[];
   /** Capability policies (v4) only. */
   technical_confirmed_count?: number;
   practice_confirmed_count?: number;
   /** Gaps reported but not blocking the level (v4: at most one, never in a hard capability). */
   tolerated_gaps?: LevelCriterion[];
-  /** Tools the candidate said they never worked with, while an alternative tool was never asked (v4). */
-  declined?: LevelCriterion[];
+  /** Criteria answered with a validated "no experience" statement while an alternative tool was never asked (v4). */
+  no_experience?: LevelCriterion[];
+  /** Gaps in hard-critical capabilities: they always block the level (v4). */
+  hard_gaps?: LevelCriterion[];
 }
 
 /** Assessed professional level of one finished attempt: evidence-based, never an input of the vacancy order. */
@@ -143,8 +145,8 @@ export interface AssessedLevel {
   unassessed_pools?: LevelPool[];
   /** Capabilities with evidence that decided nothing: borderline or untraced scores. Absent in older responses. */
   unresolved_pools?: LevelPool[];
-  /** Capabilities shown only through a tool the candidate never worked with (v4). Absent in older responses. */
-  declined_pools?: LevelPool[];
+  /** Capabilities answered only with "no experience" while an alternative was never asked (v4). Absent in older responses. */
+  no_experience_pools?: LevelPool[];
   evidence_references: (LevelCriterion & { turn_ids: string[] })[];
   /** Ukrainian lines; criterion ids are already replaced by titles on the server. */
   explanation: string[];

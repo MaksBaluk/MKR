@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { desiredLabel, explanationLines, explanationWithoutHigher, groupBySection, hasHigherEvidence, higherEvidenceText, levelLabel, SECTIONS, sectionTitle, unassessedItems } from '@/lib/levelView';
+import { desiredLabel, explanationLines, explanationWithoutHigher, groupBySection, hasHigherEvidence, higherEvidenceText, higherNotice, levelLabel, SECTIONS, sectionTitle, unassessedItems } from '@/lib/levelView';
 import type { ResultSection } from '@/types';
 
 describe('level labels', () => {
@@ -90,5 +90,36 @@ describe('higher level with evidence', () => {
       .toEqual(['Підтверджено Junior за перевіреними критеріями.']);
     expect(explanationWithoutHigher({ ...base, assessed_level: 'SENIOR', highest_supported_level: 'SENIOR' }))
       .toEqual(base.explanation);
+  });
+});
+
+describe('higherNotice (audit I-4)', () => {
+  const cov = (status: 'SUPPORTED' | 'GAP' | 'UNVERIFIED', extra: Record<string, unknown> = {}) => ({
+    status, critical_total: 9, assessed_count: 0, confirmed_count: 0, gap_count: 0, confirmed: [], gaps: [],
+    unassessed: [], ...extra,
+  });
+
+  test('a hard gap below the highest level blocks the achievement block and names the gap', () => {
+    const level = {
+      assessed_level: 'UNKNOWN' as const, highest_supported_level: 'SENIOR' as const,
+      coverage_by_level: {
+        JUNIOR: cov('GAP', { gaps: [{ id: 'python-core.idioms', title: 'Ідіоматичний код', kind: 'COMPETENCY' as const }],
+          hard_gaps: [{ id: 'python-core.idioms', title: 'Ідіоматичний код', kind: 'COMPETENCY' as const }] }),
+        MIDDLE: cov('SUPPORTED'), SENIOR: cov('SUPPORTED'),
+      },
+    };
+    const n = higherNotice(level);
+    expect(n?.kind).toBe('blocked');
+    expect(n?.level).toBe('JUNIOR');
+    expect(n?.text).toBe('Увага: на рівні Junior виявлено критичні прогалини: «Ідіоматичний код». '
+      + 'Тому вищий рівень не присвоюється, навіть якщо окремі відповіді йому відповідають.');
+  });
+
+  test('missing lower evidence (no gap) keeps the higher-evidence block', () => {
+    const n = higherNotice({ assessed_level: 'JUNIOR', highest_supported_level: 'SENIOR',
+      coverage_by_level: { JUNIOR: cov('SUPPORTED'), MIDDLE: cov('UNVERIFIED'), SENIOR: cov('SUPPORTED') } });
+    expect(n).toEqual({ kind: 'evidence', level: 'SENIOR',
+      text: 'Є докази й для вищого рівня (Senior), але нижчий рівень підтверджено не повністю, тому вищий рівень не присвоюється.' });
+    expect(higherNotice({ assessed_level: 'MIDDLE', highest_supported_level: 'MIDDLE', coverage_by_level: {} })).toBeNull();
   });
 });

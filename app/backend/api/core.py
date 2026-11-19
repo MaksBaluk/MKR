@@ -24,7 +24,7 @@ from backend.domain.interview_budget import MIN_SHOWN_QUESTIONS_PER_ACTION, topi
 from backend.domain.market import VacancyInput, compute_market
 from backend.domain.planner import choose_next
 from backend.domain.level_probe import practice_gaps, prioritize_unmet
-from backend.domain.seniority import CriterionEvidence, estimate, is_declined
+from backend.domain.seniority import CriterionEvidence, estimate
 from backend.domain.seniority_policy import PRACTICE_ACTION, SeniorityPolicy, policy_by_version, policy_for
 from backend.experiments.config import ExperimentConfig, InterviewMode
 from backend.experiments.planning import plan_topics, slot_targets, static_plan_json
@@ -109,14 +109,14 @@ def seniority_evidence(rows, turn_topics: Mapping[str, str]) -> dict[str, Criter
     quotes no turn is kept only when no traced score exists; it then has no evidence turn and stays unresolved.
     `score` (max) is what policies v1-v3 read. Policy v4 reads `topic_scores` instead (every traced per-topic score,
     descending) and classifies their median (MATH_SPEC §3e v4, audit D-5); topic criteria additionally carry
-    `declined` (the effective revision only quotes "never worked with this tool", seniority.is_declined)."""
+    `declined`: the effective revision carries the validated Evaluator flag `no_experience` (legacy rows: never)."""
     turns: dict[str, set[str]] = {}
     for r in current_criteria_rows(rows):
         if r.score is not None:
             turns.setdefault(r.criterion_id, set()).update(_turn_ids(r))
     topic_rows = [r for r in effective_rows(rows) if r.action_id != PRACTICE_ACTION]
     out = {r.criterion_id: r.score for r in topic_rows}
-    declined = {r.criterion_id for r in topic_rows if is_declined(r.score, _excerpts(r))}
+    declined = {r.criterion_id for r in topic_rows if getattr(r, "no_experience", None) is True}
     per_topic: dict[str, dict[str | None, float]] = {}
     for r in rows:
         if r.action_id == PRACTICE_ACTION:
@@ -132,10 +132,6 @@ def seniority_evidence(rows, turn_topics: Mapping[str, str]) -> dict[str, Criter
     return {cid: CriterionEvidence(cid, score, tuple(sorted(turns.get(cid, ()))) if score is not None else (),
                                    cid in declined, spread.get(cid, ()))
             for cid, score in out.items()}
-
-
-def _excerpts(row) -> list[str]:
-    return [e.get("exact_excerpt") or "" for e in (row.evidence or []) if isinstance(e, dict)]
 
 
 def _action_scores(rows) -> dict[str, float | None]:
@@ -596,7 +592,8 @@ def _assess_action(db: Session, user: User, iv: CoreInterview, turn: CoreTurn) -
         db.add(CriterionAssessment(user_id=user.id, session_id=iv.id, action_id=action_id,
                                    criterion_id=c.criterion_id, rubric_id=rubric.id, score=c.score,
                                    reason=c.reason, evidence=[e.model_dump() for e in c.evidence], revision=rev,
-                                   sufficient_evidence=result.output.sufficient_evidence))
+                                   sufficient_evidence=result.output.sufficient_evidence,
+                                   no_experience=c.no_experience))
     return "ACCEPTED"
 
 

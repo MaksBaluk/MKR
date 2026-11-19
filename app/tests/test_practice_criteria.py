@@ -26,6 +26,7 @@ class PracticeChat:
 
     def __init__(self, score=0.6, practice=0.8):
         self.score, self.practice = score, practice
+        self.no_experience = False  # when True every topic criterion carries the validated no_experience flag
         self.human_inputs: list[str] = []
 
     def invoke(self, messages, *a, **k):
@@ -44,7 +45,8 @@ class PracticeChat:
         practice = json.loads(data["practice_criterion_ids"]) if "practice_criterion_ids" in data else []
         return SimpleNamespace(content=json.dumps({
             "action_id": json.loads(data["action_id"]), "rubric_version": "v1", "off_topic": False,
-            "criteria": [item(c, self.score) for c in json.loads(data["allowed_criterion_ids"])],
+            "criteria": [{**item(c, self.score), **({"no_experience": True} if self.no_experience else {})}
+                         for c in json.loads(data["allowed_criterion_ids"])],
             "practice": [item(c, self.practice) for c in practice]}))
 
 

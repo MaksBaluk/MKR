@@ -39,7 +39,7 @@ def test_all_runs_store_v4_and_respect_budgets(results):
 def test_ur1_senior_without_kafka_does_not_collapse_to_junior(results):
     two, one = results["no-kafka-2"], results["no-kafka-1"]
     assert two["assessed"] == "SENIOR" and two["same_evidence"]["python-backend/v3"] == "JUNIOR"
-    assert {p["id"] for p in two["level"]["declined_pools"]} >= {"event-consumers", "failure-handling"}
+    assert {p["id"] for p in two["level"]["no_experience_pools"]} >= {"event-consumers", "failure-handling"}
     assert one["assessed"] != "JUNIOR"
 
 

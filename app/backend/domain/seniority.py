@@ -6,7 +6,7 @@ vacancy fit are deliberately not parameters. Unknown (score None) is never treat
 from __future__ import annotations
 
 import math
-import re
+import dataclasses
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from statistics import median
@@ -18,26 +18,12 @@ from backend.domain.seniority_policy import (PRACTICE_ACTION, CriterionPool, Lev
 
 LevelName = Literal["JUNIOR", "MIDDLE", "SENIOR", "UNKNOWN"]
 LevelStatus = Literal["SUPPORTED", "GAP", "UNVERIFIED"]
-PoolStatus = Literal["CONFIRMED", "GAP", "UNRESOLVED", "UNASSESSED", "DECLINED"]  # DECLINED: capability rules only
+# NO_EXPERIENCE: capability rules (v4) only; decided like UNRESOLVED (no credit, no gap), shown separately.
+PoolStatus = Literal["CONFIRMED", "GAP", "UNRESOLVED", "UNASSESSED", "NO_EXPERIENCE"]
 AssessmentStatus = Literal["ASSESSED", "INSUFFICIENT_DATA", "GAPS_AT_JUNIOR", "POLICY_UNAVAILABLE"]
 
 NO_POLICY_TEXT = "Для цього напряму рівень не визначається: потрібна експертна валідація рубрик"
 _TITLE = {"JUNIOR": "Junior", "MIDDLE": "Middle", "SENIOR": "Senior"}
-
-
-# A no-experience statement about the asked tool ("не працював з Kafka"). Plain "не знаю" is lack of knowledge (a gap),
-# not a declined tool, so it is deliberately not matched.
-DECLINE_RE = re.compile(
-    r"не\s+(працював|працювала|працюю|використовував|використовувала|використовую|стикався|стикалася|мав\s+досвіду|"
-    r"мала\s+досвіду|маю\s+досвіду)|нема(є)?\s+досвіду|без\s+досвіду|never\s+(used|worked)|no\s+experience|"
-    r"have\s*n[o']t\s+(used|worked)", re.I)
-DECLINE_MAX_SCORE = 0.25  # only a score in the lowest band ("materially incorrect / none") can be a declined tool
-
-
-def is_declined(score: float | None, excerpts: list[str]) -> bool:
-    """Every quoted excerpt is a no-experience statement and the score is in the lowest band."""
-    return (score is not None and score < DECLINE_MAX_SCORE and bool(excerpts)
-            and all(DECLINE_RE.search(x or "") for x in excerpts))
 
 
 @dataclass(frozen=True)
@@ -45,7 +31,7 @@ class CriterionEvidence:
     criterion_id: str
     score: float | None
     evidence_turns: tuple[str, ...] = ()
-    declined: bool = False  # topic criterion: the answer says the candidate never worked with the tool (is_declined)
+    declined: bool = False  # topic criterion: validated Evaluator flag no_experience on the effective revision
     topic_scores: tuple[float, ...] = ()  # practice criterion: traced score per source topic, descending (v4 uses it)
 
 
@@ -58,7 +44,7 @@ class PoolCoverage:
     confirmed_ids: tuple[str, ...]
     gap_ids: tuple[str, ...]
     unassessed_ids: tuple[str, ...]
-    declined_ids: tuple[str, ...] | None = None  # capability rules only (None: not part of v2/v3 JSON)
+    no_experience_ids: tuple[str, ...] | None = None  # capability rules only (None: not part of v2/v3 JSON)
 
 
 @dataclass(frozen=True)
@@ -81,7 +67,8 @@ class LevelCoverage:
     technical_confirmed: int | None = None
     practice_confirmed: int | None = None
     tolerated_gap_ids: tuple[str, ...] | None = None  # gaps of GAP pools that do not block the level
-    declined_ids: tuple[str, ...] | None = None
+    no_experience_ids: tuple[str, ...] | None = None
+    hard_gap_ids: tuple[str, ...] | None = None  # gaps of GAP pools listed in the rule's hard_pools
 
 
 @dataclass(frozen=True)
@@ -187,9 +174,10 @@ def _is_practice(cid: str) -> bool:
 
 
 def _member(rule: LevelRule, cid: str, evidence: Mapping[str, CriterionEvidence]) -> str:
-    """State of one pool member under a capability rule: CONF, WEAK, DECLINED, BORDER or NONE (no score).
+    """State of one pool member under a capability rule: CONF, WEAK, NOEXP, BORDER or NONE (no score).
     Practice is classified by the median of its per-source-topic scores (D-5: one strong topic no longer outweighs
-    weaker ones, as the v1-v3 maximum did); a practice score with no traced topic is borderline."""
+    weaker ones, as the v1-v3 maximum did); an even count takes the mean of the middle two; a practice score with no
+    traced topic is borderline."""
     item = _score(evidence, cid)
     if item is None:
         return "NONE"
@@ -201,30 +189,35 @@ def _member(rule: LevelRule, cid: str, evidence: Mapping[str, CriterionEvidence]
         return "CONF" if s >= tau else "WEAK" if s < low else "BORDER"
     if not item.evidence_turns:
         return "BORDER"  # a score without an evidence turn is never a confirmation nor a gap
-    return ("CONF" if item.score >= tau else "DECLINED" if item.declined else "WEAK" if item.score < low
+    return ("CONF" if item.score >= tau else "NOEXP" if item.declined else "WEAK" if item.score < low
             else "BORDER")
 
 
 def _capability_pool(rule: LevelRule, pool: CriterionPool, evidence: Mapping[str, CriterionEvidence]) -> PoolCoverage:
-    """CONFIRMED: a member confirms. UNRESOLVED: otherwise any borderline/untraced member. GAP: a weak answer on a tool
-    the candidate works with, or "never worked with it" for the only tool of the pool or for >= 2 offered tools.
-    DECLINED: the only evidence is "never worked with" one tool while an alternative was never asked (not a gap, not
-    evidence). UNASSESSED: no member scored."""
+    """CONFIRMED: a member confirms. UNRESOLVED: otherwise any borderline/untraced member. GAP: only when every
+    alternative of the pool was asked (or the pool has a single member) and each is weak or a no-experience
+    declaration. While an alternative is still unasked, a weak try and a declaration are treated alike (audit fix I-1:
+    a declaration must never beat trying): NO_EXPERIENCE if every scored member is a declaration, else UNRESOLVED.
+    Neither gives credit or a gap. A hard pool (rule.hard_pools) needs no alternative: a weak try or a declaration is a
+    GAP at once. UNASSESSED: no member scored."""
     st = {cid: _member(rule, cid, evidence) for cid in pool.members}
-    by = {k: tuple(c for c, v in st.items() if v == k) for k in ("CONF", "WEAK", "DECLINED", "BORDER", "NONE")}
+    by = {k: tuple(c for c, v in st.items() if v == k) for k in ("CONF", "WEAK", "NOEXP", "BORDER", "NONE")}
+    # A hard-critical capability must be shown in the tool that was asked: no waiting for an alternative there.
+    all_asked = not by["NONE"] or pool.pool_id in rule.hard_pools
     status: PoolStatus = (
-        "CONFIRMED" if by["CONF"] else "UNRESOLVED" if by["BORDER"] else "GAP" if by["WEAK"] else
-        ("GAP" if len(pool.members) == 1 or len(by["DECLINED"]) >= 2 else "DECLINED") if by["DECLINED"] else
+        "CONFIRMED" if by["CONF"] else "UNRESOLVED" if by["BORDER"] else
+        ("GAP" if all_asked else "UNRESOLVED" if by["WEAK"] else "NO_EXPERIENCE") if by["WEAK"] or by["NOEXP"] else
         "UNASSESSED")
     return PoolCoverage(pool.pool_id, pool.title, status, pool.members, by["CONF"],
-                        by["WEAK"] + by["DECLINED"] if status == "GAP" else (),
+                        by["WEAK"] + by["NOEXP"] if status == "GAP" else (),
                         pool.members if status == "UNASSESSED" else (),
-                        by["DECLINED"] if status == "DECLINED" else ())
+                        by["NOEXP"] if status == "NO_EXPERIENCE" else ())
 
 
 def _capability_coverage(rule: LevelRule, evidence: Mapping[str, CriterionEvidence]) -> LevelCoverage:
     """Counts over decided pools (CONFIRMED or GAP); no compensation across pools: a pool is confirmed only by its own
-    members. A level is GAP when a hard pool is GAP or more than `max_soft_gaps` pools are GAP."""
+    members. A level is GAP when a hard pool is GAP or more than `max_soft_gaps` pools are GAP (the chain-wide budget
+    is applied in estimate)."""
     pools = tuple(_capability_pool(rule, p, evidence) for p in rule.pools)
     practice = {p.pool_id for p in rule.pools if all(_is_practice(c) for c in p.members)}
     conf = [p for p in pools if p.status == "CONFIRMED"]
@@ -233,7 +226,8 @@ def _capability_coverage(rule: LevelRule, evidence: Mapping[str, CriterionEviden
     prac = len(conf) - tech
     confirmed_ids = _unique([c for p in conf for c in p.confirmed_ids])
     comps = len({c.split(".", 1)[0] for c in confirmed_ids} - {PRACTICE_ACTION})
-    blocking = any(p.pool_id in rule.hard_pools for p in gap) or len(gap) > rule.max_soft_gaps
+    hard = _unique([c for p in gap if p.pool_id in rule.hard_pools for c in p.gap_ids])
+    blocking = bool(hard) or len(gap) > rule.max_soft_gaps
     required_ok = not rule.required_any or any(p.pool_id in rule.required_any for p in conf)
     reasons = tuple(code for code, failed in (
         ("CRITICAL_GAP", blocking),
@@ -248,7 +242,23 @@ def _capability_coverage(rule: LevelRule, evidence: Mapping[str, CriterionEviden
     return LevelCoverage(rule.level, total, decided, len(conf), len(gap), decided / total, len(conf) / total, comps,
                          status, confirmed_ids, gap_ids, _unique([c for p in pools for c in p.unassessed_ids]), reasons,
                          pools, tech, prac, () if blocking else gap_ids,
-                         _unique([c for p in pools for c in (p.declined_ids or ())]))
+                         _unique([c for p in pools for c in (p.no_experience_ids or ())]), hard)
+
+
+def _chain_budget(policy: SeniorityPolicy, cov: list[LevelCoverage]) -> list[LevelCoverage]:
+    """Chain-wide soft-gap budget (audit fix I-2): a level is GAP when the distinct GAP pools of it and every lower
+    level exceed `policy.max_chain_soft_gaps`, so tolerated gaps never accumulate along Junior -> Middle -> Senior."""
+    cap = policy.max_chain_soft_gaps
+    if cap is None:
+        return cov
+    seen: dict[str, None] = {}
+    out = []
+    for c in cov:
+        seen.update(dict.fromkeys(p.pool_id for p in c.pools if p.status == "GAP"))
+        if len(seen) > cap and c.status != "GAP":
+            c = dataclasses.replace(c, status="GAP", reasons=("CUMULATIVE_GAPS", *c.reasons), tolerated_gap_ids=())
+        out.append(c)
+    return out
 
 
 def _unique(ids: list[str]) -> tuple[str, ...]:
@@ -260,7 +270,7 @@ def estimate(policy: SeniorityPolicy | None, evidence: Mapping[str, CriterionEvi
         return SeniorityResult("UNKNOWN", "UNKNOWN", "POLICY_UNAVAILABLE", {}, (), (), (), {}, None, None,
                                (NO_POLICY_TEXT,))
     rules = sorted(policy.rules, key=lambda r: rank(r.level))
-    cov = [_coverage(r, evidence) for r in rules]
+    cov = _chain_budget(policy, [_coverage(r, evidence) for r in rules])
 
     chain = -1  # index of the highest level in the unbroken SUPPORTED chain from the lowest level
     while chain + 1 < len(cov) and cov[chain + 1].status == "SUPPORTED":
@@ -302,10 +312,11 @@ def _explain(policy: SeniorityPolicy, cov: list[LevelCoverage], chain: int, high
     tolerated = _unique([g for c in cov for g in (c.tolerated_gap_ids or ())])
     if tolerated:
         lines.append(f"Окремі прогалини не блокують рівень, але їх варто підтягнути: {', '.join(tolerated)}.")
-    declined = _unique([d for c in cov for d in (c.declined_ids or ())])
-    if declined:
-        lines.append(f"Кандидат не працював з частиною інструментів ({', '.join(declined)}); ці можливості не "
-                     "перевірено на іншому інструменті, тому вони не враховуються ні як підтвердження, ні як прогалина.")
+    no_exp = _unique([d for c in cov for d in (c.no_experience_ids or ())])
+    if no_exp:
+        lines.append(f"У відповідях зазначено, що досвіду з частиною інструментів немає ({', '.join(no_exp)}); "
+                     "альтернативні інструменти не перевірялися, тому ці навички не враховано ні як підтвердження, "
+                     "ні як прогалину.")
     if highest != "UNKNOWN" and (chain < 0 or rank(Level(highest)) > rank(cov[chain].level)):
         lines.append(f"Критерії {_TITLE[highest]} підтверджено, але нижчі рівні не підтверджені, "
                      "тому цей рівень не присвоюється.")
@@ -335,4 +346,5 @@ def _coverage_json(c: dict) -> dict:
 
 
 # Keys that exist only for capability rules (v4): absent (not null) in v1-v3 JSON, so stored rows stay byte-identical.
-_V4_ONLY = frozenset({"technical_confirmed", "practice_confirmed", "tolerated_gap_ids", "declined_ids"})
+_V4_ONLY = frozenset({"technical_confirmed", "practice_confirmed", "tolerated_gap_ids", "no_experience_ids",
+                      "hard_gap_ids"})

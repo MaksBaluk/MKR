@@ -16,6 +16,7 @@ topic), validation, practice storage, finish hook, GET /level. Throwaway in-memo
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -76,6 +77,7 @@ class Model:
     per_q: int = 1
     goal_policy: str = "GAP_ONLY"  # or OPEN
     questions: dict = field(default_factory=dict)
+    noise: "Noise | None" = None  # noisy grading (audit fix I-5); None = exact anchors
 
     def invoke(self, messages, *a, **k):
         system, human = messages[0].content, messages[1].content
@@ -102,9 +104,19 @@ class Model:
                 latest[cid] = (tid, _P2S[ph], f"Щодо {cid}: {ph}.")
 
         def item(c: str) -> dict:
+            if c in latest and self.noise is not None and latest[c][1] > 0.0:
+                tid, s0, ex = latest[c]
+                s = self.noise.grade(c, tid, s0)
+                if s is None:  # the grader missed the sentence: no evidence for this criterion
+                    return {"criterion_id": c, "score": None, "reason": "немає свідчень", "evidence": []}
+                latest[c] = (tid, s, ex)
             if c in latest:
                 tid, s, ex = latest[c]
-                return {"criterion_id": c, "score": s, "reason": "оцінено", "evidence": [{"turn_id": tid, "exact_excerpt": ex}]}
+                out = {"criterion_id": c, "score": s, "reason": "оцінено",
+                       "evidence": [{"turn_id": tid, "exact_excerpt": ex}]}
+                if s == 0.0 and not c.startswith("practice"):  # the "не працював" phrase: a validated declaration
+                    out["no_experience"] = True
+                return out
             return {"criterion_id": c, "score": None, "reason": "немає свідчень", "evidence": []}
 
         crit = [item(c) for c in allowed]
@@ -120,6 +132,27 @@ class Model:
         if practice:
             out["practice"] = [item(c) for c in practice]
         return json.dumps(out, ensure_ascii=False)
+
+
+@dataclass(frozen=True)
+class Noise:
+    """Deterministic grading noise per (seed, criterion, answer turn): the same answer always gets the same grade.
+    jitter: uniform +-jitter around the anchor (0.78 +- .1 covers .68-.88, 0.6 covers .50-.70); p_miss: the criterion
+    is not graded at all; p_over / p_under: an extra +-.15 (over-/under-grading)."""
+    seed: int
+    jitter: float = 0.10
+    p_miss: float = 0.08
+    p_over: float = 0.05
+    p_under: float = 0.05
+
+    def grade(self, cid: str, turn: str, anchor: float) -> float | None:
+        u = [int(hashlib.sha256(f"{self.seed}:{cid}:{turn}:{k}".encode()).hexdigest()[:8], 16) / 0xFFFFFFFF
+             for k in range(3)]
+        if u[0] < self.p_miss:
+            return None
+        s = anchor + (2 * u[1] - 1) * self.jitter
+        s += 0.15 if u[2] < self.p_over else -0.15 if u[2] > 1 - self.p_under else 0.0
+        return round(min(1.0, max(0.0, s)), 2)
 
 
 @dataclass
@@ -163,9 +196,10 @@ def profiles() -> dict[str, Callable[[str], float]]:
     }
 
 
-def run(env, name: str, truth: Callable[[str], float], desired: str, per_q: int = 1, goal: str = "GAP_ONLY") -> dict:
+def run(env, name: str, truth: Callable[[str], float], desired: str, per_q: int = 1, goal: str = "GAP_ONLY",
+        noise: Noise | None = None) -> dict:
     original = core.get_chat_model
-    core.get_chat_model = lambda: Model(per_q, goal, MODEL_QUESTIONS)
+    core.get_chat_model = lambda: Model(per_q, goal, MODEL_QUESTIONS, noise)
     try:
         return _run(env, name, truth, desired, per_q, goal)
     finally:
@@ -209,6 +243,7 @@ def _run(env, name: str, truth: Callable[[str], float], desired: str, per_q: int
             "highest": lv["highest_supported_level"], "policy": lv["policy"]["version"],
             "same_evidence": {f"{p}/{v}": estimate(POLICY_VERSIONS[(p, v)], evidence).assessed_level
                               for p, v in POLICY_VERSIONS},
+            "evidence": evidence,
             "difficulty": dict(Counter(t.difficulty for t in turns))}
 
 
@@ -225,7 +260,51 @@ def grid(names=None, desired=("junior", "middle", "senior"), per_qs=(1, 2), goal
     return out
 
 
+TRUE_LEVEL = {"senior": "SENIOR", "senior-no-kafka": "SENIOR", "senior-no-aws": "SENIOR", "senior-weak-git": "SENIOR",
+              "middle": "MIDDLE", "weak-senior": "MIDDLE", "junior": "JUNIOR", "weak": "UNKNOWN"}
+_RANK = {"UNKNOWN": -1, "JUNIOR": 0, "MIDDLE": 1, "SENIOR": 2}
+
+
+def noisy_sweep(seeds=range(7), policies=None) -> dict:
+    """>= 200 noisy interviews (8 profiles x 1-2 criteria/question x GAP_ONLY/OPEN x seeds; desired level cycles with
+    the seed). Rates per policy over the same stored evidence (the API stores the current policy)."""
+    from scripts.chapter4.scenarios import Env
+    truths, runs = profiles(), []
+    with Env() as env:
+        for seed in seeds:
+            desired = ("junior", "middle", "senior")[seed % 3]
+            for name in truths:
+                for pq in (1, 2):
+                    for g in ("GAP_ONLY", "OPEN"):
+                        r = run(env, name, truths[name], desired, pq, g, Noise(seed))
+                        runs.append({k: v for k, v in r.items() if k != "level"})
+    policies = policies or {f"{p}/{v}": POLICY_VERSIONS[(p, v)] for p, v in POLICY_VERSIONS}
+    return {"runs": len(runs), "rates": {name: rates(runs, pol) for name, pol in policies.items()}}
+
+
+def rates(runs: list[dict], policy) -> dict:
+    got = [(TRUE_LEVEL[r["profile"]], estimate(policy, r["evidence"]).assessed_level, r["per_q"]) for r in runs]
+    def share(pred, cond):
+        sel = [x for x in got if cond(x)]
+        return f"{sum(pred(x) for x in sel)}/{len(sel)}"
+    return {
+        "false_senior": share(lambda x: x[1] == "SENIOR", lambda x: x[0] != "SENIOR"),
+        "false_middle_or_higher": share(lambda x: _RANK[x[1]] >= 1, lambda x: _RANK[x[0]] <= 0),
+        "missed_senior": share(lambda x: x[1] != "SENIOR", lambda x: x[0] == "SENIOR"),
+        "missed_senior_per_q2": share(lambda x: x[1] != "SENIOR", lambda x: x[0] == "SENIOR" and x[2] == 2),
+        "missed_middle": share(lambda x: _RANK[x[1]] < 1, lambda x: x[0] == "MIDDLE"),
+        "overrated_any": share(lambda x: _RANK[x[1]] > _RANK[x[0]], lambda x: True),
+    }
+
+
 if __name__ == "__main__":
+    if "--noisy" in sys.argv:
+        print(LABEL + "; NOISY grading (Noise: jitter .10, miss .08, over/under .05)")
+        out = noisy_sweep()
+        print(f"{out['runs']} interviews")
+        for name, r in out["rates"].items():
+            print(f"  {name:20} " + "  ".join(f"{k}={v}" for k, v in r.items()))
+        raise SystemExit(0)
     print(LABEL)
     for r in grid():
         print(f"{r['profile']:16} desired={r['desired']:6} per_q={r['per_q']} {r['goal']:8} q={r['questions']:2} "

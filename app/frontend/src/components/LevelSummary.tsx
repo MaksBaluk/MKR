@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { desiredLabel, explanationWithoutHigher, higherEvidenceText, levelLabel, unassessedItems } from '@/lib/levelView';
+import { desiredLabel, explanationWithoutHigher, higherNotice, levelLabel, unassessedItems } from '@/lib/levelView';
 import type { AssessedLevel, LevelPool } from '@/types';
 
 function CriterionList({ title, items, empty }: { title: string; items: LevelPool[]; empty: string }) {
@@ -49,13 +49,24 @@ export function LevelSummary({ level, profileTarget }: { level: AssessedLevel | 
             </dd>
           </div>
         </dl>
-        {level && higherEvidenceText(level) && (
-          <div className="rounded-xl border border-line p-3" role="note" aria-labelledby="level-higher-title">
-            <p id="level-higher-title" className="text-xs text-ink-subtle">Найвищий рівень із доказами</p>
-            <p className="text-lg font-semibold text-ink">{levelLabel(level.highest_supported_level)}</p>
-            <p className="mt-1 text-sm text-ink-muted">{higherEvidenceText(level)}</p>
-          </div>
-        )}
+        {level && (() => {
+          const notice = higherNotice(level);
+          if (!notice) return null;
+          if (notice.kind === 'blocked') {
+            return (
+              <p role="alert" className="rounded-xl border border-danger bg-danger-soft p-3 text-sm font-medium text-ink">
+                {notice.text}
+              </p>
+            );
+          }
+          return (
+            <div className="rounded-xl border border-line p-3" role="note" aria-labelledby="level-higher-title">
+              <p id="level-higher-title" className="text-xs text-ink-subtle">Найвищий рівень із доказами</p>
+              <p className="text-lg font-semibold text-ink">{levelLabel(notice.level)}</p>
+              <p className="mt-1 text-sm text-ink-muted">{notice.text}</p>
+            </div>
+          );
+        })()}
         {level ? (
           <>
             {explanationWithoutHigher(level).length > 0 && (
@@ -71,9 +82,9 @@ export function LevelSummary({ level, profileTarget }: { level: AssessedLevel | 
                 <CriterionList title="Межові відповіді: не зараховано ні як підтвердження, ні як прогалину"
                   items={level.unresolved_pools} empty="" />
               )}
-              {!!level.declined_pools?.length && (
+              {!!level.no_experience_pools?.length && (
                 <CriterionList title="Без досвіду з інструментом: альтернативу не перевіряли"
-                  items={level.declined_pools} empty="" />
+                  items={level.no_experience_pools} empty="" />
               )}
             </div>
             {level.note && (

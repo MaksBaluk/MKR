@@ -61,6 +61,8 @@ class SeniorityPolicy:
     track: str
     status: Literal["WORKING_ASSUMPTION", "VALIDATED"]
     rules: tuple[LevelRule, ...]
+    # Capability policies (v4): distinct GAP pools tolerated over a level and all lower levels together. None: v1-v3.
+    max_chain_soft_gaps: int | None = None
 
 
 PRACTICE_ACTION = "practice-backend"
@@ -171,9 +173,8 @@ def capability(level: Level, tau: float, gap_below: float, min_confirmed: int, m
 
 
 # v4 = v3 pools with capability-level gaps, anchor-aligned thresholds and counts over confirmed pools (audit 2026-11-19,
-# D-1, D-4, D-10, UR-7). Thresholds sit on rubric band edges: confirm at >= .50 (Junior, "partial") or >= .75 (Middle,
-# Senior, "good"); a gap is a traced score below .50 ("weak"/"incorrect"). [.50, .75) is borderline at Middle/Senior: the
-# anchors do not separate .70 from .65 inside the "partial" band, so that zone is unresolved, never a gap nor a pass.
+# D-1, D-4, D-10, UR-7). Confirm at >= .50 (Junior), >= .70 (Middle, measured under noise) or >= .75 (Senior, band edge
+# "good"); a gap is a traced score below .50 ("weak"/"incorrect"). [.50, tau) is borderline: never a gap nor a pass.
 # Counts are chosen from the realistic-evaluator measurement (scripts/seniority_reachability.py §6) and remain a
 # WORKING_ASSUMPTION: not calibrated, expert validation required.
 _V4_SENIOR_POOLS = tuple(
@@ -183,16 +184,24 @@ PYTHON_BACKEND_V4 = SeniorityPolicy(
     policy_id="python-backend", version="v4", track="python", status="WORKING_ASSUMPTION",
     rules=(
         # Every level needs one confirmed data-layer capability of its own (no backend level without data evidence).
-        # Junior: 6 of 9 capabilities confirmed (5 technical); weak core Python always blocks (hard pools).
-        capability(Level.JUNIOR, 0.50, 0.50, 6, 5, 0, 3, _J2.pools, hard_pools=("python-idioms", "python-errors"),
+        # Hard pools come from topics Q_t picks in every measured interview (python-core, sql, postgresql): a weak try
+        # there always blocks the level. One soft gap is tolerated per chain (max_chain_soft_gaps), not per level.
+        # Junior: 6 of 9 capabilities confirmed (5 technical).
+        capability(Level.JUNIOR, 0.50, 0.50, 6, 5, 0, 3, _J2.pools,
+                   hard_pools=("python-idioms", "python-errors", "sql-correctness"),
                    required_any=("sql-joins", "sql-correctness")),
         # Middle: half of 14 confirmed, >= 5 of 11 technical and >= 2 of 3 practice (justified decisions, diagnosis).
-        capability(Level.MIDDLE, 0.75, 0.50, 7, 5, 2, 4, _M2.pools,
+        # Middle tau .70 (fix round 1, I-5): under noisy grading (scripts/seniority_realistic.py --noisy, 224 runs) .75
+        # missed 17/56 true Middles versus 9/56 at .70, with identical false-Senior/false-Middle counts. [.50, .70) stays
+        # borderline (UNRESOLVED), never a gap: the anchors do not separate scores inside the "partial" band (UR-7).
+        capability(Level.MIDDLE, 0.70, 0.50, 7, 5, 2, 4, _M2.pools, hard_pools=("data-consistency",),
                    required_any=("query-efficiency", "data-consistency", "schema-design")),
         # Senior: >= 4 of 9 technical Senior capabilities, >= 3 of 5 practice, one of them on the data layer (WS-3).
         capability(Level.SENIOR, 0.75, 0.50, 7, 4, 3, 3, _V4_SENIOR_POOLS,
+                   hard_pools=("db-operations", "schema-migrations"),
                    required_any=("db-operations", "schema-migrations")),
-    ))
+    ),
+    max_chain_soft_gaps=1)
 
 # Every policy version ever used to store a level stays addressable, so stored rows keep their meaning.
 POLICY_VERSIONS: dict[tuple[str, str], SeniorityPolicy] = {
