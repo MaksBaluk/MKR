@@ -1,6 +1,11 @@
 """Deterministic question-difficulty controller. Pure: no DB, no API. Never changes or caps criterion scores.
 
-Seniority is only the initial hypothesis; level moves one step at a time from evidence on targeted criteria."""
+Seniority is only the initial hypothesis; level moves one step at a time from evidence on targeted criteria.
+
+Controller v2 (WP-B, audit D-3): a step is decided from the graded focus criteria of the last question (the first
+`focus` targeted criteria, which one narrow question can cover), without requiring `sufficient_evidence` for the
+whole topic; a new topic starts from the level the previous topic reached (core.next_question). v1 rules stay
+selectable for reproducing older runs (`DifficultyConfig(version=CONTROLLER_V1)`)."""
 
 from __future__ import annotations
 
@@ -26,12 +31,18 @@ def rank(d: Difficulty) -> int:
     return _ORDER.index(d)
 
 
+CONTROLLER_V1 = "difficulty/v1"
+CONTROLLER_V2 = "difficulty/v2"
+
+
 @dataclass(frozen=True)
 class DifficultyConfig:
     up_score: float = 0.75
     down_score: float = 0.50
     min_known_share: float = 0.5
     diagnostic_floor: Difficulty = Difficulty.BASIC
+    focus: int = 2  # v2: criteria in focus of one question (the first targeted ones, as the Interviewer is told)
+    version: str = CONTROLLER_V2
 
 
 DEFAULT_CONFIG = DifficultyConfig()
@@ -75,7 +86,9 @@ def initial_difficulty(candidate_level: str | None, market: str | None) -> tuple
 
 def next_step(state: ControllerState, cfg: DifficultyConfig, *, targeted: Sequence[str],
               scores: Mapping[str, float | None], topic_score: float | None, sufficient: bool,
-              open_criteria: Sequence[str], goal_open: bool = False) -> DifficultyDecision:
+              open_criteria: Sequence[str], goal_open: bool = False, level_open: bool = False) -> DifficultyDecision:
+    """level_open (WP-B, D-2): Python keeps the topic open for unresolved level-critical criteria (level_probe);
+    like an open goal it only removes `enough`; the caps and NO_OPEN_CRITERIA still close the topic."""
     targets = tuple(open_criteria)
     level = state.level
     if not targets:
@@ -88,17 +101,23 @@ def next_step(state: ControllerState, cfg: DifficultyConfig, *, targeted: Sequen
     # interview_budget.needs_min_followup and interview_budget.topic_open_for_question (planner eligibility).
     # graded=True: the caller decides only for topics with an accepted assessment (ungraded topics never continue).
     owed = needs_min_followup(state.shown, graded=True, score=topic_score, sufficient=sufficient)
-    enough = not (owed or topic_score is None or goal_open)
-    known = [s for c in targeted if (s := scores.get(c)) is not None]
+    enough = not (owed or topic_score is None or goal_open or level_open)
+    v1 = cfg.version == CONTROLLER_V1
+    focus = list(targeted) if v1 else list(targeted)[:max(1, cfg.focus)]
+    known = [s for c in focus if (s := scores.get(c)) is not None]
     if not known:
         return DifficultyDecision(level, "NO_EVIDENCE+ENOUGH" if enough else "NO_EVIDENCE",
                                   "CLOSE" if enough else "FOLLOWUP", targets)
-    share = len(known) / len(targeted)
+    share = len(known) / len(focus)
     mean = sum(known) / len(known)
     r = rank(level)
-    if sufficient and share >= cfg.min_known_share and mean >= cfg.up_score:
+    # v1 required sufficient_evidence for a step up, which Python forces false while any topic criterion is null:
+    # practically unreachable (audit D-3). v2 decides from the graded focus criteria only, symmetric for both steps.
+    up_ok = (sufficient or not v1) and share >= cfg.min_known_share
+    down_ok = share == 1.0 if v1 else share >= cfg.min_known_share
+    if up_ok and mean >= cfg.up_score:
         new, reason = _ORDER[min(r + 1, 2)], "STRONG"
-    elif share == 1.0 and mean < cfg.down_score:
+    elif down_ok and mean < cfg.down_score:
         new, reason = _ORDER[max(r - 1, rank(cfg.diagnostic_floor))], "WEAK"
     else:
         new, reason = level, "PARTIAL"

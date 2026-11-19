@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import pytest
 
 from backend.agents.prompts import EVALUATOR_SYSTEM, INTERVIEWER_SYSTEM
+from backend.domain.difficulty import CONTROLLER_V2
 from backend.models import CandidateProfile, CoreTurn
 from tests.test_followup_flow import PolicyChat, _answer, _next, _start, _turn, _use
 
@@ -43,8 +44,8 @@ def test_first_question_difficulty_from_level(client, auth, db, spy, level, expe
     q1 = _next(client, auth, iv, 0)
     t = _turn(db, q1["turn"]["id"])
     assert t.difficulty == expected and t.difficulty_reason == f"LEVEL:{level}"
-    assert t.controller_before == {"level": expected, "shown": 0, "history": []}
-    assert t.controller_after == {"level": expected, "shown": 1, "history": [expected]}
+    assert t.controller_before == {"level": expected, "shown": 0, "history": [], "version": CONTROLLER_V2}
+    assert t.controller_after == {"level": expected, "shown": 1, "history": [expected], "version": CONTROLLER_V2}
     assert f"difficulty: {expected}" in spy.interviewer_humans[-1]
 
 
@@ -75,7 +76,7 @@ def test_second_question_replays_controller_state(client, auth, db, spy):
     q2 = _next(client, auth, iv, a1["version"])
     assert q2["turn"]["action_id"] == q1["turn"]["action_id"]  # min-two rule: 0.6 is not an early close
     t = _turn(db, q2["turn"]["id"])
-    assert t.controller_before == {"level": "BASIC", "shown": 1, "history": ["BASIC"]}
+    assert t.controller_before == {"level": "BASIC", "shown": 1, "history": ["BASIC"], "version": CONTROLLER_V2}
     assert t.difficulty == "BASIC" and t.difficulty_reason == "PARTIAL"
     assert t.controller_after["shown"] == 2 and t.controller_after["history"] == ["BASIC", "BASIC"]
 
@@ -93,7 +94,7 @@ def test_legacy_null_difficulty_restarts(client, auth, db, spy):
     assert q2["turn"]["action_id"] == q1["turn"]["action_id"]
     t = _turn(db, q2["turn"]["id"])
     assert t.difficulty == "ADVANCED" and t.difficulty_reason == "LEGACY_RESTART"
-    assert t.controller_before == {"level": "ADVANCED", "shown": 1, "history": []}
+    assert t.controller_before == {"level": "ADVANCED", "shown": 1, "history": [], "version": CONTROLLER_V2}
 
 
 def test_bank_fallback_still_gets_difficulty(client, auth, db, monkeypatch):
@@ -207,7 +208,8 @@ def test_incomplete_answer_follows_up_same_level_on_open_criterion(client, auth,
     _set_level(db, "middle")
     q1, q2 = _stored(db, _play(client, auth, iv, 2, "inc"))
     assert q1.action_id == q2.action_id
-    assert q2.difficulty == q1.difficulty == "INTERMEDIATE" and q2.difficulty_reason == "PARTIAL"
+    # controller v2 (D-3): the graded focus criterion is weak, so the follow-up is one step easier
+    assert (q1.difficulty, q2.difficulty, q2.difficulty_reason) == ("INTERMEDIATE", "BASIC", "WEAK")
     assert q2.followup_reason and q2.target_criteria == [q1.target_criteria[1]]  # a null criterion, not the graded one
     assert q1.target_criteria[0] not in q2.target_criteria
 

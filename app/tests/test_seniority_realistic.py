@@ -17,6 +17,12 @@ CASES = {  # id: (profile, desired, criteria per question, follow-up goal policy
     "middle-2": ("middle", "middle", 2, "GAP_ONLY"),
     "junior-2": ("junior", "junior", 2, "GAP_ONLY"),
     "weak-2": ("weak", "senior", 2, "OPEN"),
+    # WP-B (D-2, D-3): narrow questions, literal-prompt goals, desired level below the truth
+    "senior-junior-1": ("senior", "junior", 1, "GAP_ONLY"),
+    "senior-junior-2": ("senior", "junior", 2, "GAP_ONLY"),
+    "junior-1": ("junior", "junior", 1, "GAP_ONLY"),
+    "weak-junior-1": ("weak", "junior", 1, "GAP_ONLY"),
+    "weak-senior-desired-1": ("weak", "senior", 1, "GAP_ONLY"),
 }
 
 
@@ -33,7 +39,28 @@ def test_label_is_simulated():
 
 def test_all_runs_store_v4_and_respect_budgets(results):
     for r in results.values():
-        assert r["policy"] == "v4" and len(r["topics"]) <= 10 and r["questions"] <= 50
+        assert r["policy"] == "v4" and len(r["topics"]) <= 10 and r["max_per_topic"] <= 5 and r["questions"] <= 50
+
+
+def test_junior_desired_strong_candidate_reaches_senior_depth_and_level(results):
+    """D-3 / UR-6: the desired level is only the first question's prior; strong answers raise the depth."""
+    for key in ("senior-junior-1", "senior-junior-2"):
+        r = results[key]
+        assert r["difficulty"].get("ADVANCED", 0) > r["questions"] // 2, r["difficulty"]
+        assert r["assessed"] == "SENIOR", key
+
+
+def test_narrow_questions_now_reach_senior_and_junior(results):
+    """D-2: Python keeps a topic open for unresolved level-critical criteria (1 criterion per question)."""
+    assert results["senior-junior-1"]["assessed"] == "SENIOR"
+    assert results["junior-1"]["assessed"] == "JUNIOR"
+
+
+def test_weak_candidate_gets_no_escalation(results):
+    low = results["weak-junior-1"]
+    assert set(low["difficulty"]) == {"BASIC"} and low["assessed"] == "UNKNOWN"
+    high = results["weak-senior-desired-1"]  # desired senior: starts ADVANCED, weak answers step it down
+    assert high["difficulty"].get("BASIC", 0) >= high["questions"] - 2 and high["assessed"] == "UNKNOWN"
 
 
 def test_ur1_senior_without_kafka_does_not_collapse_to_junior(results):

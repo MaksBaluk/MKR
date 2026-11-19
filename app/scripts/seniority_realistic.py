@@ -99,14 +99,16 @@ class Model:
         allowed, open_ids = _line(h, "allowed_criterion_ids"), _line(h, "open_criterion_ids")
         practice = _line(h, "practice_criterion_ids") or []
         latest: dict[str, tuple[str, float, str]] = {}
-        for tid, body in re.findall(r'<candidate_answer turn_id="([^"]+)">(".*")</candidate_answer>', h):
+        position: dict[str, str] = {}  # turn id -> "<action>#<answer index>": noise must not depend on random UUIDs
+        for i, (tid, body) in enumerate(re.findall(r'<candidate_answer turn_id="([^"]+)">(".*")</candidate_answer>', h)):
+            position[tid] = f"{_line(h, 'action_id')}#{i}"
             for cid, ph in _SENT.findall(json.loads(body)):
                 latest[cid] = (tid, _P2S[ph], f"Щодо {cid}: {ph}.")
 
         def item(c: str) -> dict:
             if c in latest and self.noise is not None and latest[c][1] > 0.0:
                 tid, s0, ex = latest[c]
-                s = self.noise.grade(c, tid, s0)
+                s = self.noise.grade(c, position[tid], s0)
                 if s is None:  # the grader missed the sentence: no evidence for this criterion
                     return {"criterion_id": c, "score": None, "reason": "немає свідчень", "evidence": []}
                 latest[c] = (tid, s, ex)
@@ -136,7 +138,9 @@ class Model:
 
 @dataclass(frozen=True)
 class Noise:
-    """Deterministic grading noise per (seed, criterion, answer turn): the same answer always gets the same grade.
+    """Deterministic grading noise per (seed, criterion, answer position in its topic): the same answer always gets the
+    same grade, and a rerun with the same seed gives the same sweep (before WP-B the key was the random turn UUID, so
+    sweeps were not reproducible).
     jitter: uniform +-jitter around the anchor (0.78 +- .1 covers .68-.88, 0.6 covers .50-.70); p_miss: the criterion
     is not graded at all; p_over / p_under: an extra +-.15 (over-/under-grading)."""
     seed: int
@@ -244,6 +248,7 @@ def _run(env, name: str, truth: Callable[[str], float], desired: str, per_q: int
             "same_evidence": {f"{p}/{v}": estimate(POLICY_VERSIONS[(p, v)], evidence).assessed_level
                               for p, v in POLICY_VERSIONS},
             "evidence": evidence,
+            "max_per_topic": max(Counter(t.action_id for t in turns).values(), default=0),
             "difficulty": dict(Counter(t.difficulty for t in turns))}
 
 
@@ -279,7 +284,23 @@ def noisy_sweep(seeds=range(7), policies=None) -> dict:
                         r = run(env, name, truths[name], desired, pq, g, Noise(seed))
                         runs.append({k: v for k, v in r.items() if k != "level"})
     policies = policies or {f"{p}/{v}": POLICY_VERSIONS[(p, v)] for p, v in POLICY_VERSIONS}
-    return {"runs": len(runs), "rates": {name: rates(runs, pol) for name, pol in policies.items()}}
+    return {"runs": len(runs), "rates": {name: rates(runs, pol) for name, pol in policies.items()},
+            "usage": usage(runs), "rows": runs}
+
+
+def usage(runs: list[dict]) -> dict:
+    """Budget use of a sweep: averages and maxima of questions / topics / questions per topic, difficulty totals,
+    and how many interviews of a true Senior with desired junior reached at least one ADVANCED question."""
+    n = len(runs) or 1
+    diff = Counter()
+    for r in runs:
+        diff.update(r["difficulty"])
+    sj = [r for r in runs if TRUE_LEVEL[r["profile"]] == "SENIOR" and r["desired"] == "junior"]
+    return {"avg_questions": round(sum(r["questions"] for r in runs) / n, 2),
+            "avg_topics": round(sum(len(r["topics"]) for r in runs) / n, 2),
+            "max_questions": max(r["questions"] for r in runs), "max_topics": max(len(r["topics"]) for r in runs),
+            "max_per_topic": max(r["max_per_topic"] for r in runs), "difficulty": dict(diff),
+            "senior_desired_junior_advanced": f"{sum(bool(r['difficulty'].get('ADVANCED')) for r in sj)}/{len(sj)}"}
 
 
 def rates(runs: list[dict], policy) -> dict:
@@ -291,8 +312,11 @@ def rates(runs: list[dict], policy) -> dict:
         "false_senior": share(lambda x: x[1] == "SENIOR", lambda x: x[0] != "SENIOR"),
         "false_middle_or_higher": share(lambda x: _RANK[x[1]] >= 1, lambda x: _RANK[x[0]] <= 0),
         "missed_senior": share(lambda x: x[1] != "SENIOR", lambda x: x[0] == "SENIOR"),
+        "false_middle": share(lambda x: x[1] == "MIDDLE", lambda x: _RANK[x[0]] < 1),
+        "missed_senior_per_q1": share(lambda x: x[1] != "SENIOR", lambda x: x[0] == "SENIOR" and x[2] == 1),
         "missed_senior_per_q2": share(lambda x: x[1] != "SENIOR", lambda x: x[0] == "SENIOR" and x[2] == 2),
         "missed_middle": share(lambda x: _RANK[x[1]] < 1, lambda x: x[0] == "MIDDLE"),
+        "missed_middle_per_q1": share(lambda x: _RANK[x[1]] < 1, lambda x: x[0] == "MIDDLE" and x[2] == 1),
         "overrated_any": share(lambda x: _RANK[x[1]] > _RANK[x[0]], lambda x: True),
     }
 
@@ -304,6 +328,13 @@ if __name__ == "__main__":
         print(f"{out['runs']} interviews")
         for name, r in out["rates"].items():
             print(f"  {name:20} " + "  ".join(f"{k}={v}" for k, v in r.items()))
+        print("  usage " + "  ".join(f"{k}={v}" for k, v in out["usage"].items()))
+        cur = policy_for("python")
+        for (name, pq), n in sorted(Counter((r["profile"], r["per_q"]) for r in out["rows"]).items()):
+            sel = [r for r in out["rows"] if (r["profile"], r["per_q"]) == (name, pq)]
+            got = Counter(estimate(cur, r["evidence"]).assessed_level for r in sel)
+            print(f"  {name:16} per_q={pq} n={n} {dict(sorted(got.items()))} "
+                  f"avg_q={sum(r['questions'] for r in sel) / len(sel):.1f}")
         raise SystemExit(0)
     print(LABEL)
     for r in grid():

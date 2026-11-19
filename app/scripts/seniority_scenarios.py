@@ -41,7 +41,8 @@ API = "/api/v1"
 LABEL = "SIMULATED: deterministic stub Interviewer/Evaluator, scripted answers; not a real LLM and not a real candidate"
 POLICY = policy_for("python")  # the current python policy (python-backend/v4): what new attempts are assessed with
 # NOTE (audit D-8): TruthEvaluator grades the whole topic and all practice from every answer. It is an UPPER BOUND of
-# evaluator generosity, not a realistic reachability estimate; see scripts/seniority_realistic.py for that.
+# evaluator generosity, not a realistic reachability estimate. No reachability claim rests on these scenarios: those
+# come from scripts/seniority_realistic.py (tests/test_seniority_realistic.py, noisy sweep `--noisy`).
 CRITICAL = {r.level: r.critical for r in POLICY.rules}
 ANSWER = ("У сервісі замовлень я сам обрав складений індекс, бо запит сканував усю таблицю; порівняв план через "
           "EXPLAIN до і після, а міграцію виконав без блокування таблиці.")
@@ -110,7 +111,7 @@ def _partial(c: str) -> float | None:
 
 # Every scenario runs on the full system-selected python cohort (90 seeded vacancies): no scenario-only cohort.
 SCENARIOS = (
-    Scenario("P1", "Сильні відповіді з усіх тем, які обрав планувальник", "senior", lambda c: 0.9,
+    Scenario("P1", "Верхня межа: щедрий оцінювач, сильні відповіді з усіх тем планувальника", "senior", lambda c: 0.9,
              ("SENIOR", "ASSESSED"), expected_levels={"JUNIOR": "SUPPORTED", "MIDDLE": "SUPPORTED",
                                                       "SENIOR": "SUPPORTED"}),
     Scenario("P2", "Бажаний Senior; підтверджено Middle, Senior не перевірено", "senior",

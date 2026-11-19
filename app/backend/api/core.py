@@ -16,14 +16,15 @@ from backend.api.common import create_attempt, default_profile
 from backend.db import get_db
 from backend.domain.core_flow import RubricMap, planner_state
 from backend.domain.assessment import GOAL_TEXT_MAX, FollowupGoal, sanitize_goal
-from backend.domain.topic_summary import TopicSummary, needs_verification, open_criteria, topic_summary
+from backend.domain.topic_summary import (DECLINED_SCORE, TopicSummary, needs_verification, open_criteria,
+                                          topic_summary)
 from backend.domain.candidate_level import resolve_level
 from backend.domain.difficulty import (DEFAULT_CONFIG, ControllerState, Difficulty, DifficultyDecision,
                                        initial_difficulty, market_level, next_step)
 from backend.domain.interview_budget import MIN_SHOWN_QUESTIONS_PER_ACTION, topic_open_for_question
 from backend.domain.market import VacancyInput, compute_market
 from backend.domain.planner import choose_next
-from backend.domain.level_probe import practice_gaps, prioritize_unmet
+from backend.domain.level_probe import MAX_ASKS_PER_CRITERION, continuation_targets, practice_gaps, probe_order
 from backend.domain.seniority import CriterionEvidence, estimate
 from backend.domain.seniority_policy import PRACTICE_ACTION, SeniorityPolicy, policy_by_version, policy_for
 from backend.experiments.config import ExperimentConfig, InterviewMode
@@ -391,30 +392,92 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
                     goal = sanitize_goal(FollowupGoal.model_validate(last.eval_goal), set(criteria_for(db, a)), open_ids(a))
                 except ValidationError:
                     goal = None
+            # D-2: a goal that keeps re-asking criteria already in focus of MAX_ASKS questions yields to Python's level
+            # continuation when unresolved level-critical criteria remain (no level policy: never applies).
+            if goal is not None and level_targets(a) and all(asked(a).get(c, 0) >= MAX_ASKS_PER_CRITERION
+                                                             for c in goal.criterion_ids):
+                goal = None
             goal_memo[a] = goal
         return goal_memo[a]
+
+    # Level probe estimate. Without a policy it is None; without a capability policy (v4) continuation_targets is
+    # empty, so the level rules below are inert there (marketing, design, attempts started under v1-v3).
+    policy = attempt_policy(db, iv) if cfg.adaptive_followup else None
+    try:
+        probe = (estimate(policy, seniority_evidence(session_rows, {t.id: t.action_id for t in turns}))
+                 if policy else None)
+    except ValueError:  # a malformed legacy score must never block the next question: probe off, order unchanged
+        probe = None
+    focus = DEFAULT_CONFIG.focus
+
+    def asked(a: str) -> dict[str, int]:
+        """How many graded questions of topic `a` had each criterion in focus (the first targeted ones)."""
+        out: dict[str, int] = {}
+        for t in turns:
+            if t.action_id == a and t.answer_text and t.target_criteria:
+                for c in t.target_criteria[:focus]:
+                    out[c] = out.get(c, 0) + 1
+        return out
+
+    def weak_answers(a: str) -> bool:
+        """The topic's answers so far are weak or declined: M_c or the last question's focus mean below the down score,
+        or a declaration (validated no_experience flag, or a sufficient ~0 score). Then no level continuation."""
+        m = latest_in_session.get(a)
+        if m is None or m < DEFAULT_CONFIG.down_score:
+            return True
+        crit = set(criteria_for(db, a))
+        latest = {r.criterion_id: r for r in session_rows if r.criterion_id in crit}  # latest revision wins
+        if any(r.no_experience or (r.score is not None and r.score <= DECLINED_SCORE and r.sufficient_evidence)
+               for r in latest.values()):
+            return True
+        last = next((t for t in reversed(turns) if t.action_id == a and t.answer_text), None)
+        known = [x for c in (last.target_criteria or [])[:focus] if (x := cscores.get(c)) is not None] if last else []
+        return bool(known) and sum(known) / len(known) < DEFAULT_CONFIG.down_score
+
+    level_memo: dict[str, list[str]] = {}
+
+    def level_targets(a: str) -> list[str]:
+        """Python-owned continuation (D-2): unresolved level-critical criteria of the topic, unless answers are weak."""
+        if a not in level_memo:
+            level_memo[a] = ([] if probe is None or a not in latest_in_session or weak_answers(a) else
+                             [c for c in continuation_targets(policy, probe, criteria_for(db, a), cscores, asked(a))
+                              if c in set(open_ids(a))])
+        return level_memo[a]
+
+    def level_open(a: str) -> bool:
+        """Only the topic just answered is kept open by the level rule; older topics behave as before."""
+        return bool(turns) and turns[-1].action_id == a and bool(level_targets(a))
 
     level_ctx = _level_context(db, iv)
     start_level, start_reason = initial_difficulty(level_ctx["candidate_level"],
                                                    market_level([r.get("years_min") for r in revisions]))
     decision_memo: dict[str, tuple[ControllerState, DifficultyDecision]] = {}
 
+    def opening() -> tuple[Difficulty, str]:
+        """Start level of a new topic. Controller v2 (D-3): the level the previous topic reached (its decision's
+        next_level, bounded to BASIC..ADVANCED by the controller); the desired-level hypothesis only for the first."""
+        if not turns:
+            return start_level, start_reason
+        prev = decision(turns[-1].action_id)[1]
+        return prev.next_level, f"CARRY:{prev.reason}"
+
     def decision(a: str) -> tuple[ControllerState, DifficultyDecision]:
         """Controller state replayed from the topic's stored turns, then the decision for its next question.
-        A topic without turns starts at the initial difficulty; a legacy last turn (NULL difficulty) restarts there."""
+        A topic without turns starts at opening(); a legacy last turn (NULL difficulty) restarts at the initial level."""
         if a not in decision_memo:
             mine = [t for t in turns if t.action_id == a]
             history = tuple(Difficulty(t.difficulty) for t in mine if t.difficulty in Difficulty.__members__)
             if not mine:
-                st = ControllerState(start_level, 0, ())
-                decision_memo[a] = st, DifficultyDecision(start_level, start_reason, "CONTINUE", tuple(open_ids(a)))
+                lvl, why = opening()
+                st = ControllerState(lvl, 0, ())
+                decision_memo[a] = st, DifficultyDecision(lvl, why, "CONTINUE", tuple(open_ids(a)))
             else:
                 last = mine[-1]
                 legacy = last.difficulty not in Difficulty.__members__
                 st = ControllerState(start_level if legacy else Difficulty(last.difficulty), len(mine), history)
                 d = next_step(st, DEFAULT_CONFIG, targeted=last.target_criteria or [], scores=cscores,
                               topic_score=latest_in_session.get(a), sufficient=sufficient.get(a, False),
-                              open_criteria=open_ids(a), goal_open=goal_for(a) is not None)
+                              open_criteria=open_ids(a), goal_open=goal_for(a) is not None, level_open=level_open(a))
                 if legacy:
                     d = DifficultyDecision(start_level, "LEGACY_RESTART", d.action, d.target_criteria)
                 decision_memo[a] = st, d
@@ -438,7 +501,8 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         return not (a in used and closed(a)) and topic_open_for_question(
             used=a in used, distinct_topics=len(used), shown=shown.get(a, 0),
             latest_score_is_null=a in latest_in_session and latest_in_session[a] is None,
-            goal_open=a in used and goal_for(a) is not None, max_topics=cfg.max_topics, max_per_topic=cfg.max_per_topic)
+            goal_open=a in used and (goal_for(a) is not None or level_open(a)), max_topics=cfg.max_topics,
+            max_per_topic=cfg.max_per_topic)
 
     # A topic below its minimum continues before the planner opens anything (even if its groups closed/failed);
     # so does the topic just answered while its goal-driven follow-up is still eligible.
@@ -448,8 +512,10 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         followup = turns[-1].action_id if turns and shown[turns[-1].action_id] < k else None
     else:
         followup = next((t.action_id for t in reversed(turns) if needs_second(t.action_id)), None)
-        if followup is None and turns and goal_for(turns[-1].action_id) is not None and eligible(turns[-1].action_id):
-            followup = turns[-1].action_id
+        last_topic = turns[-1].action_id if turns else None
+        if followup is None and last_topic and (goal_for(last_topic) is not None or level_open(last_topic)) \
+                and eligible(last_topic):
+            followup = last_topic  # validated LLM goal, or Python's level continuation (D-2), within the caps
     if cfg.total_budget is not None and len(turns) >= cfg.total_budget:
         action = None  # experiment budget spent: completes exactly like plan exhaustion; unasked criteria stay null
     elif followup is not None:
@@ -471,16 +537,13 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     comp = db.get(Competency, action)
     gaps: list[str] = []
     if cfg.adaptive_followup:
-        # Level probe: only reorders this topic's open criteria and hints practice gaps (no policy: unchanged, none).
-        policy = attempt_policy(db, iv)
-        try:
-            probe = (estimate(policy, seniority_evidence(session_rows, {t.id: t.action_id for t in turns}))
-                     if policy else None)
-        except ValueError:  # a malformed legacy score must never block the next question: probe off, order unchanged
-            probe = None
+        # Level probe: reorders this topic's open criteria (unresolved level-critical ones first, D-2) and hints
+        # practice gaps (D-6). No policy: order unchanged, no hints.
         goal = goal_for(action)  # the Evaluator may have just confirmed the criterion it named: re-checked in goal_for
+        lead = (continuation_targets(policy, probe, criteria_for(db, action), cscores, asked(action))
+                if probe is not None and not (action in latest_in_session and weak_answers(action)) else [])
         # a validated follow-up goal wins: practice gaps are hinted only when no goal drives the question
-        unmet, gaps = prioritize_unmet(open_ids(action), policy, probe), [] if goal else practice_gaps(policy, probe)
+        unmet, gaps = probe_order(open_ids(action), policy, probe, lead), [] if goal else practice_gaps(policy, probe)
     else:  # slot i of k targets a fixed round-robin share of the rubric (all criteria if the share is empty)
         crit = criteria_for(db, action)
         unmet, goal = list(slot_targets(crit, k, shown.get(action, 0)) or crit), None
@@ -530,7 +593,8 @@ def _store_level(db: Session, iv: CoreInterview) -> None:
 
 
 def _controller_json(st: ControllerState) -> dict:
-    return {"level": st.level.value, "shown": st.shown, "history": [d.value for d in st.history]}
+    return {"level": st.level.value, "shown": st.shown, "history": [d.value for d in st.history],
+            "version": DEFAULT_CONFIG.version}
 
 
 def _level_context(db: Session, iv: CoreInterview) -> dict:

@@ -112,9 +112,13 @@ def test_no_question_targets_criterion_with_sufficient_evidence(client, db, monk
 
 def test_q_t_choice_identical_with_and_without_probing(client, db, monkeypatch, ask_log):
     probed = _run(client, db, monkeypatch, "probe-on")
-    monkeypatch.setattr("backend.api.core.prioritize_unmet", lambda unmet, policy, result: list(unmet))
+    monkeypatch.setattr("backend.api.core.probe_order", lambda unmet, policy, result, first: list(unmet))
+    monkeypatch.setattr("backend.api.core.continuation_targets", lambda *a, **k: [])
     monkeypatch.setattr("backend.api.core.practice_gaps", lambda *a, **k: [])
     plain = _run(client, db, monkeypatch, "probe-off")
+    # Q_t picks the same topics in the same order; the level rule may only add questions inside a chosen topic
+    assert list(dict.fromkeys(q["action_id"] for q in probed.qa)) == list(dict.fromkeys(q["action_id"]
+                                                                                         for q in plain.qa))
     key = [(q["action_id"], q["ordinal_in_topic"], q["difficulty"]) for q in probed.qa]
     assert key == [(q["action_id"], q["ordinal_in_topic"], q["difficulty"]) for q in plain.qa]
     assert [sorted(q["target_criteria"] or []) for q in probed.qa] == [sorted(q["target_criteria"] or [])
@@ -140,9 +144,13 @@ def test_budget_exhausted_leaves_level_unknown_not_guessed(client, db, monkeypat
 
 
 def test_track_without_policy_sends_no_practice_gaps(client, db, monkeypatch, ask_log):
+    calls = []
+    real = core.continuation_targets
+    monkeypatch.setattr("backend.api.core.continuation_targets", lambda *a, **k: calls.append(a) or real(*a, **k))
     rec = _run(client, db, monkeypatch, "probe-marketing", track="marketing")
     assert rec.qa and ask_log
     assert all(not s.get("practice_gaps") for s in ask_log)
+    assert calls == []  # WP-B level continuation is inert without a level policy
 
 
 def test_followup_goal_wins_over_practice_gaps(client, db, monkeypatch, ask_log):

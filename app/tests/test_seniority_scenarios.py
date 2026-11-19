@@ -33,9 +33,11 @@ def test_scenario_level_and_status(results, sc):
     assert {k: v for k, v in _statuses(r).items() if k in sc.expected_levels} == sc.expected_levels
 
 
-def test_p1_product_cohort_reaches_senior_with_market_topics(results):
-    """Q_t is unchanged and still spends the budget on market topics (kafka, fastapi, aws, docker, ...); v2 pools let
-    that evidence count. Two Senior capabilities stay unassessed because Q_t never picks their topics."""
+def test_p1_upper_bound_topic_choice_and_unassessed_pools(results):
+    """UPPER BOUND only (TruthEvaluator grades whole topics): not a reachability claim (audit D-8; realistic
+    reachability is asserted in tests/test_seniority_realistic.py). Q_t is unchanged and still spends the budget on
+    market topics (kafka, fastapi, aws, docker, ...). Two Senior capabilities stay unassessed because Q_t never picks
+    their topics."""
     r = results["P1"]
     assert len(r["topics"]) == 10 and {"kafka", "fastapi", "aws", "docker"} <= set(r["topics"])
     assert not {"sqlalchemy", "celery", "pytest", "async-python", "observability"} & set(r["topics"])

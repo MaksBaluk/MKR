@@ -218,3 +218,16 @@ def test_evaluator_input_turn_meta():
     assert 'question difficulty must not raise or lower a score' in EVALUATOR_SYSTEM
     assert 'only from' in EVALUATOR_SYSTEM and 'actually evidence it' in EVALUATOR_SYSTEM
     assert 'BASIC question' not in EVALUATOR_SYSTEM and 'whatever the question' in EVALUATOR_SYSTEM
+
+
+def test_practice_questions_may_use_any_real_situation_at_every_level():
+    """WP-B (audit D-7): ownership/ambiguity anchors need context with other people or after release; the junior
+    setting must not forbid it when practice_gaps call for it."""
+    from backend.agents.prompts import INTERVIEWER_SYSTEM
+    rule = INTERVIEWER_SYSTEM[INTERVIEWER_SYSTEM.index("practice_gaps (optional"):]
+    assert "Whatever the candidate level" in rule and "study project, pet project, internship or work" in rule
+    assert "Пригадайте ситуацію з навчального, власного чи робочого проєкту" in rule
+    junior = INTERVIEWER_SYSTEM[INTERVIEWER_SYSTEM.index("- junior or early career"):]
+    assert "allowed when practice_gaps call for it" in junior[:400]
+    assert "Do not ask about leading a team" in junior[:400]  # the junior scope limit itself stays
+    assert "cover the first one or two" in INTERVIEWER_SYSTEM

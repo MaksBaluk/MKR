@@ -1,6 +1,9 @@
 from backend.domain.difficulty import (
-    DEFAULT_CONFIG, ControllerState, Difficulty, DifficultyConfig, initial_difficulty, market_level, next_step, rank,
+    CONTROLLER_V1, CONTROLLER_V2, DEFAULT_CONFIG, ControllerState, Difficulty, DifficultyConfig, initial_difficulty,
+    market_level, next_step, rank,
 )
+
+V1 = DifficultyConfig(version=CONTROLLER_V1)
 
 B, M, A = Difficulty.BASIC, Difficulty.INTERMEDIATE, Difficulty.ADVANCED
 
@@ -47,9 +50,15 @@ def test_senior_weak_steps_down_to_floor():
     assert step(B, s).next_level == B
 
 
-def test_incomplete_weak_answer_does_not_lower():
-    d = step(M, {"c1": 0.1, "c2": None})
+def test_v1_incomplete_weak_answer_does_not_lower():
+    d = step(M, {"c1": 0.1, "c2": None}, cfg=V1)
     assert d.next_level == M and d.reason == "PARTIAL" and d.action == "FOLLOWUP"
+
+
+def test_v2_weak_graded_focus_lowers_even_if_another_focus_criterion_is_null():
+    d = step(M, {"c1": 0.1, "c2": None})
+    assert (d.next_level, d.reason, d.action) == (B, "WEAK", "CONTINUE")
+    assert step(M, {"c1": 0.1, "c2": None, "c3": None}, targeted=["c2", "c3", "c1"]).reason == "NO_EVIDENCE"
 
 
 def test_all_null_no_change():
@@ -61,9 +70,32 @@ def test_all_null_no_change():
     assert step(A, {}, targeted=[]).reason == "NO_EVIDENCE"
 
 
-def test_strong_but_not_sufficient_no_raise():
-    d = step(B, {"c1": 0.9}, sufficient=False)
+def test_v1_strong_but_not_sufficient_no_raise():
+    d = step(B, {"c1": 0.9}, sufficient=False, cfg=V1)
     assert d.next_level == B and d.reason == "PARTIAL"
+
+
+def test_v2_strong_focus_raises_without_whole_topic_sufficiency():
+    """D-3: Python forces sufficient=false while any topic criterion is null, so v1 could never step up there."""
+    assert DEFAULT_CONFIG.version == CONTROLLER_V2 and DEFAULT_CONFIG.focus == 2
+    many = ["c1", "c2", "c3", "c4", "c5"]  # targeted = every open criterion; one narrow question covered the first
+    d = step(B, {"c1": 0.9}, targeted=many, sufficient=False)
+    assert (d.next_level, d.reason) == (M, "STRONG")
+    assert step(M, {"c1": 0.9}, targeted=many, sufficient=False).next_level == A
+    assert step(B, {"c1": 0.9}, targeted=many, sufficient=False, cfg=V1).reason == "PARTIAL"
+    # the third criterion is outside the focus: graded there, it does not count
+    assert step(B, {"c3": 0.9}, targeted=many, sufficient=False).reason == "NO_EVIDENCE"
+    assert step(B, {"c1": 0.7}, targeted=many, sufficient=False).reason == "PARTIAL"  # mean below up_score
+
+
+def test_level_open_keeps_topic_open_like_a_goal():
+    assert step(B, {"c1": 0.9}, shown=2, topic_score=0.8).action == "CLOSE"
+    d = next_step(ControllerState(B, 2, ()), DEFAULT_CONFIG, targeted=["c1"], scores={"c1": 0.9}, topic_score=0.8,
+                  sufficient=True, open_criteria=["c3"], level_open=True)
+    assert (d.action, d.next_level) == ("CONTINUE", M)
+    capped = next_step(ControllerState(B, 5, ()), DEFAULT_CONFIG, targeted=["c1"], scores={"c1": 0.9}, topic_score=0.8,
+                       sufficient=True, open_criteria=["c3"], level_open=True)
+    assert capped.action == "CLOSE" and capped.reason == "QUESTION_CAP"
 
 
 def test_close_when_no_open_criteria():
