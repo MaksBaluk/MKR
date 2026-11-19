@@ -51,7 +51,29 @@ export function explanationLines(level: Pick<AssessedLevel, 'explanation' | 'not
   return level.note ? level.explanation.filter((l) => !POLICY_LINE.test(l)) : level.explanation;
 }
 
-/** What was not checked: whole capabilities for a pooled policy (v2, v3), otherwise the critical criteria (v1 rows). */
+const RANK: Record<LevelName, number> = { UNKNOWN: -1, JUNIOR: 0, MIDDLE: 1, SENIOR: 2 };
+
+/** True when a level above the assigned one has its own evidence but a lower level is not fully confirmed. */
+export function hasHigherEvidence(level: Pick<AssessedLevel, 'assessed_level' | 'highest_supported_level'>): boolean {
+  return RANK[level.highest_supported_level] > RANK[level.assessed_level];
+}
+
+/** Ukrainian sentence for hasHigherEvidence; null when there is nothing to add. */
+export function higherEvidenceText(level: Pick<AssessedLevel, 'assessed_level' | 'highest_supported_level'>): string | null {
+  if (!hasHigherEvidence(level)) return null;
+  return `Є докази й для вищого рівня (${levelLabel(level.highest_supported_level)}), але нижчий рівень `
+    + 'підтверджено не повністю, тому вищий рівень не присвоюється.';
+}
+
+const HIGHER_LINE = /^Критерії \S+ підтверджено, але нижчі рівні не підтверджені/;
+
+/** Explanation lines without the server's "higher level" line when the dedicated block shows it instead. */
+export function explanationWithoutHigher(level: Pick<AssessedLevel, 'explanation' | 'note' | 'assessed_level' | 'highest_supported_level'>): string[] {
+  const lines = explanationLines(level);
+  return hasHigherEvidence(level) ? lines.filter((l) => !HIGHER_LINE.test(l)) : lines;
+}
+
+/** What was not checked: whole capabilities for a pooled policy (v2-v4), otherwise the critical criteria (v1 rows). */
 export function unassessedItems(level: Pick<AssessedLevel, 'unassessed_criteria' | 'unassessed_pools'>): LevelPool[] {
   return level.unassessed_pools?.length ? level.unassessed_pools : level.unassessed_criteria;
 }

@@ -8,7 +8,11 @@
    1, 3 or 6 practice criteria confirmed.
 4. Named cases: a run with no data-layer topic (M-1 disclosure) and the 8 always-picked topics.
 5. Minimal number of fully graded topics (measured sequences) for Middle and Senior, per policy and practice count.
-Policies v1, v2 and the current v3 are reported side by side.
+6. REALISTIC evaluator (scripts/seniority_realistic.py, audit D-8): 8 hidden-truth profiles x 3 desired levels x
+   1-2 criteria per question x follow-up goal GAP_ONLY/OPEN = 96 interviews through the real API; outcome per policy
+   (the current one is what the API stores; older versions re-estimate the same evidence).
+Policies v1, v2, v3 and the current v4 are reported side by side. Sections 2-5 grade every chosen criterion (and, for
+v4, every practice criterion in two topics) at 0.9: an upper bound, not a realistic estimate.
 Numbers say what the thresholds imply for given evidence; they do not validate the policy or the evaluator.
 """
 from __future__ import annotations
@@ -24,13 +28,13 @@ if __package__ in (None, ""):
 import scripts.seniority_scenarios as S  # noqa: E402  (sets the throwaway DB and disabled provider first)
 from backend.domain.seniority import CriterionEvidence, estimate  # noqa: E402
 from backend.domain.seniority_policy import (PRACTICE_CRITERIA, PYTHON_BACKEND_V1,  # noqa: E402
-                                             PYTHON_BACKEND_V2, PYTHON_BACKEND_V3)
+                                             PYTHON_BACKEND_V2, PYTHON_BACKEND_V3, PYTHON_BACKEND_V4)
 from backend.seed import read_fixture  # noqa: E402
 from scripts.chapter4.scenarios import Env  # noqa: E402
 
 RUBRIC = {r["action_id"]: [c["criterion_id"] for c in r["criteria"]] for r in read_fixture("rubrics.json")["rubrics"]}
-POLICIES = (PYTHON_BACKEND_V1, PYTHON_BACKEND_V2, PYTHON_BACKEND_V3)
-POOLED = (PYTHON_BACKEND_V2, PYTHON_BACKEND_V3)
+POLICIES = (PYTHON_BACKEND_V1, PYTHON_BACKEND_V2, PYTHON_BACKEND_V3, PYTHON_BACKEND_V4)
+POOLED = (PYTHON_BACKEND_V2, PYTHON_BACKEND_V3, PYTHON_BACKEND_V4)
 
 
 def _u(seed: object, cid: str) -> float:
@@ -57,7 +61,9 @@ def measure_topics() -> list[tuple[str, str, list[str]]]:
 
 
 def ev(ids) -> dict[str, CriterionEvidence]:
-    return {c: CriterionEvidence(c, 0.9, ("t",)) for c in ids}
+    """Every id at 0.9 with an evidence turn; practice graded in two source topics (v4 reads the per-topic spread)."""
+    return {c: CriterionEvidence(c, 0.9, ("t",), topic_scores=(0.9, 0.9) if c in PRACTICE_CRITERIA else ())
+            for c in ids}
 
 
 def line(policy, ids) -> str:
@@ -93,7 +99,7 @@ def main() -> None:
         print(f"  k={k:2}: " + "; ".join(f"{v}: {dict(c)}" for v, c in outcomes.items()))
 
     base = list(freq)[:10]  # the ten most frequent topics, in frequency order
-    print(f"\n3. partial grading over the {len(base)} most frequent topics {base} (v2 | v3)")
+    print(f"\n3. partial grading over the {len(base)} most frequent topics {base} (v2 | v3 | v4)")
     for k in (5, 6, 7, 8, 10):
         for per in (2, 3, 4):
             row = []
@@ -139,5 +145,29 @@ def fmt(values: list[int | None]) -> str:
     return f"{min(reached)}..{max(reached)}" + (f" (never in {never})" if never else "")
 
 
+def realistic() -> None:
+    import scripts.seniority_realistic as R
+    from collections import defaultdict
+    print(f"\n6. {R.LABEL}")
+    runs = R.grid()
+    current = runs[0]["policy"]
+    table: dict[tuple, dict[str, Counter]] = defaultdict(lambda: defaultdict(Counter))
+    for r in runs:
+        key = (r["profile"], r["per_q"], r["goal"])
+        for name, level in r["same_evidence"].items():
+            table[key][name.split("/")[1]][level] += 1
+    versions = sorted({v for t in table.values() for v in t})
+    print(f"  {len(runs)} interviews; API stored policy {current}; outcome counts over desired junior/middle/senior")
+    print("  questions per interview: " + fmt_range([r["questions"] for r in runs]))
+    for key in sorted(table):
+        print(f"  {key[0]:16} per_q={key[1]} {key[2]:8} " + " | ".join(
+            f"{v}: " + ", ".join(f"{lvl} {n}" for lvl, n in sorted(table[key][v].items())) for v in versions))
+
+
+def fmt_range(values: list[int]) -> str:
+    return f"{min(values)}..{max(values)}"
+
+
 if __name__ == "__main__":
     main()
+    realistic()

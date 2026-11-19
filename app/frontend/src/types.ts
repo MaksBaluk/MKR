@@ -99,7 +99,7 @@ export interface LevelCriterion {
   kind: 'PRACTICE' | 'COMPETENCY';
 }
 
-/** One critical capability of a pooled level policy (v2, v3): any of its criteria can confirm it. */
+/** One critical capability of a pooled level policy (v2-v4): any of its criteria can confirm it. */
 export interface LevelPool {
   id: string;
   /** Ukrainian capability name. */
@@ -115,14 +115,21 @@ export interface LevelCoverage {
   confirmed: LevelCriterion[];
   gaps: LevelCriterion[];
   unassessed: LevelCriterion[];
-  /** Pooled policies only (v2, v3). */
-  pools?: (LevelPool & { status: 'CONFIRMED' | 'GAP' | 'UNRESOLVED' | 'UNASSESSED'; criteria: LevelCriterion[] })[];
+  /** Pooled policies only (v2-v4). DECLINED exists only from v4. */
+  pools?: (LevelPool & { status: 'CONFIRMED' | 'GAP' | 'UNRESOLVED' | 'UNASSESSED' | 'DECLINED'; criteria: LevelCriterion[] })[];
+  /** Capability policies (v4) only. */
+  technical_confirmed_count?: number;
+  practice_confirmed_count?: number;
+  /** Gaps reported but not blocking the level (v4: at most one, never in a hard capability). */
+  tolerated_gaps?: LevelCriterion[];
+  /** Tools the candidate said they never worked with, while an alternative tool was never asked (v4). */
+  declined?: LevelCriterion[];
 }
 
 /** Assessed professional level of one finished attempt: evidence-based, never an input of the vacancy order. */
 export interface AssessedLevel {
   interview_id: string;
-  /** Profile value copied at finish: junior | middle | senior | lead, or null. */
+  /** Profile value copied when the attempt started (attempts before 2026-11-19: at finish): junior | middle | senior | lead, or null. */
   desired_level: string | null;
   assessed_level: LevelName;
   highest_supported_level: LevelName;
@@ -132,8 +139,12 @@ export interface AssessedLevel {
   confirmed_strengths: LevelCriterion[];
   critical_gaps: LevelCriterion[];
   unassessed_criteria: LevelCriterion[];
-  /** Capabilities with no evidence at all (pooled policies v2, v3); empty or absent for per-criterion policies (v1). */
+  /** Capabilities with no evidence at all (pooled policies v2-v4); empty or absent for per-criterion policies (v1). */
   unassessed_pools?: LevelPool[];
+  /** Capabilities with evidence that decided nothing: borderline or untraced scores. Absent in older responses. */
+  unresolved_pools?: LevelPool[];
+  /** Capabilities shown only through a tool the candidate never worked with (v4). Absent in older responses. */
+  declined_pools?: LevelPool[];
   evidence_references: (LevelCriterion & { turn_ids: string[] })[];
   /** Ukrainian lines; criterion ids are already replaced by titles on the server. */
   explanation: string[];

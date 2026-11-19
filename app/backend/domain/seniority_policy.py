@@ -34,6 +34,17 @@ class LevelRule:
     pools: tuple[CriterionPool, ...] = ()  # empty: every critical id is its own unit (v1 code path)
     min_assessed: int | None = None  # pooled rules: count-based thresholds over pools
     min_confirmed: int | None = None
+    # Capability rules (v4) only; None/empty keeps the v1-v3 semantics exactly (see seniority._capability_coverage).
+    gap_below: float | None = None  # established gap: s < gap_below; [gap_below, tau) is borderline (unresolved)
+    min_technical: int = 0  # CONFIRMED non-practice pools
+    min_practice: int = 0  # CONFIRMED practice pools
+    max_soft_gaps: int = 0  # GAP pools tolerated outside hard_pools (still reported as gaps)
+    hard_pools: tuple[str, ...] = ()  # a GAP in one of these always makes the level GAP
+    required_any: tuple[str, ...] = ()  # at least one of these pools must be CONFIRMED
+
+    @property
+    def capability(self) -> bool:
+        return self.gap_below is not None
 
 
 def pooled(level: Level, tau: float, min_assessed: int, min_confirmed: int, min_competencies: int,
@@ -148,12 +159,48 @@ PYTHON_BACKEND_V3 = SeniorityPolicy(
     policy_id="python-backend", version="v3", track="python", status="WORKING_ASSUMPTION",
     rules=(_J2, _M2, pooled(Level.SENIOR, _S2.tau, 9, 7, 3, _S2.pools)))
 
+
+def capability(level: Level, tau: float, gap_below: float, min_confirmed: int, min_technical: int, min_practice: int,
+               min_competencies: int, pools: tuple[CriterionPool, ...], *, max_soft_gaps: int = 1,
+               hard_pools: tuple[str, ...] = (), required_any: tuple[str, ...] = ()) -> LevelRule:
+    """Capability rule (v4): gaps are decided per capability, not per tool (MATH_SPEC §3e v4). Only CONFIRMED and GAP
+    pools are decided evidence; UNRESOLVED (borderline/untraced), DECLINED and UNASSESSED never fill a minimum."""
+    members = tuple(dict.fromkeys(c for p in pools for c in p.members))
+    return LevelRule(level, tau, 0.0, 0.0, min_competencies, members, pools, None, min_confirmed, gap_below,
+                     min_technical, min_practice, max_soft_gaps, hard_pools, required_any)
+
+
+# v4 = v3 pools with capability-level gaps, anchor-aligned thresholds and counts over confirmed pools (audit 2026-11-19,
+# D-1, D-4, D-10, UR-7). Thresholds sit on rubric band edges: confirm at >= .50 (Junior, "partial") or >= .75 (Middle,
+# Senior, "good"); a gap is a traced score below .50 ("weak"/"incorrect"). [.50, .75) is borderline at Middle/Senior: the
+# anchors do not separate .70 from .65 inside the "partial" band, so that zone is unresolved, never a gap nor a pass.
+# Counts are chosen from the realistic-evaluator measurement (scripts/seniority_reachability.py §6) and remain a
+# WORKING_ASSUMPTION: not calibrated, expert validation required.
+_V4_SENIOR_POOLS = tuple(
+    _P("cost-reliability", "Вартість і надійність інфраструктури", ("aws.cost", "kubernetes.resources"))
+    if p.pool_id == "cost-reliability" else p for p in _S2.pools)  # UR-2: no single-tool Senior capability via aws only
+PYTHON_BACKEND_V4 = SeniorityPolicy(
+    policy_id="python-backend", version="v4", track="python", status="WORKING_ASSUMPTION",
+    rules=(
+        # Every level needs one confirmed data-layer capability of its own (no backend level without data evidence).
+        # Junior: 6 of 9 capabilities confirmed (5 technical); weak core Python always blocks (hard pools).
+        capability(Level.JUNIOR, 0.50, 0.50, 6, 5, 0, 3, _J2.pools, hard_pools=("python-idioms", "python-errors"),
+                   required_any=("sql-joins", "sql-correctness")),
+        # Middle: half of 14 confirmed, >= 5 of 11 technical and >= 2 of 3 practice (justified decisions, diagnosis).
+        capability(Level.MIDDLE, 0.75, 0.50, 7, 5, 2, 4, _M2.pools,
+                   required_any=("query-efficiency", "data-consistency", "schema-design")),
+        # Senior: >= 4 of 9 technical Senior capabilities, >= 3 of 5 practice, one of them on the data layer (WS-3).
+        capability(Level.SENIOR, 0.75, 0.50, 7, 4, 3, 3, _V4_SENIOR_POOLS,
+                   required_any=("db-operations", "schema-migrations")),
+    ))
+
 # Every policy version ever used to store a level stays addressable, so stored rows keep their meaning.
 POLICY_VERSIONS: dict[tuple[str, str], SeniorityPolicy] = {
-    (p.policy_id, p.version): p for p in (PYTHON_BACKEND_V1, PYTHON_BACKEND_V2, PYTHON_BACKEND_V3)}
+    (p.policy_id, p.version): p
+    for p in (PYTHON_BACKEND_V1, PYTHON_BACKEND_V2, PYTHON_BACKEND_V3, PYTHON_BACKEND_V4)}
 
 # Current policy per track: new finalizations use it. Marketing and design have none (unreviewed rubrics).
-POLICIES: dict[str, SeniorityPolicy | None] = {"python": PYTHON_BACKEND_V3, "marketing": None, "design": None}
+POLICIES: dict[str, SeniorityPolicy | None] = {"python": PYTHON_BACKEND_V4, "marketing": None, "design": None}
 
 
 def policy_for(track: str | None) -> SeniorityPolicy | None:

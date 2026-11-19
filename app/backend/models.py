@@ -325,6 +325,11 @@ class CoreInterview(Base):
     # NULL for product interviews (= fully adaptive).
     mode_config: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     static_plan: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Snapshot at attempt start (migration 0017; NULL for older attempts): the desired level shown with the result and the
+    # level policy the attempt is finalized under, so a profile edit or a policy deploy mid-interview changes neither.
+    start_desired_level: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    start_policy_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    start_policy_version: Mapped[str | None] = mapped_column(String(32), nullable=True)
     __table_args__ = (UniqueConstraint("profile_id", "attempt_no", name="uq_attempt_profile_no"),)
 
 

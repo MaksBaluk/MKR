@@ -24,8 +24,8 @@ from backend.domain.interview_budget import MIN_SHOWN_QUESTIONS_PER_ACTION, topi
 from backend.domain.market import VacancyInput, compute_market
 from backend.domain.planner import choose_next
 from backend.domain.level_probe import practice_gaps, prioritize_unmet
-from backend.domain.seniority import CriterionEvidence, estimate
-from backend.domain.seniority_policy import PRACTICE_ACTION, policy_for
+from backend.domain.seniority import CriterionEvidence, estimate, is_declined
+from backend.domain.seniority_policy import PRACTICE_ACTION, SeniorityPolicy, policy_by_version, policy_for
 from backend.experiments.config import ExperimentConfig, InterviewMode
 from backend.experiments.planning import plan_topics, slot_targets, static_plan_json
 from backend.agents.graphs import run_answer, run_ask
@@ -106,12 +106,17 @@ def seniority_evidence(rows, turn_topics: Mapping[str, str]) -> dict[str, Criter
     Topic criteria: effective_rows score. Practice criteria (graded alongside every topic) are combined order-
     independently: per source topic (the topic of the quoted turns, `turn_topics`) the latest non-null score wins, then
     the max over topics, so one topic's confirmation is never erased by a later, weaker topic. A non-null score that
-    quotes no turn is kept only when no traced score exists; it then has no evidence turn and stays unresolved."""
+    quotes no turn is kept only when no traced score exists; it then has no evidence turn and stays unresolved.
+    `score` (max) is what policies v1-v3 read. Policy v4 reads `topic_scores` instead (every traced per-topic score,
+    descending) and classifies their median (MATH_SPEC §3e v4, audit D-5); topic criteria additionally carry
+    `declined` (the effective revision only quotes "never worked with this tool", seniority.is_declined)."""
     turns: dict[str, set[str]] = {}
     for r in current_criteria_rows(rows):
         if r.score is not None:
             turns.setdefault(r.criterion_id, set()).update(_turn_ids(r))
-    out = {r.criterion_id: r.score for r in effective_rows(rows) if r.action_id != PRACTICE_ACTION}
+    topic_rows = [r for r in effective_rows(rows) if r.action_id != PRACTICE_ACTION]
+    out = {r.criterion_id: r.score for r in topic_rows}
+    declined = {r.criterion_id for r in topic_rows if is_declined(r.score, _excerpts(r))}
     per_topic: dict[str, dict[str | None, float]] = {}
     for r in rows:
         if r.action_id == PRACTICE_ACTION:
@@ -119,11 +124,18 @@ def seniority_evidence(rows, turn_topics: Mapping[str, str]) -> dict[str, Criter
             if r.score is not None:
                 topic = next((turn_topics[t] for t in _turn_ids(r) if t in turn_topics), None)
                 per_topic[r.criterion_id][topic] = r.score
+    spread: dict[str, tuple[float, ...]] = {}
     for cid, by_topic in per_topic.items():
         traced = [v for k, v in by_topic.items() if k is not None]
         out[cid] = max(traced) if traced else by_topic.get(None)
-    return {cid: CriterionEvidence(cid, score, tuple(sorted(turns.get(cid, ()))) if score is not None else ())
+        spread[cid] = tuple(sorted(traced, reverse=True))
+    return {cid: CriterionEvidence(cid, score, tuple(sorted(turns.get(cid, ()))) if score is not None else (),
+                                   cid in declined, spread.get(cid, ()))
             for cid, score in out.items()}
+
+
+def _excerpts(row) -> list[str]:
+    return [e.get("exact_excerpt") or "" for e in (row.evidence or []) if isinstance(e, dict)]
 
 
 def _action_scores(rows) -> dict[str, float | None]:
@@ -229,6 +241,16 @@ def _interview_track(db: Session, iv: CoreInterview) -> str | None:
         return prof.track
     user = db.get(User, iv.user_id)
     return user.track if user else None
+
+
+def attempt_policy(db: Session, iv: CoreInterview) -> SeniorityPolicy | None:
+    """The policy an attempt is assessed under: the version captured when it started (migration 0017), else (attempts
+    started before 0017) the track's current policy. A start version that is no longer known falls back the same way."""
+    if iv.start_policy_version is not None:
+        started = policy_by_version(iv.start_policy_id, iv.start_policy_version)
+        if started is not None:
+            return started
+    return policy_for(_interview_track(db, iv))
 
 
 def _label(db: Session, action_id: str) -> str:
@@ -454,7 +476,7 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     gaps: list[str] = []
     if cfg.adaptive_followup:
         # Level probe: only reorders this topic's open criteria and hints practice gaps (no policy: unchanged, none).
-        policy = policy_for(_interview_track(db, iv))
+        policy = attempt_policy(db, iv)
         try:
             probe = (estimate(policy, seniority_evidence(session_rows, {t.id: t.action_id for t in turns}))
                      if policy else None)

@@ -6,8 +6,10 @@ vacancy fit are deliberately not parameters. Unknown (score None) is never treat
 from __future__ import annotations
 
 import math
+import re
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
+from statistics import median
 from typing import Literal
 
 from backend.domain.criteria import epsilon
@@ -16,11 +18,26 @@ from backend.domain.seniority_policy import (PRACTICE_ACTION, CriterionPool, Lev
 
 LevelName = Literal["JUNIOR", "MIDDLE", "SENIOR", "UNKNOWN"]
 LevelStatus = Literal["SUPPORTED", "GAP", "UNVERIFIED"]
-PoolStatus = Literal["CONFIRMED", "GAP", "UNRESOLVED", "UNASSESSED"]
+PoolStatus = Literal["CONFIRMED", "GAP", "UNRESOLVED", "UNASSESSED", "DECLINED"]  # DECLINED: capability rules only
 AssessmentStatus = Literal["ASSESSED", "INSUFFICIENT_DATA", "GAPS_AT_JUNIOR", "POLICY_UNAVAILABLE"]
 
 NO_POLICY_TEXT = "Для цього напряму рівень не визначається: потрібна експертна валідація рубрик"
 _TITLE = {"JUNIOR": "Junior", "MIDDLE": "Middle", "SENIOR": "Senior"}
+
+
+# A no-experience statement about the asked tool ("не працював з Kafka"). Plain "не знаю" is lack of knowledge (a gap),
+# not a declined tool, so it is deliberately not matched.
+DECLINE_RE = re.compile(
+    r"не\s+(працював|працювала|працюю|використовував|використовувала|використовую|стикався|стикалася|мав\s+досвіду|"
+    r"мала\s+досвіду|маю\s+досвіду)|нема(є)?\s+досвіду|без\s+досвіду|never\s+(used|worked)|no\s+experience|"
+    r"have\s*n[o']t\s+(used|worked)", re.I)
+DECLINE_MAX_SCORE = 0.25  # only a score in the lowest band ("materially incorrect / none") can be a declined tool
+
+
+def is_declined(score: float | None, excerpts: list[str]) -> bool:
+    """Every quoted excerpt is a no-experience statement and the score is in the lowest band."""
+    return (score is not None and score < DECLINE_MAX_SCORE and bool(excerpts)
+            and all(DECLINE_RE.search(x or "") for x in excerpts))
 
 
 @dataclass(frozen=True)
@@ -28,6 +45,8 @@ class CriterionEvidence:
     criterion_id: str
     score: float | None
     evidence_turns: tuple[str, ...] = ()
+    declined: bool = False  # topic criterion: the answer says the candidate never worked with the tool (is_declined)
+    topic_scores: tuple[float, ...] = ()  # practice criterion: traced score per source topic, descending (v4 uses it)
 
 
 @dataclass(frozen=True)
@@ -39,6 +58,7 @@ class PoolCoverage:
     confirmed_ids: tuple[str, ...]
     gap_ids: tuple[str, ...]
     unassessed_ids: tuple[str, ...]
+    declined_ids: tuple[str, ...] | None = None  # capability rules only (None: not part of v2/v3 JSON)
 
 
 @dataclass(frozen=True)
@@ -57,6 +77,11 @@ class LevelCoverage:
     unassessed_ids: tuple[str, ...]
     reasons: tuple[str, ...]
     pools: tuple[PoolCoverage, ...] = ()  # pooled policies only; counts above are then over pools
+    # Capability rules (v4) only; None keeps v1-v3 JSON byte-identical.
+    technical_confirmed: int | None = None
+    practice_confirmed: int | None = None
+    tolerated_gap_ids: tuple[str, ...] | None = None  # gaps of GAP pools that do not block the level
+    declined_ids: tuple[str, ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -84,6 +109,8 @@ def _score(evidence: Mapping[str, CriterionEvidence], cid: str) -> CriterionEvid
 
 
 def _coverage(rule: LevelRule, evidence: Mapping[str, CriterionEvidence]) -> LevelCoverage:
+    if rule.capability:
+        return _capability_coverage(rule, evidence)
     if rule.pools:
         return _pooled_coverage(rule, evidence)
     confirmed: list[str] = []
@@ -155,6 +182,75 @@ def _pooled_coverage(rule: LevelRule, evidence: Mapping[str, CriterionEvidence])
                          _unique([c for p in pools for c in p.unassessed_ids]), reasons, pools)
 
 
+def _is_practice(cid: str) -> bool:
+    return cid.startswith(f"{PRACTICE_ACTION}.")
+
+
+def _member(rule: LevelRule, cid: str, evidence: Mapping[str, CriterionEvidence]) -> str:
+    """State of one pool member under a capability rule: CONF, WEAK, DECLINED, BORDER or NONE (no score).
+    Practice is classified by the median of its per-source-topic scores (D-5: one strong topic no longer outweighs
+    weaker ones, as the v1-v3 maximum did); a practice score with no traced topic is borderline."""
+    item = _score(evidence, cid)
+    if item is None:
+        return "NONE"
+    tau, low = rule.tau, rule.gap_below
+    if _is_practice(cid):
+        if not item.topic_scores:
+            return "BORDER"
+        s = median(item.topic_scores)
+        return "CONF" if s >= tau else "WEAK" if s < low else "BORDER"
+    if not item.evidence_turns:
+        return "BORDER"  # a score without an evidence turn is never a confirmation nor a gap
+    return ("CONF" if item.score >= tau else "DECLINED" if item.declined else "WEAK" if item.score < low
+            else "BORDER")
+
+
+def _capability_pool(rule: LevelRule, pool: CriterionPool, evidence: Mapping[str, CriterionEvidence]) -> PoolCoverage:
+    """CONFIRMED: a member confirms. UNRESOLVED: otherwise any borderline/untraced member. GAP: a weak answer on a tool
+    the candidate works with, or "never worked with it" for the only tool of the pool or for >= 2 offered tools.
+    DECLINED: the only evidence is "never worked with" one tool while an alternative was never asked (not a gap, not
+    evidence). UNASSESSED: no member scored."""
+    st = {cid: _member(rule, cid, evidence) for cid in pool.members}
+    by = {k: tuple(c for c, v in st.items() if v == k) for k in ("CONF", "WEAK", "DECLINED", "BORDER", "NONE")}
+    status: PoolStatus = (
+        "CONFIRMED" if by["CONF"] else "UNRESOLVED" if by["BORDER"] else "GAP" if by["WEAK"] else
+        ("GAP" if len(pool.members) == 1 or len(by["DECLINED"]) >= 2 else "DECLINED") if by["DECLINED"] else
+        "UNASSESSED")
+    return PoolCoverage(pool.pool_id, pool.title, status, pool.members, by["CONF"],
+                        by["WEAK"] + by["DECLINED"] if status == "GAP" else (),
+                        pool.members if status == "UNASSESSED" else (),
+                        by["DECLINED"] if status == "DECLINED" else ())
+
+
+def _capability_coverage(rule: LevelRule, evidence: Mapping[str, CriterionEvidence]) -> LevelCoverage:
+    """Counts over decided pools (CONFIRMED or GAP); no compensation across pools: a pool is confirmed only by its own
+    members. A level is GAP when a hard pool is GAP or more than `max_soft_gaps` pools are GAP."""
+    pools = tuple(_capability_pool(rule, p, evidence) for p in rule.pools)
+    practice = {p.pool_id for p in rule.pools if all(_is_practice(c) for c in p.members)}
+    conf = [p for p in pools if p.status == "CONFIRMED"]
+    gap = [p for p in pools if p.status == "GAP"]
+    tech = sum(p.pool_id not in practice for p in conf)
+    prac = len(conf) - tech
+    confirmed_ids = _unique([c for p in conf for c in p.confirmed_ids])
+    comps = len({c.split(".", 1)[0] for c in confirmed_ids} - {PRACTICE_ACTION})
+    blocking = any(p.pool_id in rule.hard_pools for p in gap) or len(gap) > rule.max_soft_gaps
+    required_ok = not rule.required_any or any(p.pool_id in rule.required_any for p in conf)
+    reasons = tuple(code for code, failed in (
+        ("CRITICAL_GAP", blocking),
+        ("CONFIRMED_COUNT_BELOW_MIN", len(conf) < (rule.min_confirmed or 0)),
+        ("TECHNICAL_POOLS_BELOW_MIN", tech < rule.min_technical),
+        ("PRACTICE_POOLS_BELOW_MIN", prac < rule.min_practice),
+        ("TOO_FEW_COMPETENCIES", comps < rule.min_competencies),
+        ("REQUIRED_CAPABILITY_UNCONFIRMED", not required_ok)) if failed)
+    status: LevelStatus = "GAP" if blocking else ("UNVERIFIED" if reasons else "SUPPORTED")
+    total, decided = len(pools), len(conf) + len(gap)
+    gap_ids = _unique([c for p in gap for c in p.gap_ids])
+    return LevelCoverage(rule.level, total, decided, len(conf), len(gap), decided / total, len(conf) / total, comps,
+                         status, confirmed_ids, gap_ids, _unique([c for p in pools for c in p.unassessed_ids]), reasons,
+                         pools, tech, prac, () if blocking else gap_ids,
+                         _unique([c for p in pools for c in (p.declined_ids or ())]))
+
+
 def _unique(ids: list[str]) -> tuple[str, ...]:
     return tuple(dict.fromkeys(ids))
 
@@ -203,6 +299,13 @@ def _explain(policy: SeniorityPolicy, cov: list[LevelCoverage], chain: int, high
             line += (f" Для {_TITLE[nxt.level.value]} виявлено критичні прогалини: {', '.join(nxt.gap_ids)}."
                      if nxt.status == "GAP" else f" Для висновку про {_TITLE[nxt.level.value]} недостатньо даних.")
         lines.append(line)
+    tolerated = _unique([g for c in cov for g in (c.tolerated_gap_ids or ())])
+    if tolerated:
+        lines.append(f"Окремі прогалини не блокують рівень, але їх варто підтягнути: {', '.join(tolerated)}.")
+    declined = _unique([d for c in cov for d in (c.declined_ids or ())])
+    if declined:
+        lines.append(f"Кандидат не працював з частиною інструментів ({', '.join(declined)}); ці можливості не "
+                     "перевірено на іншому інструменті, тому вони не враховуються ні як підтвердження, ні як прогалина.")
     if highest != "UNKNOWN" and (chain < 0 or rank(Level(highest)) > rank(cov[chain].level)):
         lines.append(f"Критерії {_TITLE[highest]} підтверджено, але нижчі рівні не підтверджені, "
                      "тому цей рівень не присвоюється.")
@@ -224,7 +327,12 @@ def result_to_json(r: SeniorityResult) -> dict:
 def _coverage_json(c: dict) -> dict:
     """Per-criterion policies (v1) store exactly the fields they always stored: no `pools` key."""
     out = {f: v.value if isinstance(v, Level) else list(v) if isinstance(v, tuple) else v
-           for f, v in c.items() if f != "pools"}
+           for f, v in c.items() if f != "pools" and not (f in _V4_ONLY and v is None)}
     if c["pools"]:
-        out["pools"] = [{f: list(v) if isinstance(v, tuple) else v for f, v in p.items()} for p in c["pools"]]
+        out["pools"] = [{f: list(v) if isinstance(v, tuple) else v for f, v in p.items()
+                         if not (f in _V4_ONLY and v is None)} for p in c["pools"]]
     return out
+
+
+# Keys that exist only for capability rules (v4): absent (not null) in v1-v3 JSON, so stored rows stay byte-identical.
+_V4_ONLY = frozenset({"technical_confirmed", "practice_confirmed", "tolerated_gap_ids", "declined_ids"})

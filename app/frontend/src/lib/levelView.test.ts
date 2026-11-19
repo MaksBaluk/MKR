@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { desiredLabel, explanationLines, groupBySection, levelLabel, SECTIONS, sectionTitle, unassessedItems } from '@/lib/levelView';
+import { desiredLabel, explanationLines, explanationWithoutHigher, groupBySection, hasHigherEvidence, higherEvidenceText, levelLabel, SECTIONS, sectionTitle, unassessedItems } from '@/lib/levelView';
 import type { ResultSection } from '@/types';
 
 describe('level labels', () => {
@@ -69,5 +69,26 @@ describe('unassessedItems', () => {
   test('v1 rows and older payloads fall back to criteria', () => {
     expect(unassessedItems({ unassessed_criteria: crit, unassessed_pools: [] })).toEqual(crit);
     expect(unassessedItems({ unassessed_criteria: crit })).toEqual(crit);
+  });
+});
+
+describe('higher level with evidence', () => {
+  test('shown only when the highest supported level is above the assigned one', () => {
+    expect(hasHigherEvidence({ assessed_level: 'JUNIOR', highest_supported_level: 'SENIOR' })).toBe(true);
+    expect(hasHigherEvidence({ assessed_level: 'UNKNOWN', highest_supported_level: 'MIDDLE' })).toBe(true);
+    expect(hasHigherEvidence({ assessed_level: 'SENIOR', highest_supported_level: 'SENIOR' })).toBe(false);
+    expect(hasHigherEvidence({ assessed_level: 'UNKNOWN', highest_supported_level: 'UNKNOWN' })).toBe(false);
+    expect(higherEvidenceText({ assessed_level: 'MIDDLE', highest_supported_level: 'MIDDLE' })).toBeNull();
+    expect(higherEvidenceText({ assessed_level: 'JUNIOR', highest_supported_level: 'SENIOR' })).toBe(
+      'Є докази й для вищого рівня (Senior), але нижчий рівень підтверджено не повністю, тому вищий рівень не присвоюється.');
+  });
+
+  test('the server line about the higher level is not repeated next to the dedicated block', () => {
+    const base = { note: null, explanation: ['Підтверджено Junior за перевіреними критеріями.',
+      'Критерії Senior підтверджено, але нижчі рівні не підтверджені, тому цей рівень не присвоюється.'] };
+    expect(explanationWithoutHigher({ ...base, assessed_level: 'JUNIOR', highest_supported_level: 'SENIOR' }))
+      .toEqual(['Підтверджено Junior за перевіреними критеріями.']);
+    expect(explanationWithoutHigher({ ...base, assessed_level: 'SENIOR', highest_supported_level: 'SENIOR' }))
+      .toEqual(base.explanation);
   });
 });

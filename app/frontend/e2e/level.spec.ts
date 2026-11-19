@@ -20,7 +20,7 @@ test('results show desired vs assessed level and sections never hide vacancies',
   expect(level.ok()).toBeTruthy();
   const levelJson = await level.json();
   expect(levelJson.assessed_level).toBe('UNKNOWN');
-  expect(levelJson.policy.version).toBe('v3');
+  expect(levelJson.policy.version).toBe('v4');
   expect(levelJson.unassessed_pools.length).toBeGreaterThan(0);
   const api = await (await request.get(`${API}/profiles/${profileId}/results?page=1&page_size=10&fitting=all`,
     { headers: user.headers })).json();
@@ -34,8 +34,10 @@ test('results show desired vs assessed level and sections never hide vacancies',
   await expect(page.getByText('Підтверджений рівень', { exact: true })).toBeVisible();
   await expect(page.locator('dd').filter({ hasText: /^Недостатньо даних$/ })).toBeVisible();
   await expect(page.getByText(/%.*(найм|працевлашт)/i)).toHaveCount(0);
+  // highest_supported_level equals the assigned one here (UNKNOWN): the "higher level" block must not appear
+  await expect(page.getByText('Найвищий рівень із доказами', { exact: true })).toHaveCount(0);
 
-  // Not-checked list names capabilities (pool titles of the pooled policies v2/v3) in Ukrainian, never raw criterion ids.
+  // Not-checked list names capabilities (pool titles of the pooled policies v2-v4) in Ukrainian, never raw criterion ids.
   await page.locator('summary').filter({ hasText: /^Не перевірено/ }).click();
   await expect(page.getByText(levelJson.unassessed_pools[0].title, { exact: true })).toBeVisible();
   await expect(page.getByText(/\b(postgresql|practice-backend|fastapi)\.[a-z]+/)).toHaveCount(0);

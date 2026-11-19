@@ -30,7 +30,8 @@ from sqlalchemy import select  # noqa: E402
 import backend.api.core as core  # noqa: E402
 from backend.api.level import attempt_evidence  # noqa: E402
 from backend.domain.seniority import estimate  # noqa: E402
-from backend.domain.seniority_policy import PRACTICE_CRITERIA, PYTHON_BACKEND_V2, Level, policy_for  # noqa: E402
+from backend.domain.seniority_policy import (PRACTICE_CRITERIA, PYTHON_BACKEND_V2, PYTHON_BACKEND_V3, Level,  # noqa: E402
+                                             policy_for)
 from backend.experiments.config import InterviewMode, config_for  # noqa: E402
 from backend.models import CohortSnapshot, CoreInterview, CoreTurn  # noqa: E402
 from scripts.chapter4.scenarios import Env  # noqa: E402
@@ -38,7 +39,9 @@ from scripts.chapter4.simulation import SimulatedModel  # noqa: E402
 
 API = "/api/v1"
 LABEL = "SIMULATED: deterministic stub Interviewer/Evaluator, scripted answers; not a real LLM and not a real candidate"
-POLICY = policy_for("python")  # the current python policy (python-backend/v3): what new attempts are assessed with
+POLICY = policy_for("python")  # the current python policy (python-backend/v4): what new attempts are assessed with
+# NOTE (audit D-8): TruthEvaluator grades the whole topic and all practice from every answer. It is an UPPER BOUND of
+# evaluator generosity, not a realistic reachability estimate; see scripts/seniority_realistic.py for that.
 CRITICAL = {r.level: r.critical for r in POLICY.rules}
 ANSWER = ("У сервісі замовлень я сам обрав складений індекс, бо запит сканував усю таблицю; порівняв план через "
           "EXPLAIN до і після, а міграцію виконав без блокування таблиці.")
@@ -120,9 +123,9 @@ SCENARIOS = (
              expected_levels={"JUNIOR": "SUPPORTED", "MIDDLE": "UNVERIFIED", "SENIOR": "UNVERIFIED"}),
     Scenario("S3", "Сильні окремі відповіді, але замало покриття (бюджет 3 питання)", "senior", lambda c: 0.95,
              ("UNKNOWN", "INSUFFICIENT_DATA"), total_budget=3),
-    Scenario("P5", "Сильні відповіді, бюджет 6 питань (поріг Senior у v3)", "senior", lambda c: 0.9,
-             ("SENIOR", "ASSESSED"), total_budget=6, expected_levels={"JUNIOR": "SUPPORTED", "MIDDLE": "SUPPORTED",
-                                                                     "SENIOR": "SUPPORTED"}),
+    Scenario("P5", "Сильні відповіді, бюджет 6 питань (WS-4: Senior у v3, у v4 бракує шару даних Senior)", "senior",
+             lambda c: 0.9, ("MIDDLE", "ASSESSED"), total_budget=6,
+             expected_levels={"JUNIOR": "SUPPORTED", "MIDDLE": "SUPPORTED", "SENIOR": "UNVERIFIED"}),
 )
 
 
@@ -169,7 +172,8 @@ def run(env: Env, sc: Scenario) -> dict:
             "vacancies": len(env.db.get(CohortSnapshot, cohort).vacancy_ids), "budget": sc.total_budget,
             "questions": len(topics), "topics": list(dict.fromkeys(topics)),
             "evidence": {k: {"score": v.score, "turns": len(v.evidence_turns)} for k, v in sorted(evidence.items())},
-            "v2_level": estimate(PYTHON_BACKEND_V2, evidence).assessed_level,  # same evidence, previous policy
+            "v2_level": estimate(PYTHON_BACKEND_V2, evidence).assessed_level,  # same evidence, older policies
+            "v3_level": estimate(PYTHON_BACKEND_V3, evidence).assessed_level,
             "level": level.json(), "top": [(i["title"], i["seniority"], i.get("section")) for i in res["items"]]}
 
 

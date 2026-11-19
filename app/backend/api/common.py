@@ -106,8 +106,14 @@ def open_attempt(db: Session, profile_id: str) -> CoreInterview | None:
 def create_attempt(db: Session, user: User, profile_id: str, cohort_id: str) -> tuple[CoreInterview, bool]:
     """Insert the next attempt. A concurrent racer hits uq (profile_id, attempt_no): return its open attempt."""
     from sqlalchemy.exc import IntegrityError
+    from backend.domain.seniority_policy import policy_for
+    prof = db.get(CandidateProfile, profile_id)
+    policy = policy_for(prof.track if prof else user.track)
     iv = CoreInterview(user_id=user.id, cohort_id=cohort_id, status="ACTIVE", version=0, profile_id=profile_id,
-                       attempt_no=next_attempt_no(db, profile_id))
+                       attempt_no=next_attempt_no(db, profile_id),
+                       start_desired_level=prof.target_level if prof else None,
+                       start_policy_id=policy.policy_id if policy else None,
+                       start_policy_version=policy.version if policy else None)
     db.add(iv)
     try:
         db.commit()

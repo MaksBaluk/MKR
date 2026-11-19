@@ -31,13 +31,13 @@ def topics(names, score=0.9) -> dict[str, float]:
 
 # --- registry ------------------------------------------------------------------------------------------------------
 
-def test_registry_current_is_v3_and_older_versions_stay_addressable():
-    assert policy_for("python") is V3 and (V3.policy_id, V3.version, V3.track, V3.status) == (
-        "python-backend", "v3", "python", "WORKING_ASSUMPTION")
+def test_registry_v3_and_older_versions_stay_addressable():
+    assert policy_for("python") is not V3  # v4 is current since the 2026-11-19 audit; v3 rows keep their meaning
+    assert (V3.policy_id, V3.version, V3.track, V3.status) == ("python-backend", "v3", "python", "WORKING_ASSUMPTION")
     assert policy_by_version("python-backend", "v1") is PYTHON_BACKEND_V1
     assert policy_by_version("python-backend", "v2") is V2
     assert policy_by_version("python-backend", "v3") is V3
-    assert set(POLICY_VERSIONS) == {("python-backend", v) for v in ("v1", "v2", "v3")}
+    assert {("python-backend", v) for v in ("v1", "v2", "v3")} <= set(POLICY_VERSIONS)
     assert policy_for("marketing") is None and policy_for("design") is None
 
 
@@ -65,6 +65,20 @@ def test_v2_results_byte_identical_to_golden():
         r = estimate(V2, e)
         got.append({"result": result_to_json(r), "prioritized": prioritize_unmet(V2_IDS, V2, r),
                     "practice_gaps": practice_gaps(V2, r, limit=9)})
+    assert len(got) == golden["cases"] == 91
+    assert [[g["result"]["assessed_level"], g["result"]["assessment_status"]] for g in got] == golden["levels"]
+    blob = json.dumps(got, ensure_ascii=False, sort_keys=True).encode()
+    assert hashlib.sha256(blob).hexdigest() == golden["sha256"]
+
+
+def test_v3_results_byte_identical_to_golden():
+    """Digest produced by the v3 code at commit 27a7fe5, before v4 existed."""
+    golden = json.loads((Path(__file__).parent / "data" / "seniority_v3_golden.json").read_text())
+    got = []
+    for e in cases(ids=V2_IDS):
+        r = estimate(V3, e)
+        got.append({"result": result_to_json(r), "prioritized": prioritize_unmet(V2_IDS, V3, r),
+                    "practice_gaps": practice_gaps(V3, r, limit=9)})
     assert len(got) == golden["cases"] == 91
     assert [[g["result"]["assessed_level"], g["result"]["assessment_status"]] for g in got] == golden["levels"]
     blob = json.dumps(got, ensure_ascii=False, sort_keys=True).encode()

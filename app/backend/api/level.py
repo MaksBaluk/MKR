@@ -13,10 +13,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from backend.api.core import SEEDED_SOURCES, _interview_track, _owned_interview, is_practice, seniority_evidence
+from backend.api.core import (SEEDED_SOURCES, _interview_track, _owned_interview, attempt_policy, is_practice,
+                              seniority_evidence)
 from backend.db import get_db
 from backend.domain.seniority import CriterionEvidence, estimate, result_to_json
-from backend.domain.seniority_policy import SeniorityPolicy, policy_for
+from backend.domain.seniority_policy import SeniorityPolicy
 from backend.models import (CandidateProfile, CoreInterview, CoreTurn, CriterionAssessment, Rubric, RubricCriterion,
                             SeniorityAssessment, User)
 from backend.security import current_user
@@ -54,11 +55,11 @@ def _stored(db: Session, interview_id: str, version: str | None) -> SeniorityAss
 
 
 def finalize_level(db: Session, iv: CoreInterview, policy: SeniorityPolicy | None = None) -> SeniorityAssessment:
-    """Store the level of a finished attempt under `policy` (default: the track's current policy). Idempotent per
+    """Store the level of a finished attempt under `policy` (default: attempt_policy). Idempotent per
     (attempt, policy version): an existing row is returned unchanged, never overwritten. The caller commits.
     Raises ValueError for a malformed stored score (the estimator never guesses)."""
     track = _interview_track(db, iv)
-    policy = policy if policy is not None else policy_for(track)
+    policy = policy if policy is not None else attempt_policy(db, iv)
     version = policy.version if policy else None
     existing = _stored(db, iv.id, version)
     if existing is not None:
@@ -71,7 +72,8 @@ def finalize_level(db: Session, iv: CoreInterview, policy: SeniorityPolicy | Non
         policy_status=policy.status if policy else None, assessed_level=result.assessed_level,
         highest_supported_level=result.highest_supported_level, assessment_status=result.assessment_status,
         result=result_to_json(result), rubric_versions=_rubric_versions(db, _attempt_rows(db, iv.id)),
-        desired_level=prof.target_level if prof else None)
+        desired_level=iv.start_desired_level if iv.start_desired_level is not None else
+        prof.target_level if prof else None)
     try:
         with db.begin_nested():
             db.add(row)
@@ -109,7 +111,7 @@ def level_payload(db: Session, row: SeniorityAssessment) -> dict:
         return {"id": cid, "title": titles.get(cid, cid), "kind": "PRACTICE" if is_practice(cid) else "COMPETENCY"}
 
     ids = {c for cov in r["coverage_by_level"].values()
-           for key in ("confirmed_ids", "gap_ids", "unassessed_ids") for c in cov[key]}
+           for key in ("confirmed_ids", "gap_ids", "unassessed_ids", "declined_ids") for c in cov.get(key) or ()}
     explanation = []
     for line in r["explanation"]:
         for cid in sorted(ids, key=len, reverse=True):
@@ -125,7 +127,11 @@ def level_payload(db: Session, row: SeniorityAssessment) -> dict:
                       "competencies_confirmed": c["competencies_confirmed"], "reasons": c["reasons"],
                       "confirmed": [item(x) for x in c["confirmed_ids"]], "gaps": [item(x) for x in c["gap_ids"]],
                       "unassessed": [item(x) for x in c["unassessed_ids"]],
-                      **({"pools": [pool(p) for p in c["pools"]]} if "pools" in c else {})}
+                      **({"pools": [pool(p) for p in c["pools"]]} if "pools" in c else {}),
+                      **({"technical_confirmed_count": c["technical_confirmed"],
+                          "practice_confirmed_count": c["practice_confirmed"],
+                          "tolerated_gaps": [item(x) for x in c["tolerated_gap_ids"]],
+                          "declined": [item(x) for x in c["declined_ids"]]} if "technical_confirmed" in c else {})}
                 for lvl, c in r["coverage_by_level"].items()}
     # Pooled policies (v2, v3): the "not checked" list names whole capabilities (pool titles), not every alternative tool.
     unassessed = set(r["unassessed_criteria"])
@@ -141,10 +147,18 @@ def level_payload(db: Session, row: SeniorityAssessment) -> dict:
             "critical_gaps": [item(c) for c in r["critical_gaps"]],
             "unassessed_criteria": [item(c) for c in r["unassessed_criteria"]],
             "unassessed_pools": unassessed_pools,
+            # Capabilities whose evidence did not decide them: borderline/untraced (UNRESOLVED) or a declined tool whose
+            # alternative was never asked (DECLINED, policy v4). Neither counts as confirmed nor as a gap.
+            "unresolved_pools": _pools_with(r, "UNRESOLVED"), "declined_pools": _pools_with(r, "DECLINED"),
             "evidence_references": [{**item(c), "turn_ids": t} for c, t in r["evidence_references"].items()],
             "explanation": explanation,
             "note": WORKING_ASSUMPTION_NOTE if row.policy_status == "WORKING_ASSUMPTION" else None,
             "created_at": _iso_utc(row.created_at)}
+
+
+def _pools_with(result: dict, status: str) -> list[dict]:
+    return list({p["pool_id"]: {"id": p["pool_id"], "title": p["title"]} for c in result["coverage_by_level"].values()
+                 for p in c.get("pools", ()) if p["status"] == status}.values())
 
 
 def _iso_utc(value: datetime | None) -> str | None:
@@ -155,13 +169,13 @@ def _iso_utc(value: datetime | None) -> str | None:
 
 
 def level_for_attempt(db: Session, iv: CoreInterview) -> dict | None:
-    """Payload of the attempt's stored level: the row of the track's current policy when it exists, otherwise the latest
+    """Payload of the attempt's stored level: the row of the attempt's policy (attempt_policy) when it exists, else the latest
     stored row (e.g. a v1 row of an attempt finished before v2: rendered as stored, never rewritten). Only a finished
     attempt without any row is assessed now, under the current policy, and stored.
     None when the attempt is not finished or its stored scores are malformed."""
     if iv.status != "FINISHED":
         return None
-    current = policy_for(_interview_track(db, iv))
+    current = attempt_policy(db, iv)
     rows = list(db.scalars(select(SeniorityAssessment).where(SeniorityAssessment.interview_id == iv.id)
                            .order_by(SeniorityAssessment.created_at.desc())))
     # The current policy's row if stored, else the latest stored row (an older version is never re-assessed on read).

@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { desiredLabel, explanationLines, levelLabel, unassessedItems } from '@/lib/levelView';
+import { desiredLabel, explanationWithoutHigher, higherEvidenceText, levelLabel, unassessedItems } from '@/lib/levelView';
 import type { AssessedLevel, LevelPool } from '@/types';
 
 function CriterionList({ title, items, empty }: { title: string; items: LevelPool[]; empty: string }) {
@@ -49,17 +49,32 @@ export function LevelSummary({ level, profileTarget }: { level: AssessedLevel | 
             </dd>
           </div>
         </dl>
+        {level && higherEvidenceText(level) && (
+          <div className="rounded-xl border border-line p-3" role="note" aria-labelledby="level-higher-title">
+            <p id="level-higher-title" className="text-xs text-ink-subtle">Найвищий рівень із доказами</p>
+            <p className="text-lg font-semibold text-ink">{levelLabel(level.highest_supported_level)}</p>
+            <p className="mt-1 text-sm text-ink-muted">{higherEvidenceText(level)}</p>
+          </div>
+        )}
         {level ? (
           <>
-            {explanationLines(level).length > 0 && (
+            {explanationWithoutHigher(level).length > 0 && (
               <ul className="flex flex-col gap-1 text-sm text-ink-muted">
-                {explanationLines(level).map((line, i) => <li key={i}>{line}</li>)}
+                {explanationWithoutHigher(level).map((line, i) => <li key={i}>{line}</li>)}
               </ul>
             )}
             <div className="flex flex-col gap-2">
               <CriterionList title="Підтверджено" items={level.confirmed_strengths} empty="Підтверджених критичних критеріїв поки немає." />
               <CriterionList title="Прогалини" items={level.critical_gaps} empty="Критичних прогалин не виявлено." />
               <CriterionList title="Не перевірено" items={unassessedItems(level)} empty="Усі критичні вимоги перевірено." />
+              {!!level.unresolved_pools?.length && (
+                <CriterionList title="Межові відповіді: не зараховано ні як підтвердження, ні як прогалину"
+                  items={level.unresolved_pools} empty="" />
+              )}
+              {!!level.declined_pools?.length && (
+                <CriterionList title="Без досвіду з інструментом: альтернативу не перевіряли"
+                  items={level.declined_pools} empty="" />
+              )}
             </div>
             {level.note && (
               <p className="flex flex-wrap items-center gap-2 text-xs text-ink-muted">
