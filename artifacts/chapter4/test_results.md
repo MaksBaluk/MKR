@@ -1,39 +1,46 @@
-# Результати автоматизованих перевірок
+# Технічне тестування (етап 8), фаза 1
 
-Усі команди виконано 2026-11-18 на робочому дереві з незакомічними змінами (див. `environment.md`). Нижче лише те, що реально запускалось.
+Дата: 2026-11-19. Продуктовий код: commit `282f6fb`. Машина: macOS 27.2.1, Apple M3 Pro (12 ядер); Python 3.12.13 (uv 0.12.3), Node 25.9.0, Docker 29.3.1. Реальна LLM не викликалась (налаштована кінцева точка недоступна, `ConnectionRefusedError`). Попередні значення цього файлу (старий код) замінено.
 
-| # | Команда (каталог) | Час запуску | Результат | Обмеження |
+## 1. Запуски
+
+| # | Команда (каталог) | Середовище / БД | Результат | Тривалість |
 |---|---|---|---|---|
-| 1 | `uv run pytest -q` (`app/`) | 18:01 | **578 passed**, 59 warnings, 100 с | SQLite in-memory; **не PostgreSQL**; LLM підміняється заглушками тестів |
-| 2 | `npm run typecheck` (`app/frontend/`) | 17:17 | без помилок (`tsc -b`) | — |
-| 3 | `npm test` (`app/frontend/`) | 17:17 | **19 файлів, 155 тестів passed** (vitest) | unit-тести бібліотек UI, не браузер |
-| 4 | `npm run build` (`app/frontend/`) | 17:17 | збірка успішна (`built in 1.64s`) | — |
-| 5 | `npx playwright test` (`app/frontend/`) | 2026-11-18 18:22 | **7 passed** (Chromium, 1.5 с): реєстрація через форму й збереження сесії, помилка входу, відновлення інтерв'ю після перезавантаження, ізоляція користувачів, провенанс у каталозі, 375px без горизонтального скролу | йдуть проти Docker-стека `http://127.0.0.1:8080`; Evaluator недоступний, тож відповідь зберігається як `UNGRADED`; створюють акаунти `e2e-*@example.test` у dev-БД; тільки Chromium |
-| 6 | 26 надійнісних тестів поіменно (`raw/reliability_tests.txt`) | 17:17 | **26 passed** | SQLite; перелік нижче |
-| 7 | `uv run python -m scripts.chapter4.pg_smoke` (`app/`) | 17:20 | **8/8 PASS** (`raw/pg_smoke.json`) | жива PostgreSQL у Docker; створено 2 тестові акаунти `*@example.test` у dev-БД; Evaluator був недоступний (LLM-сервер вимкнено), тому відповідь збережена як `UNGRADED` |
-| 8 | `alembic_version` у PostgreSQL | 2026-11-18 | `0014_vacancy_provenance` (`raw/postgres_migrations.txt`); у БД 229 вакансій (49 `REAL_IMPORTED`), 2371 з 2371 вимог мають D_vga/τ | міграції застосовано контейнером `migrate` |
-| 9 | `uv run python -m scripts.chapter4.math_validation` (`app/`) | 2026-11-18 | **65/65 PASS** (`math_validation.csv`) | перевірка коду на ручних прикладах, не емпірична якість |
-| 10 | `uv run python -m scripts.chapter4.build_all` (`app/`) | 2026-11-18 | 18 прогонів, відтворюваність `identical=true`, `rerank` без LLM збігається зі збереженим порядком | **SIMULATED**, див. `experiment_manifest.json` |
+| 1 | `uv run pytest -q -p no:cacheprovider` (`app/`), до змін фази 1 | SQLite in-memory (`conftest.py`) | **781 passed**, 0 failed, 81 warnings (DeprecationWarning sqlite datetime adapter) | 154.75 с |
+| 2 | те саме після додавання тестів фази 1 | SQLite | **885 passed, 4 skipped** (4 = `test_chapter4_postgres.py` без `CH4_PG_URL`), 0 failed | 169.15 с |
+| 3 | `uv run pytest -q tests/test_chapter4_seniority_scenarios.py` | SQLite + API-потік із заглушкою | 17 passed | 8.2 с |
+| 4 | `uv run pytest -q tests/test_chapter4_math_properties.py` | чисті функції | 87 passed (22 property + 65 контрольних прикладів) | 1.9 с |
+| 5 | `CH4_PG_URL=postgresql+psycopg://postgres:***@127.0.0.1:55432/ch4 uv run pytest -q tests/test_chapter4_postgres.py` | **PostgreSQL 16 (pgvector/pgvector:pg16), одноразовий контейнер `ch4-pg`, схема Alembic `upgrade head`** | **4 passed** | 6.3 с |
+| 6 | `npm run typecheck` (`app/frontend`) | TypeScript 5.9.2 | exit 0 | 2.1 с |
+| 7 | `npm test` | Vitest 3.2.4 | **167 passed** (20 файлів) | 1.5 с |
+| 8 | `npm run build` | Vite 7.1.7 | exit 0 (`built in 1.57s`) | 3.6 с |
+| 9 | `docker compose up -d --build api web` (`app/`) | стек `competencematch` (db PostgreSQL 16.15, api, web; сервіси `migrate`, `seed` ідемпотентні) | exit 0; `GET /healthz` 200; `alembic_version` лишився `0018_assessment_no_experience` | — |
+| 10 | `npx playwright test --reporter=line` (`app/frontend`) | Chromium 1187 проти nginx `127.0.0.1:8080` (Docker, PostgreSQL) | **8 passed** | 3.9 с |
+| 11 | `uv run python -m scripts.seniority_realistic --noisy` | SQLite + API, `SIMULATED` | exit 0, 224 інтерв'ю | 4 хв 55 с |
+| 12 | `uv run python -m scripts.chapter4.seniority_sweep_ch4` / `--stub-ua` | SQLite + API, `SIMULATED` | exit 0, 320 / 224 інтерв'ю | 7 хв 16 с / 4 хв 38 с |
 
-## Що саме покривають надійнісні тести (рядок 6)
+Повний набір pytest на PostgreSQL **NOT_RUN**: `tests/conftest.py` жорстко задає SQLite, режиму PostgreSQL немає. На PostgreSQL виконано лише 4 інтеграційні тести (рядок 5) і Playwright проти Docker-стека (рядок 10). SQLite-результати не подаються як доказ PostgreSQL. Старий `scripts/chapter4/pg_smoke.py` не запускався: він створює користувачів у проєктній БД; ті самі перевірки виконано на одноразовій БД (рядок 5).
 
-| Вимога | Тест | Статус |
+Побічні ефекти: Playwright створює користувачів `e2e-*@example.test` у БД Docker-стека (зараз їх 108, накопичено багатьма прогонами). Контейнер `ch4-pg` зупинено й видалено (`--rm`).
+
+## 2. Окремі перевірки
+
+| Перевірка | Тести (усі PASS, команда: `uv run pytest -q <id>`; 36 тестів, 12.3 с) | БД |
 |---|---|---|
-| Відновлення інтерв'ю | `test_interview_flow.py::test_resume_returns_open_interview_without_browser_storage` | PASSED |
-| Повторний запит (ідемпотентність) | `test_interview_flow.py::test_answer_replay_same_key_returns_same_turn`, `test_cohorts_api.py::test_post_is_idempotent` | PASSED |
-| Застарілий version → 409 | `test_interview_flow.py::test_stale_version_rejected` | PASSED |
-| Паралельні `next-question` | `test_interview_completion.py::test_parallel_next_question_returns_the_winner_not_a_500` | PASSED |
-| Тайм-аут LLM не повторюється | `test_graphs.py::test_timeout_not_retried` | PASSED |
-| Rate limit: повтор після паузи / остаточна відмова | `test_graphs.py::test_rate_limited_calls_are_retried_after_a_wait`, `::test_rate_limit_that_never_clears_ends_as_a_provider_failure` | PASSED |
-| Відсутня модель → відповідь збережена `UNGRADED` | `test_graphs.py::test_no_model_ungraded`, `test_interview_flow.py::test_ungraded_answer_moves_to_next_topic` | PASSED |
-| Збій провайдера → без оцінок і цілей | `test_followup_flow.py::test_provider_failure_is_ungraded_without_goal`, `test_experiment_runner.py::test_llm_failure_creates_no_grades` | PASSED |
-| Збереження попередніх оцінок (`null`/off-topic) | `test_audit_regressions.py` (3 інтеграційні тести) | PASSED |
-| Ізоляція користувачів | `test_profiles_api.py::test_owner_isolation` | PASSED |
+| Повторні HTTP-запити (ідемпотентність) | `test_interview_flow.py::test_answer_replay_same_key_returns_same_turn`, `test_cohorts_api.py::test_post_is_idempotent`, `test_interview_flow.py::test_pending_question_not_regenerated`; `test_chapter4_postgres.py::test_idempotent_replay_stale_version_and_isolation_on_postgres` (повтор відповіді з тим самим ключем, 409 на застарілу версію) | SQLite; **PostgreSQL** |
+| Відновлення інтерв'ю | `test_interview_flow.py::test_resume_returns_open_interview_without_browser_storage`, `test_difficulty_flow.py::test_second_question_replays_controller_state`; Playwright `interview.spec.ts:5` (відповідь збережено, відновлення після перезавантаження); PG-тест (pending_turn із сервера) | SQLite; PostgreSQL |
+| Помилки LLM, тайм-аути | `test_graphs.py::{test_unknown_id_retried_once_then_ungraded, test_timeout_not_retried, test_llm_exception_falls_back_to_bank, test_a_stalled_provider_hits_a_hard_deadline_in_ask_and_answer, test_rate_limit_that_never_clears_ends_as_a_provider_failure}`, `test_followup_flow.py::test_provider_failure_is_ungraded_without_goal` | SQLite (провайдер — фейк) |
+| Збереження балів | `test_audit_regressions.py::{test_off_topic_and_null_never_erase_confirmed_scores_and_history_is_kept, test_partial_null_in_new_revision_keeps_earlier_score}`, `test_practice_criteria.py::test_null_practice_revision_does_not_erase_score`, `test_seniority_api.py::test_competency_evidence_keeps_effective_rows_and_all_turns`; сценарій S11 | SQLite |
+| Цілісність історичних результатів | `test_profiles_api.py::{test_second_attempt_does_not_change_results_until_finished, test_archive_hides_blocks_attempts_keeps_history}`, `test_seniority_api.py::{test_v1_row_of_old_attempt_is_kept_and_rendered, test_v2_row_of_old_attempt_is_kept_and_rendered_with_its_own_pools}`, `test_dvga.py::test_snapshot_freezes_criteria_and_tau`; PG: рядок рівня один і незмінний після повторного читання | SQLite; PostgreSQL |
+| Ізоляція користувачів | `test_profiles_api.py::test_owner_isolation`, `test_seniority_api.py::test_owner_isolation_level_endpoint`; Playwright `interview.spec.ts:33`; PG-тест (403/404 для чужого інтерв'ю й результатів) | SQLite; PostgreSQL |
+| Ізоляція спроб | `test_seniority_api.py::test_attempts_are_not_mixed`, `test_profiles_api.py::test_attempt_planner_ignores_other_attempt_scores`. Виняток у коді: `POST /recommendations` змішує спроби (`architecture_audit.md` A-2; тесту на це немає, UI і раннер його не використовують) | SQLite |
+| Версіонування SeniorityPolicy | `test_seniority_api.py::{test_policy_version_change_does_not_rewrite_history, test_attempt_started_under_older_policy_is_finalized_under_it, test_desired_level_is_captured_at_attempt_start}`; PG: `finalize_level(v3)` додає рядок v3, рядок v4 не змінюється | SQLite; PostgreSQL |
+| Зміна рубрики | `test_experiment_runner.py::test_rerank_refuses_changed_rubric_versions`, `test_experiment_report.py::test_rubric_version_mismatch_sentence_and_missing_version_kept` | SQLite |
+| Відсутність хибного підвищення | `test_seniority_ws1.py` (7 тестів), сценарії S01, S05, S08, S09a; шумовий перебір: хибний Senior 0/112, хибний Middle+ 0/56 (обидва варіанти стенду) | SQLite; `SIMULATED` |
+| Міграції на PostgreSQL | `test_chapter4_postgres.py::test_alembic_head_on_postgres_and_one_step_reversible` (head = 0018, `downgrade -1` і `upgrade head`) | PostgreSQL |
 
-Не проведено: тести на PostgreSQL (весь набір SQLite), навантажувальні тести, реальні відмови провайдера в мережі, Firefox/Safari.
+Нових тестів для прогалин написано: `test_chapter4_postgres.py` (4; PostgreSQL), `test_chapter4_seniority_scenarios.py` (17), `test_chapter4_math_properties.py` (87).
 
-## Тести, додані в рамках підготовки матеріалів
+## 3. Збої
 
-- `tests/test_vacancy_import.py` (16): парсер, валідація, походження, міграція 0014.
-- `tests/test_audit_regressions.py` (12), `tests/test_dvga.py` (12): виправлення аудиту (валідація Evaluator, ревізії, D_vga/τ, міграція 0013).
-- `tests/test_expert_labels.py` +2: `criterion_agreement` (узгодженість двох розмітників за критеріальними оцінками).
+Збоїв у жодному запуску немає. Попередження: 81 `DeprecationWarning` (sqlite datetime adapter, Python 3.12), 3 `DeprecationWarning` Alembic (`path_separator`). Під час інтерв'ю зі заглушкою в журналі є рядки `interviewer question rejected … kind=NOT_UKRAINIAN` — це очікувана поведінка продукту на артефакт заглушки (див. `seniority_audit.md` §4), а не збій тесту.

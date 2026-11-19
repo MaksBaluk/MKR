@@ -1,174 +1,225 @@
 {
-  "generated": "2026-11-18T18:58:39+0100",
-  "kind": "SIMULATED_CONTROLLED_RUNS",
-  "answer_source": "SIMULATED",
-  "evaluator": "SIMULATED_STUB (deterministic, not an LLM)",
-  "real_llm_calls": 0,
-  "claim_scope": "pipeline behaviour of planner, difficulty controller, follow-up targeting and ranking only; no statement about real candidates, real evaluator quality or real vacancies",
-  "algorithm_version": "rank-2.15+tv-jv/v1",
-  "total_budget": 12,
-  "max_topics": 10,
-  "max_per_topic": 5,
-  "static_questions_per_topic": 2,
-  "database": "SQLite in-memory per batch (product database never used)",
-  "configs": [
-    {
-      "label": "A",
-      "mode": "INITIAL_PROFILE"
-    },
-    {
-      "label": "B",
-      "mode": "STATIC_INTERVIEW",
-      "total_budget": 12
-    },
-    {
-      "label": "C",
-      "mode": "ADAPTIVE_INTERVIEW",
-      "total_budget": 12
-    },
-    {
-      "label": "C-difficulty",
-      "mode": "ADAPTIVE_INTERVIEW",
-      "total_budget": 12,
-      "adaptive_difficulty": false
-    },
-    {
-      "label": "C-followup",
-      "mode": "ADAPTIVE_INTERVIEW",
-      "total_budget": 12,
-      "adaptive_followup": false
-    },
-    {
-      "label": "C-topics",
-      "mode": "ADAPTIVE_INTERVIEW",
-      "total_budget": 12,
-      "adaptive_topics": false
-    }
-  ],
-  "candidates": [
-    {
-      "candidate_id": "sim-junior",
-      "desired_title": "Junior Python Developer",
-      "years_experience": 1,
-      "target_level": "junior",
-      "track": "python",
-      "location": "Київ",
-      "work_mode": "remote",
-      "self_ratings": {
-        "python-core": 0.6,
-        "git": 0.5,
-        "pytest": 0.4,
-        "kafka": 0.8
+  "schema": "ch4-manifest/v2",
+  "frozen_config": {
+    "frozen_at": "2026-11-19T17:16:20+0100",
+    "commit": "282f6fb2a286bdc0291bf42c4b87cf89b63d9e92",
+    "branch": "feat/criterion-core",
+    "working_tree_clean_at_freeze": true,
+    "dataset_snapshot": {
+      "sha256": "f8b085258bc6de3b0e040bcab758ef1a80508bbe26c18f4fcbc3aee2eda8ad19",
+      "files": {
+        "vacancies.json": "9bc11fcde8b1d857a0fa087f569fb380a241b7b09b2bbb9b1e8c2860b45d3790",
+        "vacancies_real.json": "1a15d456f0800e7fbc4d2093bba4e03ecfe5d164ad7a286aca86da926c317bcb",
+        "vacancy_criteria.json": "9aa9e1fdefb70d925077b56c2a7e58276f05075d75858c23e830c30a87bf91e1",
+        "vacancy_sources.json": "30841da50c9cf2cd57b2057c0337e745fac4d03a01a6556407b7c434fc2a5b94",
+        "rubrics.json": "a728ea45b2475704c3cddb28b828ec98f660eef796d607095fd34dcb18aed787",
+        "practice_rubrics.json": "38090d71ae7894a12109f9ff624aa8a7d681475046ddecdc14a0db10af18381c",
+        "competencies.json": "a98106cd3ebc81c5b6a28ddf77b7f855cf78c2de5a439f76ae2b9532297adee7",
+        "questions.json": "9a0a246071841a31d626b1df5dc7d386e3a6da9967a931e7e97ebdc23dce0864"
       },
-      "hidden_truth": {
-        "default": 0.45,
-        "base": {
-          "python-core": 0.7,
-          "git": 0.7,
-          "rest-api": 0.65,
-          "pytest": 0.6,
-          "sql": 0.6,
-          "kafka": 0.1,
-          "kubernetes": 0.05,
-          "redis": 0.15,
-          "aws": 0.1,
-          "ci-cd": 0.2
-        }
+      "note": "180 fixture vacancies are synthetic/adapted examples (DEMO_CURATED, SYNTHETIC_GENERATED); 49 REAL_IMPORTED from a Djinni snapshot (djinni-import-v1); D_vga SYNTHETIC_RULE_V1, tau WORKING_ASSUMPTION_LEVEL_MAP"
+    },
+    "cohorts_fresh_seed": {
+      "python": {
+        "vacancies": 90,
+        "sha256": "bee5974491cd55994de7801ec1677f0b8f741e45e2dfb11200b6eecc2fbabcb7",
+        "requirement_alternatives": 904
+      },
+      "marketing": {
+        "vacancies": 74,
+        "sha256": "85af8d142ff5dc42ccc488cd404335ae202b728624405e341dd2d4d940b685ff",
+        "requirement_alternatives": 766
+      },
+      "design": {
+        "vacancies": 65,
+        "sha256": "544e6d9d959f11af1fdf30c6047ba949424be0c3fa403810d526984f7018be83",
+        "requirement_alternatives": 701
       }
     },
-    {
-      "candidate_id": "sim-middle",
-      "desired_title": "Python Backend Developer",
-      "years_experience": 4,
-      "target_level": "middle",
-      "track": "python",
-      "location": "Київ",
-      "work_mode": "remote",
-      "self_ratings": {
-        "python-core": 0.8,
-        "fastapi": 0.8,
-        "postgresql": 0.8,
-        "redis": 0.7
+    "cohort_policy": "TRACK_ALL_VALID_V2",
+    "rubric_versions": [
+      "ab-testing:v1:CURATED_TEMPLATE",
+      "accessibility:v1:CURATED_TEMPLATE",
+      "app-security:v1:CURATED_TEMPLATE",
+      "async-python:v1:CURATED_TEMPLATE",
+      "attribution:v1:CURATED_TEMPLATE",
+      "aws:v1:CURATED_TEMPLATE",
+      "brand-strategy:v1:CURATED_TEMPLATE",
+      "branding:v1:CURATED_TEMPLATE",
+      "celery:v1:CURATED_TEMPLATE",
+      "ci-cd:v1:CURATED_TEMPLATE",
+      "content-strategy:v1:CURATED_TEMPLATE",
+      "copywriting:v1:CURATED_TEMPLATE",
+      "crm:v1:CURATED_TEMPLATE",
+      "cro:v1:CURATED_TEMPLATE",
+      "design-systems:v1:CURATED_TEMPLATE",
+      "django:v1:CURATED_TEMPLATE",
+      "docker:v1:CURATED_TEMPLATE",
+      "email-marketing:v1:CURATED_TEMPLATE",
+      "excel:v1:CURATED_TEMPLATE",
+      "fastapi:v1:CURATED_TEMPLATE",
+      "figma:v1:CURATED_TEMPLATE",
+      "ga4:v1:CURATED_TEMPLATE",
+      "git:v1:CURATED_TEMPLATE",
+      "google-ads:v1:CURATED_TEMPLATE",
+      "gtm:v1:CURATED_TEMPLATE",
+      "html-css:v1:CURATED_TEMPLATE",
+      "illustrator:v1:CURATED_TEMPLATE",
+      "information-architecture:v1:CURATED_TEMPLATE",
+      "interaction-design:v1:CURATED_TEMPLATE",
+      "kafka:v1:CURATED_TEMPLATE",
+      "kubernetes:v1:CURATED_TEMPLATE",
+      "linux:v1:CURATED_TEMPLATE",
+      "looker-studio:v1:CURATED_TEMPLATE",
+      "market-research:v1:CURATED_TEMPLATE",
+      "marketing-automation:v1:CURATED_TEMPLATE",
+      "meta-ads:v1:CURATED_TEMPLATE",
+      "motion-design:v1:CURATED_TEMPLATE",
+      "observability:v1:CURATED_TEMPLATE",
+      "performance-marketing:v1:CURATED_TEMPLATE",
+      "photoshop:v1:CURATED_TEMPLATE",
+      "postgresql:v1:CURATED_TEMPLATE",
+      "practice-backend:v1:CURATED_TEMPLATE",
+      "product-analytics:v1:CURATED_TEMPLATE",
+      "prototyping:v1:CURATED_TEMPLATE",
+      "pytest:v1:CURATED_TEMPLATE",
+      "python-core:v1:CURATED_TEMPLATE",
+      "redis:v1:CURATED_TEMPLATE",
+      "responsive-design:v1:CURATED_TEMPLATE",
+      "rest-api:v1:CURATED_TEMPLATE",
+      "segmentation:v1:CURATED_TEMPLATE",
+      "seo:v1:CURATED_TEMPLATE",
+      "social-media:v1:CURATED_TEMPLATE",
+      "sql:v1:CURATED_TEMPLATE",
+      "sqlalchemy:v1:CURATED_TEMPLATE",
+      "stakeholder-communication:v1:CURATED_TEMPLATE",
+      "typography:v1:CURATED_TEMPLATE",
+      "ui-design:v1:CURATED_TEMPLATE",
+      "usability-testing:v1:CURATED_TEMPLATE",
+      "ux-research:v1:CURATED_TEMPLATE",
+      "visual-design:v1:CURATED_TEMPLATE",
+      "wireframing:v1:CURATED_TEMPLATE"
+    ],
+    "rubric_count": 61,
+    "criterion_count": 240,
+    "seniority_policy": {
+      "current_python": "python-backend/v4",
+      "status": "WORKING_ASSUMPTION",
+      "sha256": "25b4b16b93494df6c000ebc1a716cb827dd5e80d16cd1e161a92c5f6aa910772",
+      "min_confirming_turns": 2,
+      "addressable_versions": [
+        "python-backend/v1",
+        "python-backend/v2",
+        "python-backend/v3",
+        "python-backend/v4"
+      ],
+      "marketing": null,
+      "design": null
+    },
+    "scoring_policy": {
+      "confirmed_score": 0.75,
+      "min_coverage_for_overall": 0.6,
+      "tau_by_level": {
+        "1": 0.5,
+        "2": 0.75,
+        "3": 0.9
       },
-      "hidden_truth": {
-        "default": 0.65,
-        "base": {
-          "fastapi": 0.9,
-          "django": 0.85,
-          "postgresql": 0.9,
-          "sql": 0.9,
-          "python-core": 0.9,
-          "kafka": 0.2,
-          "kubernetes": 0.3
-        }
-      }
+      "tau_source": "WORKING_ASSUMPTION_LEVEL_MAP",
+      "epsilon": "min(0.05, tau/2)"
     },
-    {
-      "candidate_id": "sim-senior",
-      "desired_title": "Senior Python Engineer",
-      "years_experience": 8,
-      "target_level": "senior",
-      "track": "python",
-      "location": "Київ",
-      "work_mode": "remote",
-      "self_ratings": {
-        "python-core": 0.9,
-        "postgresql": 0.9,
-        "kubernetes": 0.9,
-        "kafka": 0.9
-      },
-      "hidden_truth": {
-        "default": 0.85,
-        "base": {
-          "kafka": 0.2,
-          "kubernetes": 0.25,
-          "redis": 0.5
-        }
-      }
-    }
-  ],
-  "run_count": 18,
-  "runs_per_candidate_config": 1,
-  "reproducibility": {
-    "batches": 2,
-    "normalized_sha256_batch1": "8b1985a0262d76ee",
-    "normalized_sha256_batch2": "8b1985a0262d76ee",
-    "identical": true,
-    "rerank_without_llm_matches_stored_order": true,
-    "wall_s": 13.3
-  },
-  "equal_conditions_check": {
-    "sim-junior": {
-      "same_cohort_sha256_all_modes": true,
-      "same_rubric_versions_interview_modes": true,
-      "same_total_budget_interview_modes": true,
-      "same_model_info_interview_modes": true,
-      "same_algorithm_version": true,
-      "same_profile_all_modes_except_generated_id": true
+    "difficulty_controller": {
+      "up_score": 0.75,
+      "down_score": 0.5,
+      "min_known_share": 0.5,
+      "diagnostic_floor": "BASIC",
+      "focus": 2,
+      "version": "difficulty/v2"
     },
-    "sim-middle": {
-      "same_cohort_sha256_all_modes": true,
-      "same_rubric_versions_interview_modes": true,
-      "same_total_budget_interview_modes": true,
-      "same_model_info_interview_modes": true,
-      "same_algorithm_version": true,
-      "same_profile_all_modes_except_generated_id": true
+    "ranking": {
+      "algorithm_version": "rank-2.15+tv-jv/v1",
+      "experiments_and_recommendations": "pure (2.15)+T_v/J_v+id",
+      "results_screen": "confirmed_share first (owner decision, deviation from (2.15))"
     },
-    "sim-senior": {
-      "same_cohort_sha256_all_modes": true,
-      "same_rubric_versions_interview_modes": true,
-      "same_total_budget_interview_modes": true,
-      "same_model_info_interview_modes": true,
-      "same_algorithm_version": true,
-      "same_profile_all_modes_except_generated_id": true
+    "prompt_version": "4a377e2a7eb4af46c43479c4adf4b8fcb07e5d11ece9101290adfc6a1f90a21e",
+    "interview_limits": {
+      "max_topics": 10,
+      "max_questions_per_topic": 5,
+      "min_questions_per_open_topic": 2,
+      "total_budget": "experiment-specific (set per run)"
+    },
+    "llm": {
+      "configured_provider": "openai_compatible",
+      "configured_model": "lmstudio-community/Qwen2.5-7B-Instruct-1M-GGUF",
+      "temperature": 0.3,
+      "max_retries_client": 0,
+      "evaluator_validation_retry": 1,
+      "timeout_s": "300",
+      "used_in_phase1": "none (SIMULATED stubs only; configured endpoint unreachable: connection refused)"
     }
   },
-  "rubric_versions": [
-    "v1"
+  "phase1_evidence": [
+    {
+      "run_ids": "ch4-sweep-det-000..095, ch4-sweep-noi-000..223",
+      "label": "SIMULATED",
+      "command": "cd app && uv run python -m scripts.chapter4.seniority_sweep_ch4",
+      "files": [
+        "raw/seniority_sweep_runs.csv",
+        "raw/seniority_sweep_summary.json"
+      ],
+      "config": "experiment_manifest.json#frozen_config (commit 282f6fb)",
+      "result": "v4 noisy: false SENIOR 0/112, missed SENIOR 26/112, missed MIDDLE 0/56"
+    },
+    {
+      "run_ids": "ch4-sweep-noi-000-ua..ch4-sweep-noi-223-ua",
+      "label": "SIMULATED (harness variant UaModel)",
+      "command": "cd app && uv run python -m scripts.chapter4.seniority_sweep_ch4 --stub-ua",
+      "files": [
+        "raw/seniority_sweep_ua_stub_runs.csv",
+        "raw/seniority_sweep_ua_stub_summary.json"
+      ],
+      "config": "experiment_manifest.json#frozen_config (commit 282f6fb)",
+      "result": "v4 noisy: false SENIOR 0/112, missed SENIOR 14/112, missed MIDDLE 0/56"
+    },
+    {
+      "run_ids": "ch4-s01-est..ch4-s12-est, ch4-s09a-est; ch4-s04-e2e, ch4-s07-e2e, ch4-s01-e2e, ch4-s08-e2e, ch4-s10-e2e, ch4-s04-e2e-narrow",
+      "label": "ESTIMATOR_LEVEL / SIMULATED_E2E",
+      "command": "cd app && uv run python -m scripts.chapter4.seniority_scenarios_ch4",
+      "files": [
+        "seniority_results.csv",
+        "interview_turns.jsonl"
+      ],
+      "config": "experiment_manifest.json#frozen_config (commit 282f6fb)",
+      "result": "estimator 12 PASS / 1 FAIL (S09); E2E 5 PASS / 1 FAIL (S04-E2E-narrow)"
+    },
+    {
+      "run_ids": "math seed 20261119",
+      "label": "DETERMINISTIC",
+      "command": "cd app && uv run python -m scripts.chapter4.math_validation_ch4",
+      "files": [
+        "mathematical_validation.csv"
+      ],
+      "config": "experiment_manifest.json#frozen_config (commit 282f6fb)",
+      "result": "87 rows: 85 PASS, 1 PARTIAL (H01), 1 DEVIATION (R01)"
+    },
+    {
+      "run_ids": "ch4-pg-s07-e2e, ch4-pg-policy",
+      "label": "SIMULATED on PostgreSQL 16 (throwaway)",
+      "command": "CH4_PG_URL=... uv run pytest -q tests/test_chapter4_postgres.py",
+      "files": [
+        "test_results.md"
+      ],
+      "config": "experiment_manifest.json#frozen_config (commit 282f6fb)",
+      "result": "4 passed"
+    }
   ],
-  "prompt_version": "d1aec7a48cbcd16133dd55a1ee0f34e10021cc3b0e106e569d8c577971be3870",
-  "cohort_sha256": [
-    "bee5974491cd55994de7801ec1677f0b8f741e45e2dfb11200b6eecc2fbabcb7"
-  ],
-  "command": "cd app && uv run python -m scripts.chapter4.build_all"
+  "runs": [],
+  "superseded_previous_package": {
+    "generated": "2026-11-18T18:58:39+0100",
+    "kind": "SIMULATED_CONTROLLED_RUNS",
+    "prompt_version": "d1aec7a48cbcd16133dd55a1ee0f34e10021cc3b0e106e569d8c577971be3870",
+    "run_count": 18,
+    "algorithm_version": "rank-2.15+tv-jv/v1",
+    "command": "cd app && uv run python -m scripts.chapter4.build_all",
+    "note": "produced on older code (before policy v4, WP-B, WS-1); not comparable on prompts; regenerate"
+  }
 }

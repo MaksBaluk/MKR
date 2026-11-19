@@ -1,0 +1,148 @@
+{
+  "label": "SIMULATED (realistic stub, not a real LLM)",
+  "commit": "282f6fb2a286bdc0291bf42c4b87cf89b63d9e92",
+  "current_policy": "python-backend/v4",
+  "duration_s": 277.9,
+  "stub": "UaModel (harness variant: Ukrainian difficulty word)",
+  "noisy": {
+    "runs": 224,
+    "rates": {
+      "python-backend/v1": {
+        "false_senior": "0/112",
+        "false_middle_or_higher": "0/56",
+        "missed_senior": "112/112",
+        "false_middle": "0/56",
+        "missed_senior_per_q1": "56/56",
+        "missed_senior_per_q2": "56/56",
+        "missed_middle": "56/56",
+        "missed_middle_per_q1": "28/28",
+        "overrated_any": "0/224"
+      },
+      "python-backend/v2": {
+        "false_senior": "0/112",
+        "false_middle_or_higher": "0/56",
+        "missed_senior": "89/112",
+        "false_middle": "0/56",
+        "missed_senior_per_q1": "48/56",
+        "missed_senior_per_q2": "41/56",
+        "missed_middle": "11/56",
+        "missed_middle_per_q1": "11/28",
+        "overrated_any": "0/224"
+      },
+      "python-backend/v3": {
+        "false_senior": "0/112",
+        "false_middle_or_higher": "0/56",
+        "missed_senior": "81/112",
+        "false_middle": "0/56",
+        "missed_senior_per_q1": "40/56",
+        "missed_senior_per_q2": "41/56",
+        "missed_middle": "11/56",
+        "missed_middle_per_q1": "11/28",
+        "overrated_any": "0/224"
+      },
+      "python-backend/v4": {
+        "false_senior": "0/112",
+        "false_middle_or_higher": "0/56",
+        "missed_senior": "14/112",
+        "false_middle": "0/56",
+        "missed_senior_per_q1": "14/56",
+        "missed_senior_per_q2": "0/56",
+        "missed_middle": "0/56",
+        "missed_middle_per_q1": "0/28",
+        "overrated_any": "0/224"
+      }
+    },
+    "usage": {
+      "avg_questions": 35.89,
+      "avg_topics": 10.0,
+      "max_questions": 47,
+      "max_topics": 10,
+      "max_per_topic": 5,
+      "difficulty": {
+        "BASIC": 2751,
+        "INTERMEDIATE": 460,
+        "ADVANCED": 4829
+      },
+      "senior_desired_junior_advanced": "48/48"
+    },
+    "distribution_v4": {
+      "senior|per_q=1": {
+        "MIDDLE": 2,
+        "SENIOR": 12
+      },
+      "senior|per_q=2": {
+        "SENIOR": 14
+      },
+      "senior-no-kafka|per_q=1": {
+        "MIDDLE": 3,
+        "SENIOR": 11
+      },
+      "senior-no-kafka|per_q=2": {
+        "SENIOR": 14
+      },
+      "senior-no-aws|per_q=1": {
+        "MIDDLE": 7,
+        "SENIOR": 7
+      },
+      "senior-no-aws|per_q=2": {
+        "SENIOR": 14
+      },
+      "senior-weak-git|per_q=1": {
+        "MIDDLE": 2,
+        "SENIOR": 12
+      },
+      "senior-weak-git|per_q=2": {
+        "SENIOR": 14
+      },
+      "middle|per_q=1": {
+        "MIDDLE": 14
+      },
+      "middle|per_q=2": {
+        "MIDDLE": 14
+      },
+      "weak-senior|per_q=1": {
+        "MIDDLE": 14
+      },
+      "weak-senior|per_q=2": {
+        "MIDDLE": 14
+      },
+      "junior|per_q=1": {
+        "JUNIOR": 12,
+        "UNKNOWN": 2
+      },
+      "junior|per_q=2": {
+        "JUNIOR": 14
+      },
+      "weak|per_q=1": {
+        "UNKNOWN": 14
+      },
+      "weak|per_q=2": {
+        "UNKNOWN": 14
+      }
+    },
+    "missed_senior": {
+      "n_missed": 14,
+      "by_assessed": {
+        "MIDDLE": 14
+      },
+      "by_profile_per_q": {
+        "senior|per_q=1": 2,
+        "senior-no-kafka|per_q=1": 3,
+        "senior-no-aws|per_q=1": 7,
+        "senior-weak-git|per_q=1": 2
+      },
+      "by_cause": {
+        "SENIOR:TECHNICAL_POOLS_BELOW_MIN": 14,
+        "SENIOR:TOO_FEW_COMPETENCIES": 8,
+        "SENIOR:REQUIRED_CAPABILITY_UNCONFIRMED": 1,
+        "DATA_LAYER:SINGLE_CONFIRMATION": 1
+      },
+      "postgresql_not_visited": 0,
+      "with_fallback_questions": 0,
+      "avg_fallback_questions_missed": 0.0,
+      "avg_fallback_questions_reached": 0.0,
+      "never_targeted_senior_members": {}
+    },
+    "api_equals_recomputed_v4": true
+  }
+}
