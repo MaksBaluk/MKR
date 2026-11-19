@@ -1,4 +1,5 @@
-"""Policy python-backend/v2 (§3e): pooled critical units, count thresholds; v1 stays byte-identical and addressable."""
+"""Policy python-backend/v2 (§3e): pooled critical units, count thresholds; v1 stays byte-identical and addressable.
+v2 is no longer current (v3 is, tests/test_seniority_policy_v3.py); these tests keep v2 behaviour fixed for stored rows."""
 import json
 from pathlib import Path
 
@@ -40,13 +41,13 @@ def test_v1_results_byte_identical_to_golden():
 
 # --- registry ------------------------------------------------------------------------------------------------------
 
-def test_registry_current_is_v2_and_v1_stays_addressable():
-    assert policy_for("python") is V2 and (V2.policy_id, V2.version, V2.status) == (
-        "python-backend", "v2", "WORKING_ASSUMPTION")
+def test_registry_v2_and_v1_stay_addressable():
+    assert policy_for("python") is not V2  # v3 is current since 2026-11-19; v2 rows keep their meaning
+    assert (V2.policy_id, V2.version, V2.status) == ("python-backend", "v2", "WORKING_ASSUMPTION")
     assert policy_by_version("python-backend", "v1") is PYTHON_BACKEND_V1
     assert policy_by_version("python-backend", "v2") is V2
     assert policy_by_version("python-backend", "v9") is None and policy_by_version(None, None) is None
-    assert set(POLICY_VERSIONS) == {("python-backend", "v1"), ("python-backend", "v2")}
+    assert {("python-backend", "v1"), ("python-backend", "v2")} <= set(POLICY_VERSIONS)
     assert PYTHON_BACKEND_V1.version == "v1" and all(not r.pools for r in PYTHON_BACKEND_V1.rules)
 
 

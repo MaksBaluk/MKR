@@ -1,6 +1,6 @@
 """Level probe (§3e): within the topic Q_t already chose, put criteria that are critical for the lowest level not yet
 SUPPORTED first, and name that level's unassessed practice criteria as a hint for the Interviewer. For a pooled policy
-(v2) "critical" means the members of that level's pools that are not CONFIRMED yet.
+(v2, v3) "critical" means the members of that level's pools that are not CONFIRMED yet.
 
 Pure. It only reorders and annotates: membership of `unmet`, topic choice, budgets, caps and difficulty are untouched.
 Without a level policy (or without an estimate) the input comes back unchanged and there are no practice gaps.

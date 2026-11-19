@@ -137,12 +137,21 @@ PYTHON_BACKEND_V2 = SeniorityPolicy(
         )),
     ))
 
+# v3 = v2 pools with a lower Senior bar (owner decision: Senior was out of reach on the topics Q_t picks). Junior and
+# Middle rules are the v2 objects. Senior counts are ceil(share * 14 pools) with the chosen shares .60/.50 -> 9/7, and
+# min_competencies 4 -> 3: one topic confirms at most two Senior pools, so three different tools are still required.
+# Lowering means Senior needs less evidence; the numbers are a working assumption, not measured or calibrated.
+_J2, _M2, _S2 = PYTHON_BACKEND_V2.rules
+PYTHON_BACKEND_V3 = SeniorityPolicy(
+    policy_id="python-backend", version="v3", track="python", status="WORKING_ASSUMPTION",
+    rules=(_J2, _M2, pooled(Level.SENIOR, _S2.tau, 9, 7, 3, _S2.pools)))
+
 # Every policy version ever used to store a level stays addressable, so stored rows keep their meaning.
 POLICY_VERSIONS: dict[tuple[str, str], SeniorityPolicy] = {
-    (p.policy_id, p.version): p for p in (PYTHON_BACKEND_V1, PYTHON_BACKEND_V2)}
+    (p.policy_id, p.version): p for p in (PYTHON_BACKEND_V1, PYTHON_BACKEND_V2, PYTHON_BACKEND_V3)}
 
 # Current policy per track: new finalizations use it. Marketing and design have none (unreviewed rubrics).
-POLICIES: dict[str, SeniorityPolicy | None] = {"python": PYTHON_BACKEND_V2, "marketing": None, "design": None}
+POLICIES: dict[str, SeniorityPolicy | None] = {"python": PYTHON_BACKEND_V3, "marketing": None, "design": None}
 
 
 def policy_for(track: str | None) -> SeniorityPolicy | None:

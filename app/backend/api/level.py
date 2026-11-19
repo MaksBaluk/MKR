@@ -127,7 +127,7 @@ def level_payload(db: Session, row: SeniorityAssessment) -> dict:
                       "unassessed": [item(x) for x in c["unassessed_ids"]],
                       **({"pools": [pool(p) for p in c["pools"]]} if "pools" in c else {})}
                 for lvl, c in r["coverage_by_level"].items()}
-    # Pooled policies (v2): the "not checked" list names whole capabilities (pool titles), not every alternative tool.
+    # Pooled policies (v2, v3): the "not checked" list names whole capabilities (pool titles), not every alternative tool.
     unassessed = set(r["unassessed_criteria"])
     unassessed_pools = list({p["pool_id"]: {"id": p["pool_id"], "title": p["title"]}
                              for c in r["coverage_by_level"].values() for p in c.get("pools", ())

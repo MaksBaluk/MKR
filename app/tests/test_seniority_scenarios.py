@@ -1,6 +1,6 @@
 """End-to-end level scenarios (SIMULATED evaluator) through the real API: profile, cohort, interview, finish, /level.
 
-All scenarios run on the full system-selected python cohort under the current policy python-backend/v2."""
+All scenarios run on the full system-selected python cohort under the current policy python-backend/v3."""
 import pytest
 
 from scripts.seniority_scenarios import LABEL, SCENARIOS, build
@@ -27,7 +27,7 @@ def test_scenarios_are_labelled_simulated():
 def test_scenario_level_and_status(results, sc):
     r = results[sc.sid]
     assert r["status"] == "FINISHED" and r["cohort"] == "SYSTEM_COHORT" and r["vacancies"] == 90
-    assert r["level"]["policy"]["version"] == "v2"
+    assert r["level"]["policy"]["version"] == "v3"
     assert _got(r) == tuple(r["expected"])
     assert {k: v for k, v in _statuses(r).items() if k in sc.expected_levels} == sc.expected_levels
 
@@ -69,3 +69,18 @@ def test_s3_strong_answers_without_coverage_stay_unknown(results):
     assert r["questions"] == 3 and r["level"]["critical_gaps"] == []
     assert all(e["score"] >= 0.95 for e in r["evidence"].values() if e["score"] is not None)
     assert all(c["status"] == "UNVERIFIED" for c in r["level"]["coverage_by_level"].values())
+
+
+# The same stored evidence re-estimated under the previous policy v2 (comparison only; v3 is what the API stores).
+V2_LEVELS = {"P1": "SENIOR", "P2": "MIDDLE", "P3": "UNKNOWN", "P4": "JUNIOR", "S3": "UNKNOWN", "P5": "MIDDLE"}
+
+
+def test_v2_comparison_differs_only_where_the_senior_bar_moved(results):
+    assert {sid: r["v2_level"] for sid, r in results.items()} == V2_LEVELS
+
+
+def test_p5_six_strong_topics_reach_senior_under_v3_only(results):
+    r = results["P5"]
+    assert r["questions"] == 6 and len(r["topics"]) == 6 and r["v2_level"] == "MIDDLE"
+    senior = r["level"]["coverage_by_level"]["SENIOR"]
+    assert (senior["assessed_count"], senior["confirmed_count"], senior["competencies_confirmed"]) == (10, 10, 3)

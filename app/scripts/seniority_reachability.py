@@ -7,6 +7,8 @@
 3. Partial grading: the first n criteria (rubric order) of each of the k most frequent topics (frequency order), with
    1, 3 or 6 practice criteria confirmed.
 4. Named cases: a run with no data-layer topic (M-1 disclosure) and the 8 always-picked topics.
+5. Minimal number of fully graded topics (measured sequences) for Middle and Senior, per policy and practice count.
+Policies v1, v2 and the current v3 are reported side by side.
 Numbers say what the thresholds imply for given evidence; they do not validate the policy or the evaluator.
 """
 from __future__ import annotations
@@ -22,12 +24,13 @@ if __package__ in (None, ""):
 import scripts.seniority_scenarios as S  # noqa: E402  (sets the throwaway DB and disabled provider first)
 from backend.domain.seniority import CriterionEvidence, estimate  # noqa: E402
 from backend.domain.seniority_policy import (PRACTICE_CRITERIA, PYTHON_BACKEND_V1,  # noqa: E402
-                                             PYTHON_BACKEND_V2)
+                                             PYTHON_BACKEND_V2, PYTHON_BACKEND_V3)
 from backend.seed import read_fixture  # noqa: E402
 from scripts.chapter4.scenarios import Env  # noqa: E402
 
 RUBRIC = {r["action_id"]: [c["criterion_id"] for c in r["criteria"]] for r in read_fixture("rubrics.json")["rubrics"]}
-POLICIES = (PYTHON_BACKEND_V1, PYTHON_BACKEND_V2)
+POLICIES = (PYTHON_BACKEND_V1, PYTHON_BACKEND_V2, PYTHON_BACKEND_V3)
+POOLED = (PYTHON_BACKEND_V2, PYTHON_BACKEND_V3)
 
 
 def _u(seed: object, cid: str) -> float:
@@ -82,7 +85,7 @@ def main() -> None:
 
     sequences = list(dict.fromkeys(tuple(t) for _, _, t in runs))
     print(f"\n2. upper bound: all criteria of the first k picked topics + all practice at 0.9 ({len(sequences)} sequences)")
-    for k in (6, 8, 10):
+    for k in (5, 6, 7, 8, 10):
         outcomes = {p.version: Counter() for p in POLICIES}
         for seq in sequences:
             for p in POLICIES:
@@ -90,13 +93,14 @@ def main() -> None:
         print(f"  k={k:2}: " + "; ".join(f"{v}: {dict(c)}" for v, c in outcomes.items()))
 
     base = list(freq)[:10]  # the ten most frequent topics, in frequency order
-    print(f"\n3. partial grading over the {len(base)} most frequent topics {base} (v2)")
+    print(f"\n3. partial grading over the {len(base)} most frequent topics {base} (v2 | v3)")
     for k in (5, 6, 7, 8, 10):
         for per in (2, 3, 4):
             row = []
             for prac in (1, 3, 6):
-                r = estimate(PYTHON_BACKEND_V2, ev(topic_ids(base[:k], per) + list(PRACTICE_CRITERIA[:prac])))
-                row.append(f"practice{prac}={r.assessed_level}")
+                got = [estimate(p, ev(topic_ids(base[:k], per) + list(PRACTICE_CRITERIA[:prac]))).assessed_level
+                       for p in POOLED]
+                row.append(f"practice{prac}={'|'.join(got)}")
             print(f"  topics={k:2} criteria/topic={per}: " + " ".join(row))
 
     print("\n4. named cases")
@@ -106,7 +110,33 @@ def main() -> None:
     for title, topics in ((f"always-picked {always}", always), (f"no data-layer topic {no_data}", no_data),
                           (f"sql but no postgresql/django {sql_only}", sql_only)):
         for prac in (0, 6):
-            print(f"  {title} practice={prac}: " + line(PYTHON_BACKEND_V2, topic_ids(topics) + list(PRACTICE_CRITERIA[:prac])))
+            for p in POOLED:
+                print(f"  {title} practice={prac}: " + line(p, topic_ids(topics) + list(PRACTICE_CRITERIA[:prac])))
+
+    print(f"\n5. minimal k (all criteria of the first k picked topics) over {len(sequences)} sequences: min/max")
+    for p in POOLED:
+        for prac in (0, 3, 6):
+            mins = {"MIDDLE": [], "SENIOR": []}
+            for seq in sequences:
+                for target in mins:
+                    k = next((k for k in range(1, len(seq) + 1) if rank_of(estimate(
+                        p, ev(topic_ids(seq[:k]) + list(PRACTICE_CRITERIA[:prac]))).assessed_level) >= rank_of(target)),
+                        None)
+                    mins[target].append(k)
+            print(f"  {p.version} practice={prac}: " + "; ".join(
+                f"{t} k={fmt(v)}" for t, v in mins.items()))
+
+
+def rank_of(level: str) -> int:
+    return {"UNKNOWN": -1, "JUNIOR": 0, "MIDDLE": 1, "SENIOR": 2}[level]
+
+
+def fmt(values: list[int | None]) -> str:
+    reached = [v for v in values if v is not None]
+    never = len(values) - len(reached)
+    if not reached:
+        return "never"
+    return f"{min(reached)}..{max(reached)}" + (f" (never in {never})" if never else "")
 
 
 if __name__ == "__main__":

@@ -99,7 +99,7 @@ export interface LevelCriterion {
   kind: 'PRACTICE' | 'COMPETENCY';
 }
 
-/** One critical capability of a pooled level policy (v2): any of its criteria can confirm it. */
+/** One critical capability of a pooled level policy (v2, v3): any of its criteria can confirm it. */
 export interface LevelPool {
   id: string;
   /** Ukrainian capability name. */
@@ -115,7 +115,7 @@ export interface LevelCoverage {
   confirmed: LevelCriterion[];
   gaps: LevelCriterion[];
   unassessed: LevelCriterion[];
-  /** Pooled policies only (v2). */
+  /** Pooled policies only (v2, v3). */
   pools?: (LevelPool & { status: 'CONFIRMED' | 'GAP' | 'UNRESOLVED' | 'UNASSESSED'; criteria: LevelCriterion[] })[];
 }
 
@@ -132,7 +132,7 @@ export interface AssessedLevel {
   confirmed_strengths: LevelCriterion[];
   critical_gaps: LevelCriterion[];
   unassessed_criteria: LevelCriterion[];
-  /** Capabilities with no evidence at all (pooled policies, v2); empty or absent for per-criterion policies (v1). */
+  /** Capabilities with no evidence at all (pooled policies v2, v3); empty or absent for per-criterion policies (v1). */
   unassessed_pools?: LevelPool[];
   evidence_references: (LevelCriterion & { turn_ids: string[] })[];
   /** Ukrainian lines; criterion ids are already replaced by titles on the server. */

@@ -11,7 +11,8 @@ from sqlalchemy.exc import IntegrityError
 from backend.api.core import seniority_evidence
 from backend.api.level import attempt_evidence, finalize_level
 from backend.domain.seniority import estimate, result_to_json
-from backend.domain.seniority_policy import PRACTICE_ACTION, PYTHON_BACKEND_V1, PYTHON_BACKEND_V2, policy_for
+from backend.domain.seniority_policy import (PRACTICE_ACTION, PYTHON_BACKEND_V1, PYTHON_BACKEND_V2, PYTHON_BACKEND_V3,
+                                             policy_for)
 from backend.experiments.config import InterviewMode, config_for
 from backend.experiments.runner import run_experiment
 from backend.models import CoreInterview, CoreTurn, SeniorityAssessment
@@ -19,9 +20,9 @@ from tests.test_level_probe_flow import GOOD, ProbeChat, cand, mixed
 from tests.test_followup_flow import _use
 from tests.test_practice_criteria import API, PracticeChat, _answer, _attempt
 
-CURRENT = PYTHON_BACKEND_V2  # the python track's current policy: new finalizations use it
-V3 = dataclasses.replace(PYTHON_BACKEND_V2, version="v3", rules=tuple(
-    dataclasses.replace(r, tau=0.99) for r in PYTHON_BACKEND_V2.rules))
+CURRENT = PYTHON_BACKEND_V3  # the python track's current policy: new finalizations use it
+V9 = dataclasses.replace(CURRENT, version="v9", rules=tuple(  # a hypothetical future version
+    dataclasses.replace(r, tau=0.99) for r in CURRENT.rules))
 
 
 @pytest.fixture()
@@ -63,7 +64,7 @@ def test_level_stored_on_finish_with_policy_version_and_attempt(client, auth, db
     iv = _finished(client, auth)
     [row] = _rows(db, iv["id"])
     assert (row.interview_id, row.profile_id, row.policy_id, row.policy_version) == (
-        iv["id"], iv["profile_id"], "python-backend", "v2")
+        iv["id"], iv["profile_id"], "python-backend", "v3")
     assert row.created_at is not None and row.policy_status == "WORKING_ASSUMPTION" and row.track == "python"
     with db() as s:
         turns = s.scalars(select(CoreTurn).where(CoreTurn.interview_id == iv["id"])).all()
@@ -80,22 +81,22 @@ def test_auto_finish_also_stores_level(client, db, monkeypatch):
                              client, s)
     with db() as s:
         assert s.get(CoreInterview, rec.interview_id).status == "FINISHED"
-    assert [r.policy_version for r in _rows(db, rec.interview_id)] == ["v2"]
+    assert [r.policy_version for r in _rows(db, rec.interview_id)] == ["v3"]
 
 
 def test_policy_version_change_does_not_rewrite_history(client, auth, db, chat, monkeypatch):
     iv = _finished(client, auth)
     [old] = _rows(db, iv["id"])
-    monkeypatch.setattr("backend.api.level.policy_for", lambda track: V3)
+    monkeypatch.setattr("backend.api.level.policy_for", lambda track: V9)
     got = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
-    assert got["policy"]["version"] == "v2" and len(_rows(db, iv["id"])) == 1  # reading never re-assesses
+    assert got["policy"]["version"] == "v3" and len(_rows(db, iv["id"])) == 1  # reading never re-assesses
     with db() as s:
-        new = finalize_level(s, s.get(CoreInterview, iv["id"]), V3)
-        again = finalize_level(s, s.get(CoreInterview, iv["id"]), V3)
+        new = finalize_level(s, s.get(CoreInterview, iv["id"]), V9)
+        again = finalize_level(s, s.get(CoreInterview, iv["id"]), V9)
         s.commit()
         assert again.id == new.id  # idempotent per (attempt, policy version)
     rows = _rows(db, iv["id"])
-    assert [r.policy_version for r in rows] == ["v2", "v3"]
+    assert [r.policy_version for r in rows] == ["v3", "v9"]
     assert (rows[0].id, rows[0].result, rows[0].created_at) == (old.id, old.result, old.created_at)
 
 
@@ -189,8 +190,8 @@ def test_legacy_finished_attempt_gets_level_lazily(client, auth, db, chat):
         s.commit()
     got = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
     [row] = _rows(db, iv["id"])
-    assert got["policy"] == {"id": "python-backend", "version": "v2", "status": "WORKING_ASSUMPTION"}
-    assert got["note"] == "Потребує експертної валідації" and got["created_at"] and row.policy_version == "v2"
+    assert got["policy"] == {"id": "python-backend", "version": "v3", "status": "WORKING_ASSUMPTION"}
+    assert got["note"] == "Потребує експертної валідації" and got["created_at"] and row.policy_version == "v3"
     assert client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json() == got
 
 
@@ -416,13 +417,13 @@ def test_level_independent_of_partial_topic_coverage(client, auth, db, monkeypat
     assert _level_without_timestamp(again) == _level_without_timestamp(level)
 
 
-# --- policy v2 is current; v1 rows stay as stored --------------------------------------------------------------------
+# --- policy v3 is current; v1 and v2 rows stay as stored --------------------------------------------------------------------
 
-def test_new_attempt_stores_v2_and_payload_names_pools_in_ukrainian(client, auth, db, chat):
+def test_new_attempt_stores_v3_and_payload_names_pools_in_ukrainian(client, auth, db, chat):
     assert policy_for("python") is CURRENT
     iv = _finished(client, auth)
     [row] = _rows(db, iv["id"])
-    assert row.policy_version == "v2"
+    assert row.policy_version == "v3"
     level = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
     for cov in level["coverage_by_level"].values():
         assert cov["pools"] and all(p["title"] and "." not in p["title"] for p in cov["pools"])
@@ -443,18 +444,40 @@ def test_v1_row_of_old_attempt_is_kept_and_rendered(client, auth, db, chat):
     assert got["policy"]["version"] == "v1" and got["unassessed_pools"] == []
     assert all("pools" not in c for c in got["coverage_by_level"].values())
     assert [(r.id, r.policy_version, r.result) for r in _rows(db, iv["id"])] == [(v1_id, "v1", v1_result)]
-    with db() as s:  # an explicit v2 finalization adds a row; the v1 row is untouched and the current one is shown
+    with db() as s:  # an explicit current finalization adds a row; the v1 row is untouched and the current one is shown
         finalize_level(s, s.get(CoreInterview, iv["id"]))
         s.commit()
     rows = _rows(db, iv["id"])
-    assert [r.policy_version for r in rows] == ["v1", "v2"] and (rows[0].id, rows[0].result) == (v1_id, v1_result)
-    assert client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()["policy"]["version"] == "v2"
+    assert [r.policy_version for r in rows] == ["v1", "v3"] and (rows[0].id, rows[0].result) == (v1_id, v1_result)
+    assert client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()["policy"]["version"] == "v3"
+
+
+def test_v2_row_of_old_attempt_is_kept_and_rendered_with_its_own_pools(client, auth, db, chat):
+    iv = _finished(client, auth)
+    with db() as s:  # simulate an attempt finished before v3: only a v2 row exists
+        s.execute(delete(SeniorityAssessment))
+        v2 = finalize_level(s, s.get(CoreInterview, iv["id"]), PYTHON_BACKEND_V2)
+        s.commit()
+        v2_id, v2_result = v2.id, v2.result
+        assert v2_result == result_to_json(estimate(PYTHON_BACKEND_V2, attempt_evidence(s, iv["id"])))
+    got = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
+    assert got["policy"] == {"id": "python-backend", "version": "v2", "status": "WORKING_ASSUMPTION"}
+    assert all(cov["pools"] for cov in got["coverage_by_level"].values()) and got["assessed_level"] == v2_result[
+        "assessed_level"]
+    assert [(r.id, r.policy_version, r.result) for r in _rows(db, iv["id"])] == [(v2_id, "v2", v2_result)]
+    with db() as s:  # a new v3 finalization adds a row; the v2 row is never rewritten
+        finalize_level(s, s.get(CoreInterview, iv["id"]))
+        s.commit()
+    rows = _rows(db, iv["id"])
+    assert [r.policy_version for r in rows] == ["v2", "v3"] and (rows[0].id, rows[0].result) == (v2_id, v2_result)
+    assert client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()["policy"]["version"] == "v3"
 
 
 def test_current_policy_row_wins_regardless_of_creation_order(client, auth, db, chat):
-    iv = _finished(client, auth)  # v2 row first
+    iv = _finished(client, auth)  # v3 row first
     with db() as s:
-        finalize_level(s, s.get(CoreInterview, iv["id"]), PYTHON_BACKEND_V1)  # v1 row stored later
+        finalize_level(s, s.get(CoreInterview, iv["id"]), PYTHON_BACKEND_V1)  # v1 and v2 rows stored later
+        finalize_level(s, s.get(CoreInterview, iv["id"]), PYTHON_BACKEND_V2)
         s.commit()
-    assert [r.policy_version for r in _rows(db, iv["id"])] == ["v2", "v1"]
-    assert client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()["policy"]["version"] == "v2"
+    assert [r.policy_version for r in _rows(db, iv["id"])] == ["v3", "v1", "v2"]
+    assert client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()["policy"]["version"] == "v3"

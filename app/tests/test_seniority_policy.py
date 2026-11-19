@@ -24,7 +24,7 @@ def test_policy_levels_are_hierarchical_and_ids_exist():
 def test_policy_is_versioned_and_flagged():
     p = PYTHON_BACKEND_V1
     assert (p.policy_id, p.version, p.status) == ("python-backend", "v1", "WORKING_ASSUMPTION")
-    assert policy_by_version("python-backend", "v1") is p  # still addressable; the current python policy is v2
+    assert policy_by_version("python-backend", "v1") is p  # still addressable; the current python policy is v3
 
 
 def test_marketing_design_have_no_policy():
