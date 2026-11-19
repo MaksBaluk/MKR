@@ -62,6 +62,8 @@ def test_v2_pools_use_existing_ids_titles_and_hierarchy():
         assert len(members) == len(set(members)), "a criterion belongs to at most one pool per level"
         for p in rule.pools:
             assert p.members and p.title and not any(ch in p.title for ch in "._")  # human Ukrainian title
+            prefixes = [c.split(".", 1)[0] for c in p.members]
+            assert len(prefixes) == len(set(prefixes)), f"{p.pool_id}: any-of only across different tools"
             for c in p.members:
                 assert c in (set(PRACTICE_CRITERIA) if c.startswith(PRACTICE_ACTION + ".") else base), c
     assert [rank(r.level) for r in V2.rules] == [0, 1, 2]
@@ -156,6 +158,17 @@ def test_pooled_result_json_has_pools_with_titles():
     assert json.loads(json.dumps(data)) == data
 
 
+def test_same_tool_gap_is_never_hidden_by_a_sibling_skill():
+    """Review I-1: errors=0.1 and sql.correctness=0.1 (with turns) next to strong idioms/joins must stay visible gaps."""
+    strong = {c: 0.9 for r in V2.rules for c in r.critical}
+    r = estimate(V2, ev({**strong, "python-core.errors": 0.1, "sql.correctness": 0.1}))
+    assert (r.assessed_level, r.assessment_status) == ("UNKNOWN", "GAPS_AT_JUNIOR")
+    assert {"python-core.errors", "sql.correctness"} <= set(r.critical_gaps)
+    assert r.coverage_by_level["JUNIOR"].status == "GAP"
+    v1 = estimate(PYTHON_BACKEND_V1, ev({**strong, "python-core.errors": 0.1, "sql.correctness": 0.1}))
+    assert v1.assessment_status == "GAPS_AT_JUNIOR"  # same verdict as v1
+
+
 def test_v2_middle_reachable_with_market_topics_only():
     """The topics Q_t picks on the full cohort (measured): no sqlalchemy/celery/pytest/async/observability."""
     topics = ("python-core", "kafka", "fastapi", "ci-cd", "sql", "aws", "docker", "postgresql")
@@ -193,3 +206,13 @@ def test_probe_targets_unmet_pools_only():
 def test_estimate_is_deterministic(policy):
     e = cases()[5]
     assert result_to_json(estimate(policy, e)) == result_to_json(estimate(policy, e))
+
+
+def test_no_data_layer_evidence_never_assigns_middle():
+    """Review M-1: without sql/postgresql/django/sqlalchemy the Junior SQL pools stay unassessed, so the chain stops
+    before Middle even though the Middle coverage alone may be SUPPORTED (disclosed in MATH_SPEC §3e)."""
+    rubric = {r["action_id"]: [c["criterion_id"] for c in r["criteria"]] for r in read_fixture("rubrics.json")["rubrics"]}
+    topics = ("python-core", "kafka", "fastapi", "ci-cd", "aws", "docker")
+    r = estimate(V2, ev({c: 0.9 for t in topics for c in rubric[t]} | {c: 0.9 for c in PRACTICE_CRITERIA}))
+    assert r.assessed_level == "UNKNOWN" and r.coverage_by_level["JUNIOR"].status == "UNVERIFIED"
+    assert r.coverage_by_level["MIDDLE"].status == "SUPPORTED"  # the documented weakness of Middle alone

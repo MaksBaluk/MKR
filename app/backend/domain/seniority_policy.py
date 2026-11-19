@@ -76,19 +76,25 @@ PYTHON_BACKEND_V1 = SeniorityPolicy(
     ))
 
 _P = CriterionPool
+# Any-of only across different tools: the members of one pool always have distinct competency prefixes, so two skills of
+# one tool (e.g. sql.joins and sql.correctness) are never alternatives and a gap in one is never hidden by the other.
+# Counts are ceil(share * pools) with the owner-chosen shares Junior .75/.75, Middle .70/.60, Senior .75/.70
+# (lowered from v1; not calibrated).
 PYTHON_BACKEND_V2 = SeniorityPolicy(
     policy_id="python-backend", version="v2", track="python", status="WORKING_ASSUMPTION",
     rules=(
-        pooled(Level.JUNIOR, 0.50, 5, 5, 3, (
-            _P("python-basics", "Базове володіння Python", ("python-core.idioms", "python-core.errors")),
-            _P("data-queries", "Запити до реляційних даних", ("sql.joins", "sql.correctness", "sql.aggregation")),
+        pooled(Level.JUNIOR, 0.50, 7, 7, 3, (
+            _P("python-idioms", "Ідіоматичний код Python", ("python-core.idioms",)),
+            _P("python-errors", "Обробка помилок у Python", ("python-core.errors",)),
+            _P("sql-joins", "З'єднання таблиць у запитах", ("sql.joins",)),
+            _P("sql-correctness", "Коректність результатів запитів", ("sql.correctness",)),
             _P("api-contract", "Контракт і валідація API", ("rest-api.contract", "fastapi.validation")),
             _P("code-testing", "Перевірка коректності коду", ("python-core.testing", "pytest.structure")),
-            _P("build-run", "Збирання й запуск сервісу",
-               ("docker.images", "docker.compose", "ci-cd.pipeline", "git.branching")),
+            _P("build-pipeline", "Збирання сервісу", ("docker.images", "ci-cd.pipeline")),
+            _P("version-control", "Робота з гілками в Git", ("git.branching",)),
             _P("practice-independence", "Самостійність у виконанні задач", ("practice-backend.independence",)),
         )),
-        pooled(Level.MIDDLE, 0.70, 10, 8, 5, (
+        pooled(Level.MIDDLE, 0.70, 10, 9, 5, (
             _P("typed-contracts", "Типізація та контракти коду", ("python-core.typing",)),
             _P("query-efficiency", "Ефективність запитів і доступу до даних",
                ("postgresql.indexes", "sql.performance", "sqlalchemy.loading", "django.orm")),
@@ -97,35 +103,31 @@ PYTHON_BACKEND_V2 = SeniorityPolicy(
             _P("schema-design", "Проєктування схеми даних", ("postgresql.schema", "sqlalchemy.models")),
             _P("service-design", "Структура сервісу та API",
                ("fastapi.dependencies", "rest-api.pagination", "django.architecture")),
-            _P("async-io", "Асинхронна робота без блокувань",
-               ("fastapi.async", "async-python.blocking", "async-python.eventloop")),
+            _P("async-io", "Асинхронна робота без блокувань", ("fastapi.async", "async-python.blocking")),
             _P("test-isolation", "Ізольовані тести сервісу",
                ("pytest.isolation", "fastapi.testing", "async-python.testing")),
             _P("deploy-config", "Конфігурація та розгортання",
                ("docker.runtime", "ci-cd.deploy", "aws.deploy", "kubernetes.workloads")),
-            _P("async-processing", "Обробка подій і фонових задач",
-               ("kafka.consumers", "celery.design", "celery.retries", "redis.caching")),
-            _P("input-security", "Безпека вхідних даних і секретів",
-               ("app-security.input", "app-security.secrets", "docker.security")),
+            _P("event-consumers", "Споживачі подій і фонові задачі", ("kafka.consumers", "celery.design")),
+            _P("failure-handling", "Обробка збоїв і повторні спроби", ("kafka.errors", "celery.retries")),
+            _P("secure-config", "Безпека контейнерів і секретів", ("docker.security", "app-security.secrets")),
             _P("practice-independence", "Самостійність у виконанні задач", ("practice-backend.independence",)),
             _P("practice-rationale", "Обґрунтування рішень", ("practice-backend.rationale",)),
             _P("practice-diagnosis", "Діагностика проблем", ("practice-backend.diagnosis",)),
         )),
-        pooled(Level.SENIOR, 0.75, 10, 10, 4, (
-            _P("db-operations", "Експлуатація й безпечні зміни бази даних",
-               ("postgresql.operations", "postgresql.migrations", "django.migrations")),
+        pooled(Level.SENIOR, 0.75, 11, 10, 4, (
+            _P("db-operations", "Експлуатація бази даних", ("postgresql.operations",)),
+            _P("schema-migrations", "Безпечні зміни схеми", ("postgresql.migrations", "django.migrations")),
             _P("concurrency", "Конкурентний доступ і паралельність",
                ("sqlalchemy.concurrency", "async-python.concurrency")),
-            _P("delivery-reliability", "Надійна доставка повідомлень і задач",
-               ("kafka.semantics", "kafka.errors", "celery.idempotency", "redis.reliability")),
+            _P("delivery-guarantees", "Гарантії доставки повідомлень і задач",
+               ("kafka.semantics", "celery.idempotency", "redis.reliability")),
             _P("release-safety", "Безпечні релізи та відкат", ("ci-cd.safety",)),
             _P("access-security", "Безпека доступу та авторизація",
                ("app-security.authz", "rest-api.security", "aws.iam", "django.permissions", "kubernetes.security")),
             _P("incident-diagnosis", "Розслідування інцидентів у продакшені",
-               ("observability.incidents", "observability.tracing", "linux.diagnostics",
-                "kubernetes.troubleshooting")),
-            _P("architecture-tradeoffs", "Вибір інфраструктури з урахуванням вартості й надійності",
-               ("aws.services", "aws.cost")),
+               ("observability.incidents", "linux.diagnostics", "kubernetes.troubleshooting")),
+            _P("cost-reliability", "Вартість і надійність інфраструктури", ("aws.cost",)),
             _P("contract-evolution", "Сумісність контрактів під час змін", ("rest-api.versioning", "kafka.schemas")),
             _P("practice-tradeoffs", "Аналіз компромісів", ("practice-backend.tradeoffs",)),
             _P("practice-ambiguity", "Робота з невизначеністю", ("practice-backend.ambiguity",)),
