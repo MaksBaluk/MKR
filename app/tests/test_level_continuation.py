@@ -29,6 +29,9 @@ def test_lowest_open_level_and_the_next_one_are_probed():
     assert r.coverage_by_level["JUNIOR"].status == "SUPPORTED"
     # Junior supported: Middle + Senior pools, so db-operations and schema-migrations are asked too
     assert targets(junior) == PG
+    # WS-1 fix: a replicated Senior pool confirmed by one answer only gets its second answer first
+    one = {**junior, "postgresql.operations": .9}
+    assert targets(one, asked={"postgresql.operations": 1})[0] == "postgresql.operations"
 
 
 def test_confirmed_weak_and_twice_asked_criteria_do_not_keep_a_topic_open():

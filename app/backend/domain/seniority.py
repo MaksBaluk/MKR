@@ -13,8 +13,8 @@ from statistics import median
 from typing import Literal
 
 from backend.domain.criteria import epsilon
-from backend.domain.seniority_policy import (PRACTICE_ACTION, CriterionPool, Level, LevelRule, SeniorityPolicy,
-                                             rank)
+from backend.domain.seniority_policy import (MIN_CONFIRMING_TURNS, PRACTICE_ACTION, CriterionPool, Level, LevelRule,
+                                             SeniorityPolicy, rank)
 
 LevelName = Literal["JUNIOR", "MIDDLE", "SENIOR", "UNKNOWN"]
 LevelStatus = Literal["SUPPORTED", "GAP", "UNVERIFIED"]
@@ -33,6 +33,9 @@ class CriterionEvidence:
     evidence_turns: tuple[str, ...] = ()
     declined: bool = False  # topic criterion: validated Evaluator flag no_experience on the effective revision
     topic_scores: tuple[float, ...] = ()  # practice criterion: traced score per source topic, descending (v4 uses it)
+    # Topic criterion: (score, quoted turn ids) of every non-null revision, sorted (v4 replicated pools use it).
+    # Empty (evidence built by hand or legacy): one revision (score, evidence_turns) is assumed.
+    scored_turns: tuple[tuple[float, tuple[str, ...]], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -173,7 +176,16 @@ def _is_practice(cid: str) -> bool:
     return cid.startswith(f"{PRACTICE_ACTION}.")
 
 
-def _member(rule: LevelRule, cid: str, evidence: Mapping[str, CriterionEvidence]) -> str:
+def _confirming_turns(item: CriterionEvidence, tau: float) -> set[str]:
+    """Distinct answers that confirm a criterion at `tau`: turns quoted by revisions scored >= tau, minus turns that any
+    revision scored below tau also quoted (a re-graded weak answer is not a confirmation). Order-independent."""
+    revs = item.scored_turns or ((item.score, item.evidence_turns),)
+    high = {t for s, ts in revs if s >= tau for t in ts}
+    low = {t for s, ts in revs if s < tau for t in ts}
+    return high - low
+
+
+def _member(rule: LevelRule, cid: str, evidence: Mapping[str, CriterionEvidence], replicated: bool = False) -> str:
     """State of one pool member under a capability rule: CONF, WEAK, NOEXP, BORDER or NONE (no score).
     Practice is classified by the median of its per-source-topic scores (D-5: one strong topic no longer outweighs
     weaker ones, as the v1-v3 maximum did); an even count takes the mean of the middle two; a practice score with no
@@ -189,6 +201,8 @@ def _member(rule: LevelRule, cid: str, evidence: Mapping[str, CriterionEvidence]
         return "CONF" if s >= tau else "WEAK" if s < low else "BORDER"
     if not item.evidence_turns:
         return "BORDER"  # a score without an evidence turn is never a confirmation nor a gap
+    if item.score >= tau and replicated and len(_confirming_turns(item, tau)) < MIN_CONFIRMING_TURNS:
+        return "BORDER"  # WS-1: one confirming answer in a replicated pool is not yet a confirmation
     return ("CONF" if item.score >= tau else "NOEXP" if item.declined else "WEAK" if item.score < low
             else "BORDER")
 
@@ -200,7 +214,8 @@ def _capability_pool(rule: LevelRule, pool: CriterionPool, evidence: Mapping[str
     a declaration must never beat trying): NO_EXPERIENCE if every scored member is a declaration, else UNRESOLVED.
     Neither gives credit or a gap. A hard pool (rule.hard_pools) needs no alternative: a weak try or a declaration is a
     GAP at once. UNASSESSED: no member scored."""
-    st = {cid: _member(rule, cid, evidence) for cid in pool.members}
+    replicated = pool.pool_id in rule.replicated_pools
+    st = {cid: _member(rule, cid, evidence, replicated) for cid in pool.members}
     by = {k: tuple(c for c, v in st.items() if v == k) for k in ("CONF", "WEAK", "NOEXP", "BORDER", "NONE")}
     # A hard-critical capability must be shown in the tool that was asked: no waiting for an alternative there.
     all_asked = not by["NONE"] or pool.pool_id in rule.hard_pools

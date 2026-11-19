@@ -24,7 +24,8 @@ from backend.domain.difficulty import (DEFAULT_CONFIG, ControllerState, Difficul
 from backend.domain.interview_budget import MIN_SHOWN_QUESTIONS_PER_ACTION, topic_open_for_question
 from backend.domain.market import VacancyInput, compute_market
 from backend.domain.planner import choose_next
-from backend.domain.level_probe import MAX_ASKS_PER_CRITERION, continuation_targets, practice_gaps, probe_order
+from backend.domain.level_probe import (MAX_ASKS_PER_CRITERION, continuation_targets, practice_gaps, probe_order,
+                                        replicated_members)
 from backend.domain.seniority import CriterionEvidence, estimate
 from backend.domain.seniority_policy import PRACTICE_ACTION, SeniorityPolicy, policy_by_version, policy_for
 from backend.experiments.config import ExperimentConfig, InterviewMode
@@ -110,7 +111,9 @@ def seniority_evidence(rows, turn_topics: Mapping[str, str]) -> dict[str, Criter
     quotes no turn is kept only when no traced score exists; it then has no evidence turn and stays unresolved.
     `score` (max) is what policies v1-v3 read. Policy v4 reads `topic_scores` instead (every traced per-topic score,
     descending) and classifies their median (MATH_SPEC §3e v4, audit D-5); topic criteria additionally carry
-    `declined`: the effective revision carries the validated Evaluator flag `no_experience` (legacy rows: never)."""
+    `declined`: the effective revision carries the validated Evaluator flag `no_experience` (legacy rows: never), and
+    `scored_turns`: (score, quoted turn ids) of every non-null revision, sorted, so v4 replicated pools can count
+    distinct confirming answers (WS-1 fix)."""
     turns: dict[str, set[str]] = {}
     for r in current_criteria_rows(rows):
         if r.score is not None:
@@ -125,13 +128,17 @@ def seniority_evidence(rows, turn_topics: Mapping[str, str]) -> dict[str, Criter
             if r.score is not None:
                 topic = next((turn_topics[t] for t in _turn_ids(r) if t in turn_topics), None)
                 per_topic[r.criterion_id][topic] = r.score
+    scored: dict[str, list[tuple[float, tuple[str, ...]]]] = {}
+    for r in current_criteria_rows(rows):
+        if r.action_id != PRACTICE_ACTION and r.score is not None:
+            scored.setdefault(r.criterion_id, []).append((r.score, tuple(sorted(set(_turn_ids(r))))))
     spread: dict[str, tuple[float, ...]] = {}
     for cid, by_topic in per_topic.items():
         traced = [v for k, v in by_topic.items() if k is not None]
         out[cid] = max(traced) if traced else by_topic.get(None)
         spread[cid] = tuple(sorted(traced, reverse=True))
     return {cid: CriterionEvidence(cid, score, tuple(sorted(turns.get(cid, ()))) if score is not None else (),
-                                   cid in declined, spread.get(cid, ()))
+                                   cid in declined, spread.get(cid, ()), tuple(sorted(scored.get(cid, ()))))
             for cid, score in out.items()}
 
 
@@ -394,8 +401,10 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
                     goal = None
             # D-2: a goal that keeps re-asking criteria already in focus of MAX_ASKS questions yields to Python's level
             # continuation when unresolved level-critical criteria remain (no level policy: never applies).
-            if goal is not None and level_targets(a) and all(asked(a).get(c, 0) >= MAX_ASKS_PER_CRITERION
-                                                             for c in goal.criterion_ids):
+            # WS-1 fix: a pending decisive target (replicated Senior data-layer pool) also wins over the goal.
+            if goal is not None and level_targets(a) and (
+                    level_targets(a)[0] in replicated_members(policy)
+                    or all(asked(a).get(c, 0) >= MAX_ASKS_PER_CRITERION for c in goal.criterion_ids)):
                 goal = None
             goal_memo[a] = goal
         return goal_memo[a]
@@ -411,12 +420,12 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
     focus = DEFAULT_CONFIG.focus
 
     def asked(a: str) -> dict[str, int]:
-        """How many graded questions of topic `a` had each criterion in focus (the first targeted ones)."""
+        """How many answered questions of topic `a` led with each criterion (first targeted criterion: the one a
+        narrow question must cover; the second focus slot is optional for the Interviewer and is not counted)."""
         out: dict[str, int] = {}
         for t in turns:
             if t.action_id == a and t.answer_text and t.target_criteria:
-                for c in t.target_criteria[:focus]:
-                    out[c] = out.get(c, 0) + 1
+                out[t.target_criteria[0]] = out.get(t.target_criteria[0], 0) + 1
         return out
 
     def weak_answers(a: str) -> bool:
@@ -440,9 +449,14 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         """Python-owned continuation (D-2): unresolved level-critical criteria of the topic, unless answers are weak."""
         if a not in level_memo:
             level_memo[a] = ([] if probe is None or a not in latest_in_session or weak_answers(a) else
-                             [c for c in continuation_targets(policy, probe, criteria_for(db, a), cscores, asked(a))
-                              if c in set(open_ids(a))])
+                             continuation_targets(policy, probe, criteria_for(db, a), cscores, asked(a)))
         return level_memo[a]
+
+    def with_level(a: str) -> list[str]:
+        """Open criteria plus level targets that are not open: a criterion of a replicated pool confirmed by one answer
+        only (score >= .75) is re-asked for a second, independent example (WS-1 fix); otherwise equal to open_ids."""
+        extra = [c for c in level_targets(a) if c not in set(open_ids(a))] if level_open(a) else []
+        return open_ids(a) + extra
 
     def level_open(a: str) -> bool:
         """Only the topic just answered is kept open by the level rule; older topics behave as before."""
@@ -477,7 +491,7 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
                 st = ControllerState(start_level if legacy else Difficulty(last.difficulty), len(mine), history)
                 d = next_step(st, DEFAULT_CONFIG, targeted=last.target_criteria or [], scores=cscores,
                               topic_score=latest_in_session.get(a), sufficient=sufficient.get(a, False),
-                              open_criteria=open_ids(a), goal_open=goal_for(a) is not None, level_open=level_open(a))
+                              open_criteria=with_level(a), goal_open=goal_for(a) is not None, level_open=level_open(a))
                 if legacy:
                     d = DifficultyDecision(start_level, "LEGACY_RESTART", d.action, d.target_criteria)
                 decision_memo[a] = st, d
@@ -543,7 +557,8 @@ def next_question(interview_id: str, data: VersionBody, db: Session = Depends(ge
         lead = (continuation_targets(policy, probe, criteria_for(db, action), cscores, asked(action))
                 if probe is not None and not (action in latest_in_session and weak_answers(action)) else [])
         # a validated follow-up goal wins: practice gaps are hinted only when no goal drives the question
-        unmet, gaps = probe_order(open_ids(action), policy, probe, lead), [] if goal else practice_gaps(policy, probe)
+        topic_open = open_ids(action) + [c for c in lead if c not in set(open_ids(action))]
+        unmet, gaps = probe_order(topic_open, policy, probe, lead), [] if goal else practice_gaps(policy, probe)
     else:  # slot i of k targets a fixed round-robin share of the rubric (all criteria if the share is empty)
         crit = criteria_for(db, action)
         unmet, goal = list(slot_targets(crit, k, shown.get(action, 0)) or crit), None

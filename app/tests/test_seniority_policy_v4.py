@@ -20,9 +20,10 @@ RUBRIC = {r["action_id"]: [c["criterion_id"] for c in r["criteria"]] for r in re
 PR = {c.split(".", 1)[1]: c for c in PRACTICE_CRITERIA}
 
 
-def ev(scores: dict[str, float | None], declined=(), topics=2) -> dict[str, CriterionEvidence]:
+def ev(scores: dict[str, float | None], declined=(), topics=2, turns=("t1", "t2")) -> dict[str, CriterionEvidence]:
     """Traced evidence; practice is graded in `topics` source topics with the same score; `declined` ids carry a
-    "never worked with it" statement (as seniority_evidence derives it)."""
+    "never worked with it" statement (as seniority_evidence derives it). Topic criteria are confirmed by `turns`
+    (two distinct answers by default, so replicated Senior pools can confirm; WS-1 tests pass one turn)."""
     out = {}
     for c, s in scores.items():
         if s is None:
@@ -30,7 +31,7 @@ def ev(scores: dict[str, float | None], declined=(), topics=2) -> dict[str, Crit
         elif c in PRACTICE_CRITERIA:
             out[c] = CriterionEvidence(c, s, ("t1",), topic_scores=(s,) * topics)
         else:
-            out[c] = CriterionEvidence(c, s, ("t1",), declined=c in declined)
+            out[c] = CriterionEvidence(c, s, turns, declined=c in declined)
     return out
 
 

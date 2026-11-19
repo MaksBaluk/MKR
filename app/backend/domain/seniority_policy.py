@@ -41,6 +41,9 @@ class LevelRule:
     max_soft_gaps: int = 0  # GAP pools tolerated outside hard_pools (still reported as gaps)
     hard_pools: tuple[str, ...] = ()  # a GAP in one of these always makes the level GAP
     required_any: tuple[str, ...] = ()  # at least one of these pools must be CONFIRMED
+    # Capability rules only (WS-1 fix): a member of one of these pools confirms only with >= MIN_CONFIRMING_TURNS
+    # distinct confirming answers (seniority._confirming_turns); otherwise it stays borderline (UNRESOLVED).
+    replicated_pools: tuple[str, ...] = ()
 
     @property
     def capability(self) -> bool:
@@ -66,6 +69,7 @@ class SeniorityPolicy:
 
 
 PRACTICE_ACTION = "practice-backend"
+MIN_CONFIRMING_TURNS = 2  # distinct answers that must confirm a member of a replicated pool
 PRACTICE_CRITERIA: tuple[str, ...] = tuple(
     f"{PRACTICE_ACTION}.{s}" for s in ("independence", "rationale", "tradeoffs", "diagnosis", "ambiguity", "ownership"))
 
@@ -164,12 +168,13 @@ PYTHON_BACKEND_V3 = SeniorityPolicy(
 
 def capability(level: Level, tau: float, gap_below: float, min_confirmed: int, min_technical: int, min_practice: int,
                min_competencies: int, pools: tuple[CriterionPool, ...], *, max_soft_gaps: int = 1,
-               hard_pools: tuple[str, ...] = (), required_any: tuple[str, ...] = ()) -> LevelRule:
+               hard_pools: tuple[str, ...] = (), required_any: tuple[str, ...] = (),
+               replicated_pools: tuple[str, ...] = ()) -> LevelRule:
     """Capability rule (v4): gaps are decided per capability, not per tool (MATH_SPEC §3e v4). Only CONFIRMED and GAP
     pools are decided evidence; UNRESOLVED (borderline/untraced), DECLINED and UNASSESSED never fill a minimum."""
     members = tuple(dict.fromkeys(c for p in pools for c in p.members))
     return LevelRule(level, tau, 0.0, 0.0, min_competencies, members, pools, None, min_confirmed, gap_below,
-                     min_technical, min_practice, max_soft_gaps, hard_pools, required_any)
+                     min_technical, min_practice, max_soft_gaps, hard_pools, required_any, replicated_pools)
 
 
 # v4 = v3 pools with capability-level gaps, anchor-aligned thresholds and counts over confirmed pools (audit 2026-11-19,
@@ -197,9 +202,12 @@ PYTHON_BACKEND_V4 = SeniorityPolicy(
         capability(Level.MIDDLE, 0.70, 0.50, 7, 5, 2, 4, _M2.pools, hard_pools=("data-consistency",),
                    required_any=("query-efficiency", "data-consistency", "schema-design")),
         # Senior: >= 4 of 9 technical Senior capabilities, >= 3 of 5 practice, one of them on the data layer (WS-3).
+        # WS-1 fix (owner-approved, 2026-11-19): the Senior data-layer pools (hard and required) decide the level
+        # boundary, so one lucky over-grade must not confirm them: two distinct confirming answers are required.
         capability(Level.SENIOR, 0.75, 0.50, 7, 4, 3, 3, _V4_SENIOR_POOLS,
                    hard_pools=("db-operations", "schema-migrations"),
-                   required_any=("db-operations", "schema-migrations")),
+                   required_any=("db-operations", "schema-migrations"),
+                   replicated_pools=("db-operations", "schema-migrations")),
     ),
     max_chain_soft_gaps=1)
 

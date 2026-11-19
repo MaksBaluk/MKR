@@ -90,3 +90,12 @@ def test_controls_keep_their_level(results):
     assert results["middle-2"]["assessed"] == "MIDDLE"
     assert results["junior-2"]["assessed"] == "JUNIOR"
     assert (results["weak-2"]["assessed"], results["weak-2"]["status"]) == ("UNKNOWN", "GAPS_AT_JUNIOR")
+
+
+def test_ws1_seed0_lucky_over_grade_no_longer_gives_senior():
+    """Re-audit WS-1: noisy seed 0, desired junior, 2 criteria/question, OPEN goals. Before the replicated-pool rule
+    this exact run was SENIOR (borderline Senior data-layer answers over-graded once on a re-ask)."""
+    from scripts.seniority_realistic import Noise
+    with Env() as env:
+        r = run(env, "weak-senior", profiles()["weak-senior"], "junior", 2, "OPEN", Noise(0))
+    assert r["assessed"] != "SENIOR" and r["max_per_topic"] <= 5 and len(r["topics"]) <= 10

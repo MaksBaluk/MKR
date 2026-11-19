@@ -72,9 +72,12 @@ def continuation_targets(policy: SeniorityPolicy | None, result: SeniorityResult
                          max_asks: int = MAX_ASKS_PER_CRITERION) -> list[str]:
     """Topic criteria that keep the topic open (D-2): members of not-yet-decided pools (not CONFIRMED, not GAP, not
     NO_EXPERIENCE) of the probed levels (lowest non-SUPPORTED level first, then the next level up) whose score is null or
-    borderline and that were in focus of fewer than `max_asks` questions of this topic. Practice criteria never qualify
+    borderline (or, in a replicated pool, confirmed by one answer only: it needs a second confirming answer) and that
+    were in focus of fewer than `max_asks` questions of this topic. Pending second confirmations of replicated pools come
+    first (they decide the level boundary), then the rest in level and pool order. Practice criteria never qualify
     (they are not topic criteria). Deterministic from stored scores and the policy; the LLM goal is not consulted."""
     topic = set(topic_criteria)
+    decisive: dict[str, None] = {}  # second answers for replicated pools (Senior data layer): asked first
     out: dict[str, None] = {}
     for rule in _probe_rules(policy, result):
         cov = result.coverage_by_level.get(rule.level.value)  # type: ignore[union-attr]
@@ -82,10 +85,20 @@ def continuation_targets(policy: SeniorityPolicy | None, result: SeniorityResult
         for pool in rule.pools:
             if status.get(pool.pool_id) in ("CONFIRMED", "GAP", "NO_EXPERIENCE"):
                 continue
+            replicated = pool.pool_id in rule.replicated_pools
             for c in pool.members:
-                if c in topic and asked.get(c, 0) < max_asks and _unresolved(rule, scores.get(c)):
-                    out[c] = None
-    return list(out)
+                s = scores.get(c)
+                # a replicated pool that is not CONFIRMED needs a second, independent confirming answer (WS-1 fix)
+                second = replicated and s is not None and s >= rule.tau
+                if c in topic and asked.get(c, 0) < max_asks and (_unresolved(rule, s) or second):
+                    (decisive if second else out)[c] = None
+    return list(decisive) + [c for c in out if c not in decisive]
+
+
+def replicated_members(policy: SeniorityPolicy | None) -> frozenset[str]:
+    """Members of the replicated pools of a capability policy (empty otherwise)."""
+    return frozenset(c for r in (policy.rules if policy else ()) if r.capability for p in r.pools
+                     if p.pool_id in r.replicated_pools for c in p.members)
 
 
 def probe_order(unmet: Sequence[str], policy: SeniorityPolicy | None, result: SeniorityResult | None,

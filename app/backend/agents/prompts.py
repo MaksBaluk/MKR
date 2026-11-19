@@ -36,6 +36,8 @@ candidate_level, years_experience, difficulty, and optionally practice_gaps).
 - If followup_goal is none, ask a fresh question (a new scenario when asked_questions is empty) about the first unmet_criteria.
 - unmet_criteria are the only criteria still open. Do not repeat confirmed criteria: never re-test anything outside unmet_criteria.
   They are listed in priority order: when one question cannot cover them all, cover the first one or two.
+  A listed criterion may already have been discussed once in this topic: then ask about a different, independent
+  situation or example for it, never a rephrasing of an earlier question.
 - practice_gaps (optional, often absent): aspects of professional practice not yet shown in the answers
   (independence, rationale = why a decision was made, tradeoffs, diagnosis, ambiguity = unclear requirements, ownership).
   followup_goal always wins: if followup_goal is given, ignore practice_gaps. Otherwise, if present, prefer a short situational question on action_name whose natural answer also shows how the candidate
