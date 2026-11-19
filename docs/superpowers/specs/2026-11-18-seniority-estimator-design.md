@@ -26,3 +26,6 @@ C: new level-tagged criteria inside all 60 rubrics (rubrics v2) — large, needs
 
 ## Consequence to state honestly
 ~12 questions rarely cover enough critical criteria: `UNKNOWN`/"Middle confirmed, Senior unverified" will be the common outcome.
+
+## Update 2026-11-19 (policy v2)
+The consequence above held for v1 and was worse than predicted (Junior/UNKNOWN on the full cohort). Policy `python-backend/v2` replaces per-criterion critical sets with capability pools and count thresholds; see `docs/tasks/MATH_SPEC.md` §3e and `docs/tasks/SENIORITY_REPORT.md`.
