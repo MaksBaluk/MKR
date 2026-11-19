@@ -10,7 +10,7 @@ import backend.api.core as core
 from backend.agents.prompts import INTERVIEWER_SYSTEM
 from backend.domain.interview_budget import MAX_SHOWN_QUESTIONS_PER_ACTION, MAX_TOPICS
 from backend.domain.seniority import estimate
-from backend.domain.seniority_policy import PRACTICE_ACTION, PYTHON_BACKEND_V1
+from backend.domain.seniority_policy import PRACTICE_ACTION, PYTHON_BACKEND_V1, PYTHON_BACKEND_V2
 from backend.experiments.config import InterviewMode, config_for
 from backend.experiments.providers import CandidateSpec, ScriptedProvider
 from backend.experiments.runner import run_experiment
@@ -134,6 +134,9 @@ def test_budget_exhausted_leaves_level_unknown_not_guessed(client, db, monkeypat
     r = estimate(PYTHON_BACKEND_V1, core.seniority_evidence(rows, topics))
     assert (r.assessed_level, r.assessment_status) == ("UNKNOWN", "INSUFFICIENT_DATA")
     assert r.critical_gaps == () and r.unassessed_criteria
+    v2 = estimate(PYTHON_BACKEND_V2, core.seniority_evidence(rows, topics))  # the current policy: same honest outcome
+    assert (v2.assessed_level, v2.assessment_status) == ("UNKNOWN", "INSUFFICIENT_DATA")
+    assert v2.critical_gaps == () and v2.unassessed_criteria
 
 
 def test_track_without_policy_sends_no_practice_gaps(client, db, monkeypatch, ask_log):

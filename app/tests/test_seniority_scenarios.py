@@ -1,7 +1,9 @@
-"""End-to-end level scenarios (SIMULATED evaluator) through the real API: profile, cohort, interview, finish, /level."""
+"""End-to-end level scenarios (SIMULATED evaluator) through the real API: profile, cohort, interview, finish, /level.
+
+All scenarios run on the full system-selected python cohort under the current policy python-backend/v2."""
 import pytest
 
-from scripts.seniority_scenarios import LABEL, build
+from scripts.seniority_scenarios import LABEL, SCENARIOS, build
 
 
 @pytest.fixture(scope="module")
@@ -13,32 +15,52 @@ def _got(r):
     return r["level"]["assessed_level"], r["level"]["assessment_status"]
 
 
+def _statuses(r):
+    return {k: c["status"] for k, c in r["level"]["coverage_by_level"].items()}
+
+
 def test_scenarios_are_labelled_simulated():
     assert LABEL.startswith("SIMULATED")
 
 
-@pytest.mark.parametrize("sid", ["S1", "S2", "S3", "S2-product"])
-def test_scenario_level_and_status(results, sid):
-    r = results[sid]
-    assert r["status"] == "FINISHED"
+@pytest.mark.parametrize("sc", SCENARIOS, ids=[s.sid for s in SCENARIOS])
+def test_scenario_level_and_status(results, sc):
+    r = results[sc.sid]
+    assert r["status"] == "FINISHED" and r["cohort"] == "SYSTEM_COHORT" and r["vacancies"] == 90
+    assert r["level"]["policy"]["version"] == "v2"
     assert _got(r) == tuple(r["expected"])
+    assert {k: v for k, v in _statuses(r).items() if k in sc.expected_levels} == sc.expected_levels
 
 
-def test_s1_desired_senior_confirms_middle_senior_unverified(results):
-    lv = results["S1"]["level"]
-    assert lv["desired_level"] == "senior"
-    assert {k: c["status"] for k, c in lv["coverage_by_level"].items()} == {
-        "JUNIOR": "SUPPORTED", "MIDDLE": "SUPPORTED", "SENIOR": "UNVERIFIED"}
-    assert lv["critical_gaps"] == []  # borderline 0.72 and missing evidence are not gaps
+def test_p1_product_cohort_reaches_senior_with_market_topics(results):
+    """Q_t is unchanged and still spends the budget on market topics (kafka, fastapi, aws, docker, ...); v2 pools let
+    that evidence count. Two Senior capabilities stay unassessed because Q_t never picks their topics."""
+    r = results["P1"]
+    assert len(r["topics"]) == 10 and {"kafka", "fastapi", "aws", "docker"} <= set(r["topics"])
+    assert not {"sqlalchemy", "celery", "pytest", "async-python", "observability"} & set(r["topics"])
+    titles = {p["title"] for p in r["level"]["unassessed_pools"]}
+    assert titles == {"Конкурентний доступ і паралельність", "Розслідування інцидентів у продакшені"}
+    assert r["level"]["critical_gaps"] == []
+
+
+def test_p2_desired_senior_confirms_middle_senior_unverified(results):
+    lv = results["P2"]["level"]
+    assert lv["desired_level"] == "senior" and lv["critical_gaps"] == []  # borderline 0.72 is not a gap
     assert lv["explanation"][0] == "Підтверджено Middle за перевіреними критеріями. Для висновку про Senior недостатньо даних."
-    unassessed = {c["id"] for c in lv["unassessed_criteria"]}
-    assert {"practice-backend.ownership", "practice-backend.tradeoffs"} <= unassessed
+    senior = {p["title"]: p["status"] for p in lv["coverage_by_level"]["SENIOR"]["pools"]}
+    assert senior["Аналіз компромісів"] == "UNASSESSED" and "UNRESOLVED" in senior.values()
 
 
-def test_s2_senior_needs_every_level_supported(results):
-    cov = results["S2"]["level"]["coverage_by_level"]
-    assert all(c["status"] == "SUPPORTED" for c in cov.values())
-    assert results["S2"]["level"]["note"] == "Потребує експертної валідації"
+def test_p3_weak_answers_never_reach_a_level(results):
+    lv = results["P3"]["level"]
+    assert lv["coverage_by_level"]["JUNIOR"]["gap_count"] == 6 and lv["critical_gaps"]
+
+
+def test_p4_partial_middle_is_unverified_not_gap(results):
+    lv = results["P4"]["level"]
+    middle = lv["coverage_by_level"]["MIDDLE"]
+    assert middle["gap_count"] == 0 and "ASSESSED_COUNT_BELOW_MIN" in middle["reasons"]
+    assert lv["explanation"][0] == "Підтверджено Junior за перевіреними критеріями. Для висновку про Middle недостатньо даних."
 
 
 def test_s3_strong_answers_without_coverage_stay_unknown(results):
@@ -46,12 +68,3 @@ def test_s3_strong_answers_without_coverage_stay_unknown(results):
     assert r["questions"] == 3 and r["level"]["critical_gaps"] == []
     assert all(e["score"] >= 0.95 for e in r["evidence"].values() if e["score"] is not None)
     assert all(c["status"] == "UNVERIFIED" for c in r["level"]["coverage_by_level"].values())
-
-
-def test_full_system_cohort_caps_level_known_limit(results):
-    """Documented limit: on the full system cohort Q_t spends topics on non-policy skills, so even uniformly strong
-    answers stop at JUNIOR. If Q_t or the policy change, revisit SENIORITY_REPORT.md instead of editing this away."""
-    r = results["S2-product"]
-    assert r["cohort"] == "SYSTEM_COHORT" and len(r["topics"]) == 10
-    assert {"kafka", "fastapi"} <= set(r["topics"])
-

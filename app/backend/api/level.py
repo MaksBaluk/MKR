@@ -115,13 +115,23 @@ def level_payload(db: Session, row: SeniorityAssessment) -> dict:
         for cid in sorted(ids, key=len, reverse=True):
             line = line.replace(cid, f"«{titles.get(cid, cid)}»")
         explanation.append(line)
+    def pool(p: dict) -> dict:
+        return {"id": p["pool_id"], "title": p["title"], "status": p["status"],
+                "criteria": [item(x) for x in p["members"]]}
+
     coverage = {lvl: {"status": c["status"], "critical_total": c["critical_total"], "assessed_count": c["assessed"],
                       "confirmed_count": c["confirmed"], "gap_count": c["gaps"],
                       "assessed_share": c["assessed_share"], "confirmed_share": c["confirmed_share"],
                       "competencies_confirmed": c["competencies_confirmed"], "reasons": c["reasons"],
                       "confirmed": [item(x) for x in c["confirmed_ids"]], "gaps": [item(x) for x in c["gap_ids"]],
-                      "unassessed": [item(x) for x in c["unassessed_ids"]]}
+                      "unassessed": [item(x) for x in c["unassessed_ids"]],
+                      **({"pools": [pool(p) for p in c["pools"]]} if "pools" in c else {})}
                 for lvl, c in r["coverage_by_level"].items()}
+    # Pooled policies (v2): the "not checked" list names whole capabilities (pool titles), not every alternative tool.
+    unassessed = set(r["unassessed_criteria"])
+    unassessed_pools = list({p["pool_id"]: {"id": p["pool_id"], "title": p["title"]}
+                             for c in r["coverage_by_level"].values() for p in c.get("pools", ())
+                             if p["status"] == "UNASSESSED" and set(p["members"]) <= unassessed}.values())
     return {"interview_id": row.interview_id, "desired_level": row.desired_level,
             "assessed_level": row.assessed_level, "highest_supported_level": row.highest_supported_level,
             "assessment_status": row.assessment_status,
@@ -130,6 +140,7 @@ def level_payload(db: Session, row: SeniorityAssessment) -> dict:
             "confirmed_strengths": [item(c) for c in r["confirmed_strengths"]],
             "critical_gaps": [item(c) for c in r["critical_gaps"]],
             "unassessed_criteria": [item(c) for c in r["unassessed_criteria"]],
+            "unassessed_pools": unassessed_pools,
             "evidence_references": [{**item(c), "turn_ids": t} for c, t in r["evidence_references"].items()],
             "explanation": explanation,
             "note": WORKING_ASSUMPTION_NOTE if row.policy_status == "WORKING_ASSUMPTION" else None,
@@ -144,12 +155,18 @@ def _iso_utc(value: datetime | None) -> str | None:
 
 
 def level_for_attempt(db: Session, iv: CoreInterview) -> dict | None:
-    """Payload of the attempt's latest stored level; a legacy finished attempt without one is assessed and stored now.
+    """Payload of the attempt's stored level: the row of the track's current policy when it exists, otherwise the latest
+    stored row (e.g. a v1 row of an attempt finished before v2: rendered as stored, never rewritten). Only a finished
+    attempt without any row is assessed now, under the current policy, and stored.
     None when the attempt is not finished or its stored scores are malformed."""
     if iv.status != "FINISHED":
         return None
-    row = db.scalar(select(SeniorityAssessment).where(SeniorityAssessment.interview_id == iv.id)
-                    .order_by(SeniorityAssessment.created_at.desc()))
+    current = policy_for(_interview_track(db, iv))
+    rows = list(db.scalars(select(SeniorityAssessment).where(SeniorityAssessment.interview_id == iv.id)
+                           .order_by(SeniorityAssessment.created_at.desc())))
+    # The current policy's row if stored, else the latest stored row (an older version is never re-assessed on read).
+    key = (current.policy_id, current.version) if current is not None else None
+    row = next((x for x in rows if (x.policy_id, x.policy_version) == key), rows[0] if rows else None)
     try:
         if row is None:
             with db.begin_nested():

@@ -11,10 +11,12 @@ from dataclasses import asdict, dataclass
 from typing import Literal
 
 from backend.domain.criteria import epsilon
-from backend.domain.seniority_policy import PRACTICE_ACTION, Level, LevelRule, SeniorityPolicy, rank
+from backend.domain.seniority_policy import (PRACTICE_ACTION, CriterionPool, Level, LevelRule, SeniorityPolicy,
+                                             rank)
 
 LevelName = Literal["JUNIOR", "MIDDLE", "SENIOR", "UNKNOWN"]
 LevelStatus = Literal["SUPPORTED", "GAP", "UNVERIFIED"]
+PoolStatus = Literal["CONFIRMED", "GAP", "UNRESOLVED", "UNASSESSED"]
 AssessmentStatus = Literal["ASSESSED", "INSUFFICIENT_DATA", "GAPS_AT_JUNIOR", "POLICY_UNAVAILABLE"]
 
 NO_POLICY_TEXT = "Для цього напряму рівень не визначається: потрібна експертна валідація рубрик"
@@ -26,6 +28,17 @@ class CriterionEvidence:
     criterion_id: str
     score: float | None
     evidence_turns: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class PoolCoverage:
+    pool_id: str
+    title: str
+    status: PoolStatus
+    members: tuple[str, ...]
+    confirmed_ids: tuple[str, ...]
+    gap_ids: tuple[str, ...]
+    unassessed_ids: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -43,6 +56,7 @@ class LevelCoverage:
     gap_ids: tuple[str, ...]
     unassessed_ids: tuple[str, ...]
     reasons: tuple[str, ...]
+    pools: tuple[PoolCoverage, ...] = ()  # pooled policies only; counts above are then over pools
 
 
 @dataclass(frozen=True)
@@ -70,6 +84,8 @@ def _score(evidence: Mapping[str, CriterionEvidence], cid: str) -> CriterionEvid
 
 
 def _coverage(rule: LevelRule, evidence: Mapping[str, CriterionEvidence]) -> LevelCoverage:
+    if rule.pools:
+        return _pooled_coverage(rule, evidence)
     confirmed: list[str] = []
     gaps: list[str] = []
     unassessed: list[str] = []
@@ -95,6 +111,48 @@ def _coverage(rule: LevelRule, evidence: Mapping[str, CriterionEvidence]) -> Lev
     status: LevelStatus = "GAP" if gaps else ("UNVERIFIED" if reasons else "SUPPORTED")
     return LevelCoverage(rule.level, total, assessed, len(confirmed), len(gaps), a_share, c_share, comps,
                          status, tuple(confirmed), tuple(gaps), tuple(unassessed), reasons)
+
+
+def _pool(pool: CriterionPool, tau: float, evidence: Mapping[str, CriterionEvidence]) -> PoolCoverage:
+    """CONFIRMED: some member s >= tau with an evidence turn. GAP: none confirms, at least one member is an established
+    gap (s < tau - eps with a turn) and no member is assessed-but-unresolved (borderline or untraced). UNRESOLVED:
+    assessed otherwise. UNASSESSED: no member scored. Unscored members never block a gap nor count as one."""
+    confirmed, gaps, unresolved, unassessed = [], [], [], []
+    for cid in pool.members:
+        item = _score(evidence, cid)
+        if item is None:
+            unassessed.append(cid)
+        elif item.score >= tau and item.evidence_turns:
+            confirmed.append(cid)
+        elif item.score < tau - epsilon(tau) and item.evidence_turns:
+            gaps.append(cid)
+        else:
+            unresolved.append(cid)
+    status: PoolStatus = ("CONFIRMED" if confirmed else "GAP" if gaps and not unresolved else
+                          "UNRESOLVED" if gaps or unresolved else "UNASSESSED")
+    return PoolCoverage(pool.pool_id, pool.title, status, pool.members, tuple(confirmed),
+                        tuple(gaps) if status == "GAP" else (), tuple(unassessed) if status == "UNASSESSED" else ())
+
+
+def _pooled_coverage(rule: LevelRule, evidence: Mapping[str, CriterionEvidence]) -> LevelCoverage:
+    """Counts over pools (no compensation across pools). `unassessed_ids` lists members of wholly unassessed pools only:
+    an unscored alternative inside an assessed pool is not missing evidence for the level."""
+    pools = tuple(_pool(p, rule.tau, evidence) for p in rule.pools)
+    total = len(pools)
+    assessed = sum(p.status != "UNASSESSED" for p in pools)
+    confirmed = sum(p.status == "CONFIRMED" for p in pools)
+    gaps = sum(p.status == "GAP" for p in pools)
+    confirmed_ids = _unique([c for p in pools for c in p.confirmed_ids])
+    comps = len({c.split(".", 1)[0] for c in confirmed_ids} - {PRACTICE_ACTION})
+    reasons = tuple(code for code, failed in (
+        ("CRITICAL_GAP", bool(gaps)),
+        ("ASSESSED_COUNT_BELOW_MIN", assessed < (rule.min_assessed or 0)),
+        ("CONFIRMED_COUNT_BELOW_MIN", confirmed < (rule.min_confirmed or 0)),
+        ("TOO_FEW_COMPETENCIES", comps < rule.min_competencies)) if failed)
+    status: LevelStatus = "GAP" if gaps else ("UNVERIFIED" if reasons else "SUPPORTED")
+    return LevelCoverage(rule.level, total, assessed, confirmed, gaps, assessed / total, confirmed / total, comps,
+                         status, confirmed_ids, _unique([c for p in pools for c in p.gap_ids]),
+                         _unique([c for p in pools for c in p.unassessed_ids]), reasons, pools)
 
 
 def _unique(ids: list[str]) -> tuple[str, ...]:
@@ -125,7 +183,7 @@ def estimate(policy: SeniorityPolicy | None, evidence: Mapping[str, CriterionEvi
     strengths = tuple(s for s in _unique([s for c in scope for s in c.confirmed_ids]) if s not in gaps)
     unassessed = _unique([u for c in scope for u in c.unassessed_ids])
     refs = {cid: evidence[cid].evidence_turns for cid in _unique([cid for r in rules[:top + 1] for cid in r.critical])
-            if cid not in unassessed and evidence[cid].evidence_turns}
+            if cid in evidence and evidence[cid].score is not None and evidence[cid].evidence_turns}
 
     return SeniorityResult(assessed, highest, status, {c.level.value: c for c in cov}, strengths, gaps, unassessed, refs,
                            policy.policy_id, policy.version, _explain(policy, cov, chain, highest))
@@ -159,7 +217,14 @@ def result_to_json(r: SeniorityResult) -> dict:
     for key in ("confirmed_strengths", "critical_gaps", "unassessed_criteria", "explanation"):
         data[key] = list(data[key])
     data["evidence_references"] = {k: list(v) for k, v in r.evidence_references.items()}
-    data["coverage_by_level"] = {k: {f: v.value if isinstance(v, Level) else list(v) if isinstance(v, tuple) else v
-                                     for f, v in c.items()}
-                                 for k, c in data["coverage_by_level"].items()}
+    data["coverage_by_level"] = {k: _coverage_json(c) for k, c in data["coverage_by_level"].items()}
     return data
+
+
+def _coverage_json(c: dict) -> dict:
+    """Per-criterion policies (v1) store exactly the fields they always stored: no `pools` key."""
+    out = {f: v.value if isinstance(v, Level) else list(v) if isinstance(v, tuple) else v
+           for f, v in c.items() if f != "pools"}
+    if c["pools"]:
+        out["pools"] = [{f: list(v) if isinstance(v, tuple) else v for f, v in p.items()} for p in c["pools"]]
+    return out

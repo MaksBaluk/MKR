@@ -11,7 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from backend.api.core import seniority_evidence
 from backend.api.level import attempt_evidence, finalize_level
 from backend.domain.seniority import estimate, result_to_json
-from backend.domain.seniority_policy import PRACTICE_ACTION, PYTHON_BACKEND_V1
+from backend.domain.seniority_policy import PRACTICE_ACTION, PYTHON_BACKEND_V1, PYTHON_BACKEND_V2, policy_for
 from backend.experiments.config import InterviewMode, config_for
 from backend.experiments.runner import run_experiment
 from backend.models import CoreInterview, CoreTurn, SeniorityAssessment
@@ -19,8 +19,9 @@ from tests.test_level_probe_flow import GOOD, ProbeChat, cand, mixed
 from tests.test_followup_flow import _use
 from tests.test_practice_criteria import API, PracticeChat, _answer, _attempt
 
-V2 = dataclasses.replace(PYTHON_BACKEND_V1, version="v2", rules=tuple(
-    dataclasses.replace(r, tau=0.99) for r in PYTHON_BACKEND_V1.rules))
+CURRENT = PYTHON_BACKEND_V2  # the python track's current policy: new finalizations use it
+V3 = dataclasses.replace(PYTHON_BACKEND_V2, version="v3", rules=tuple(
+    dataclasses.replace(r, tau=0.99) for r in PYTHON_BACKEND_V2.rules))
 
 
 @pytest.fixture()
@@ -62,11 +63,11 @@ def test_level_stored_on_finish_with_policy_version_and_attempt(client, auth, db
     iv = _finished(client, auth)
     [row] = _rows(db, iv["id"])
     assert (row.interview_id, row.profile_id, row.policy_id, row.policy_version) == (
-        iv["id"], iv["profile_id"], "python-backend", "v1")
+        iv["id"], iv["profile_id"], "python-backend", "v2")
     assert row.created_at is not None and row.policy_status == "WORKING_ASSUMPTION" and row.track == "python"
     with db() as s:
         turns = s.scalars(select(CoreTurn).where(CoreTurn.interview_id == iv["id"])).all()
-        expected = result_to_json(estimate(PYTHON_BACKEND_V1, attempt_evidence(s, iv["id"])))
+        expected = result_to_json(estimate(CURRENT, attempt_evidence(s, iv["id"])))
     assert row.rubric_versions == {turns[0].action_id: "v1", PRACTICE_ACTION: "v1"}
     assert row.result == expected and row.assessed_level == expected["assessed_level"]
     assert row.desired_level == "middle"
@@ -79,22 +80,22 @@ def test_auto_finish_also_stores_level(client, db, monkeypatch):
                              client, s)
     with db() as s:
         assert s.get(CoreInterview, rec.interview_id).status == "FINISHED"
-    assert [r.policy_version for r in _rows(db, rec.interview_id)] == ["v1"]
+    assert [r.policy_version for r in _rows(db, rec.interview_id)] == ["v2"]
 
 
 def test_policy_version_change_does_not_rewrite_history(client, auth, db, chat, monkeypatch):
     iv = _finished(client, auth)
     [old] = _rows(db, iv["id"])
-    monkeypatch.setattr("backend.api.level.policy_for", lambda track: V2)
+    monkeypatch.setattr("backend.api.level.policy_for", lambda track: V3)
     got = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
-    assert got["policy"]["version"] == "v1" and len(_rows(db, iv["id"])) == 1  # reading never re-assesses
+    assert got["policy"]["version"] == "v2" and len(_rows(db, iv["id"])) == 1  # reading never re-assesses
     with db() as s:
-        new = finalize_level(s, s.get(CoreInterview, iv["id"]), V2)
-        again = finalize_level(s, s.get(CoreInterview, iv["id"]), V2)
+        new = finalize_level(s, s.get(CoreInterview, iv["id"]), V3)
+        again = finalize_level(s, s.get(CoreInterview, iv["id"]), V3)
         s.commit()
         assert again.id == new.id  # idempotent per (attempt, policy version)
     rows = _rows(db, iv["id"])
-    assert [r.policy_version for r in rows] == ["v1", "v2"]
+    assert [r.policy_version for r in rows] == ["v2", "v3"]
     assert (rows[0].id, rows[0].result, rows[0].created_at) == (old.id, old.result, old.created_at)
 
 
@@ -114,7 +115,7 @@ def test_attempts_are_not_mixed(client, auth, db, chat):
         assert evidence and all(set(e.evidence_turns) <= own_turns for e in evidence.values())
         refs = {t for item in levels[iv["id"]]["evidence_references"] for t in item["turn_ids"]}
         assert refs and refs <= own_turns
-        assert _rows(db, iv["id"])[0].result == result_to_json(estimate(PYTHON_BACKEND_V1, evidence))
+        assert _rows(db, iv["id"])[0].result == result_to_json(estimate(CURRENT, evidence))
     with db() as s:
         a, b = attempt_evidence(s, first["id"]), attempt_evidence(s, second["id"])
     assert {k: v.score for k, v in a.items()} != {k: v.score for k, v in b.items()}
@@ -129,7 +130,7 @@ def test_desired_level_change_does_not_change_result(client, auth, db, chat):
         "name": "Профіль python", "track": "python", "target_level": "senior", "years_experience": 12})
     assert r.status_code == 200, r.text
     with db() as s:
-        recomputed = result_to_json(estimate(PYTHON_BACKEND_V1, attempt_evidence(s, iv["id"])))
+        recomputed = result_to_json(estimate(CURRENT, attempt_evidence(s, iv["id"])))
     [row] = _rows(db, iv["id"])
     assert recomputed == row.result and recomputed["assessed_level"] == before["assessed_level"]
     after = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
@@ -188,8 +189,8 @@ def test_legacy_finished_attempt_gets_level_lazily(client, auth, db, chat):
         s.commit()
     got = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
     [row] = _rows(db, iv["id"])
-    assert got["policy"] == {"id": "python-backend", "version": "v1", "status": "WORKING_ASSUMPTION"}
-    assert got["note"] == "Потребує експертної валідації" and got["created_at"] and row.policy_version == "v1"
+    assert got["policy"] == {"id": "python-backend", "version": "v2", "status": "WORKING_ASSUMPTION"}
+    assert got["note"] == "Потребує експертної валідації" and got["created_at"] and row.policy_version == "v2"
     assert client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json() == got
 
 
@@ -404,7 +405,7 @@ def test_level_independent_of_partial_topic_coverage(client, auth, db, monkeypat
                                                                       Rubric.version == "v1"))]
             scores = {r.criterion_id: r.score for r in rows if r.action_id == action and r.score is not None}
             assert ts.topic_summary(rubric, scores).e < ts.MIN_COVERAGE_FOR_OVERALL, action
-        expected = result_to_json(estimate(PYTHON_BACKEND_V1, attempt_evidence(s, iv["id"])))
+        expected = result_to_json(estimate(CURRENT, attempt_evidence(s, iv["id"])))
     assert topics and _rows(db, iv["id"])[0].result == expected
     assert expected["coverage_by_level"]["JUNIOR"]["assessed"] > 0  # partial topic evidence still counts
     monkeypatch.setattr("backend.domain.topic_summary.MIN_COVERAGE_FOR_OVERALL", 0.0)
@@ -413,3 +414,47 @@ def test_level_independent_of_partial_topic_coverage(client, auth, db, monkeypat
         s.commit()
     again = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
     assert _level_without_timestamp(again) == _level_without_timestamp(level)
+
+
+# --- policy v2 is current; v1 rows stay as stored --------------------------------------------------------------------
+
+def test_new_attempt_stores_v2_and_payload_names_pools_in_ukrainian(client, auth, db, chat):
+    assert policy_for("python") is CURRENT
+    iv = _finished(client, auth)
+    [row] = _rows(db, iv["id"])
+    assert row.policy_version == "v2"
+    level = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
+    for cov in level["coverage_by_level"].values():
+        assert cov["pools"] and all(p["title"] and "." not in p["title"] for p in cov["pools"])
+        assert all(c["title"] != c["id"] for p in cov["pools"] for c in p["criteria"])
+    assert level["unassessed_pools"] and all(set(p) == {"id", "title"} for p in level["unassessed_pools"])
+    titles = {p["title"] for cov in level["coverage_by_level"].values() for p in cov["pools"]}
+    assert {p["title"] for p in level["unassessed_pools"]} <= titles
+
+
+def test_v1_row_of_old_attempt_is_kept_and_rendered(client, auth, db, chat):
+    iv = _finished(client, auth)
+    with db() as s:  # simulate an attempt finished before v2: only a v1 row exists
+        s.execute(delete(SeniorityAssessment))
+        v1 = finalize_level(s, s.get(CoreInterview, iv["id"]), PYTHON_BACKEND_V1)
+        s.commit()
+        v1_id, v1_result = v1.id, v1.result
+    got = client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()
+    assert got["policy"]["version"] == "v1" and got["unassessed_pools"] == []
+    assert all("pools" not in c for c in got["coverage_by_level"].values())
+    assert [(r.id, r.policy_version, r.result) for r in _rows(db, iv["id"])] == [(v1_id, "v1", v1_result)]
+    with db() as s:  # an explicit v2 finalization adds a row; the v1 row is untouched and the current one is shown
+        finalize_level(s, s.get(CoreInterview, iv["id"]))
+        s.commit()
+    rows = _rows(db, iv["id"])
+    assert [r.policy_version for r in rows] == ["v1", "v2"] and (rows[0].id, rows[0].result) == (v1_id, v1_result)
+    assert client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()["policy"]["version"] == "v2"
+
+
+def test_current_policy_row_wins_regardless_of_creation_order(client, auth, db, chat):
+    iv = _finished(client, auth)  # v2 row first
+    with db() as s:
+        finalize_level(s, s.get(CoreInterview, iv["id"]), PYTHON_BACKEND_V1)  # v1 row stored later
+        s.commit()
+    assert [r.policy_version for r in _rows(db, iv["id"])] == ["v2", "v1"]
+    assert client.get(f"{API}/interviews/{iv['id']}/level", headers=auth).json()["policy"]["version"] == "v2"

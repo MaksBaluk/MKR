@@ -1,5 +1,6 @@
 """Level probe (§3e): within the topic Q_t already chose, put criteria that are critical for the lowest level not yet
-SUPPORTED first, and name that level's unassessed practice criteria as a hint for the Interviewer.
+SUPPORTED first, and name that level's unassessed practice criteria as a hint for the Interviewer. For a pooled policy
+(v2) "critical" means the members of that level's pools that are not CONFIRMED yet.
 
 Pure. It only reorders and annotates: membership of `unmet`, topic choice, budgets, caps and difficulty are untouched.
 Without a level policy (or without an estimate) the input comes back unchanged and there are no practice gaps.
@@ -29,8 +30,15 @@ def prioritize_unmet(unmet: Sequence[str], policy: SeniorityPolicy | None,
     rule = _target(policy, result)
     if rule is None:
         return list(unmet)
-    critical = set(rule.critical)
+    critical = set(rule.critical) if not rule.pools else _open_members(rule, result)
     return [c for c in unmet if c in critical] + [c for c in unmet if c not in critical]
+
+
+def _open_members(rule: LevelRule, result: SeniorityResult | None) -> set[str]:
+    """Pooled rule: members of the target level's pools that are not CONFIRMED yet (a confirmed pool needs nothing)."""
+    cov = result.coverage_by_level.get(rule.level.value) if result else None
+    done = {p.pool_id for p in cov.pools if p.status == "CONFIRMED"} if cov else set()
+    return {c for p in rule.pools if p.pool_id not in done for c in p.members}
 
 
 def practice_gaps(policy: SeniorityPolicy | None, result: SeniorityResult | None, limit: int = 2) -> list[str]:
@@ -41,5 +49,6 @@ def practice_gaps(policy: SeniorityPolicy | None, result: SeniorityResult | None
     cov = result.coverage_by_level.get(rule.level.value)  # type: ignore[union-attr]
     if cov is None:
         return []
-    unassessed = set(cov.unassessed_ids)
+    unassessed = set(cov.unassessed_ids)  # pooled rule: members of wholly unassessed pools
+
     return [c for c in rule.critical if c.startswith(f"{PRACTICE_ACTION}.") and c in unassessed][:limit]

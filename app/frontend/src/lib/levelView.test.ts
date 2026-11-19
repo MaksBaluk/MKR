@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { desiredLabel, explanationLines, groupBySection, levelLabel, SECTIONS, sectionTitle } from '@/lib/levelView';
+import { desiredLabel, explanationLines, groupBySection, levelLabel, SECTIONS, sectionTitle, unassessedItems } from '@/lib/levelView';
 import type { ResultSection } from '@/types';
 
 describe('level labels', () => {
@@ -57,5 +57,17 @@ describe('explanationLines', () => {
       'Політика рівнів python-seniority/v1 є робочим припущенням і потребує експертної валідації.'];
     expect(explanationLines({ explanation: lines, note: 'Потребує експертної валідації' })).toEqual([lines[0]]);
     expect(explanationLines({ explanation: lines, note: null })).toEqual(lines);
+  });
+});
+
+describe('unassessedItems', () => {
+  const crit = [{ id: 'postgresql.indexes', title: 'Індекси та плани виконання', kind: 'COMPETENCY' as const }];
+  test('pooled policy (v2) lists capabilities by Ukrainian title', () => {
+    const pools = [{ id: 'concurrency', title: 'Конкурентний доступ і паралельність' }];
+    expect(unassessedItems({ unassessed_criteria: crit, unassessed_pools: pools })).toEqual(pools);
+  });
+  test('v1 rows and older payloads fall back to criteria', () => {
+    expect(unassessedItems({ unassessed_criteria: crit, unassessed_pools: [] })).toEqual(crit);
+    expect(unassessedItems({ unassessed_criteria: crit })).toEqual(crit);
   });
 });

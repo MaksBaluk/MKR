@@ -1,6 +1,6 @@
 from sqlalchemy import select, func
 
-from backend.domain.seniority_policy import (PRACTICE_ACTION, PRACTICE_CRITERIA, PYTHON_BACKEND_V1, policy_for, rank)
+from backend.domain.seniority_policy import (PRACTICE_ACTION, PRACTICE_CRITERIA, PYTHON_BACKEND_V1, policy_by_version, policy_for, rank)
 from backend.models import Competency, Rubric, RubricCriterion, RequirementAlternative
 from backend.seed import read_fixture, seed_database
 
@@ -24,7 +24,7 @@ def test_policy_levels_are_hierarchical_and_ids_exist():
 def test_policy_is_versioned_and_flagged():
     p = PYTHON_BACKEND_V1
     assert (p.policy_id, p.version, p.status) == ("python-backend", "v1", "WORKING_ASSUMPTION")
-    assert policy_for("python") is p
+    assert policy_by_version("python-backend", "v1") is p  # still addressable; the current python policy is v2
 
 
 def test_marketing_design_have_no_policy():

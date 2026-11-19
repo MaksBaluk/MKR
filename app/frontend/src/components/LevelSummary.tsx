@@ -1,9 +1,9 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { desiredLabel, explanationLines, levelLabel } from '@/lib/levelView';
-import type { AssessedLevel, LevelCriterion } from '@/types';
+import { desiredLabel, explanationLines, levelLabel, unassessedItems } from '@/lib/levelView';
+import type { AssessedLevel, LevelPool } from '@/types';
 
-function CriterionList({ title, items, empty }: { title: string; items: LevelCriterion[]; empty: string }) {
+function CriterionList({ title, items, empty }: { title: string; items: LevelPool[]; empty: string }) {
   return (
     <details className="rounded-lg border border-line px-3 py-2 text-sm">
       <summary className="min-h-8 cursor-pointer py-1 font-medium text-ink hover:text-primary-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
@@ -59,7 +59,7 @@ export function LevelSummary({ level, profileTarget }: { level: AssessedLevel | 
             <div className="flex flex-col gap-2">
               <CriterionList title="Підтверджено" items={level.confirmed_strengths} empty="Підтверджених критичних критеріїв поки немає." />
               <CriterionList title="Прогалини" items={level.critical_gaps} empty="Критичних прогалин не виявлено." />
-              <CriterionList title="Не перевірено" items={level.unassessed_criteria} empty="Усі критичні критерії перевірено." />
+              <CriterionList title="Не перевірено" items={unassessedItems(level)} empty="Усі критичні вимоги перевірено." />
             </div>
             {level.note && (
               <p className="flex flex-wrap items-center gap-2 text-xs text-ink-muted">

@@ -1,4 +1,4 @@
-import type { AssessedLevel, LevelName, ResultSection } from '@/types';
+import type { AssessedLevel, LevelName, LevelPool, ResultSection } from '@/types';
 
 const LEVEL_LABEL: Record<LevelName, string> = {
   JUNIOR: 'Junior', MIDDLE: 'Middle', SENIOR: 'Senior', UNKNOWN: 'Недостатньо даних',
@@ -49,4 +49,9 @@ const POLICY_LINE = /^Політика рівнів \S+ є робочим при
  * note is shown it replaces that line. */
 export function explanationLines(level: Pick<AssessedLevel, 'explanation' | 'note'>): string[] {
   return level.note ? level.explanation.filter((l) => !POLICY_LINE.test(l)) : level.explanation;
+}
+
+/** What was not checked: whole capabilities for a pooled policy (v2), otherwise the critical criteria (v1 rows). */
+export function unassessedItems(level: Pick<AssessedLevel, 'unassessed_criteria' | 'unassessed_pools'>): LevelPool[] {
+  return level.unassessed_pools?.length ? level.unassessed_pools : level.unassessed_criteria;
 }
