@@ -139,7 +139,9 @@ PYTHON_BACKEND_V2 = SeniorityPolicy(
 
 # v3 = v2 pools with a lower Senior bar (owner decision: Senior was out of reach on the topics Q_t picks). Junior and
 # Middle rules are the v2 objects. Senior counts are ceil(share * 14 pools) with the chosen shares .60/.50 -> 9/7, and
-# min_competencies 4 -> 3: one topic confirms at most two Senior pools, so three different tools are still required.
+# min_competencies 4 -> 3 (owner target ~6 topics; with 4 the measured minimum is 7-8). It counts distinct tools of the
+# confirming member ids, not pools: two tools confirming one pool count twice, so Senior can rest on 2 technical Senior
+# capabilities plus 5 practice pools. It is not a breadth guarantee (MATH_SPEC §3e, v3).
 # Lowering means Senior needs less evidence; the numbers are a working assumption, not measured or calibrated.
 _J2, _M2, _S2 = PYTHON_BACKEND_V2.rules
 PYTHON_BACKEND_V3 = SeniorityPolicy(
