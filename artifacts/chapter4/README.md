@@ -1,4 +1,4 @@
-# Матеріали розділу 4: як відтворити (фаза 1)
+# Матеріали розділу 4: як відтворити (фази 1–2)
 
 Фаза 1 охоплює етапи 1–4 і 8 специфікації (`.superpowers/sdd/ch4-spec.md`): знімок реалізації, аудит SeniorityEstimator і архітектури, контрольні сценарії S01–S12, перевірку математичного ядра, технічне тестування. Етапи 5–7, 9–12 (порівняння режимів, адаптивність, незалежна якість, тексти розділу) — наступні фази.
 
@@ -19,7 +19,7 @@
 | `test_results.md` | точні команди, середовище, кількості, тривалість, збої | вручну за результатами команд |
 | `failure_cases.md` | проблемні сценарії й обмеження (оновлено) | вручну |
 
-Файли попереднього пакета (`experiment_runs.csv`, `criterion_results.csv`, `ranking_results.csv`, `evaluation_*`, `adaptivity_scenarios.*`, `math_validation.csv`, `environment.md`, `chapter4_evidence_report.md`, `raw/runs.*`) створено на **старішому коді** (інший `prompt_version`, до політики v4 і WP-B). Вони не є результатами фази 1 і мають бути перегенеровані у фазі 2. `interview_turns.jsonl` перезаписано: тепер він містить лише ходи фази 1 (старі рядки є в історії git, коміт `1278e33`).
+Файли попереднього пакета, створені на старішому коді, у фазі 2 **видалено** (історія git, коміт `1278e33`): `math_validation.csv` (замінено `mathematical_validation.csv`), `evaluation_report/`, `raw/runs.*`, `adaptivity_scenarios.*` (замінено `adaptivity_evidence.*`), `chapter4_evidence_report.md` (новий звіт — фаза 3); скрипти `scripts/chapter4/experiments.py`, `report.py`. Перегенеровано на заморожених версіях: `experiment_runs.csv`, `criterion_results.csv`, `ranking_results.csv`, `evaluation_metrics.csv`, `dataset_summary.csv`, `environment.md`.
 
 ## Команди (з каталогу `app/`)
 
@@ -57,3 +57,31 @@ docker compose up -d --build api web && (cd frontend && npx playwright test)
 - `ch4-sNN-est` — рядки оцінювача в `seniority_results.csv`; `ch4-sNN-e2e*` — наскрізні прогони, їхні ходи в `interview_turns.jsonl`.
 - `ch4-pg-*` — прогони на одноразовому PostgreSQL (`test_chapter4_postgres.py`).
 Усі прогони фази 1 виконано на commit `282f6fb` і конфігурації `experiment_manifest.json` → `frozen_config`.
+
+
+## Фаза 2 (етапи 5–7, протокол v2 `.superpowers/sdd/ch4-spec-addendum.md`)
+
+Одна команда (з `app/`, на чистому продуктовому коді; інакше відмова, `--allow-dirty` — свідомий обхід):
+
+```bash
+uv run python -m scripts.chapter4.build_all            # ≈ 12–15 хв на 6 процесах; --with-sweep додає фазові перебори (≈ 12 хв)
+uv run pytest -q tests/test_chapter4_modes.py
+```
+
+| Файл | Зміст | Генератор |
+|---|---|---|
+| `simulation_method.md` | генеративний алгоритм кандидатів/заглушок, режими, статистика (для 4.2) | вручну |
+| `raw/modes_runs.jsonl.gz`, `raw/modes_meta.json` | усі прогони режимів з ходами й ревізіями оцінок; перевірка відтворюваності | `modes_experiment.py` |
+| `experiment_runs.csv` | один рядок на прогін: питання, теми, follow-up, зміни складності, fallback/UNGRADED, покриття, невирішені критичні, рівень, ширина інтервалів, `config_ref` | `modes_analysis.py` |
+| `interview_experiment_results.csv` (E2), `ranking_metrics.csv` (E3), `evaluator_metrics.csv` (E4), `seniority_experiment_results.csv`, `estimator_metrics.csv` (E5) | поля протоколу v2; P@5/NDCG/MAE/точність проти експертів — `NO_GROUND_TRUTH`, доки немає ADJUDICATED-міток | `chapter4_metrics.py` |
+| `mode_comparison.csv` | парні різниці режимів, кластерний бутстреп-ДІ, знаковий тест, d_z | `modes_analysis.py` |
+| `ablation_results.csv` | B / C / D без зміни складності / D, дві моделі кандидата | `modes_analysis.py` |
+| `criterion_results.csv`, `ranking_results.csv` | критерії (бюджет 50, і режим A) і Top-10 кожного прогону | `modes_analysis.py` |
+| `seniority_results.csv`, `interview_turns.jsonl` | рядки фази 1 + рядки з `suite` (у jsonl — ходи seed 0, бюджет 50 і stub_check; усі ходи в raw) | `seniority_scenarios_ch4.py` + `modes_analysis.py` |
+| `adaptivity_evidence.md/.json` | етап 6: вибір теми, складність, followup_goal на збережених ходах | `adaptivity_evidence.py` |
+| `evaluation_metrics.csv` | статуси NO_GROUND_TRUTH / SIMULATED_GROUND_TRUTH / NOT_APPLICABLE | `modes_analysis.py` |
+| `figures_data/*.csv`, `figures/*.svg`, `tables/*` | джерела рисунків, SVG з українськими підписами, таблиці 4.3–4.6 | `modes_analysis.py`, `chapter4_metrics.py` |
+| `missing_evidence.md` | чого бракує для повних висновків | `chapter4_metrics.py` |
+| `data/` | `vacancies.csv`, `vacancy_requirements.jsonl`, `dataset_audit.md`, `candidates.csv`, `hidden/scenario_definitions.json` (приховано), `candidate_competency_reference.jsonl` (null), `response_bank.jsonl`, `annotations/*.csv` (порожні), `annotation_inputs/` (інструкція, шкала 0–3, пул вакансій) | `data_package.py` |
+
+Ідентифікатори: `ch4-m-<кандидат>-<режим>-b<бюджет>-s<seed>` (режими A, B, C, D, Dfd; суфікси `-dsens` — чутлива модель кандидата, `-enstub` — документована заглушка для перевірки EB-3). Усі прогони — SIMULATED на commit `282f6fb` (продуктовий код) і `experiment_manifest.json` → `frozen_config`; список run_id — `experiment_manifest.json` → `runs`.

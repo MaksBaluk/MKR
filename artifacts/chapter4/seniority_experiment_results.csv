@@ -1,0 +1,883 @@
+run_id,candidate_id,mode,budget,seed,desired_level,assessed_level,highest_supported_level,assessment_status,coverage_junior,coverage_middle,coverage_senior,critical_gaps,unknown_critical_count,simulated_truth_level,expert_level,status
+ch4-m-C01-A-na-na,C01,A_INITIAL_PROFILE,,,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,JUNIOR,,SIMULATED
+ch4-m-C01-B-b10-s0,C01,B_STATIC,10,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,ci-cd.deploy fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas python-core.typing sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C01-B-b10-s1,C01,B_STATIC,10,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics python-core.typing sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C01-B-b10-s2,C01,B_STATIC,10,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics python-core.typing sql.performance,41,JUNIOR,,SIMULATED
+ch4-m-C01-B-b20-s0,C01,B_STATIC,20,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C01-B-b20-s1,C01,B_STATIC,20,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C01-B-b20-s2,C01,B_STATIC,20,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C01-B-b30-s0,C01,B_STATIC,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C01-B-b30-s1,C01,B_STATIC,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C01-B-b30-s2,C01,B_STATIC,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C01-B-b50-s0,C01,B_STATIC,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C01-B-b50-s1,C01,B_STATIC,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C01-B-b50-s2,C01,B_STATIC,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C01-C-b10-s0,C01,C_ADAPTIVE_NO_MARKET,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,sql.performance,55,JUNIOR,,SIMULATED
+ch4-m-C01-C-b10-s1,C01,C_ADAPTIVE_NO_MARKET,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,async-python.blocking async-python.testing observability.incidents,56,JUNIOR,,SIMULATED
+ch4-m-C01-C-b10-s2,C01,C_ADAPTIVE_NO_MARKET,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,aws.cost aws.deploy celery.design celery.retries,55,JUNIOR,,SIMULATED
+ch4-m-C01-C-b20-s0,C01,C_ADAPTIVE_NO_MARKET,20,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,linux.diagnostics pytest.isolation sql.performance,52,JUNIOR,,SIMULATED
+ch4-m-C01-C-b20-s1,C01,C_ADAPTIVE_NO_MARKET,20,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,async-python.blocking async-python.testing aws.deploy kubernetes.resources kubernetes.workloads observability.incidents,53,JUNIOR,,SIMULATED
+ch4-m-C01-C-b20-s2,C01,C_ADAPTIVE_NO_MARKET,20,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries kafka.consumers kubernetes.resources kubernetes.workloads,52,JUNIOR,,SIMULATED
+ch4-m-C01-C-b30-s0,C01,C_ADAPTIVE_NO_MARKET,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,linux.diagnostics postgresql.indexes postgresql.transactions pytest.isolation sql.performance,49,JUNIOR,,SIMULATED
+ch4-m-C01-C-b30-s1,C01,C_ADAPTIVE_NO_MARKET,30,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,async-python.blocking async-python.testing aws.deploy kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents pytest.isolation,50,JUNIOR,,SIMULATED
+ch4-m-C01-C-b30-s2,C01,C_ADAPTIVE_NO_MARKET,30,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries docker.runtime kafka.consumers kubernetes.resources kubernetes.workloads,49,JUNIOR,,SIMULATED
+ch4-m-C01-C-b50-s0,C01,C_ADAPTIVE_NO_MARKET,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,app-security.authz app-security.secrets async-python.blocking async-python.testing celery.design celery.retries ci-cd.deploy linux.diagnostics postgresql.indexes postgresql.transactions pytest.isolation sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C01-C-b50-s1,C01,C_ADAPTIVE_NO_MARKET,50,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.testing aws.deploy kafka.consumers kafka.errors kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents postgresql.transactions pytest.isolation python-core.typing sqlalchemy.loading sqlalchemy.models,42,JUNIOR,,SIMULATED
+ch4-m-C01-C-b50-s2,C01,C_ADAPTIVE_NO_MARKET,50,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries docker.runtime kafka.consumers kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents postgresql.indexes postgresql.transactions pytest.isolation,43,JUNIOR,,SIMULATED
+ch4-m-C01-D-b10-s0,C01,D_FULL_COMPETENCEMATCH,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers kafka.errors python-core.typing,53,JUNIOR,,SIMULATED
+ch4-m-C01-D-b10-s1,C01,D_FULL_COMPETENCEMATCH,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers kafka.errors python-core.typing,54,JUNIOR,,SIMULATED
+ch4-m-C01-D-b10-s2,C01,D_FULL_COMPETENCEMATCH,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers python-core.typing,55,JUNIOR,,SIMULATED
+ch4-m-C01-D-b20-s0,C01,D_FULL_COMPETENCEMATCH,20,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,django.architecture django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing,47,JUNIOR,,SIMULATED
+ch4-m-C01-D-b20-s1,C01,D_FULL_COMPETENCEMATCH,20,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,51,JUNIOR,,SIMULATED
+ch4-m-C01-D-b20-s2,C01,D_FULL_COMPETENCEMATCH,20,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,django.architecture django.orm kafka.consumers python-core.typing,50,JUNIOR,,SIMULATED
+ch4-m-C01-D-b30-s0,C01,D_FULL_COMPETENCEMATCH,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost ci-cd.deploy django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing,46,JUNIOR,,SIMULATED
+ch4-m-C01-D-b30-s1,C01,D_FULL_COMPETENCEMATCH,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy django.architecture django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,47,JUNIOR,,SIMULATED
+ch4-m-C01-D-b30-s2,C01,D_FULL_COMPETENCEMATCH,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost ci-cd.deploy django.architecture django.orm kafka.consumers python-core.typing,48,JUNIOR,,SIMULATED
+ch4-m-C01-D-b50-s0,C01,D_FULL_COMPETENCEMATCH,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes python-core.typing redis.reliability,41,JUNIOR,,SIMULATED
+ch4-m-C01-D-b50-s1,C01,D_FULL_COMPETENCEMATCH,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.schema python-core.typing redis.reliability sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C01-D-b50-s2,C01,D_FULL_COMPETENCEMATCH,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security kafka.consumers postgresql.indexes postgresql.schema python-core.typing redis.reliability,42,JUNIOR,,SIMULATED
+ch4-m-C01-Dfd-b10-s0,C01,D_FIXED_DIFFICULTY,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kafka.consumers kafka.errors python-core.typing,53,JUNIOR,,SIMULATED
+ch4-m-C01-Dfd-b10-s1,C01,D_FIXED_DIFFICULTY,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kafka.consumers kafka.errors python-core.typing,54,JUNIOR,,SIMULATED
+ch4-m-C01-Dfd-b10-s2,C01,D_FIXED_DIFFICULTY,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kafka.consumers python-core.typing,55,JUNIOR,,SIMULATED
+ch4-m-C01-Dfd-b20-s0,C01,D_FIXED_DIFFICULTY,20,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,48,JUNIOR,,SIMULATED
+ch4-m-C01-Dfd-b20-s1,C01,D_FIXED_DIFFICULTY,20,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,51,JUNIOR,,SIMULATED
+ch4-m-C01-Dfd-b20-s2,C01,D_FIXED_DIFFICULTY,20,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,kafka.consumers python-core.typing sql.performance,51,JUNIOR,,SIMULATED
+ch4-m-C01-Dfd-b30-s0,C01,D_FIXED_DIFFICULTY,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,46,JUNIOR,,SIMULATED
+ch4-m-C01-Dfd-b30-s1,C01,D_FIXED_DIFFICULTY,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,ci-cd.deploy django.architecture django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,47,JUNIOR,,SIMULATED
+ch4-m-C01-Dfd-b30-s2,C01,D_FIXED_DIFFICULTY,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy django.architecture django.orm kafka.consumers python-core.typing sql.performance,48,JUNIOR,,SIMULATED
+ch4-m-C01-Dfd-b50-s0,C01,D_FIXED_DIFFICULTY,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes python-core.typing redis.reliability sql.performance,40,JUNIOR,,SIMULATED
+ch4-m-C01-Dfd-b50-s1,C01,D_FIXED_DIFFICULTY,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.deploy aws.iam ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.schema python-core.typing redis.reliability sql.performance,41,JUNIOR,,SIMULATED
+ch4-m-C01-Dfd-b50-s2,C01,D_FIXED_DIFFICULTY,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security kafka.consumers postgresql.indexes postgresql.schema python-core.typing redis.reliability sql.performance,41,JUNIOR,,SIMULATED
+ch4-m-C02-A-na-na,C02,A_INITIAL_PROFILE,,,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,JUNIOR,,SIMULATED
+ch4-m-C02-B-b10-s0,C02,B_STATIC,10,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,ci-cd.deploy fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C02-B-b10-s1,C02,B_STATIC,10,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C02-B-b10-s2,C02,B_STATIC,10,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics sql.performance,41,JUNIOR,,SIMULATED
+ch4-m-C02-B-b20-s0,C02,B_STATIC,20,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C02-B-b20-s1,C02,B_STATIC,20,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C02-B-b20-s2,C02,B_STATIC,20,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C02-B-b30-s0,C02,B_STATIC,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C02-B-b30-s1,C02,B_STATIC,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C02-B-b30-s2,C02,B_STATIC,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C02-B-b50-s0,C02,B_STATIC,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C02-B-b50-s1,C02,B_STATIC,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C02-B-b50-s2,C02,B_STATIC,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C02-C-b10-s0,C02,C_ADAPTIVE_NO_MARKET,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,sql.performance,55,JUNIOR,,SIMULATED
+ch4-m-C02-C-b10-s1,C02,C_ADAPTIVE_NO_MARKET,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,async-python.blocking async-python.testing observability.incidents,56,JUNIOR,,SIMULATED
+ch4-m-C02-C-b10-s2,C02,C_ADAPTIVE_NO_MARKET,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,aws.cost aws.deploy celery.design celery.retries,55,JUNIOR,,SIMULATED
+ch4-m-C02-C-b20-s0,C02,C_ADAPTIVE_NO_MARKET,20,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,linux.diagnostics pytest.isolation sql.performance,52,JUNIOR,,SIMULATED
+ch4-m-C02-C-b20-s1,C02,C_ADAPTIVE_NO_MARKET,20,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,async-python.blocking async-python.testing aws.deploy kubernetes.resources kubernetes.workloads observability.incidents,53,JUNIOR,,SIMULATED
+ch4-m-C02-C-b20-s2,C02,C_ADAPTIVE_NO_MARKET,20,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries kafka.consumers kubernetes.resources kubernetes.workloads,52,JUNIOR,,SIMULATED
+ch4-m-C02-C-b30-s0,C02,C_ADAPTIVE_NO_MARKET,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,linux.diagnostics postgresql.indexes postgresql.transactions pytest.isolation sql.performance,49,JUNIOR,,SIMULATED
+ch4-m-C02-C-b30-s1,C02,C_ADAPTIVE_NO_MARKET,30,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,async-python.blocking async-python.testing aws.deploy kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents pytest.isolation,50,JUNIOR,,SIMULATED
+ch4-m-C02-C-b30-s2,C02,C_ADAPTIVE_NO_MARKET,30,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries docker.runtime kafka.consumers kubernetes.resources kubernetes.workloads,49,JUNIOR,,SIMULATED
+ch4-m-C02-C-b50-s0,C02,C_ADAPTIVE_NO_MARKET,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,app-security.authz app-security.secrets async-python.blocking async-python.testing celery.design celery.retries ci-cd.deploy linux.diagnostics postgresql.indexes postgresql.transactions pytest.isolation sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C02-C-b50-s1,C02,C_ADAPTIVE_NO_MARKET,50,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.testing aws.deploy kafka.consumers kafka.errors kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents postgresql.transactions pytest.isolation sqlalchemy.loading sqlalchemy.models,41,JUNIOR,,SIMULATED
+ch4-m-C02-C-b50-s2,C02,C_ADAPTIVE_NO_MARKET,50,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries docker.runtime kafka.consumers kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents postgresql.indexes postgresql.transactions pytest.isolation,43,JUNIOR,,SIMULATED
+ch4-m-C02-D-b10-s0,C02,D_FULL_COMPETENCEMATCH,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,fastapi.dependencies kafka.consumers kafka.errors,51,JUNIOR,,SIMULATED
+ch4-m-C02-D-b10-s1,C02,D_FULL_COMPETENCEMATCH,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,fastapi.dependencies kafka.consumers kafka.errors,52,JUNIOR,,SIMULATED
+ch4-m-C02-D-b10-s2,C02,D_FULL_COMPETENCEMATCH,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,fastapi.dependencies kafka.consumers,52,JUNIOR,,SIMULATED
+ch4-m-C02-D-b20-s0,C02,D_FULL_COMPETENCEMATCH,20,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost ci-cd.deploy fastapi.dependencies kafka.consumers kafka.errors,48,JUNIOR,,SIMULATED
+ch4-m-C02-D-b20-s1,C02,D_FULL_COMPETENCEMATCH,20,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy fastapi.dependencies kafka.consumers kafka.errors,48,JUNIOR,,SIMULATED
+ch4-m-C02-D-b20-s2,C02,D_FULL_COMPETENCEMATCH,20,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost ci-cd.deploy kafka.consumers,50,JUNIOR,,SIMULATED
+ch4-m-C02-D-b30-s0,C02,D_FULL_COMPETENCEMATCH,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.orm docker.runtime fastapi.dependencies kafka.consumers kafka.errors,43,JUNIOR,,SIMULATED
+ch4-m-C02-D-b30-s1,C02,D_FULL_COMPETENCEMATCH,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime fastapi.dependencies kafka.consumers kafka.errors,45,JUNIOR,,SIMULATED
+ch4-m-C02-D-b30-s2,C02,D_FULL_COMPETENCEMATCH,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security kafka.consumers,43,JUNIOR,,SIMULATED
+ch4-m-C02-D-b50-s0,C02,D_FULL_COMPETENCEMATCH,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema redis.reliability,39,JUNIOR,,SIMULATED
+ch4-m-C02-D-b50-s1,C02,D_FULL_COMPETENCEMATCH,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema redis.reliability,41,JUNIOR,,SIMULATED
+ch4-m-C02-D-b50-s2,C02,D_FULL_COMPETENCEMATCH,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security kafka.consumers postgresql.indexes postgresql.schema redis.reliability,40,JUNIOR,,SIMULATED
+ch4-m-C02-Dfd-b10-s0,C02,D_FIXED_DIFFICULTY,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies kafka.consumers kafka.errors,51,JUNIOR,,SIMULATED
+ch4-m-C02-Dfd-b10-s1,C02,D_FIXED_DIFFICULTY,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies kafka.consumers kafka.errors,52,JUNIOR,,SIMULATED
+ch4-m-C02-Dfd-b10-s2,C02,D_FIXED_DIFFICULTY,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies kafka.consumers,52,JUNIOR,,SIMULATED
+ch4-m-C02-Dfd-b20-s0,C02,D_FIXED_DIFFICULTY,20,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost ci-cd.deploy fastapi.dependencies kafka.consumers kafka.errors,48,JUNIOR,,SIMULATED
+ch4-m-C02-Dfd-b20-s1,C02,D_FIXED_DIFFICULTY,20,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,aws.cost aws.deploy ci-cd.deploy fastapi.dependencies kafka.consumers kafka.errors,48,JUNIOR,,SIMULATED
+ch4-m-C02-Dfd-b20-s2,C02,D_FIXED_DIFFICULTY,20,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost ci-cd.deploy kafka.consumers,50,JUNIOR,,SIMULATED
+ch4-m-C02-Dfd-b30-s0,C02,D_FIXED_DIFFICULTY,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.orm docker.runtime fastapi.dependencies kafka.consumers kafka.errors,43,JUNIOR,,SIMULATED
+ch4-m-C02-Dfd-b30-s1,C02,D_FIXED_DIFFICULTY,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.deploy ci-cd.deploy django.architecture django.orm fastapi.dependencies kafka.consumers kafka.errors sql.performance,45,JUNIOR,,SIMULATED
+ch4-m-C02-Dfd-b30-s2,C02,D_FIXED_DIFFICULTY,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security kafka.consumers,43,JUNIOR,,SIMULATED
+ch4-m-C02-Dfd-b50-s0,C02,D_FIXED_DIFFICULTY,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema redis.reliability,39,JUNIOR,,SIMULATED
+ch4-m-C02-Dfd-b50-s1,C02,D_FIXED_DIFFICULTY,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema redis.reliability sql.performance,40,JUNIOR,,SIMULATED
+ch4-m-C02-Dfd-b50-s2,C02,D_FIXED_DIFFICULTY,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security kafka.consumers postgresql.indexes postgresql.schema redis.reliability,40,JUNIOR,,SIMULATED
+ch4-m-C03-A-na-na,C03,A_INITIAL_PROFILE,,,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,JUNIOR,,SIMULATED
+ch4-m-C03-B-b10-s0,C03,B_STATIC,10,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,ci-cd.deploy fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas python-core.typing,42,JUNIOR,,SIMULATED
+ch4-m-C03-B-b10-s1,C03,B_STATIC,10,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics python-core.typing,42,JUNIOR,,SIMULATED
+ch4-m-C03-B-b10-s2,C03,B_STATIC,10,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics python-core.typing,41,JUNIOR,,SIMULATED
+ch4-m-C03-B-b20-s0,C03,B_STATIC,20,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema python-core.typing rest-api.contract rest-api.pagination rest-api.security rest-api.versioning,27,JUNIOR,,SIMULATED
+ch4-m-C03-B-b20-s1,C03,B_STATIC,20,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.contract rest-api.pagination rest-api.security rest-api.versioning,27,JUNIOR,,SIMULATED
+ch4-m-C03-B-b20-s2,C03,B_STATIC,20,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.contract rest-api.pagination rest-api.security rest-api.versioning,27,JUNIOR,,SIMULATED
+ch4-m-C03-B-b30-s0,C03,B_STATIC,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema python-core.typing rest-api.contract rest-api.pagination rest-api.security rest-api.versioning,27,JUNIOR,,SIMULATED
+ch4-m-C03-B-b30-s1,C03,B_STATIC,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.contract rest-api.pagination rest-api.security rest-api.versioning,27,JUNIOR,,SIMULATED
+ch4-m-C03-B-b30-s2,C03,B_STATIC,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.contract rest-api.pagination rest-api.security rest-api.versioning,27,JUNIOR,,SIMULATED
+ch4-m-C03-B-b50-s0,C03,B_STATIC,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema python-core.typing rest-api.contract rest-api.pagination rest-api.security rest-api.versioning,27,JUNIOR,,SIMULATED
+ch4-m-C03-B-b50-s1,C03,B_STATIC,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.contract rest-api.pagination rest-api.security rest-api.versioning,27,JUNIOR,,SIMULATED
+ch4-m-C03-B-b50-s2,C03,B_STATIC,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.contract rest-api.pagination rest-api.security rest-api.versioning,27,JUNIOR,,SIMULATED
+ch4-m-C03-C-b10-s0,C03,C_ADAPTIVE_NO_MARKET,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,rest-api.contract,55,JUNIOR,,SIMULATED
+ch4-m-C03-C-b10-s1,C03,C_ADAPTIVE_NO_MARKET,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,async-python.blocking async-python.testing observability.incidents,56,JUNIOR,,SIMULATED
+ch4-m-C03-C-b10-s2,C03,C_ADAPTIVE_NO_MARKET,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,aws.cost aws.deploy celery.design celery.retries,55,JUNIOR,,SIMULATED
+ch4-m-C03-C-b20-s0,C03,C_ADAPTIVE_NO_MARKET,20,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,linux.diagnostics postgresql.schema postgresql.transactions pytest.isolation rest-api.contract,50,JUNIOR,,SIMULATED
+ch4-m-C03-C-b20-s1,C03,C_ADAPTIVE_NO_MARKET,20,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,async-python.blocking async-python.testing aws.deploy kubernetes.resources kubernetes.workloads observability.incidents,53,JUNIOR,,SIMULATED
+ch4-m-C03-C-b20-s2,C03,C_ADAPTIVE_NO_MARKET,20,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries kafka.consumers kubernetes.resources kubernetes.workloads,52,JUNIOR,,SIMULATED
+ch4-m-C03-C-b30-s0,C03,C_ADAPTIVE_NO_MARKET,30,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.testing linux.diagnostics postgresql.transactions pytest.isolation rest-api.contract,48,JUNIOR,,SIMULATED
+ch4-m-C03-C-b30-s1,C03,C_ADAPTIVE_NO_MARKET,30,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,async-python.blocking async-python.testing aws.deploy kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents pytest.isolation,50,JUNIOR,,SIMULATED
+ch4-m-C03-C-b30-s2,C03,C_ADAPTIVE_NO_MARKET,30,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries docker.runtime kafka.consumers kubernetes.resources kubernetes.workloads,49,JUNIOR,,SIMULATED
+ch4-m-C03-C-b50-s0,C03,C_ADAPTIVE_NO_MARKET,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,app-security.authz app-security.secrets async-python.blocking async-python.testing celery.design celery.retries ci-cd.deploy linux.diagnostics postgresql.transactions pytest.isolation rest-api.contract,42,JUNIOR,,SIMULATED
+ch4-m-C03-C-b50-s1,C03,C_ADAPTIVE_NO_MARKET,50,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.testing aws.deploy kafka.consumers kafka.errors kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents postgresql.transactions pytest.isolation python-core.typing sqlalchemy.loading sqlalchemy.models,42,JUNIOR,,SIMULATED
+ch4-m-C03-C-b50-s2,C03,C_ADAPTIVE_NO_MARKET,50,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries docker.runtime kafka.consumers kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents postgresql.indexes postgresql.transactions pytest.isolation,43,JUNIOR,,SIMULATED
+ch4-m-C03-D-b10-s0,C03,D_FULL_COMPETENCEMATCH,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers kafka.errors python-core.typing,53,JUNIOR,,SIMULATED
+ch4-m-C03-D-b10-s1,C03,D_FULL_COMPETENCEMATCH,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers kafka.errors python-core.typing,54,JUNIOR,,SIMULATED
+ch4-m-C03-D-b10-s2,C03,D_FULL_COMPETENCEMATCH,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers python-core.typing,55,JUNIOR,,SIMULATED
+ch4-m-C03-D-b20-s0,C03,D_FULL_COMPETENCEMATCH,20,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy fastapi.dependencies kafka.consumers kafka.errors python-core.typing,47,JUNIOR,,SIMULATED
+ch4-m-C03-D-b20-s1,C03,D_FULL_COMPETENCEMATCH,20,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,fastapi.dependencies kafka.consumers kafka.errors python-core.typing,49,JUNIOR,,SIMULATED
+ch4-m-C03-D-b20-s2,C03,D_FULL_COMPETENCEMATCH,20,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy kafka.consumers python-core.typing,50,JUNIOR,,SIMULATED
+ch4-m-C03-D-b30-s0,C03,D_FULL_COMPETENCEMATCH,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.migrations fastapi.dependencies kafka.consumers kafka.errors python-core.typing,43,JUNIOR,,SIMULATED
+ch4-m-C03-D-b30-s1,C03,D_FULL_COMPETENCEMATCH,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.deploy ci-cd.deploy django.architecture django.migrations fastapi.dependencies kafka.consumers kafka.errors python-core.typing,45,JUNIOR,,SIMULATED
+ch4-m-C03-D-b30-s2,C03,D_FULL_COMPETENCEMATCH,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.migrations kafka.consumers python-core.typing,46,JUNIOR,,SIMULATED
+ch4-m-C03-D-b50-s0,C03,D_FULL_COMPETENCEMATCH,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.migrations docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.transactions python-core.typing redis.reliability,40,JUNIOR,,SIMULATED
+ch4-m-C03-D-b50-s1,C03,D_FULL_COMPETENCEMATCH,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.deploy ci-cd.deploy django.architecture django.migrations docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors python-core.typing redis.reliability,41,JUNIOR,,SIMULATED
+ch4-m-C03-D-b50-s2,C03,D_FULL_COMPETENCEMATCH,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.migrations docker.runtime docker.security kafka.consumers python-core.typing redis.reliability,42,JUNIOR,,SIMULATED
+ch4-m-C03-Dfd-b10-s0,C03,D_FIXED_DIFFICULTY,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kafka.consumers kafka.errors python-core.typing,53,JUNIOR,,SIMULATED
+ch4-m-C03-Dfd-b10-s1,C03,D_FIXED_DIFFICULTY,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kafka.consumers kafka.errors python-core.typing,54,JUNIOR,,SIMULATED
+ch4-m-C03-Dfd-b10-s2,C03,D_FIXED_DIFFICULTY,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kafka.consumers python-core.typing,55,JUNIOR,,SIMULATED
+ch4-m-C03-Dfd-b20-s0,C03,D_FIXED_DIFFICULTY,20,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy fastapi.dependencies kafka.consumers kafka.errors python-core.typing,47,JUNIOR,,SIMULATED
+ch4-m-C03-Dfd-b20-s1,C03,D_FIXED_DIFFICULTY,20,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,fastapi.dependencies kafka.consumers kafka.errors python-core.typing,49,JUNIOR,,SIMULATED
+ch4-m-C03-Dfd-b20-s2,C03,D_FIXED_DIFFICULTY,20,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy kafka.consumers python-core.typing,50,JUNIOR,,SIMULATED
+ch4-m-C03-Dfd-b30-s0,C03,D_FIXED_DIFFICULTY,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.migrations fastapi.dependencies kafka.consumers kafka.errors python-core.typing,43,JUNIOR,,SIMULATED
+ch4-m-C03-Dfd-b30-s1,C03,D_FIXED_DIFFICULTY,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.deploy aws.iam ci-cd.deploy django.architecture django.migrations fastapi.dependencies kafka.consumers kafka.errors python-core.typing,44,JUNIOR,,SIMULATED
+ch4-m-C03-Dfd-b30-s2,C03,D_FIXED_DIFFICULTY,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.migrations kafka.consumers python-core.typing,46,JUNIOR,,SIMULATED
+ch4-m-C03-Dfd-b50-s0,C03,D_FIXED_DIFFICULTY,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.migrations docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.transactions python-core.typing redis.reliability,40,JUNIOR,,SIMULATED
+ch4-m-C03-Dfd-b50-s1,C03,D_FIXED_DIFFICULTY,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.deploy aws.iam ci-cd.deploy django.architecture django.migrations docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors python-core.typing redis.reliability,40,JUNIOR,,SIMULATED
+ch4-m-C03-Dfd-b50-s2,C03,D_FIXED_DIFFICULTY,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.migrations docker.runtime docker.security kafka.consumers python-core.typing redis.reliability,42,JUNIOR,,SIMULATED
+ch4-m-C04-A-na-na,C04,A_INITIAL_PROFILE,,,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,JUNIOR,,SIMULATED
+ch4-m-C04-B-b10-s0,C04,B_STATIC,10,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas python-core.typing sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C04-B-b10-s1,C04,B_STATIC,10,1,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics python-core.typing sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C04-B-b10-s2,C04,B_STATIC,10,2,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics python-core.typing sql.performance,41,JUNIOR,,SIMULATED
+ch4-m-C04-B-b20-s0,C04,B_STATIC,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C04-B-b20-s1,C04,B_STATIC,20,1,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C04-B-b20-s2,C04,B_STATIC,20,2,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C04-B-b30-s0,C04,B_STATIC,30,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C04-B-b30-s1,C04,B_STATIC,30,1,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C04-B-b30-s2,C04,B_STATIC,30,2,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C04-B-b50-s0,C04,B_STATIC,50,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C04-B-b50-s1,C04,B_STATIC,50,1,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C04-B-b50-s2,C04,B_STATIC,50,2,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C04-C-b10-s0,C04,C_ADAPTIVE_NO_MARKET,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,sql.performance,55,JUNIOR,,SIMULATED
+ch4-m-C04-C-b10-s1,C04,C_ADAPTIVE_NO_MARKET,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.testing observability.incidents,56,JUNIOR,,SIMULATED
+ch4-m-C04-C-b10-s2,C04,C_ADAPTIVE_NO_MARKET,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries,55,JUNIOR,,SIMULATED
+ch4-m-C04-C-b20-s0,C04,C_ADAPTIVE_NO_MARKET,20,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,linux.diagnostics pytest.isolation sql.performance,52,JUNIOR,,SIMULATED
+ch4-m-C04-C-b20-s1,C04,C_ADAPTIVE_NO_MARKET,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.testing aws.deploy kubernetes.resources kubernetes.workloads observability.incidents,53,JUNIOR,,SIMULATED
+ch4-m-C04-C-b20-s2,C04,C_ADAPTIVE_NO_MARKET,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries kafka.consumers kubernetes.resources kubernetes.workloads,52,JUNIOR,,SIMULATED
+ch4-m-C04-C-b30-s0,C04,C_ADAPTIVE_NO_MARKET,30,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,linux.diagnostics postgresql.indexes postgresql.transactions pytest.isolation sql.performance,49,JUNIOR,,SIMULATED
+ch4-m-C04-C-b30-s1,C04,C_ADAPTIVE_NO_MARKET,30,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.testing aws.deploy kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents pytest.isolation,50,JUNIOR,,SIMULATED
+ch4-m-C04-C-b30-s2,C04,C_ADAPTIVE_NO_MARKET,30,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries docker.runtime kafka.consumers kubernetes.resources kubernetes.workloads,49,JUNIOR,,SIMULATED
+ch4-m-C04-C-b50-s0,C04,C_ADAPTIVE_NO_MARKET,50,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,app-security.authz app-security.secrets async-python.blocking async-python.testing celery.design celery.retries ci-cd.deploy linux.diagnostics postgresql.indexes postgresql.transactions pytest.isolation sql.performance,41,JUNIOR,,SIMULATED
+ch4-m-C04-C-b50-s1,C04,C_ADAPTIVE_NO_MARKET,50,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.testing aws.deploy kafka.consumers kafka.errors kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents postgresql.transactions pytest.isolation python-core.typing sqlalchemy.loading sqlalchemy.models,42,JUNIOR,,SIMULATED
+ch4-m-C04-C-b50-s2,C04,C_ADAPTIVE_NO_MARKET,50,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries docker.runtime kafka.consumers kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents postgresql.indexes postgresql.transactions pytest.isolation,43,JUNIOR,,SIMULATED
+ch4-m-C04-D-b10-s0,C04,D_FULL_COMPETENCEMATCH,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers kafka.errors python-core.typing,53,JUNIOR,,SIMULATED
+ch4-m-C04-D-b10-s1,C04,D_FULL_COMPETENCEMATCH,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers kafka.errors python-core.typing,54,JUNIOR,,SIMULATED
+ch4-m-C04-D-b10-s2,C04,D_FULL_COMPETENCEMATCH,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers python-core.typing,55,JUNIOR,,SIMULATED
+ch4-m-C04-D-b20-s0,C04,D_FULL_COMPETENCEMATCH,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,django.architecture django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing,47,JUNIOR,,SIMULATED
+ch4-m-C04-D-b20-s1,C04,D_FULL_COMPETENCEMATCH,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,51,JUNIOR,,SIMULATED
+ch4-m-C04-D-b20-s2,C04,D_FULL_COMPETENCEMATCH,20,2,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,django.architecture django.orm kafka.consumers python-core.typing,50,JUNIOR,,SIMULATED
+ch4-m-C04-D-b30-s0,C04,D_FULL_COMPETENCEMATCH,30,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost ci-cd.deploy django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing,46,JUNIOR,,SIMULATED
+ch4-m-C04-D-b30-s1,C04,D_FULL_COMPETENCEMATCH,30,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,ci-cd.deploy django.architecture django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,47,JUNIOR,,SIMULATED
+ch4-m-C04-D-b30-s2,C04,D_FULL_COMPETENCEMATCH,30,2,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost ci-cd.deploy django.architecture django.orm kafka.consumers python-core.typing,48,JUNIOR,,SIMULATED
+ch4-m-C04-D-b50-s0,C04,D_FULL_COMPETENCEMATCH,50,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes python-core.typing redis.reliability,41,JUNIOR,,SIMULATED
+ch4-m-C04-D-b50-s1,C04,D_FULL_COMPETENCEMATCH,50,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.transactions python-core.typing redis.reliability sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C04-D-b50-s2,C04,D_FULL_COMPETENCEMATCH,50,2,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security kafka.consumers postgresql.indexes postgresql.schema python-core.typing redis.reliability,42,JUNIOR,,SIMULATED
+ch4-m-C04-Dfd-b10-s0,C04,D_FIXED_DIFFICULTY,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers kafka.errors python-core.typing,53,JUNIOR,,SIMULATED
+ch4-m-C04-Dfd-b10-s1,C04,D_FIXED_DIFFICULTY,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers kafka.errors python-core.typing,54,JUNIOR,,SIMULATED
+ch4-m-C04-Dfd-b10-s2,C04,D_FIXED_DIFFICULTY,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers python-core.typing,55,JUNIOR,,SIMULATED
+ch4-m-C04-Dfd-b20-s0,C04,D_FIXED_DIFFICULTY,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,django.architecture django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing,47,JUNIOR,,SIMULATED
+ch4-m-C04-Dfd-b20-s1,C04,D_FIXED_DIFFICULTY,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,51,JUNIOR,,SIMULATED
+ch4-m-C04-Dfd-b20-s2,C04,D_FIXED_DIFFICULTY,20,2,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,django.architecture django.orm kafka.consumers python-core.typing,50,JUNIOR,,SIMULATED
+ch4-m-C04-Dfd-b30-s0,C04,D_FIXED_DIFFICULTY,30,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost ci-cd.deploy django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing,46,JUNIOR,,SIMULATED
+ch4-m-C04-Dfd-b30-s1,C04,D_FIXED_DIFFICULTY,30,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,ci-cd.deploy django.architecture django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,47,JUNIOR,,SIMULATED
+ch4-m-C04-Dfd-b30-s2,C04,D_FIXED_DIFFICULTY,30,2,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost ci-cd.deploy django.architecture django.orm kafka.consumers python-core.typing,48,JUNIOR,,SIMULATED
+ch4-m-C04-Dfd-b50-s0,C04,D_FIXED_DIFFICULTY,50,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes python-core.typing redis.reliability,41,JUNIOR,,SIMULATED
+ch4-m-C04-Dfd-b50-s1,C04,D_FIXED_DIFFICULTY,50,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.transactions python-core.typing redis.reliability sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C04-Dfd-b50-s2,C04,D_FIXED_DIFFICULTY,50,2,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security kafka.consumers postgresql.indexes postgresql.schema python-core.typing redis.reliability,42,JUNIOR,,SIMULATED
+ch4-m-C05-A-na-na,C05,A_INITIAL_PROFILE,,,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,JUNIOR,,SIMULATED
+ch4-m-C05-B-b10-s0,C05,B_STATIC,10,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas python-core.typing sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C05-B-b10-s1,C05,B_STATIC,10,1,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics python-core.typing sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C05-B-b10-s2,C05,B_STATIC,10,2,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics python-core.typing sql.performance,41,JUNIOR,,SIMULATED
+ch4-m-C05-B-b20-s0,C05,B_STATIC,20,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C05-B-b20-s1,C05,B_STATIC,20,1,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C05-B-b20-s2,C05,B_STATIC,20,2,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C05-B-b30-s0,C05,B_STATIC,30,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C05-B-b30-s1,C05,B_STATIC,30,1,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C05-B-b30-s2,C05,B_STATIC,30,2,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C05-B-b50-s0,C05,B_STATIC,50,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas postgresql.indexes postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C05-B-b50-s1,C05,B_STATIC,50,1,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C05-B-b50-s2,C05,B_STATIC,50,2,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C05-C-b10-s0,C05,C_ADAPTIVE_NO_MARKET,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,sql.performance,55,JUNIOR,,SIMULATED
+ch4-m-C05-C-b10-s1,C05,C_ADAPTIVE_NO_MARKET,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.testing observability.incidents,56,JUNIOR,,SIMULATED
+ch4-m-C05-C-b10-s2,C05,C_ADAPTIVE_NO_MARKET,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries,55,JUNIOR,,SIMULATED
+ch4-m-C05-C-b20-s0,C05,C_ADAPTIVE_NO_MARKET,20,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,linux.diagnostics pytest.isolation sql.performance,52,JUNIOR,,SIMULATED
+ch4-m-C05-C-b20-s1,C05,C_ADAPTIVE_NO_MARKET,20,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.testing aws.deploy kubernetes.resources kubernetes.workloads observability.incidents,53,JUNIOR,,SIMULATED
+ch4-m-C05-C-b20-s2,C05,C_ADAPTIVE_NO_MARKET,20,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries kafka.consumers kubernetes.resources kubernetes.workloads,52,JUNIOR,,SIMULATED
+ch4-m-C05-C-b30-s0,C05,C_ADAPTIVE_NO_MARKET,30,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,linux.diagnostics postgresql.indexes postgresql.transactions pytest.isolation sql.performance,49,JUNIOR,,SIMULATED
+ch4-m-C05-C-b30-s1,C05,C_ADAPTIVE_NO_MARKET,30,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.testing aws.deploy kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents pytest.isolation,50,JUNIOR,,SIMULATED
+ch4-m-C05-C-b30-s2,C05,C_ADAPTIVE_NO_MARKET,30,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries docker.runtime kafka.consumers kubernetes.resources kubernetes.workloads,49,JUNIOR,,SIMULATED
+ch4-m-C05-C-b50-s0,C05,C_ADAPTIVE_NO_MARKET,50,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,app-security.authz app-security.secrets async-python.blocking async-python.testing celery.design celery.retries ci-cd.deploy linux.diagnostics postgresql.indexes postgresql.transactions pytest.isolation sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C05-C-b50-s1,C05,C_ADAPTIVE_NO_MARKET,50,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.testing aws.deploy kafka.consumers kafka.errors kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents postgresql.transactions pytest.isolation python-core.typing sqlalchemy.loading sqlalchemy.models,42,JUNIOR,,SIMULATED
+ch4-m-C05-C-b50-s2,C05,C_ADAPTIVE_NO_MARKET,50,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.retries docker.runtime kafka.consumers kubernetes.resources kubernetes.workloads linux.diagnostics observability.incidents postgresql.indexes postgresql.transactions pytest.isolation,43,JUNIOR,,SIMULATED
+ch4-m-C05-D-b10-s0,C05,D_FULL_COMPETENCEMATCH,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers kafka.errors python-core.typing,53,JUNIOR,,SIMULATED
+ch4-m-C05-D-b10-s1,C05,D_FULL_COMPETENCEMATCH,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers kafka.errors python-core.typing,54,JUNIOR,,SIMULATED
+ch4-m-C05-D-b10-s2,C05,D_FULL_COMPETENCEMATCH,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers python-core.typing,55,JUNIOR,,SIMULATED
+ch4-m-C05-D-b20-s0,C05,D_FULL_COMPETENCEMATCH,20,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,django.architecture django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing,47,JUNIOR,,SIMULATED
+ch4-m-C05-D-b20-s1,C05,D_FULL_COMPETENCEMATCH,20,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,51,JUNIOR,,SIMULATED
+ch4-m-C05-D-b20-s2,C05,D_FULL_COMPETENCEMATCH,20,2,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,django.architecture django.orm kafka.consumers python-core.typing,50,JUNIOR,,SIMULATED
+ch4-m-C05-D-b30-s0,C05,D_FULL_COMPETENCEMATCH,30,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost ci-cd.deploy django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing,46,JUNIOR,,SIMULATED
+ch4-m-C05-D-b30-s1,C05,D_FULL_COMPETENCEMATCH,30,1,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy django.architecture django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,47,JUNIOR,,SIMULATED
+ch4-m-C05-D-b30-s2,C05,D_FULL_COMPETENCEMATCH,30,2,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost ci-cd.deploy django.architecture django.orm kafka.consumers python-core.typing,48,JUNIOR,,SIMULATED
+ch4-m-C05-D-b50-s0,C05,D_FULL_COMPETENCEMATCH,50,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes python-core.typing redis.reliability,41,JUNIOR,,SIMULATED
+ch4-m-C05-D-b50-s1,C05,D_FULL_COMPETENCEMATCH,50,1,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.schema python-core.typing redis.reliability sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C05-D-b50-s2,C05,D_FULL_COMPETENCEMATCH,50,2,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security kafka.consumers postgresql.indexes postgresql.schema python-core.typing redis.reliability,42,JUNIOR,,SIMULATED
+ch4-m-C05-Dfd-b10-s0,C05,D_FIXED_DIFFICULTY,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers kafka.errors python-core.typing,53,JUNIOR,,SIMULATED
+ch4-m-C05-Dfd-b10-s1,C05,D_FIXED_DIFFICULTY,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers kafka.errors python-core.typing,54,JUNIOR,,SIMULATED
+ch4-m-C05-Dfd-b10-s2,C05,D_FIXED_DIFFICULTY,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,kafka.consumers python-core.typing,55,JUNIOR,,SIMULATED
+ch4-m-C05-Dfd-b20-s0,C05,D_FIXED_DIFFICULTY,20,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,django.architecture django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing,47,JUNIOR,,SIMULATED
+ch4-m-C05-Dfd-b20-s1,C05,D_FIXED_DIFFICULTY,20,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,51,JUNIOR,,SIMULATED
+ch4-m-C05-Dfd-b20-s2,C05,D_FIXED_DIFFICULTY,20,2,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,django.architecture django.orm kafka.consumers python-core.typing,50,JUNIOR,,SIMULATED
+ch4-m-C05-Dfd-b30-s0,C05,D_FIXED_DIFFICULTY,30,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost ci-cd.deploy django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing,46,JUNIOR,,SIMULATED
+ch4-m-C05-Dfd-b30-s1,C05,D_FIXED_DIFFICULTY,30,1,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,ci-cd.deploy django.architecture django.orm fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,47,JUNIOR,,SIMULATED
+ch4-m-C05-Dfd-b30-s2,C05,D_FIXED_DIFFICULTY,30,2,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost ci-cd.deploy django.architecture django.orm kafka.consumers python-core.typing,48,JUNIOR,,SIMULATED
+ch4-m-C05-Dfd-b50-s0,C05,D_FIXED_DIFFICULTY,50,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes python-core.typing redis.reliability,41,JUNIOR,,SIMULATED
+ch4-m-C05-Dfd-b50-s1,C05,D_FIXED_DIFFICULTY,50,1,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.dependencies kafka.consumers kafka.errors postgresql.schema python-core.typing redis.reliability sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C05-Dfd-b50-s2,C05,D_FIXED_DIFFICULTY,50,2,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security kafka.consumers postgresql.indexes postgresql.schema python-core.typing redis.reliability,42,JUNIOR,,SIMULATED
+ch4-m-C06-A-na-na,C06,A_INITIAL_PROFILE,,,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,JUNIOR,,SIMULATED
+ch4-m-C06-B-b10-s0,C06,B_STATIC,10,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics python-core.typing sql.performance,41,JUNIOR,,SIMULATED
+ch4-m-C06-B-b10-s1,C06,B_STATIC,10,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics python-core.typing sql.performance,42,JUNIOR,,SIMULATED
+ch4-m-C06-B-b10-s2,C06,B_STATIC,10,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,ci-cd.deploy ci-cd.safety fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics python-core.typing sql.performance,41,JUNIOR,,SIMULATED
+ch4-m-C06-B-b20-s0,C06,B_STATIC,20,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,26,JUNIOR,,SIMULATED
+ch4-m-C06-B-b20-s1,C06,B_STATIC,20,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C06-B-b20-s2,C06,B_STATIC,20,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,26,JUNIOR,,SIMULATED
+ch4-m-C06-B-b30-s0,C06,B_STATIC,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,26,JUNIOR,,SIMULATED
+ch4-m-C06-B-b30-s1,C06,B_STATIC,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C06-B-b30-s2,C06,B_STATIC,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,26,JUNIOR,,SIMULATED
+ch4-m-C06-B-b50-s0,C06,B_STATIC,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,26,JUNIOR,,SIMULATED
+ch4-m-C06-B-b50-s1,C06,B_STATIC,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,27,JUNIOR,,SIMULATED
+ch4-m-C06-B-b50-s2,C06,B_STATIC,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,GAP,aws.cost aws.deploy aws.iam ci-cd.deploy ci-cd.safety docker.runtime docker.security fastapi.async fastapi.dependencies fastapi.testing kafka.consumers kafka.errors kafka.schemas kafka.semantics postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema python-core.typing rest-api.pagination rest-api.security rest-api.versioning sql.performance,26,JUNIOR,,SIMULATED
+ch4-m-C06-C-b10-s0,C06,C_ADAPTIVE_NO_MARKET,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,linux.diagnostics postgresql.schema postgresql.transactions pytest.isolation rest-api.pagination rest-api.security sql.performance,48,JUNIOR,,SIMULATED
+ch4-m-C06-C-b10-s1,C06,C_ADAPTIVE_NO_MARKET,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,async-python.blocking async-python.concurrency async-python.testing aws.cost aws.deploy kubernetes.resources kubernetes.security kubernetes.workloads observability.incidents,49,JUNIOR,,SIMULATED
+ch4-m-C06-C-b10-s2,C06,C_ADAPTIVE_NO_MARKET,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.idempotency celery.retries docker.security kafka.consumers kafka.errors kubernetes.resources kubernetes.security,48,JUNIOR,,SIMULATED
+ch4-m-C06-C-b20-s0,C06,C_ADAPTIVE_NO_MARKET,20,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,app-security.authz app-security.secrets async-python.blocking async-python.testing celery.design celery.retries ci-cd.deploy linux.diagnostics postgresql.indexes postgresql.migrations postgresql.schema postgresql.transactions pytest.isolation rest-api.pagination rest-api.security sql.performance,38,JUNIOR,,SIMULATED
+ch4-m-C06-C-b20-s1,C06,C_ADAPTIVE_NO_MARKET,20,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.concurrency async-python.testing aws.cost aws.deploy kafka.consumers kafka.errors kubernetes.resources kubernetes.security kubernetes.workloads linux.diagnostics observability.incidents postgresql.indexes postgresql.migrations postgresql.transactions python-core.typing sqlalchemy.concurrency sqlalchemy.models,38,JUNIOR,,SIMULATED
+ch4-m-C06-C-b20-s2,C06,C_ADAPTIVE_NO_MARKET,20,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.idempotency celery.retries docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors kubernetes.resources kubernetes.security linux.diagnostics observability.incidents postgresql.indexes postgresql.migrations postgresql.transactions pytest.isolation,38,JUNIOR,,SIMULATED
+ch4-m-C06-C-b30-s0,C06,C_ADAPTIVE_NO_MARKET,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,app-security.authz app-security.secrets async-python.blocking async-python.testing celery.design celery.retries ci-cd.deploy linux.diagnostics postgresql.indexes postgresql.migrations postgresql.schema postgresql.transactions pytest.isolation rest-api.pagination rest-api.security sql.performance,38,JUNIOR,,SIMULATED
+ch4-m-C06-C-b30-s1,C06,C_ADAPTIVE_NO_MARKET,30,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.concurrency async-python.testing aws.cost aws.deploy kafka.consumers kafka.errors kubernetes.resources kubernetes.security kubernetes.workloads linux.diagnostics observability.incidents postgresql.indexes postgresql.migrations postgresql.transactions python-core.typing sqlalchemy.concurrency sqlalchemy.loading sqlalchemy.models,37,JUNIOR,,SIMULATED
+ch4-m-C06-C-b30-s2,C06,C_ADAPTIVE_NO_MARKET,30,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.idempotency celery.retries docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors kubernetes.resources kubernetes.security linux.diagnostics observability.incidents postgresql.indexes postgresql.migrations postgresql.transactions pytest.isolation,38,JUNIOR,,SIMULATED
+ch4-m-C06-C-b50-s0,C06,C_ADAPTIVE_NO_MARKET,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,app-security.authz app-security.secrets async-python.blocking async-python.testing celery.design celery.retries ci-cd.deploy linux.diagnostics postgresql.indexes postgresql.migrations postgresql.schema postgresql.transactions pytest.isolation rest-api.pagination rest-api.security sql.performance,38,JUNIOR,,SIMULATED
+ch4-m-C06-C-b50-s1,C06,C_ADAPTIVE_NO_MARKET,50,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,async-python.blocking async-python.concurrency async-python.testing aws.cost aws.deploy kafka.consumers kafka.errors kubernetes.resources kubernetes.security kubernetes.workloads linux.diagnostics observability.incidents postgresql.indexes postgresql.migrations postgresql.transactions python-core.typing sqlalchemy.concurrency sqlalchemy.loading sqlalchemy.models,37,JUNIOR,,SIMULATED
+ch4-m-C06-C-b50-s2,C06,C_ADAPTIVE_NO_MARKET,50,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,GAP,aws.cost aws.deploy celery.design celery.idempotency celery.retries docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors kubernetes.resources kubernetes.security linux.diagnostics observability.incidents postgresql.indexes postgresql.migrations postgresql.transactions pytest.isolation,38,JUNIOR,,SIMULATED
+ch4-m-C06-D-b10-s0,C06,D_FULL_COMPETENCEMATCH,10,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,fastapi.async fastapi.dependencies kafka.consumers kafka.errors python-core.typing,48,JUNIOR,,SIMULATED
+ch4-m-C06-D-b10-s1,C06,D_FULL_COMPETENCEMATCH,10,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,django.architecture django.orm fastapi.async fastapi.dependencies kafka.consumers kafka.errors python-core.typing,48,JUNIOR,,SIMULATED
+ch4-m-C06-D-b10-s2,C06,D_FULL_COMPETENCEMATCH,10,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,fastapi.async fastapi.dependencies kafka.consumers kafka.errors python-core.typing,49,JUNIOR,,SIMULATED
+ch4-m-C06-D-b20-s0,C06,D_FULL_COMPETENCEMATCH,20,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing,39,JUNIOR,,SIMULATED
+ch4-m-C06-D-b20-s1,C06,D_FULL_COMPETENCEMATCH,20,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability,40,JUNIOR,,SIMULATED
+ch4-m-C06-D-b20-s2,C06,D_FULL_COMPETENCEMATCH,20,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing,40,JUNIOR,,SIMULATED
+ch4-m-C06-D-b30-s0,C06,D_FULL_COMPETENCEMATCH,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability,38,JUNIOR,,SIMULATED
+ch4-m-C06-D-b30-s1,C06,D_FULL_COMPETENCEMATCH,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability,40,JUNIOR,,SIMULATED
+ch4-m-C06-D-b30-s2,C06,D_FULL_COMPETENCEMATCH,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability,39,JUNIOR,,SIMULATED
+ch4-m-C06-D-b50-s0,C06,D_FULL_COMPETENCEMATCH,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability,38,JUNIOR,,SIMULATED
+ch4-m-C06-D-b50-s1,C06,D_FULL_COMPETENCEMATCH,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability,40,JUNIOR,,SIMULATED
+ch4-m-C06-D-b50-s2,C06,D_FULL_COMPETENCEMATCH,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability,39,JUNIOR,,SIMULATED
+ch4-m-C06-Dfd-b10-s0,C06,D_FIXED_DIFFICULTY,10,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,fastapi.async fastapi.dependencies kafka.consumers kafka.errors python-core.typing,48,JUNIOR,,SIMULATED
+ch4-m-C06-Dfd-b10-s1,C06,D_FIXED_DIFFICULTY,10,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,fastapi.async fastapi.dependencies kafka.consumers kafka.errors python-core.typing sql.performance,49,JUNIOR,,SIMULATED
+ch4-m-C06-Dfd-b10-s2,C06,D_FIXED_DIFFICULTY,10,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,fastapi.async fastapi.dependencies kafka.consumers kafka.errors python-core.typing,49,JUNIOR,,SIMULATED
+ch4-m-C06-Dfd-b20-s0,C06,D_FIXED_DIFFICULTY,20,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing sql.performance,38,JUNIOR,,SIMULATED
+ch4-m-C06-Dfd-b20-s1,C06,D_FIXED_DIFFICULTY,20,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing sql.performance,40,JUNIOR,,SIMULATED
+ch4-m-C06-Dfd-b20-s2,C06,D_FIXED_DIFFICULTY,20,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing sql.performance,39,JUNIOR,,SIMULATED
+ch4-m-C06-Dfd-b30-s0,C06,D_FIXED_DIFFICULTY,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability sql.performance,37,JUNIOR,,SIMULATED
+ch4-m-C06-Dfd-b30-s1,C06,D_FIXED_DIFFICULTY,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability sql.performance,39,JUNIOR,,SIMULATED
+ch4-m-C06-Dfd-b30-s2,C06,D_FIXED_DIFFICULTY,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability sql.performance,38,JUNIOR,,SIMULATED
+ch4-m-C06-Dfd-b50-s0,C06,D_FIXED_DIFFICULTY,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability sql.performance,37,JUNIOR,,SIMULATED
+ch4-m-C06-Dfd-b50-s1,C06,D_FIXED_DIFFICULTY,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability sql.performance,39,JUNIOR,,SIMULATED
+ch4-m-C06-Dfd-b50-s2,C06,D_FIXED_DIFFICULTY,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,GAP,aws.cost aws.deploy ci-cd.deploy django.architecture django.orm docker.runtime docker.security fastapi.async fastapi.dependencies kafka.consumers kafka.errors postgresql.indexes postgresql.schema python-core.typing redis.reliability sql.performance,38,JUNIOR,,SIMULATED
+ch4-m-C07-A-na-na,C07,A_INITIAL_PROFILE,,,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,MIDDLE,,SIMULATED
+ch4-m-C07-B-b10-s0,C07,B_STATIC,10,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C07-B-b10-s1,C07,B_STATIC,10,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,42,MIDDLE,,SIMULATED
+ch4-m-C07-B-b10-s2,C07,B_STATIC,10,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,MIDDLE,,SIMULATED
+ch4-m-C07-B-b20-s0,C07,B_STATIC,20,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C07-B-b20-s1,C07,B_STATIC,20,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,27,MIDDLE,,SIMULATED
+ch4-m-C07-B-b20-s2,C07,B_STATIC,20,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C07-B-b30-s0,C07,B_STATIC,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C07-B-b30-s1,C07,B_STATIC,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,27,MIDDLE,,SIMULATED
+ch4-m-C07-B-b30-s2,C07,B_STATIC,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C07-B-b50-s0,C07,B_STATIC,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C07-B-b50-s1,C07,B_STATIC,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,27,MIDDLE,,SIMULATED
+ch4-m-C07-B-b50-s2,C07,B_STATIC,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C07-C-b10-s0,C07,C_ADAPTIVE_NO_MARKET,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,55,MIDDLE,,SIMULATED
+ch4-m-C07-C-b10-s1,C07,C_ADAPTIVE_NO_MARKET,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,53,MIDDLE,,SIMULATED
+ch4-m-C07-C-b10-s2,C07,C_ADAPTIVE_NO_MARKET,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C07-C-b20-s0,C07,C_ADAPTIVE_NO_MARKET,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,48,MIDDLE,,SIMULATED
+ch4-m-C07-C-b20-s1,C07,C_ADAPTIVE_NO_MARKET,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C07-C-b20-s2,C07,C_ADAPTIVE_NO_MARKET,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kubernetes.resources,44,MIDDLE,,SIMULATED
+ch4-m-C07-C-b30-s0,C07,C_ADAPTIVE_NO_MARKET,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,app-security.authz,45,MIDDLE,,SIMULATED
+ch4-m-C07-C-b30-s1,C07,C_ADAPTIVE_NO_MARKET,30,1,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,45,MIDDLE,,SIMULATED
+ch4-m-C07-C-b30-s2,C07,C_ADAPTIVE_NO_MARKET,30,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kubernetes.resources,40,MIDDLE,,SIMULATED
+ch4-m-C07-C-b50-s0,C07,C_ADAPTIVE_NO_MARKET,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,MIDDLE,,SIMULATED
+ch4-m-C07-C-b50-s1,C07,C_ADAPTIVE_NO_MARKET,50,1,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,41,MIDDLE,,SIMULATED
+ch4-m-C07-C-b50-s2,C07,C_ADAPTIVE_NO_MARKET,50,2,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,kubernetes.resources,36,MIDDLE,,SIMULATED
+ch4-m-C07-D-b10-s0,C07,D_FULL_COMPETENCEMATCH,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C07-D-b10-s1,C07,D_FULL_COMPETENCEMATCH,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C07-D-b10-s2,C07,D_FULL_COMPETENCEMATCH,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C07-D-b20-s0,C07,D_FULL_COMPETENCEMATCH,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C07-D-b20-s1,C07,D_FULL_COMPETENCEMATCH,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,46,MIDDLE,,SIMULATED
+ch4-m-C07-D-b20-s2,C07,D_FULL_COMPETENCEMATCH,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,MIDDLE,,SIMULATED
+ch4-m-C07-D-b30-s0,C07,D_FULL_COMPETENCEMATCH,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C07-D-b30-s1,C07,D_FULL_COMPETENCEMATCH,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,44,MIDDLE,,SIMULATED
+ch4-m-C07-D-b30-s2,C07,D_FULL_COMPETENCEMATCH,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C07-D-b50-s0,C07,D_FULL_COMPETENCEMATCH,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C07-D-b50-s1,C07,D_FULL_COMPETENCEMATCH,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C07-D-b50-s2,C07,D_FULL_COMPETENCEMATCH,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,35,MIDDLE,,SIMULATED
+ch4-m-C07-Dfd-b10-s0,C07,D_FIXED_DIFFICULTY,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C07-Dfd-b10-s1,C07,D_FIXED_DIFFICULTY,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C07-Dfd-b10-s2,C07,D_FIXED_DIFFICULTY,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C07-Dfd-b20-s0,C07,D_FIXED_DIFFICULTY,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C07-Dfd-b20-s1,C07,D_FIXED_DIFFICULTY,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,46,MIDDLE,,SIMULATED
+ch4-m-C07-Dfd-b20-s2,C07,D_FIXED_DIFFICULTY,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,MIDDLE,,SIMULATED
+ch4-m-C07-Dfd-b30-s0,C07,D_FIXED_DIFFICULTY,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C07-Dfd-b30-s1,C07,D_FIXED_DIFFICULTY,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,44,MIDDLE,,SIMULATED
+ch4-m-C07-Dfd-b30-s2,C07,D_FIXED_DIFFICULTY,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C07-Dfd-b50-s0,C07,D_FIXED_DIFFICULTY,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C07-Dfd-b50-s1,C07,D_FIXED_DIFFICULTY,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C07-Dfd-b50-s2,C07,D_FIXED_DIFFICULTY,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,35,MIDDLE,,SIMULATED
+ch4-m-C08-A-na-na,C08,A_INITIAL_PROFILE,,,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,MIDDLE,,SIMULATED
+ch4-m-C08-B-b10-s0,C08,B_STATIC,10,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C08-B-b10-s1,C08,B_STATIC,10,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,42,MIDDLE,,SIMULATED
+ch4-m-C08-B-b10-s2,C08,B_STATIC,10,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,MIDDLE,,SIMULATED
+ch4-m-C08-B-b20-s0,C08,B_STATIC,20,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,postgresql.indexes postgresql.operations postgresql.schema,27,MIDDLE,,SIMULATED
+ch4-m-C08-B-b20-s1,C08,B_STATIC,20,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,kafka.schemas postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema,27,MIDDLE,,SIMULATED
+ch4-m-C08-B-b20-s2,C08,B_STATIC,20,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,postgresql.migrations postgresql.operations postgresql.schema,27,MIDDLE,,SIMULATED
+ch4-m-C08-B-b30-s0,C08,B_STATIC,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,postgresql.indexes postgresql.operations postgresql.schema,27,MIDDLE,,SIMULATED
+ch4-m-C08-B-b30-s1,C08,B_STATIC,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,kafka.schemas postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema,27,MIDDLE,,SIMULATED
+ch4-m-C08-B-b30-s2,C08,B_STATIC,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,postgresql.migrations postgresql.operations postgresql.schema,27,MIDDLE,,SIMULATED
+ch4-m-C08-B-b50-s0,C08,B_STATIC,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,postgresql.indexes postgresql.operations postgresql.schema,27,MIDDLE,,SIMULATED
+ch4-m-C08-B-b50-s1,C08,B_STATIC,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,kafka.schemas postgresql.indexes postgresql.migrations postgresql.operations postgresql.schema,27,MIDDLE,,SIMULATED
+ch4-m-C08-B-b50-s2,C08,B_STATIC,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,postgresql.migrations postgresql.operations postgresql.schema,27,MIDDLE,,SIMULATED
+ch4-m-C08-C-b10-s0,C08,C_ADAPTIVE_NO_MARKET,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,55,MIDDLE,,SIMULATED
+ch4-m-C08-C-b10-s1,C08,C_ADAPTIVE_NO_MARKET,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,53,MIDDLE,,SIMULATED
+ch4-m-C08-C-b10-s2,C08,C_ADAPTIVE_NO_MARKET,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C08-C-b20-s0,C08,C_ADAPTIVE_NO_MARKET,20,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,UNVERIFIED,postgresql.indexes postgresql.transactions,50,MIDDLE,,SIMULATED
+ch4-m-C08-C-b20-s1,C08,C_ADAPTIVE_NO_MARKET,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C08-C-b20-s2,C08,C_ADAPTIVE_NO_MARKET,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kubernetes.resources,44,MIDDLE,,SIMULATED
+ch4-m-C08-C-b30-s0,C08,C_ADAPTIVE_NO_MARKET,30,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,UNVERIFIED,postgresql.indexes postgresql.transactions,47,MIDDLE,,SIMULATED
+ch4-m-C08-C-b30-s1,C08,C_ADAPTIVE_NO_MARKET,30,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,UNVERIFIED,postgresql.indexes postgresql.transactions,46,MIDDLE,,SIMULATED
+ch4-m-C08-C-b30-s2,C08,C_ADAPTIVE_NO_MARKET,30,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kubernetes.resources,40,MIDDLE,,SIMULATED
+ch4-m-C08-C-b50-s0,C08,C_ADAPTIVE_NO_MARKET,50,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,UNVERIFIED,postgresql.indexes postgresql.transactions,42,MIDDLE,,SIMULATED
+ch4-m-C08-C-b50-s1,C08,C_ADAPTIVE_NO_MARKET,50,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,UNVERIFIED,postgresql.transactions,43,MIDDLE,,SIMULATED
+ch4-m-C08-C-b50-s2,C08,C_ADAPTIVE_NO_MARKET,50,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,GAP,UNVERIFIED,kubernetes.resources postgresql.indexes postgresql.transactions,37,MIDDLE,,SIMULATED
+ch4-m-C08-D-b10-s0,C08,D_FULL_COMPETENCEMATCH,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,48,MIDDLE,,SIMULATED
+ch4-m-C08-D-b10-s1,C08,D_FULL_COMPETENCEMATCH,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,48,MIDDLE,,SIMULATED
+ch4-m-C08-D-b10-s2,C08,D_FULL_COMPETENCEMATCH,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,47,MIDDLE,,SIMULATED
+ch4-m-C08-D-b20-s0,C08,D_FULL_COMPETENCEMATCH,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C08-D-b20-s1,C08,D_FULL_COMPETENCEMATCH,20,1,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,45,MIDDLE,,SIMULATED
+ch4-m-C08-D-b20-s2,C08,D_FULL_COMPETENCEMATCH,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C08-D-b30-s0,C08,D_FULL_COMPETENCEMATCH,30,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,UNVERIFIED,postgresql.indexes postgresql.transactions,40,MIDDLE,,SIMULATED
+ch4-m-C08-D-b30-s1,C08,D_FULL_COMPETENCEMATCH,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C08-D-b30-s2,C08,D_FULL_COMPETENCEMATCH,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,38,MIDDLE,,SIMULATED
+ch4-m-C08-D-b50-s0,C08,D_FULL_COMPETENCEMATCH,50,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,UNVERIFIED,postgresql.indexes postgresql.transactions,39,MIDDLE,,SIMULATED
+ch4-m-C08-D-b50-s1,C08,D_FULL_COMPETENCEMATCH,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,postgresql.migrations postgresql.operations,39,MIDDLE,,SIMULATED
+ch4-m-C08-D-b50-s2,C08,D_FULL_COMPETENCEMATCH,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,postgresql.migrations postgresql.operations,34,MIDDLE,,SIMULATED
+ch4-m-C08-Dfd-b10-s0,C08,D_FIXED_DIFFICULTY,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,48,MIDDLE,,SIMULATED
+ch4-m-C08-Dfd-b10-s1,C08,D_FIXED_DIFFICULTY,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,48,MIDDLE,,SIMULATED
+ch4-m-C08-Dfd-b10-s2,C08,D_FIXED_DIFFICULTY,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,47,MIDDLE,,SIMULATED
+ch4-m-C08-Dfd-b20-s0,C08,D_FIXED_DIFFICULTY,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C08-Dfd-b20-s1,C08,D_FIXED_DIFFICULTY,20,1,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,45,MIDDLE,,SIMULATED
+ch4-m-C08-Dfd-b20-s2,C08,D_FIXED_DIFFICULTY,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C08-Dfd-b30-s0,C08,D_FIXED_DIFFICULTY,30,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,UNVERIFIED,postgresql.indexes postgresql.transactions,40,MIDDLE,,SIMULATED
+ch4-m-C08-Dfd-b30-s1,C08,D_FIXED_DIFFICULTY,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C08-Dfd-b30-s2,C08,D_FIXED_DIFFICULTY,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,38,MIDDLE,,SIMULATED
+ch4-m-C08-Dfd-b50-s0,C08,D_FIXED_DIFFICULTY,50,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,GAP,UNVERIFIED,postgresql.indexes postgresql.transactions,39,MIDDLE,,SIMULATED
+ch4-m-C08-Dfd-b50-s1,C08,D_FIXED_DIFFICULTY,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,postgresql.migrations postgresql.operations,39,MIDDLE,,SIMULATED
+ch4-m-C08-Dfd-b50-s2,C08,D_FIXED_DIFFICULTY,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,GAP,postgresql.migrations postgresql.operations,34,MIDDLE,,SIMULATED
+ch4-m-C09-A-na-na,C09,A_INITIAL_PROFILE,,,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,MIDDLE,,SIMULATED
+ch4-m-C09-B-b10-s0,C09,B_STATIC,10,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies,42,MIDDLE,,SIMULATED
+ch4-m-C09-B-b10-s1,C09,B_STATIC,10,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies kafka.schemas,42,MIDDLE,,SIMULATED
+ch4-m-C09-B-b10-s2,C09,B_STATIC,10,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies,41,MIDDLE,,SIMULATED
+ch4-m-C09-B-b20-s0,C09,B_STATIC,20,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies rest-api.pagination,27,MIDDLE,,SIMULATED
+ch4-m-C09-B-b20-s1,C09,B_STATIC,20,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies kafka.schemas rest-api.pagination,27,MIDDLE,,SIMULATED
+ch4-m-C09-B-b20-s2,C09,B_STATIC,20,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies rest-api.pagination,27,MIDDLE,,SIMULATED
+ch4-m-C09-B-b30-s0,C09,B_STATIC,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies rest-api.pagination,27,MIDDLE,,SIMULATED
+ch4-m-C09-B-b30-s1,C09,B_STATIC,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies kafka.schemas rest-api.pagination,27,MIDDLE,,SIMULATED
+ch4-m-C09-B-b30-s2,C09,B_STATIC,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies rest-api.pagination,27,MIDDLE,,SIMULATED
+ch4-m-C09-B-b50-s0,C09,B_STATIC,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies rest-api.pagination,27,MIDDLE,,SIMULATED
+ch4-m-C09-B-b50-s1,C09,B_STATIC,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies kafka.schemas rest-api.pagination,27,MIDDLE,,SIMULATED
+ch4-m-C09-B-b50-s2,C09,B_STATIC,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies rest-api.pagination,27,MIDDLE,,SIMULATED
+ch4-m-C09-C-b10-s0,C09,C_ADAPTIVE_NO_MARKET,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,55,MIDDLE,,SIMULATED
+ch4-m-C09-C-b10-s1,C09,C_ADAPTIVE_NO_MARKET,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,53,MIDDLE,,SIMULATED
+ch4-m-C09-C-b10-s2,C09,C_ADAPTIVE_NO_MARKET,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C09-C-b20-s0,C09,C_ADAPTIVE_NO_MARKET,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,48,MIDDLE,,SIMULATED
+ch4-m-C09-C-b20-s1,C09,C_ADAPTIVE_NO_MARKET,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C09-C-b20-s2,C09,C_ADAPTIVE_NO_MARKET,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies kubernetes.resources,44,MIDDLE,,SIMULATED
+ch4-m-C09-C-b30-s0,C09,C_ADAPTIVE_NO_MARKET,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,app-security.authz,45,MIDDLE,,SIMULATED
+ch4-m-C09-C-b30-s1,C09,C_ADAPTIVE_NO_MARKET,30,1,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,45,MIDDLE,,SIMULATED
+ch4-m-C09-C-b30-s2,C09,C_ADAPTIVE_NO_MARKET,30,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kubernetes.resources,43,MIDDLE,,SIMULATED
+ch4-m-C09-C-b50-s0,C09,C_ADAPTIVE_NO_MARKET,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,MIDDLE,,SIMULATED
+ch4-m-C09-C-b50-s1,C09,C_ADAPTIVE_NO_MARKET,50,1,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,41,MIDDLE,,SIMULATED
+ch4-m-C09-C-b50-s2,C09,C_ADAPTIVE_NO_MARKET,50,2,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,kubernetes.resources,38,MIDDLE,,SIMULATED
+ch4-m-C09-D-b10-s0,C09,D_FULL_COMPETENCEMATCH,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies,50,MIDDLE,,SIMULATED
+ch4-m-C09-D-b10-s1,C09,D_FULL_COMPETENCEMATCH,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies,52,MIDDLE,,SIMULATED
+ch4-m-C09-D-b10-s2,C09,D_FULL_COMPETENCEMATCH,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies,50,MIDDLE,,SIMULATED
+ch4-m-C09-D-b20-s0,C09,D_FULL_COMPETENCEMATCH,20,0,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,django.architecture fastapi.dependencies,44,MIDDLE,,SIMULATED
+ch4-m-C09-D-b20-s1,C09,D_FULL_COMPETENCEMATCH,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies,48,MIDDLE,,SIMULATED
+ch4-m-C09-D-b20-s2,C09,D_FULL_COMPETENCEMATCH,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,46,MIDDLE,,SIMULATED
+ch4-m-C09-D-b30-s0,C09,D_FULL_COMPETENCEMATCH,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies,41,MIDDLE,,SIMULATED
+ch4-m-C09-D-b30-s1,C09,D_FULL_COMPETENCEMATCH,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,django.architecture fastapi.dependencies,43,MIDDLE,,SIMULATED
+ch4-m-C09-D-b30-s2,C09,D_FULL_COMPETENCEMATCH,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,django.architecture,42,MIDDLE,,SIMULATED
+ch4-m-C09-D-b50-s0,C09,D_FULL_COMPETENCEMATCH,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies,39,MIDDLE,,SIMULATED
+ch4-m-C09-D-b50-s1,C09,D_FULL_COMPETENCEMATCH,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,django.architecture fastapi.dependencies,41,MIDDLE,,SIMULATED
+ch4-m-C09-D-b50-s2,C09,D_FULL_COMPETENCEMATCH,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,django.architecture,38,MIDDLE,,SIMULATED
+ch4-m-C09-Dfd-b10-s0,C09,D_FIXED_DIFFICULTY,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies,50,MIDDLE,,SIMULATED
+ch4-m-C09-Dfd-b10-s1,C09,D_FIXED_DIFFICULTY,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies,52,MIDDLE,,SIMULATED
+ch4-m-C09-Dfd-b10-s2,C09,D_FIXED_DIFFICULTY,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies,50,MIDDLE,,SIMULATED
+ch4-m-C09-Dfd-b20-s0,C09,D_FIXED_DIFFICULTY,20,0,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,django.architecture fastapi.dependencies,44,MIDDLE,,SIMULATED
+ch4-m-C09-Dfd-b20-s1,C09,D_FIXED_DIFFICULTY,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,fastapi.dependencies,48,MIDDLE,,SIMULATED
+ch4-m-C09-Dfd-b20-s2,C09,D_FIXED_DIFFICULTY,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,46,MIDDLE,,SIMULATED
+ch4-m-C09-Dfd-b30-s0,C09,D_FIXED_DIFFICULTY,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies,41,MIDDLE,,SIMULATED
+ch4-m-C09-Dfd-b30-s1,C09,D_FIXED_DIFFICULTY,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,django.architecture fastapi.dependencies,43,MIDDLE,,SIMULATED
+ch4-m-C09-Dfd-b30-s2,C09,D_FIXED_DIFFICULTY,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,django.architecture,42,MIDDLE,,SIMULATED
+ch4-m-C09-Dfd-b50-s0,C09,D_FIXED_DIFFICULTY,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,fastapi.dependencies,39,MIDDLE,,SIMULATED
+ch4-m-C09-Dfd-b50-s1,C09,D_FIXED_DIFFICULTY,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,django.architecture fastapi.dependencies,41,MIDDLE,,SIMULATED
+ch4-m-C09-Dfd-b50-s2,C09,D_FIXED_DIFFICULTY,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,django.architecture,38,MIDDLE,,SIMULATED
+ch4-m-C10-A-na-na,C10,A_INITIAL_PROFILE,,,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,MIDDLE,,SIMULATED
+ch4-m-C10-B-b10-s0,C10,B_STATIC,10,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C10-B-b10-s1,C10,B_STATIC,10,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,42,MIDDLE,,SIMULATED
+ch4-m-C10-B-b10-s2,C10,B_STATIC,10,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,MIDDLE,,SIMULATED
+ch4-m-C10-B-b20-s0,C10,B_STATIC,20,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C10-B-b20-s1,C10,B_STATIC,20,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,27,MIDDLE,,SIMULATED
+ch4-m-C10-B-b20-s2,C10,B_STATIC,20,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C10-B-b30-s0,C10,B_STATIC,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C10-B-b30-s1,C10,B_STATIC,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,27,MIDDLE,,SIMULATED
+ch4-m-C10-B-b30-s2,C10,B_STATIC,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C10-B-b50-s0,C10,B_STATIC,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C10-B-b50-s1,C10,B_STATIC,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,27,MIDDLE,,SIMULATED
+ch4-m-C10-B-b50-s2,C10,B_STATIC,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C10-C-b10-s0,C10,C_ADAPTIVE_NO_MARKET,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,55,MIDDLE,,SIMULATED
+ch4-m-C10-C-b10-s1,C10,C_ADAPTIVE_NO_MARKET,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,53,MIDDLE,,SIMULATED
+ch4-m-C10-C-b10-s2,C10,C_ADAPTIVE_NO_MARKET,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C10-C-b20-s0,C10,C_ADAPTIVE_NO_MARKET,20,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,48,MIDDLE,,SIMULATED
+ch4-m-C10-C-b20-s1,C10,C_ADAPTIVE_NO_MARKET,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C10-C-b20-s2,C10,C_ADAPTIVE_NO_MARKET,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kubernetes.resources,44,MIDDLE,,SIMULATED
+ch4-m-C10-C-b30-s0,C10,C_ADAPTIVE_NO_MARKET,30,0,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,app-security.authz,44,MIDDLE,,SIMULATED
+ch4-m-C10-C-b30-s1,C10,C_ADAPTIVE_NO_MARKET,30,1,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,45,MIDDLE,,SIMULATED
+ch4-m-C10-C-b30-s2,C10,C_ADAPTIVE_NO_MARKET,30,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kubernetes.resources,40,MIDDLE,,SIMULATED
+ch4-m-C10-C-b50-s0,C10,C_ADAPTIVE_NO_MARKET,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C10-C-b50-s1,C10,C_ADAPTIVE_NO_MARKET,50,1,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,41,MIDDLE,,SIMULATED
+ch4-m-C10-C-b50-s2,C10,C_ADAPTIVE_NO_MARKET,50,2,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,kubernetes.resources,36,MIDDLE,,SIMULATED
+ch4-m-C10-D-b10-s0,C10,D_FULL_COMPETENCEMATCH,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C10-D-b10-s1,C10,D_FULL_COMPETENCEMATCH,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C10-D-b10-s2,C10,D_FULL_COMPETENCEMATCH,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C10-D-b20-s0,C10,D_FULL_COMPETENCEMATCH,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C10-D-b20-s1,C10,D_FULL_COMPETENCEMATCH,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,46,MIDDLE,,SIMULATED
+ch4-m-C10-D-b20-s2,C10,D_FULL_COMPETENCEMATCH,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,MIDDLE,,SIMULATED
+ch4-m-C10-D-b30-s0,C10,D_FULL_COMPETENCEMATCH,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C10-D-b30-s1,C10,D_FULL_COMPETENCEMATCH,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,44,MIDDLE,,SIMULATED
+ch4-m-C10-D-b30-s2,C10,D_FULL_COMPETENCEMATCH,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C10-D-b50-s0,C10,D_FULL_COMPETENCEMATCH,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C10-D-b50-s1,C10,D_FULL_COMPETENCEMATCH,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C10-D-b50-s2,C10,D_FULL_COMPETENCEMATCH,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,35,MIDDLE,,SIMULATED
+ch4-m-C10-Dfd-b10-s0,C10,D_FIXED_DIFFICULTY,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C10-Dfd-b10-s1,C10,D_FIXED_DIFFICULTY,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C10-Dfd-b10-s2,C10,D_FIXED_DIFFICULTY,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C10-Dfd-b20-s0,C10,D_FIXED_DIFFICULTY,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C10-Dfd-b20-s1,C10,D_FIXED_DIFFICULTY,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,46,MIDDLE,,SIMULATED
+ch4-m-C10-Dfd-b20-s2,C10,D_FIXED_DIFFICULTY,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,MIDDLE,,SIMULATED
+ch4-m-C10-Dfd-b30-s0,C10,D_FIXED_DIFFICULTY,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C10-Dfd-b30-s1,C10,D_FIXED_DIFFICULTY,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,44,MIDDLE,,SIMULATED
+ch4-m-C10-Dfd-b30-s2,C10,D_FIXED_DIFFICULTY,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C10-Dfd-b50-s0,C10,D_FIXED_DIFFICULTY,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C10-Dfd-b50-s1,C10,D_FIXED_DIFFICULTY,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C10-Dfd-b50-s2,C10,D_FIXED_DIFFICULTY,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,35,MIDDLE,,SIMULATED
+ch4-m-C11-A-na-na,C11,A_INITIAL_PROFILE,,,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,MIDDLE,,SIMULATED
+ch4-m-C11-B-b10-s0,C11,B_STATIC,10,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C11-B-b10-s1,C11,B_STATIC,10,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,42,MIDDLE,,SIMULATED
+ch4-m-C11-B-b10-s2,C11,B_STATIC,10,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,MIDDLE,,SIMULATED
+ch4-m-C11-B-b20-s0,C11,B_STATIC,20,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C11-B-b20-s1,C11,B_STATIC,20,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,27,MIDDLE,,SIMULATED
+ch4-m-C11-B-b20-s2,C11,B_STATIC,20,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C11-B-b30-s0,C11,B_STATIC,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C11-B-b30-s1,C11,B_STATIC,30,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,27,MIDDLE,,SIMULATED
+ch4-m-C11-B-b30-s2,C11,B_STATIC,30,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C11-B-b50-s0,C11,B_STATIC,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C11-B-b50-s1,C11,B_STATIC,50,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,27,MIDDLE,,SIMULATED
+ch4-m-C11-B-b50-s2,C11,B_STATIC,50,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C11-C-b10-s0,C11,C_ADAPTIVE_NO_MARKET,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,55,MIDDLE,,SIMULATED
+ch4-m-C11-C-b10-s1,C11,C_ADAPTIVE_NO_MARKET,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,53,MIDDLE,,SIMULATED
+ch4-m-C11-C-b10-s2,C11,C_ADAPTIVE_NO_MARKET,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C11-C-b20-s0,C11,C_ADAPTIVE_NO_MARKET,20,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,48,MIDDLE,,SIMULATED
+ch4-m-C11-C-b20-s1,C11,C_ADAPTIVE_NO_MARKET,20,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C11-C-b20-s2,C11,C_ADAPTIVE_NO_MARKET,20,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kubernetes.resources,44,MIDDLE,,SIMULATED
+ch4-m-C11-C-b30-s0,C11,C_ADAPTIVE_NO_MARKET,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,app-security.authz,45,MIDDLE,,SIMULATED
+ch4-m-C11-C-b30-s1,C11,C_ADAPTIVE_NO_MARKET,30,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,45,MIDDLE,,SIMULATED
+ch4-m-C11-C-b30-s2,C11,C_ADAPTIVE_NO_MARKET,30,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kubernetes.resources,40,MIDDLE,,SIMULATED
+ch4-m-C11-C-b50-s0,C11,C_ADAPTIVE_NO_MARKET,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,MIDDLE,,SIMULATED
+ch4-m-C11-C-b50-s1,C11,C_ADAPTIVE_NO_MARKET,50,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,41,MIDDLE,,SIMULATED
+ch4-m-C11-C-b50-s2,C11,C_ADAPTIVE_NO_MARKET,50,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,kubernetes.resources,36,MIDDLE,,SIMULATED
+ch4-m-C11-D-b10-s0,C11,D_FULL_COMPETENCEMATCH,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C11-D-b10-s1,C11,D_FULL_COMPETENCEMATCH,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C11-D-b10-s2,C11,D_FULL_COMPETENCEMATCH,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C11-D-b20-s0,C11,D_FULL_COMPETENCEMATCH,20,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C11-D-b20-s1,C11,D_FULL_COMPETENCEMATCH,20,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,46,MIDDLE,,SIMULATED
+ch4-m-C11-D-b20-s2,C11,D_FULL_COMPETENCEMATCH,20,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,MIDDLE,,SIMULATED
+ch4-m-C11-D-b30-s0,C11,D_FULL_COMPETENCEMATCH,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C11-D-b30-s1,C11,D_FULL_COMPETENCEMATCH,30,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,44,MIDDLE,,SIMULATED
+ch4-m-C11-D-b30-s2,C11,D_FULL_COMPETENCEMATCH,30,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C11-D-b50-s0,C11,D_FULL_COMPETENCEMATCH,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C11-D-b50-s1,C11,D_FULL_COMPETENCEMATCH,50,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C11-D-b50-s2,C11,D_FULL_COMPETENCEMATCH,50,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,35,MIDDLE,,SIMULATED
+ch4-m-C11-Dfd-b10-s0,C11,D_FIXED_DIFFICULTY,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C11-Dfd-b10-s1,C11,D_FIXED_DIFFICULTY,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C11-Dfd-b10-s2,C11,D_FIXED_DIFFICULTY,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C11-Dfd-b20-s0,C11,D_FIXED_DIFFICULTY,20,0,SENIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C11-Dfd-b20-s1,C11,D_FIXED_DIFFICULTY,20,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,46,MIDDLE,,SIMULATED
+ch4-m-C11-Dfd-b20-s2,C11,D_FIXED_DIFFICULTY,20,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,MIDDLE,,SIMULATED
+ch4-m-C11-Dfd-b30-s0,C11,D_FIXED_DIFFICULTY,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C11-Dfd-b30-s1,C11,D_FIXED_DIFFICULTY,30,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,44,MIDDLE,,SIMULATED
+ch4-m-C11-Dfd-b30-s2,C11,D_FIXED_DIFFICULTY,30,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C11-Dfd-b50-s0,C11,D_FIXED_DIFFICULTY,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C11-Dfd-b50-s1,C11,D_FIXED_DIFFICULTY,50,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C11-Dfd-b50-s2,C11,D_FIXED_DIFFICULTY,50,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,35,MIDDLE,,SIMULATED
+ch4-m-C12-A-na-na,C12,A_INITIAL_PROFILE,,,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,MIDDLE,,SIMULATED
+ch4-m-C12-B-b10-s0,C12,B_STATIC,10,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C12-B-b10-s1,C12,B_STATIC,10,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas,42,MIDDLE,,SIMULATED
+ch4-m-C12-B-b10-s2,C12,B_STATIC,10,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,MIDDLE,,SIMULATED
+ch4-m-C12-B-b20-s0,C12,B_STATIC,20,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,postgresql.indexes,27,MIDDLE,,SIMULATED
+ch4-m-C12-B-b20-s1,C12,B_STATIC,20,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas postgresql.indexes,27,MIDDLE,,SIMULATED
+ch4-m-C12-B-b20-s2,C12,B_STATIC,20,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C12-B-b30-s0,C12,B_STATIC,30,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,postgresql.indexes,27,MIDDLE,,SIMULATED
+ch4-m-C12-B-b30-s1,C12,B_STATIC,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas postgresql.indexes,27,MIDDLE,,SIMULATED
+ch4-m-C12-B-b30-s2,C12,B_STATIC,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C12-B-b50-s0,C12,B_STATIC,50,0,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,postgresql.indexes,27,MIDDLE,,SIMULATED
+ch4-m-C12-B-b50-s1,C12,B_STATIC,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.schemas postgresql.indexes,27,MIDDLE,,SIMULATED
+ch4-m-C12-B-b50-s2,C12,B_STATIC,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,MIDDLE,,SIMULATED
+ch4-m-C12-C-b10-s0,C12,C_ADAPTIVE_NO_MARKET,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,55,MIDDLE,,SIMULATED
+ch4-m-C12-C-b10-s1,C12,C_ADAPTIVE_NO_MARKET,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,53,MIDDLE,,SIMULATED
+ch4-m-C12-C-b10-s2,C12,C_ADAPTIVE_NO_MARKET,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C12-C-b20-s0,C12,C_ADAPTIVE_NO_MARKET,20,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,postgresql.indexes,51,MIDDLE,,SIMULATED
+ch4-m-C12-C-b20-s1,C12,C_ADAPTIVE_NO_MARKET,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C12-C-b20-s2,C12,C_ADAPTIVE_NO_MARKET,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kubernetes.resources,44,MIDDLE,,SIMULATED
+ch4-m-C12-C-b30-s0,C12,C_ADAPTIVE_NO_MARKET,30,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,postgresql.indexes,48,MIDDLE,,SIMULATED
+ch4-m-C12-C-b30-s1,C12,C_ADAPTIVE_NO_MARKET,30,1,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,postgresql.indexes,47,MIDDLE,,SIMULATED
+ch4-m-C12-C-b30-s2,C12,C_ADAPTIVE_NO_MARKET,30,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kubernetes.resources,40,MIDDLE,,SIMULATED
+ch4-m-C12-C-b50-s0,C12,C_ADAPTIVE_NO_MARKET,50,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,postgresql.indexes,42,MIDDLE,,SIMULATED
+ch4-m-C12-C-b50-s1,C12,C_ADAPTIVE_NO_MARKET,50,1,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,44,MIDDLE,,SIMULATED
+ch4-m-C12-C-b50-s2,C12,C_ADAPTIVE_NO_MARKET,50,2,MIDDLE,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,kubernetes.resources postgresql.indexes,37,MIDDLE,,SIMULATED
+ch4-m-C12-D-b10-s0,C12,D_FULL_COMPETENCEMATCH,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C12-D-b10-s1,C12,D_FULL_COMPETENCEMATCH,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C12-D-b10-s2,C12,D_FULL_COMPETENCEMATCH,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C12-D-b20-s0,C12,D_FULL_COMPETENCEMATCH,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C12-D-b20-s1,C12,D_FULL_COMPETENCEMATCH,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,46,MIDDLE,,SIMULATED
+ch4-m-C12-D-b20-s2,C12,D_FULL_COMPETENCEMATCH,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,MIDDLE,,SIMULATED
+ch4-m-C12-D-b30-s0,C12,D_FULL_COMPETENCEMATCH,30,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,postgresql.indexes,41,MIDDLE,,SIMULATED
+ch4-m-C12-D-b30-s1,C12,D_FULL_COMPETENCEMATCH,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,44,MIDDLE,,SIMULATED
+ch4-m-C12-D-b30-s2,C12,D_FULL_COMPETENCEMATCH,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C12-D-b50-s0,C12,D_FULL_COMPETENCEMATCH,50,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,postgresql.indexes,40,MIDDLE,,SIMULATED
+ch4-m-C12-D-b50-s1,C12,D_FULL_COMPETENCEMATCH,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C12-D-b50-s2,C12,D_FULL_COMPETENCEMATCH,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,35,MIDDLE,,SIMULATED
+ch4-m-C12-Dfd-b10-s0,C12,D_FIXED_DIFFICULTY,10,0,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C12-Dfd-b10-s1,C12,D_FIXED_DIFFICULTY,10,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,52,MIDDLE,,SIMULATED
+ch4-m-C12-Dfd-b10-s2,C12,D_FIXED_DIFFICULTY,10,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,50,MIDDLE,,SIMULATED
+ch4-m-C12-Dfd-b20-s0,C12,D_FIXED_DIFFICULTY,20,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,42,MIDDLE,,SIMULATED
+ch4-m-C12-Dfd-b20-s1,C12,D_FIXED_DIFFICULTY,20,1,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,46,MIDDLE,,SIMULATED
+ch4-m-C12-Dfd-b20-s2,C12,D_FIXED_DIFFICULTY,20,2,MIDDLE,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,MIDDLE,,SIMULATED
+ch4-m-C12-Dfd-b30-s0,C12,D_FIXED_DIFFICULTY,30,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,postgresql.indexes,41,MIDDLE,,SIMULATED
+ch4-m-C12-Dfd-b30-s1,C12,D_FIXED_DIFFICULTY,30,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,44,MIDDLE,,SIMULATED
+ch4-m-C12-Dfd-b30-s2,C12,D_FIXED_DIFFICULTY,30,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C12-Dfd-b50-s0,C12,D_FIXED_DIFFICULTY,50,0,MIDDLE,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,postgresql.indexes,40,MIDDLE,,SIMULATED
+ch4-m-C12-Dfd-b50-s1,C12,D_FIXED_DIFFICULTY,50,1,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,MIDDLE,,SIMULATED
+ch4-m-C12-Dfd-b50-s2,C12,D_FIXED_DIFFICULTY,50,2,MIDDLE,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,35,MIDDLE,,SIMULATED
+ch4-m-C13-A-na-na,C13,A_INITIAL_PROFILE,,,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,SENIOR,,SIMULATED
+ch4-m-C13-B-b10-s0,C13,B_STATIC,10,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C13-B-b10-s1,C13,B_STATIC,10,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C13-B-b10-s2,C13,B_STATIC,10,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,SENIOR,,SIMULATED
+ch4-m-C13-B-b20-s0,C13,B_STATIC,20,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C13-B-b20-s1,C13,B_STATIC,20,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C13-B-b20-s2,C13,B_STATIC,20,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C13-B-b30-s0,C13,B_STATIC,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C13-B-b30-s1,C13,B_STATIC,30,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C13-B-b30-s2,C13,B_STATIC,30,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C13-B-b50-s0,C13,B_STATIC,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C13-B-b50-s1,C13,B_STATIC,50,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C13-B-b50-s2,C13,B_STATIC,50,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C13-C-b10-s0,C13,C_ADAPTIVE_NO_MARKET,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,49,SENIOR,,SIMULATED
+ch4-m-C13-C-b10-s1,C13,C_ADAPTIVE_NO_MARKET,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,51,SENIOR,,SIMULATED
+ch4-m-C13-C-b10-s2,C13,C_ADAPTIVE_NO_MARKET,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,SENIOR,,SIMULATED
+ch4-m-C13-C-b20-s0,C13,C_ADAPTIVE_NO_MARKET,20,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,SENIOR,,SIMULATED
+ch4-m-C13-C-b20-s1,C13,C_ADAPTIVE_NO_MARKET,20,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,37,SENIOR,,SIMULATED
+ch4-m-C13-C-b20-s2,C13,C_ADAPTIVE_NO_MARKET,20,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,34,SENIOR,,SIMULATED
+ch4-m-C13-C-b30-s0,C13,C_ADAPTIVE_NO_MARKET,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,38,SENIOR,,SIMULATED
+ch4-m-C13-C-b30-s1,C13,C_ADAPTIVE_NO_MARKET,30,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,30,SENIOR,,SIMULATED
+ch4-m-C13-C-b30-s2,C13,C_ADAPTIVE_NO_MARKET,30,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,32,SENIOR,,SIMULATED
+ch4-m-C13-C-b50-s0,C13,C_ADAPTIVE_NO_MARKET,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,38,SENIOR,,SIMULATED
+ch4-m-C13-C-b50-s1,C13,C_ADAPTIVE_NO_MARKET,50,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,30,SENIOR,,SIMULATED
+ch4-m-C13-C-b50-s2,C13,C_ADAPTIVE_NO_MARKET,50,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,32,SENIOR,,SIMULATED
+ch4-m-C13-D-b10-s0,C13,D_FULL_COMPETENCEMATCH,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C13-D-b10-s1,C13,D_FULL_COMPETENCEMATCH,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C13-D-b10-s2,C13,D_FULL_COMPETENCEMATCH,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,44,SENIOR,,SIMULATED
+ch4-m-C13-D-b20-s0,C13,D_FULL_COMPETENCEMATCH,20,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C13-D-b20-s1,C13,D_FULL_COMPETENCEMATCH,20,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,32,SENIOR,,SIMULATED
+ch4-m-C13-D-b20-s2,C13,D_FULL_COMPETENCEMATCH,20,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,34,SENIOR,,SIMULATED
+ch4-m-C13-D-b30-s0,C13,D_FULL_COMPETENCEMATCH,30,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C13-D-b30-s1,C13,D_FULL_COMPETENCEMATCH,30,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C13-D-b30-s2,C13,D_FULL_COMPETENCEMATCH,30,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C13-D-b50-s0,C13,D_FULL_COMPETENCEMATCH,50,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C13-D-b50-s1,C13,D_FULL_COMPETENCEMATCH,50,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C13-D-b50-s2,C13,D_FULL_COMPETENCEMATCH,50,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C13-Dfd-b10-s0,C13,D_FIXED_DIFFICULTY,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C13-Dfd-b10-s1,C13,D_FIXED_DIFFICULTY,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C13-Dfd-b10-s2,C13,D_FIXED_DIFFICULTY,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,44,SENIOR,,SIMULATED
+ch4-m-C13-Dfd-b20-s0,C13,D_FIXED_DIFFICULTY,20,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C13-Dfd-b20-s1,C13,D_FIXED_DIFFICULTY,20,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,32,SENIOR,,SIMULATED
+ch4-m-C13-Dfd-b20-s2,C13,D_FIXED_DIFFICULTY,20,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,34,SENIOR,,SIMULATED
+ch4-m-C13-Dfd-b30-s0,C13,D_FIXED_DIFFICULTY,30,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C13-Dfd-b30-s1,C13,D_FIXED_DIFFICULTY,30,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C13-Dfd-b30-s2,C13,D_FIXED_DIFFICULTY,30,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C13-Dfd-b50-s0,C13,D_FIXED_DIFFICULTY,50,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C13-Dfd-b50-s1,C13,D_FIXED_DIFFICULTY,50,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C13-Dfd-b50-s2,C13,D_FIXED_DIFFICULTY,50,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C14-A-na-na,C14,A_INITIAL_PROFILE,,,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,SENIOR,,SIMULATED
+ch4-m-C14-B-b10-s0,C14,B_STATIC,10,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C14-B-b10-s1,C14,B_STATIC,10,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C14-B-b10-s2,C14,B_STATIC,10,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,41,SENIOR,,SIMULATED
+ch4-m-C14-B-b20-s0,C14,B_STATIC,20,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C14-B-b20-s1,C14,B_STATIC,20,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C14-B-b20-s2,C14,B_STATIC,20,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C14-B-b30-s0,C14,B_STATIC,30,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C14-B-b30-s1,C14,B_STATIC,30,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C14-B-b30-s2,C14,B_STATIC,30,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C14-B-b50-s0,C14,B_STATIC,50,0,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C14-B-b50-s1,C14,B_STATIC,50,1,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C14-B-b50-s2,C14,B_STATIC,50,2,JUNIOR,JUNIOR,JUNIOR,ASSESSED,SUPPORTED,UNVERIFIED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C14-C-b10-s0,C14,C_ADAPTIVE_NO_MARKET,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,49,SENIOR,,SIMULATED
+ch4-m-C14-C-b10-s1,C14,C_ADAPTIVE_NO_MARKET,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,51,SENIOR,,SIMULATED
+ch4-m-C14-C-b10-s2,C14,C_ADAPTIVE_NO_MARKET,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,SENIOR,,SIMULATED
+ch4-m-C14-C-b20-s0,C14,C_ADAPTIVE_NO_MARKET,20,0,JUNIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,SENIOR,,SIMULATED
+ch4-m-C14-C-b20-s1,C14,C_ADAPTIVE_NO_MARKET,20,1,JUNIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,37,SENIOR,,SIMULATED
+ch4-m-C14-C-b20-s2,C14,C_ADAPTIVE_NO_MARKET,20,2,JUNIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,34,SENIOR,,SIMULATED
+ch4-m-C14-C-b30-s0,C14,C_ADAPTIVE_NO_MARKET,30,0,JUNIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,38,SENIOR,,SIMULATED
+ch4-m-C14-C-b30-s1,C14,C_ADAPTIVE_NO_MARKET,30,1,JUNIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,30,SENIOR,,SIMULATED
+ch4-m-C14-C-b30-s2,C14,C_ADAPTIVE_NO_MARKET,30,2,JUNIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,32,SENIOR,,SIMULATED
+ch4-m-C14-C-b50-s0,C14,C_ADAPTIVE_NO_MARKET,50,0,JUNIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,38,SENIOR,,SIMULATED
+ch4-m-C14-C-b50-s1,C14,C_ADAPTIVE_NO_MARKET,50,1,JUNIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,30,SENIOR,,SIMULATED
+ch4-m-C14-C-b50-s2,C14,C_ADAPTIVE_NO_MARKET,50,2,JUNIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,32,SENIOR,,SIMULATED
+ch4-m-C14-D-b10-s0,C14,D_FULL_COMPETENCEMATCH,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C14-D-b10-s1,C14,D_FULL_COMPETENCEMATCH,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C14-D-b10-s2,C14,D_FULL_COMPETENCEMATCH,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,44,SENIOR,,SIMULATED
+ch4-m-C14-D-b20-s0,C14,D_FULL_COMPETENCEMATCH,20,0,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C14-D-b20-s1,C14,D_FULL_COMPETENCEMATCH,20,1,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,32,SENIOR,,SIMULATED
+ch4-m-C14-D-b20-s2,C14,D_FULL_COMPETENCEMATCH,20,2,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,34,SENIOR,,SIMULATED
+ch4-m-C14-D-b30-s0,C14,D_FULL_COMPETENCEMATCH,30,0,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C14-D-b30-s1,C14,D_FULL_COMPETENCEMATCH,30,1,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C14-D-b30-s2,C14,D_FULL_COMPETENCEMATCH,30,2,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C14-D-b50-s0,C14,D_FULL_COMPETENCEMATCH,50,0,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C14-D-b50-s1,C14,D_FULL_COMPETENCEMATCH,50,1,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C14-D-b50-s2,C14,D_FULL_COMPETENCEMATCH,50,2,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C14-Dfd-b10-s0,C14,D_FIXED_DIFFICULTY,10,0,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C14-Dfd-b10-s1,C14,D_FIXED_DIFFICULTY,10,1,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C14-Dfd-b10-s2,C14,D_FIXED_DIFFICULTY,10,2,JUNIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,44,SENIOR,,SIMULATED
+ch4-m-C14-Dfd-b20-s0,C14,D_FIXED_DIFFICULTY,20,0,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C14-Dfd-b20-s1,C14,D_FIXED_DIFFICULTY,20,1,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,32,SENIOR,,SIMULATED
+ch4-m-C14-Dfd-b20-s2,C14,D_FIXED_DIFFICULTY,20,2,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,34,SENIOR,,SIMULATED
+ch4-m-C14-Dfd-b30-s0,C14,D_FIXED_DIFFICULTY,30,0,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C14-Dfd-b30-s1,C14,D_FIXED_DIFFICULTY,30,1,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C14-Dfd-b30-s2,C14,D_FIXED_DIFFICULTY,30,2,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C14-Dfd-b50-s0,C14,D_FIXED_DIFFICULTY,50,0,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C14-Dfd-b50-s1,C14,D_FIXED_DIFFICULTY,50,1,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C14-Dfd-b50-s2,C14,D_FIXED_DIFFICULTY,50,2,JUNIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C15-A-na-na,C15,A_INITIAL_PROFILE,,,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,SENIOR,,SIMULATED
+ch4-m-C15-B-b10-s0,C15,B_STATIC,10,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C15-B-b10-s1,C15,B_STATIC,10,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C15-B-b10-s2,C15,B_STATIC,10,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,SENIOR,,SIMULATED
+ch4-m-C15-B-b20-s0,C15,B_STATIC,20,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C15-B-b20-s1,C15,B_STATIC,20,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C15-B-b20-s2,C15,B_STATIC,20,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C15-B-b30-s0,C15,B_STATIC,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C15-B-b30-s1,C15,B_STATIC,30,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C15-B-b30-s2,C15,B_STATIC,30,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C15-B-b50-s0,C15,B_STATIC,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C15-B-b50-s1,C15,B_STATIC,50,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C15-B-b50-s2,C15,B_STATIC,50,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C15-C-b10-s0,C15,C_ADAPTIVE_NO_MARKET,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,49,SENIOR,,SIMULATED
+ch4-m-C15-C-b10-s1,C15,C_ADAPTIVE_NO_MARKET,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,51,SENIOR,,SIMULATED
+ch4-m-C15-C-b10-s2,C15,C_ADAPTIVE_NO_MARKET,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,SENIOR,,SIMULATED
+ch4-m-C15-C-b20-s0,C15,C_ADAPTIVE_NO_MARKET,20,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,SENIOR,,SIMULATED
+ch4-m-C15-C-b20-s1,C15,C_ADAPTIVE_NO_MARKET,20,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,37,SENIOR,,SIMULATED
+ch4-m-C15-C-b20-s2,C15,C_ADAPTIVE_NO_MARKET,20,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,34,SENIOR,,SIMULATED
+ch4-m-C15-C-b30-s0,C15,C_ADAPTIVE_NO_MARKET,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,38,SENIOR,,SIMULATED
+ch4-m-C15-C-b30-s1,C15,C_ADAPTIVE_NO_MARKET,30,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,30,SENIOR,,SIMULATED
+ch4-m-C15-C-b30-s2,C15,C_ADAPTIVE_NO_MARKET,30,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,32,SENIOR,,SIMULATED
+ch4-m-C15-C-b50-s0,C15,C_ADAPTIVE_NO_MARKET,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,38,SENIOR,,SIMULATED
+ch4-m-C15-C-b50-s1,C15,C_ADAPTIVE_NO_MARKET,50,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,30,SENIOR,,SIMULATED
+ch4-m-C15-C-b50-s2,C15,C_ADAPTIVE_NO_MARKET,50,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,32,SENIOR,,SIMULATED
+ch4-m-C15-D-b10-s0,C15,D_FULL_COMPETENCEMATCH,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C15-D-b10-s1,C15,D_FULL_COMPETENCEMATCH,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C15-D-b10-s2,C15,D_FULL_COMPETENCEMATCH,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,44,SENIOR,,SIMULATED
+ch4-m-C15-D-b20-s0,C15,D_FULL_COMPETENCEMATCH,20,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C15-D-b20-s1,C15,D_FULL_COMPETENCEMATCH,20,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,32,SENIOR,,SIMULATED
+ch4-m-C15-D-b20-s2,C15,D_FULL_COMPETENCEMATCH,20,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,34,SENIOR,,SIMULATED
+ch4-m-C15-D-b30-s0,C15,D_FULL_COMPETENCEMATCH,30,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C15-D-b30-s1,C15,D_FULL_COMPETENCEMATCH,30,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C15-D-b30-s2,C15,D_FULL_COMPETENCEMATCH,30,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C15-D-b50-s0,C15,D_FULL_COMPETENCEMATCH,50,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C15-D-b50-s1,C15,D_FULL_COMPETENCEMATCH,50,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C15-D-b50-s2,C15,D_FULL_COMPETENCEMATCH,50,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C15-Dfd-b10-s0,C15,D_FIXED_DIFFICULTY,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C15-Dfd-b10-s1,C15,D_FIXED_DIFFICULTY,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C15-Dfd-b10-s2,C15,D_FIXED_DIFFICULTY,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,44,SENIOR,,SIMULATED
+ch4-m-C15-Dfd-b20-s0,C15,D_FIXED_DIFFICULTY,20,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C15-Dfd-b20-s1,C15,D_FIXED_DIFFICULTY,20,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,32,SENIOR,,SIMULATED
+ch4-m-C15-Dfd-b20-s2,C15,D_FIXED_DIFFICULTY,20,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,34,SENIOR,,SIMULATED
+ch4-m-C15-Dfd-b30-s0,C15,D_FIXED_DIFFICULTY,30,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C15-Dfd-b30-s1,C15,D_FIXED_DIFFICULTY,30,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C15-Dfd-b30-s2,C15,D_FIXED_DIFFICULTY,30,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C15-Dfd-b50-s0,C15,D_FIXED_DIFFICULTY,50,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C15-Dfd-b50-s1,C15,D_FIXED_DIFFICULTY,50,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C15-Dfd-b50-s2,C15,D_FIXED_DIFFICULTY,50,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C16-A-na-na,C16,A_INITIAL_PROFILE,,,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,SENIOR,,SIMULATED
+ch4-m-C16-B-b10-s0,C16,B_STATIC,10,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.consumers kafka.errors kafka.schemas kafka.semantics,42,SENIOR,,SIMULATED
+ch4-m-C16-B-b10-s1,C16,B_STATIC,10,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.consumers kafka.errors kafka.schemas kafka.semantics,42,SENIOR,,SIMULATED
+ch4-m-C16-B-b10-s2,C16,B_STATIC,10,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,kafka.consumers kafka.errors kafka.schemas kafka.semantics,41,SENIOR,,SIMULATED
+ch4-m-C16-B-b20-s0,C16,B_STATIC,20,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy aws.iam kafka.consumers kafka.errors kafka.schemas kafka.semantics,27,SENIOR,,SIMULATED
+ch4-m-C16-B-b20-s1,C16,B_STATIC,20,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy aws.iam kafka.consumers kafka.errors kafka.schemas kafka.semantics,27,SENIOR,,SIMULATED
+ch4-m-C16-B-b20-s2,C16,B_STATIC,20,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy aws.iam kafka.consumers kafka.errors kafka.schemas kafka.semantics,27,SENIOR,,SIMULATED
+ch4-m-C16-B-b30-s0,C16,B_STATIC,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy aws.iam kafka.consumers kafka.errors kafka.schemas kafka.semantics,27,SENIOR,,SIMULATED
+ch4-m-C16-B-b30-s1,C16,B_STATIC,30,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy aws.iam kafka.consumers kafka.errors kafka.schemas kafka.semantics,27,SENIOR,,SIMULATED
+ch4-m-C16-B-b30-s2,C16,B_STATIC,30,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy aws.iam kafka.consumers kafka.errors kafka.schemas kafka.semantics,27,SENIOR,,SIMULATED
+ch4-m-C16-B-b50-s0,C16,B_STATIC,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy aws.iam kafka.consumers kafka.errors kafka.schemas kafka.semantics,27,SENIOR,,SIMULATED
+ch4-m-C16-B-b50-s1,C16,B_STATIC,50,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy aws.iam kafka.consumers kafka.errors kafka.schemas kafka.semantics,27,SENIOR,,SIMULATED
+ch4-m-C16-B-b50-s2,C16,B_STATIC,50,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy aws.iam kafka.consumers kafka.errors kafka.schemas kafka.semantics,27,SENIOR,,SIMULATED
+ch4-m-C16-C-b10-s0,C16,C_ADAPTIVE_NO_MARKET,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,49,SENIOR,,SIMULATED
+ch4-m-C16-C-b10-s1,C16,C_ADAPTIVE_NO_MARKET,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,51,SENIOR,,SIMULATED
+ch4-m-C16-C-b10-s2,C16,C_ADAPTIVE_NO_MARKET,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,46,SENIOR,,SIMULATED
+ch4-m-C16-C-b20-s0,C16,C_ADAPTIVE_NO_MARKET,20,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,SENIOR,,SIMULATED
+ch4-m-C16-C-b20-s1,C16,C_ADAPTIVE_NO_MARKET,20,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy,38,SENIOR,,SIMULATED
+ch4-m-C16-C-b20-s2,C16,C_ADAPTIVE_NO_MARKET,20,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,37,SENIOR,,SIMULATED
+ch4-m-C16-C-b30-s0,C16,C_ADAPTIVE_NO_MARKET,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,38,SENIOR,,SIMULATED
+ch4-m-C16-C-b30-s1,C16,C_ADAPTIVE_NO_MARKET,30,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,33,SENIOR,,SIMULATED
+ch4-m-C16-C-b30-s2,C16,C_ADAPTIVE_NO_MARKET,30,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,35,SENIOR,,SIMULATED
+ch4-m-C16-C-b50-s0,C16,C_ADAPTIVE_NO_MARKET,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,38,SENIOR,,SIMULATED
+ch4-m-C16-C-b50-s1,C16,C_ADAPTIVE_NO_MARKET,50,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,33,SENIOR,,SIMULATED
+ch4-m-C16-C-b50-s2,C16,C_ADAPTIVE_NO_MARKET,50,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,35,SENIOR,,SIMULATED
+ch4-m-C16-D-b10-s0,C16,D_FULL_COMPETENCEMATCH,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,45,SENIOR,,SIMULATED
+ch4-m-C16-D-b10-s1,C16,D_FULL_COMPETENCEMATCH,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,44,SENIOR,,SIMULATED
+ch4-m-C16-D-b10-s2,C16,D_FULL_COMPETENCEMATCH,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kafka.consumers kafka.errors,46,SENIOR,,SIMULATED
+ch4-m-C16-D-b20-s0,C16,D_FULL_COMPETENCEMATCH,20,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,37,SENIOR,,SIMULATED
+ch4-m-C16-D-b20-s1,C16,D_FULL_COMPETENCEMATCH,20,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,35,SENIOR,,SIMULATED
+ch4-m-C16-D-b20-s2,C16,D_FULL_COMPETENCEMATCH,20,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,39,SENIOR,,SIMULATED
+ch4-m-C16-D-b30-s0,C16,D_FULL_COMPETENCEMATCH,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,36,SENIOR,,SIMULATED
+ch4-m-C16-D-b30-s1,C16,D_FULL_COMPETENCEMATCH,30,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,aws.cost aws.deploy kafka.consumers kafka.errors,34,SENIOR,,SIMULATED
+ch4-m-C16-D-b30-s2,C16,D_FULL_COMPETENCEMATCH,30,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,37,SENIOR,,SIMULATED
+ch4-m-C16-D-b50-s0,C16,D_FULL_COMPETENCEMATCH,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,36,SENIOR,,SIMULATED
+ch4-m-C16-D-b50-s1,C16,D_FULL_COMPETENCEMATCH,50,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,aws.cost aws.deploy kafka.consumers kafka.errors,34,SENIOR,,SIMULATED
+ch4-m-C16-D-b50-s2,C16,D_FULL_COMPETENCEMATCH,50,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,37,SENIOR,,SIMULATED
+ch4-m-C16-Dfd-b10-s0,C16,D_FIXED_DIFFICULTY,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,45,SENIOR,,SIMULATED
+ch4-m-C16-Dfd-b10-s1,C16,D_FIXED_DIFFICULTY,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,44,SENIOR,,SIMULATED
+ch4-m-C16-Dfd-b10-s2,C16,D_FIXED_DIFFICULTY,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,kafka.consumers kafka.errors,46,SENIOR,,SIMULATED
+ch4-m-C16-Dfd-b20-s0,C16,D_FIXED_DIFFICULTY,20,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,37,SENIOR,,SIMULATED
+ch4-m-C16-Dfd-b20-s1,C16,D_FIXED_DIFFICULTY,20,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,35,SENIOR,,SIMULATED
+ch4-m-C16-Dfd-b20-s2,C16,D_FIXED_DIFFICULTY,20,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,39,SENIOR,,SIMULATED
+ch4-m-C16-Dfd-b30-s0,C16,D_FIXED_DIFFICULTY,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,36,SENIOR,,SIMULATED
+ch4-m-C16-Dfd-b30-s1,C16,D_FIXED_DIFFICULTY,30,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,aws.cost aws.deploy kafka.consumers kafka.errors,34,SENIOR,,SIMULATED
+ch4-m-C16-Dfd-b30-s2,C16,D_FIXED_DIFFICULTY,30,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,37,SENIOR,,SIMULATED
+ch4-m-C16-Dfd-b50-s0,C16,D_FIXED_DIFFICULTY,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,36,SENIOR,,SIMULATED
+ch4-m-C16-Dfd-b50-s1,C16,D_FIXED_DIFFICULTY,50,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,aws.cost aws.deploy kafka.consumers kafka.errors,34,SENIOR,,SIMULATED
+ch4-m-C16-Dfd-b50-s2,C16,D_FIXED_DIFFICULTY,50,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,aws.cost aws.deploy kafka.consumers kafka.errors,37,SENIOR,,SIMULATED
+ch4-m-C17-A-na-na,C17,A_INITIAL_PROFILE,,,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,SENIOR,,SIMULATED
+ch4-m-C17-B-b10-s0,C17,B_STATIC,10,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C17-B-b10-s1,C17,B_STATIC,10,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C17-B-b10-s2,C17,B_STATIC,10,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,SENIOR,,SIMULATED
+ch4-m-C17-B-b20-s0,C17,B_STATIC,20,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C17-B-b20-s1,C17,B_STATIC,20,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C17-B-b20-s2,C17,B_STATIC,20,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C17-B-b30-s0,C17,B_STATIC,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C17-B-b30-s1,C17,B_STATIC,30,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C17-B-b30-s2,C17,B_STATIC,30,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C17-B-b50-s0,C17,B_STATIC,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C17-B-b50-s1,C17,B_STATIC,50,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C17-B-b50-s2,C17,B_STATIC,50,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,27,SENIOR,,SIMULATED
+ch4-m-C17-C-b10-s0,C17,C_ADAPTIVE_NO_MARKET,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,49,SENIOR,,SIMULATED
+ch4-m-C17-C-b10-s1,C17,C_ADAPTIVE_NO_MARKET,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,51,SENIOR,,SIMULATED
+ch4-m-C17-C-b10-s2,C17,C_ADAPTIVE_NO_MARKET,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,SENIOR,,SIMULATED
+ch4-m-C17-C-b20-s0,C17,C_ADAPTIVE_NO_MARKET,20,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,43,SENIOR,,SIMULATED
+ch4-m-C17-C-b20-s1,C17,C_ADAPTIVE_NO_MARKET,20,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,39,SENIOR,,SIMULATED
+ch4-m-C17-C-b20-s2,C17,C_ADAPTIVE_NO_MARKET,20,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,34,SENIOR,,SIMULATED
+ch4-m-C17-C-b30-s0,C17,C_ADAPTIVE_NO_MARKET,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,SENIOR,,SIMULATED
+ch4-m-C17-C-b30-s1,C17,C_ADAPTIVE_NO_MARKET,30,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,32,SENIOR,,SIMULATED
+ch4-m-C17-C-b30-s2,C17,C_ADAPTIVE_NO_MARKET,30,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,33,SENIOR,,SIMULATED
+ch4-m-C17-C-b50-s0,C17,C_ADAPTIVE_NO_MARKET,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,39,SENIOR,,SIMULATED
+ch4-m-C17-C-b50-s1,C17,C_ADAPTIVE_NO_MARKET,50,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,32,SENIOR,,SIMULATED
+ch4-m-C17-C-b50-s2,C17,C_ADAPTIVE_NO_MARKET,50,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,33,SENIOR,,SIMULATED
+ch4-m-C17-D-b10-s0,C17,D_FULL_COMPETENCEMATCH,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C17-D-b10-s1,C17,D_FULL_COMPETENCEMATCH,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C17-D-b10-s2,C17,D_FULL_COMPETENCEMATCH,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,44,SENIOR,,SIMULATED
+ch4-m-C17-D-b20-s0,C17,D_FULL_COMPETENCEMATCH,20,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C17-D-b20-s1,C17,D_FULL_COMPETENCEMATCH,20,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,32,SENIOR,,SIMULATED
+ch4-m-C17-D-b20-s2,C17,D_FULL_COMPETENCEMATCH,20,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,34,SENIOR,,SIMULATED
+ch4-m-C17-D-b30-s0,C17,D_FULL_COMPETENCEMATCH,30,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C17-D-b30-s1,C17,D_FULL_COMPETENCEMATCH,30,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C17-D-b30-s2,C17,D_FULL_COMPETENCEMATCH,30,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C17-D-b50-s0,C17,D_FULL_COMPETENCEMATCH,50,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C17-D-b50-s1,C17,D_FULL_COMPETENCEMATCH,50,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C17-D-b50-s2,C17,D_FULL_COMPETENCEMATCH,50,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C17-Dfd-b10-s0,C17,D_FIXED_DIFFICULTY,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C17-Dfd-b10-s1,C17,D_FIXED_DIFFICULTY,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C17-Dfd-b10-s2,C17,D_FIXED_DIFFICULTY,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,44,SENIOR,,SIMULATED
+ch4-m-C17-Dfd-b20-s0,C17,D_FIXED_DIFFICULTY,20,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C17-Dfd-b20-s1,C17,D_FIXED_DIFFICULTY,20,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,32,SENIOR,,SIMULATED
+ch4-m-C17-Dfd-b20-s2,C17,D_FIXED_DIFFICULTY,20,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,34,SENIOR,,SIMULATED
+ch4-m-C17-Dfd-b30-s0,C17,D_FIXED_DIFFICULTY,30,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C17-Dfd-b30-s1,C17,D_FIXED_DIFFICULTY,30,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C17-Dfd-b30-s2,C17,D_FIXED_DIFFICULTY,30,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C17-Dfd-b50-s0,C17,D_FIXED_DIFFICULTY,50,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,30,SENIOR,,SIMULATED
+ch4-m-C17-Dfd-b50-s1,C17,D_FIXED_DIFFICULTY,50,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,29,SENIOR,,SIMULATED
+ch4-m-C17-Dfd-b50-s2,C17,D_FIXED_DIFFICULTY,50,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C18-A-na-na,C18,A_INITIAL_PROFILE,,,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,59,SENIOR,,SIMULATED
+ch4-m-C18-B-b10-s0,C18,B_STATIC,10,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C18-B-b10-s1,C18,B_STATIC,10,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C18-B-b10-s2,C18,B_STATIC,10,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,,41,SENIOR,,SIMULATED
+ch4-m-C18-B-b20-s0,C18,B_STATIC,20,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,git.branching,27,SENIOR,,SIMULATED
+ch4-m-C18-B-b20-s1,C18,B_STATIC,20,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,git.branching,27,SENIOR,,SIMULATED
+ch4-m-C18-B-b20-s2,C18,B_STATIC,20,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,git.branching,27,SENIOR,,SIMULATED
+ch4-m-C18-B-b30-s0,C18,B_STATIC,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,git.branching,27,SENIOR,,SIMULATED
+ch4-m-C18-B-b30-s1,C18,B_STATIC,30,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,git.branching,27,SENIOR,,SIMULATED
+ch4-m-C18-B-b30-s2,C18,B_STATIC,30,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,git.branching,27,SENIOR,,SIMULATED
+ch4-m-C18-B-b50-s0,C18,B_STATIC,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,git.branching,27,SENIOR,,SIMULATED
+ch4-m-C18-B-b50-s1,C18,B_STATIC,50,1,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,git.branching,27,SENIOR,,SIMULATED
+ch4-m-C18-B-b50-s2,C18,B_STATIC,50,2,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,git.branching,27,SENIOR,,SIMULATED
+ch4-m-C18-C-b10-s0,C18,C_ADAPTIVE_NO_MARKET,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,49,SENIOR,,SIMULATED
+ch4-m-C18-C-b10-s1,C18,C_ADAPTIVE_NO_MARKET,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,51,SENIOR,,SIMULATED
+ch4-m-C18-C-b10-s2,C18,C_ADAPTIVE_NO_MARKET,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,43,SENIOR,,SIMULATED
+ch4-m-C18-C-b20-s0,C18,C_ADAPTIVE_NO_MARKET,20,0,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,git.branching,41,SENIOR,,SIMULATED
+ch4-m-C18-C-b20-s1,C18,C_ADAPTIVE_NO_MARKET,20,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,37,SENIOR,,SIMULATED
+ch4-m-C18-C-b20-s2,C18,C_ADAPTIVE_NO_MARKET,20,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,34,SENIOR,,SIMULATED
+ch4-m-C18-C-b30-s0,C18,C_ADAPTIVE_NO_MARKET,30,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,git.branching,35,SENIOR,,SIMULATED
+ch4-m-C18-C-b30-s1,C18,C_ADAPTIVE_NO_MARKET,30,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,30,SENIOR,,SIMULATED
+ch4-m-C18-C-b30-s2,C18,C_ADAPTIVE_NO_MARKET,30,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,32,SENIOR,,SIMULATED
+ch4-m-C18-C-b50-s0,C18,C_ADAPTIVE_NO_MARKET,50,0,SENIOR,MIDDLE,MIDDLE,ASSESSED,SUPPORTED,SUPPORTED,UNVERIFIED,git.branching,35,SENIOR,,SIMULATED
+ch4-m-C18-C-b50-s1,C18,C_ADAPTIVE_NO_MARKET,50,1,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,30,SENIOR,,SIMULATED
+ch4-m-C18-C-b50-s2,C18,C_ADAPTIVE_NO_MARKET,50,2,SENIOR,UNKNOWN,MIDDLE,INSUFFICIENT_DATA,UNVERIFIED,SUPPORTED,UNVERIFIED,,32,SENIOR,,SIMULATED
+ch4-m-C18-D-b10-s0,C18,D_FULL_COMPETENCEMATCH,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C18-D-b10-s1,C18,D_FULL_COMPETENCEMATCH,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C18-D-b10-s2,C18,D_FULL_COMPETENCEMATCH,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,44,SENIOR,,SIMULATED
+ch4-m-C18-D-b20-s0,C18,D_FULL_COMPETENCEMATCH,20,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C18-D-b20-s1,C18,D_FULL_COMPETENCEMATCH,20,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,32,SENIOR,,SIMULATED
+ch4-m-C18-D-b20-s2,C18,D_FULL_COMPETENCEMATCH,20,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,34,SENIOR,,SIMULATED
+ch4-m-C18-D-b30-s0,C18,D_FULL_COMPETENCEMATCH,30,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,30,SENIOR,,SIMULATED
+ch4-m-C18-D-b30-s1,C18,D_FULL_COMPETENCEMATCH,30,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,29,SENIOR,,SIMULATED
+ch4-m-C18-D-b30-s2,C18,D_FULL_COMPETENCEMATCH,30,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,33,SENIOR,,SIMULATED
+ch4-m-C18-D-b50-s0,C18,D_FULL_COMPETENCEMATCH,50,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,30,SENIOR,,SIMULATED
+ch4-m-C18-D-b50-s1,C18,D_FULL_COMPETENCEMATCH,50,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,29,SENIOR,,SIMULATED
+ch4-m-C18-D-b50-s2,C18,D_FULL_COMPETENCEMATCH,50,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,33,SENIOR,,SIMULATED
+ch4-m-C18-Dfd-b10-s0,C18,D_FIXED_DIFFICULTY,10,0,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C18-Dfd-b10-s1,C18,D_FIXED_DIFFICULTY,10,1,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,42,SENIOR,,SIMULATED
+ch4-m-C18-Dfd-b10-s2,C18,D_FIXED_DIFFICULTY,10,2,SENIOR,UNKNOWN,UNKNOWN,INSUFFICIENT_DATA,UNVERIFIED,UNVERIFIED,UNVERIFIED,,44,SENIOR,,SIMULATED
+ch4-m-C18-Dfd-b20-s0,C18,D_FIXED_DIFFICULTY,20,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,33,SENIOR,,SIMULATED
+ch4-m-C18-Dfd-b20-s1,C18,D_FIXED_DIFFICULTY,20,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,32,SENIOR,,SIMULATED
+ch4-m-C18-Dfd-b20-s2,C18,D_FIXED_DIFFICULTY,20,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,,34,SENIOR,,SIMULATED
+ch4-m-C18-Dfd-b30-s0,C18,D_FIXED_DIFFICULTY,30,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,30,SENIOR,,SIMULATED
+ch4-m-C18-Dfd-b30-s1,C18,D_FIXED_DIFFICULTY,30,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,29,SENIOR,,SIMULATED
+ch4-m-C18-Dfd-b30-s2,C18,D_FIXED_DIFFICULTY,30,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,33,SENIOR,,SIMULATED
+ch4-m-C18-Dfd-b50-s0,C18,D_FIXED_DIFFICULTY,50,0,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,30,SENIOR,,SIMULATED
+ch4-m-C18-Dfd-b50-s1,C18,D_FIXED_DIFFICULTY,50,1,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,29,SENIOR,,SIMULATED
+ch4-m-C18-Dfd-b50-s2,C18,D_FIXED_DIFFICULTY,50,2,SENIOR,SENIOR,SENIOR,ASSESSED,SUPPORTED,SUPPORTED,SUPPORTED,git.branching,33,SENIOR,,SIMULATED

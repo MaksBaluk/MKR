@@ -1,0 +1,11 @@
+suite,stub,candidate_model,mode_label,n_runs,questions,fallback_questions,ungraded_answers,fallback_share,runs_with_fallback
+ablation_sensitive,ua,sensitive,B_STATIC,108,2160,0,0,0.0,0
+ablation_sensitive,ua,sensitive,C_ADAPTIVE_NO_MARKET,108,2973,0,0,0.0,0
+ablation_sensitive,ua,sensitive,D_FIXED_DIFFICULTY,108,3026,0,0,0.0,0
+ablation_sensitive,ua,sensitive,D_FULL_COMPETENCEMATCH,108,3007,0,0,0.0,0
+modes,ua,insensitive,B_STATIC,216,3780,0,0,0.0,0
+modes,ua,insensitive,C_ADAPTIVE_NO_MARKET,216,4960,0,0,0.0,0
+modes,ua,insensitive,D_FIXED_DIFFICULTY,216,5005,0,0,0.0,0
+modes,ua,insensitive,D_FULL_COMPETENCEMATCH,216,4990,0,0,0.0,0
+stub_check,en,insensitive,B_STATIC,18,360,0,0,0.0,0
+stub_check,en,insensitive,D_FULL_COMPETENCEMATCH,18,630,42,0,0.0667,6

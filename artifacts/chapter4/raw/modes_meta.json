@@ -1,0 +1,66 @@
+{
+  "suite": "modes",
+  "label": "SIMULATED",
+  "quick": false,
+  "workers": 6,
+  "wall_s": 202.1,
+  "n_runs": 1350,
+  "modes": {
+    "A_INITIAL_PROFILE": {
+      "mode": "INITIAL_PROFILE"
+    },
+    "B_STATIC": {
+      "mode": "STATIC_INTERVIEW"
+    },
+    "C_ADAPTIVE_NO_MARKET": {
+      "mode": "ADAPTIVE_INTERVIEW"
+    },
+    "D_FULL_COMPETENCEMATCH": {
+      "mode": "ADAPTIVE_INTERVIEW"
+    },
+    "D_FIXED_DIFFICULTY": {
+      "mode": "ADAPTIVE_INTERVIEW",
+      "adaptive_difficulty": false
+    }
+  },
+  "budgets": [
+    10,
+    20,
+    30,
+    50
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "per_q": 2,
+  "goal_policy": "GAP_ONLY",
+  "profiles": [
+    "C01",
+    "C02",
+    "C03",
+    "C04",
+    "C05",
+    "C06",
+    "C07",
+    "C08",
+    "C09",
+    "C10",
+    "C11",
+    "C12",
+    "C13",
+    "C14",
+    "C15",
+    "C16",
+    "C17",
+    "C18"
+  ],
+  "stub": "scripts.chapter4.realistic_runs.UaModel (Ukrainian difficulty word) over scripts.seniority_realistic.Model; noise scripts.seniority_realistic.Noise(seed)",
+  "reproducibility": {
+    "probe_runs": 10,
+    "hash_first": "eca6a8386e6af0ac",
+    "hash_second": "eca6a8386e6af0ac",
+    "identical": true
+  }
+}

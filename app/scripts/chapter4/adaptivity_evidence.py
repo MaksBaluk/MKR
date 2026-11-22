@@ -54,6 +54,8 @@ def topic_selection(runs: list[dict]) -> dict:
         rows.append({"profile_id": pid, "total_budget": bud, "seed": seed, "static_plan": " > ".join(plan),
                      "static_asked_topics": " > ".join(b_order), "adaptive_topics": " > ".join(c_order),
                      "adaptive_question_sequence": " > ".join(c["topic_sequence"]),
+                     "no_market_topics": " > ".join(dict.fromkeys(idx[(pid, "C_ADAPTIVE_NO_MARKET", bud, seed)]["topic_sequence"]))
+                     if (pid, "C_ADAPTIVE_NO_MARKET", bud, seed) in idx else "",
                      "first_divergence_index": "" if k is None else k,
                      "only_adaptive": " ".join(sorted(set(c_order) - set(b_order))),
                      "only_static": " ".join(sorted(set(b_order) - set(c_order)))})
@@ -154,13 +156,22 @@ def difficulty_events(runs: list[dict]) -> dict:
 def followup_goal(runs: list[dict]) -> dict:
     """A turn where one targeted criterion is confirmed and another is weak or ungraded, followed by a question of the
     same topic aimed at the open one; the confirmed score must survive to the end of the attempt."""
-    hits, pg = [], []
+    hits, pg, pg_idx = [], [], []
     for r in runs:
         if r["mode_label"] != "D_FULL_COMPETENCEMATCH" or r["suite"] != "modes":
             continue
         scored, final = _scores_by_turn(r), _final(r)
         ts = r["turns"]
         for a, b in zip(ts, ts[1:]):
+            sa0 = scored.get(a["turn_id"], {})
+            if a["action_id"] == b["action_id"] == "postgresql" and (sa0.get("postgresql.indexes") or 1) < 0.5 \
+                    and b["target_criteria"][:1] == ["postgresql.indexes"]:
+                pg_idx.append({"run_id": r["run_id"], "profile_id": r["profile_id"],
+                               "final_scores": {c: final.get(c) for c in ("postgresql.indexes", "postgresql.transactions")},
+                               "turn": _turn_view(a, scored), "next_turn": _turn_view(b, scored),
+                               "indexes_questions_in_topic": sum(t["action_id"] == "postgresql" and
+                                                                 t["target_criteria"][:1] == ["postgresql.indexes"]
+                                                                 for t in ts)})
             if a["action_id"] != b["action_id"] or len(a["target_criteria"]) < 2:
                 continue
             sa = scored.get(a["turn_id"], {})
@@ -184,6 +195,9 @@ def followup_goal(runs: list[dict]) -> dict:
             "events_by_followup_reason": dict(Counter(h["next_turn"]["followup_reason"] for h in hits)),
             "postgresql_transactions_confirmed_indexes_open": len(pg),
             "postgresql_example": pg[0] if pg else None,
+            "postgresql_indexes_weak_then_followup": len(pg_idx),
+            "postgresql_indexes_example": sorted(pg_idx, key=lambda x: (x["profile_id"] != "C12", x["run_id"]))[0]
+            if pg_idx else None,
             "ungraded_open_example": unknown[0] if unknown else None}
 
 
@@ -196,14 +210,14 @@ def _md(ev: dict) -> str:
          "складність і уточнення — код продукту без змін. Це перевірка поведінки механізмів, а не якості на реальних "
          "кандидатах.", "",
          "## 6.1 Вибір теми після позитивних і негативних відповідей", "",
-         "| Бюджет | Пар B/C | Порядок тем C відрізняється від статичного плану B | Множина тем відрізняється |",
+         "| Бюджет | Пар B/D | Порядок тем D відрізняється від статичного плану B | Множина тем D і B відрізняється |",
          "|---|---|---|---|"]
     for b, x in ts["by_budget"].items():
         L.append(f"| {b} | {x['runs']} | {x['adaptive_order_differs_from_static_plan']} | {x['topic_set_differs']} |")
     L += ["", f"Різних статичних планів на треку python: {ts['distinct_static_plans_python']}; різних порядків тем "
-              f"адаптивного режиму (бюджет 50): {ts['distinct_adaptive_topic_orders_python_budget50']}. "
+              f"режиму D (бюджет 50): {ts['distinct_adaptive_topic_orders_python_budget50']}. "
               "Повні послідовності: `figures_data/topic_sequences_static_vs_adaptive.csv`.", "",
-          "Контраст за однакової когорти, бюджету 50 і seed 0 (адаптивний режим):", "",
+          "Контраст за однакової когорти, бюджету 50 і seed 0 (режим D, адаптивне інтерв'ю продукту; колонка `no_market_topics` у CSV — режим C):", "",
           "| Профіль | run_id | Питань | Питань на тему | Причини уточнень (followup_reason) |", "|---|---|---|---|---|"]
     for pid, x in ts["contrast_budget50_seed0"].items():
         L.append(f"| {pid} | `{x['run_id']}` | {x['questions']} | `{json.dumps(x['questions_per_topic'], ensure_ascii=False)}` "
@@ -240,7 +254,10 @@ def _md(ev: dict) -> str:
           f"(не приписаний): {fg['events_open_criterion_ungraded']}. Причини наступного питання: "
           f"`{json.dumps(fg['events_by_followup_reason'], ensure_ascii=False)}`. Випадків PostgreSQL "
           f"(transactions підтверджено, indexes відкритий): {fg['postgresql_transactions_confirmed_indexes_open']}.", ""]
-    for title, x in (("Приклад PostgreSQL", fg["postgresql_example"]),
+    L += [f"Подій «слабка оцінка postgresql.indexes → наступне питання теми про indexes»: "
+          f"{fg['postgresql_indexes_weak_then_followup']}.", ""]
+    for title, x in (("Приклад PostgreSQL (transactions підтверджено, indexes відкритий)", fg["postgresql_example"]),
+                     ("Приклад PostgreSQL (indexes слабкий → уточнення про indexes)", fg["postgresql_indexes_example"]),
                      ("Приклад, де відкритий критерій лишився без оцінки", fg["ungraded_open_example"])):
         L += [f"**{title}.**", ""]
         if not x:
@@ -252,8 +269,9 @@ def _md(ev: dict) -> str:
                      f"`{json.dumps(t['scores_quoting_this_answer'], ensure_ascii=False)}`; ціль оцінювача після "
                      f"відповіді `{json.dumps((t['eval_goal_after_answer'] or {}).get('criterion_ids'), ensure_ascii=False)}`")
         L += [f"- Підсумкові оцінки спроби: `{json.dumps(x['final_scores'], ensure_ascii=False)}`; підтверджене "
-              f"збережено: {x['confirmed_kept_to_end']}.", ""]
-    L += ["## 6.4 Абляція", "", "Див. `ablation_results.csv` і розділ 6.4 у `modes_report.md`."]
+              f"збережено: {x.get('confirmed_kept_to_end', 'n/a')}; питань теми з indexes першою ціллю: "
+              f"{x.get('indexes_questions_in_topic', 'n/a')}.", ""]
+    L += ["## 6.4 Абляція", "", "Див. `ablation_results.csv` і `tables/table_4_6_ablation.md`."]
     return "\n".join(L) + "\n"
 
 

@@ -1,0 +1,19 @@
+{
+  "dataset_version": "ds-66dcff9404cc",
+  "vacancies": 229,
+  "requirement_alternatives": 2371,
+  "candidates": 18,
+  "response_bank": 1888,
+  "vacancy_pool_rows": 944,
+  "criterion_items": 108,
+  "annotations_started": false,
+  "research_planner": "research-no-market/v1",
+  "fixture_sha256": {
+    "vacancies.json": "9bc11fcde8b1d857a0fa087f569fb380a241b7b09b2bbb9b1e8c2860b45d3790",
+    "vacancies_real.json": "1a15d456f0800e7fbc4d2093bba4e03ecfe5d164ad7a286aca86da926c317bcb",
+    "vacancy_criteria.json": "9aa9e1fdefb70d925077b56c2a7e58276f05075d75858c23e830c30a87bf91e1",
+    "vacancy_sources.json": "30841da50c9cf2cd57b2057c0337e745fac4d03a01a6556407b7c434fc2a5b94",
+    "rubrics.json": "a728ea45b2475704c3cddb28b828ec98f660eef796d607095fd34dcb18aed787",
+    "competencies.json": "a98106cd3ebc81c5b6a28ddf77b7f855cf78c2de5a439f76ae2b9532297adee7"
+  }
+}

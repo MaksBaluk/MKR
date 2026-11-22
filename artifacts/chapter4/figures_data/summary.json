@@ -1,0 +1,24 @@
+{
+  "n_runs": 1350,
+  "equal_conditions": {
+    "profiles_checked": 18,
+    "violations": [],
+    "all_equal": true,
+    "budgets_never_exceeded": true,
+    "checked_keys": [
+      "cohort_sha256",
+      "prompt_version",
+      "algorithm_version",
+      "profile_snapshot_sha",
+      "rubric_versions_sha (seeded rubric versions of the cohort)",
+      "model_class (interview modes)",
+      "caps 10/5/2"
+    ]
+  },
+  "reproducibility": {
+    "probe_runs": 10,
+    "hash_first": "eca6a8386e6af0ac",
+    "hash_second": "eca6a8386e6af0ac",
+    "identical": true
+  }
+}

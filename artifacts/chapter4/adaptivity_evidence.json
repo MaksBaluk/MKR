@@ -1,0 +1,770 @@
+{
+  "label": "SIMULATED",
+  "source": "raw/modes_runs.jsonl.gz",
+  "6.1_topic_selection": {
+    "by_budget": {
+      "10": {
+        "runs": 54,
+        "adaptive_order_differs_from_static_plan": 15,
+        "topic_set_differs": 54
+      },
+      "20": {
+        "runs": 54,
+        "adaptive_order_differs_from_static_plan": 54,
+        "topic_set_differs": 54
+      },
+      "30": {
+        "runs": 54,
+        "adaptive_order_differs_from_static_plan": 54,
+        "topic_set_differs": 39
+      },
+      "50": {
+        "runs": 54,
+        "adaptive_order_differs_from_static_plan": 54,
+        "topic_set_differs": 34
+      }
+    },
+    "contrast_budget50_seed0": {
+      "C13": {
+        "run_id": "ch4-m-C13-D-b50-s0",
+        "questions": 23,
+        "topic_sequence": [
+          "python-core",
+          "python-core",
+          "kafka",
+          "kafka",
+          "fastapi",
+          "fastapi",
+          "ci-cd",
+          "ci-cd",
+          "aws",
+          "aws",
+          "sql",
+          "sql",
+          "docker",
+          "docker",
+          "docker",
+          "docker",
+          "docker",
+          "postgresql",
+          "postgresql",
+          "rest-api",
+          "rest-api",
+          "git",
+          "git"
+        ],
+        "questions_per_topic": {
+          "python-core": 2,
+          "kafka": 2,
+          "fastapi": 2,
+          "ci-cd": 2,
+          "aws": 2,
+          "sql": 2,
+          "docker": 5,
+          "postgresql": 2,
+          "rest-api": 2,
+          "git": 2
+        },
+        "followup_reasons": [
+          [
+            "OPEN_CRITERIA",
+            19
+          ],
+          [
+            "Є прогалина.",
+            4
+          ]
+        ]
+      },
+      "C07": {
+        "run_id": "ch4-m-C07-D-b50-s0",
+        "questions": 40,
+        "topic_sequence": [
+          "python-core",
+          "python-core",
+          "python-core",
+          "python-core",
+          "kafka",
+          "kafka",
+          "kafka",
+          "kafka",
+          "kafka",
+          "fastapi",
+          "fastapi",
+          "fastapi",
+          "fastapi",
+          "fastapi",
+          "ci-cd",
+          "ci-cd",
+          "aws",
+          "aws",
+          "sql",
+          "sql",
+          "sql",
+          "sql",
+          "sql",
+          "docker",
+          "docker",
+          "docker",
+          "docker",
+          "docker",
+          "postgresql",
+          "postgresql",
+          "postgresql",
+          "postgresql",
+          "postgresql",
+          "git",
+          "git",
+          "git",
+          "git",
+          "git",
+          "pytest",
+          "pytest"
+        ],
+        "questions_per_topic": {
+          "python-core": 4,
+          "kafka": 5,
+          "fastapi": 5,
+          "ci-cd": 2,
+          "aws": 2,
+          "sql": 5,
+          "docker": 5,
+          "postgresql": 5,
+          "git": 5,
+          "pytest": 2
+        },
+        "followup_reasons": [
+          [
+            "Є прогалина.",
+            22
+          ],
+          [
+            "OPEN_CRITERIA",
+            18
+          ]
+        ]
+      },
+      "C01": {
+        "run_id": "ch4-m-C01-D-b50-s0",
+        "questions": 44,
+        "topic_sequence": [
+          "python-core",
+          "python-core",
+          "python-core",
+          "python-core",
+          "python-core",
+          "kafka",
+          "kafka",
+          "kafka",
+          "kafka",
+          "kafka",
+          "fastapi",
+          "fastapi",
+          "fastapi",
+          "fastapi",
+          "fastapi",
+          "sql",
+          "sql",
+          "django",
+          "django",
+          "django",
+          "django",
+          "django",
+          "ci-cd",
+          "ci-cd",
+          "ci-cd",
+          "ci-cd",
+          "ci-cd",
+          "aws",
+          "aws",
+          "aws",
+          "aws",
+          "aws",
+          "postgresql",
+          "postgresql",
+          "postgresql",
+          "postgresql",
+          "postgresql",
+          "docker",
+          "docker",
+          "docker",
+          "docker",
+          "docker",
+          "redis",
+          "redis"
+        ],
+        "questions_per_topic": {
+          "python-core": 5,
+          "kafka": 5,
+          "fastapi": 5,
+          "sql": 2,
+          "django": 5,
+          "ci-cd": 5,
+          "aws": 5,
+          "postgresql": 5,
+          "docker": 5,
+          "redis": 2
+        },
+        "followup_reasons": [
+          [
+            "Є прогалина.",
+            33
+          ],
+          [
+            "OPEN_CRITERIA",
+            11
+          ]
+        ]
+      },
+      "C06": {
+        "run_id": "ch4-m-C06-D-b50-s0",
+        "questions": 22,
+        "topic_sequence": [
+          "python-core",
+          "python-core",
+          "python-core",
+          "python-core",
+          "kafka",
+          "kafka",
+          "fastapi",
+          "fastapi",
+          "sql",
+          "sql",
+          "django",
+          "django",
+          "ci-cd",
+          "ci-cd",
+          "aws",
+          "aws",
+          "postgresql",
+          "postgresql",
+          "docker",
+          "docker",
+          "redis",
+          "redis"
+        ],
+        "questions_per_topic": {
+          "python-core": 4,
+          "kafka": 2,
+          "fastapi": 2,
+          "sql": 2,
+          "django": 2,
+          "ci-cd": 2,
+          "aws": 2,
+          "postgresql": 2,
+          "docker": 2,
+          "redis": 2
+        },
+        "followup_reasons": [
+          [
+            "OPEN_CRITERIA",
+            19
+          ],
+          [
+            "Є прогалина.",
+            3
+          ]
+        ]
+      }
+    },
+    "distinct_static_plans_python": 1,
+    "distinct_adaptive_topic_orders_python_budget50": 14,
+    "file": "figures_data/topic_sequences_static_vs_adaptive.csv"
+  },
+  "6.2_difficulty": {
+    "event_counts": {
+      "UP_AFTER_STRONG|modes|insensitive": 244,
+      "DOWN_AFTER_WEAK_ADVANCED|modes|insensitive": 91,
+      "DOWN_AFTER_WEAK_ADVANCED_TARGETS_WEAK|modes|insensitive": 91,
+      "UP_AFTER_STRONG|ablation_sensitive|sensitive": 159,
+      "DOWN_AFTER_WEAK_ADVANCED|ablation_sensitive|sensitive": 111,
+      "DOWN_AFTER_WEAK_ADVANCED_TARGETS_WEAK|ablation_sensitive|sensitive": 109
+    },
+    "example_up_after_strong": {
+      "run_id": "ch4-m-C14-D-b10-s0",
+      "profile_id": "C14",
+      "candidate_model": "insensitive",
+      "turn": {
+        "sequence": 1,
+        "action_id": "python-core",
+        "difficulty": "BASIC",
+        "difficulty_reason": "LEVEL:junior",
+        "followup_reason": "OPEN_CRITERIA",
+        "target_criteria": [
+          "python-core.idioms",
+          "python-core.errors",
+          "python-core.testing",
+          "python-core.typing"
+        ],
+        "question_text": "Розкажіть про Python (базовий рівень): «Ідіоматичний і читабельний код» та «Обробка помилок», питання 1?",
+        "answer_text": "Щодо python-core.idioms: робив це сам у продакшені й пояснюю механізм на конкретному прикладі. Щодо python-core.errors: робив це сам у продакшені й пояснюю механізм на конкретному прикладі. Щодо practice-backend.independence: робив це сам у продакшені й пояснюю механізм на конкретному прикладі.",
+        "scores_quoting_this_answer": {
+          "practice-backend.independence": 0.81,
+          "python-core.errors": 0.91,
+          "python-core.idioms": 0.92
+        },
+        "eval_goal_after_answer": null
+      },
+      "next_turn": {
+        "sequence": 2,
+        "action_id": "python-core",
+        "difficulty": "INTERMEDIATE",
+        "difficulty_reason": "STRONG",
+        "followup_reason": "OPEN_CRITERIA",
+        "target_criteria": [
+          "python-core.testing",
+          "python-core.typing"
+        ],
+        "question_text": "Розкажіть про Python (середній рівень): «Перевірка коректності коду» та «Типізація та контракти функцій», питання 2?",
+        "answer_text": "Щодо python-core.testing: робив це сам у продакшені й пояснюю механізм на конкретному прикладі. Щодо python-core.typing: робив це сам у продакшені й пояснюю механізм на конкретному прикладі. Щодо practice-backend.diagnosis: робив це сам у продакшені й пояснюю механізм на конкретному прикладі. Щодо practice-backend.rationale: робив це сам у продакшені й пояснюю механізм на конкретному прикладі.",
+        "scores_quoting_this_answer": {
+          "practice-backend.diagnosis": 0.98,
+          "practice-backend.rationale": 0.98,
+          "python-core.testing": 0.86,
+          "python-core.typing": 0.85
+        },
+        "eval_goal_after_answer": null
+      }
+    },
+    "example_weak_on_advanced_then_diagnostic": {
+      "run_id": "ch4-m-C11-D-b20-s0-dsens",
+      "profile_id": "C11",
+      "candidate_model": "sensitive",
+      "turn": {
+        "sequence": 6,
+        "action_id": "kafka",
+        "difficulty": "ADVANCED",
+        "difficulty_reason": "STRONG",
+        "followup_reason": "OPEN_CRITERIA",
+        "target_criteria": [
+          "kafka.schemas",
+          "kafka.semantics"
+        ],
+        "question_text": "Розкажіть про Apache Kafka (поглиблений рівень): «Схеми подій» та «Гарантії доставки», питання 6?",
+        "answer_text": "Щодо kafka.schemas: лише чув про це. Щодо kafka.semantics: лише чув про це. Щодо practice-backend.ambiguity: лише чув про це. Щодо practice-backend.diagnosis: застосовував на практиці, знаю основні підводні камені. Щодо practice-backend.ownership: лише чув про це. Щодо practice-backend.rationale: застосовував на практиці, знаю основні підводні камені. Щодо practice-backend.tradeoffs: лише чув про це.",
+        "scores_quoting_this_answer": {
+          "practice-backend.ambiguity": 0.27,
+          "practice-backend.diagnosis": 0.83,
+          "practice-backend.ownership": 0.24,
+          "practice-backend.rationale": 0.55,
+          "practice-backend.tradeoffs": 0.23,
+          "kafka.schemas": 0.33,
+          "kafka.semantics": 0.51
+        },
+        "eval_goal_after_answer": {
+          "criterion_ids": [
+            "kafka.schemas",
+            "kafka.semantics"
+          ],
+          "reason": "Є прогалина.",
+          "expected_evidence": "Приклад."
+        }
+      },
+      "next_turn": {
+        "sequence": 7,
+        "action_id": "kafka",
+        "difficulty": "INTERMEDIATE",
+        "difficulty_reason": "WEAK",
+        "followup_reason": "Є прогалина.",
+        "target_criteria": [
+          "kafka.schemas",
+          "kafka.semantics"
+        ],
+        "question_text": "Розкажіть про Apache Kafka (середній рівень): «Схеми подій» та «Гарантії доставки», питання 7?",
+        "answer_text": "Щодо kafka.schemas: розумію загальну ідею, але без деталей. Щодо kafka.semantics: розумію загальну ідею, але без деталей. Щодо practice-backend.diagnosis: застосовував на практиці, знаю основні підводні камені. Щодо practice-backend.rationale: застосовував на практиці, знаю основні підводні камені.",
+        "scores_quoting_this_answer": {
+          "practice-backend.diagnosis": 0.72,
+          "practice-backend.rationale": 0.72,
+          "kafka.schemas": 0.59,
+          "kafka.semantics": 0.52
+        },
+        "eval_goal_after_answer": {
+          "criterion_ids": [
+            "kafka.schemas",
+            "kafka.semantics"
+          ],
+          "reason": "Є прогалина.",
+          "expected_evidence": "Приклад."
+        }
+      }
+    },
+    "spike_profile_budget50_seed0": {
+      "modes|insensitive": {
+        "run_id": "ch4-m-C02-D-b50-s0",
+        "per_topic": {
+          "python-core": [
+            "B:LEVEL:junior",
+            "I:STRONG"
+          ],
+          "kafka": [
+            "I:CARRY:NO_OPEN_CRITERIA",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "fastapi": [
+            "B:CARRY:QUESTION_CAP",
+            "B:PARTIAL",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "ci-cd": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK",
+            "B:PARTIAL",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "aws": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "django": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "sql": [
+            "B:CARRY:QUESTION_CAP",
+            "B:PARTIAL"
+          ],
+          "docker": [
+            "I:CARRY:STRONG+ENOUGH",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "redis": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "postgresql": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK"
+          ]
+        },
+        "assessed_level": "JUNIOR"
+      },
+      "stub_check|insensitive": {
+        "run_id": "ch4-m-C02-D-b50-s0-enstub",
+        "per_topic": {
+          "python-core": [
+            "B:LEVEL:junior",
+            "I:STRONG"
+          ],
+          "kafka": [
+            "I:CARRY:NO_OPEN_CRITERIA",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "fastapi": [
+            "B:CARRY:QUESTION_CAP",
+            "B:PARTIAL",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "ci-cd": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK",
+            "B:PARTIAL",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "aws": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "django": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "sql": [
+            "B:CARRY:QUESTION_CAP",
+            "B:PARTIAL"
+          ],
+          "docker": [
+            "I:CARRY:STRONG+ENOUGH",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "redis": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "postgresql": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK"
+          ]
+        },
+        "assessed_level": "JUNIOR"
+      },
+      "ablation_sensitive|sensitive": {
+        "run_id": "ch4-m-C02-D-b50-s0-dsens",
+        "per_topic": {
+          "python-core": [
+            "B:LEVEL:junior",
+            "I:STRONG"
+          ],
+          "kafka": [
+            "I:CARRY:NO_OPEN_CRITERIA",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "fastapi": [
+            "B:CARRY:QUESTION_CAP",
+            "B:PARTIAL",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "ci-cd": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK",
+            "B:PARTIAL",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "aws": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "django": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "sql": [
+            "B:CARRY:QUESTION_CAP",
+            "B:PARTIAL"
+          ],
+          "docker": [
+            "I:CARRY:STRONG+ENOUGH",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "redis": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK",
+            "B:WEAK"
+          ],
+          "postgresql": [
+            "B:CARRY:QUESTION_CAP",
+            "B:WEAK"
+          ]
+        },
+        "assessed_level": "JUNIOR"
+      }
+    },
+    "desired_junior_summary": {
+      "modes|insensitive|B_STATIC": {
+        "runs": 12,
+        "reached_advanced": 0,
+        "level_JUNIOR": 12
+      },
+      "modes|insensitive|D_FULL_COMPETENCEMATCH": {
+        "runs": 12,
+        "reached_advanced": 12,
+        "level_UNKNOWN": 3,
+        "level_SENIOR": 9
+      },
+      "modes|insensitive|D_FIXED_DIFFICULTY": {
+        "runs": 12,
+        "reached_advanced": 0,
+        "level_UNKNOWN": 3,
+        "level_SENIOR": 9
+      },
+      "ablation_sensitive|sensitive|B_STATIC": {
+        "runs": 6,
+        "reached_advanced": 0,
+        "level_JUNIOR": 6
+      },
+      "ablation_sensitive|sensitive|D_FULL_COMPETENCEMATCH": {
+        "runs": 6,
+        "reached_advanced": 6,
+        "level_SENIOR": 5,
+        "level_MIDDLE": 1
+      },
+      "ablation_sensitive|sensitive|D_FIXED_DIFFICULTY": {
+        "runs": 6,
+        "reached_advanced": 0,
+        "level_JUNIOR": 1,
+        "level_MIDDLE": 2,
+        "level_SENIOR": 3
+      }
+    },
+    "file": "figures_data/desired_junior_depth.csv"
+  },
+  "6.3_followup_goal": {
+    "events": 246,
+    "events_confirmed_kept_to_end": 246,
+    "events_open_criterion_ungraded": 147,
+    "events_by_followup_reason": {
+      "Є прогалина.": 110,
+      "OPEN_CRITERIA": 136
+    },
+    "postgresql_transactions_confirmed_indexes_open": 0,
+    "postgresql_example": null,
+    "postgresql_indexes_weak_then_followup": 44,
+    "postgresql_indexes_example": {
+      "run_id": "ch4-m-C12-D-b30-s0",
+      "profile_id": "C12",
+      "final_scores": {
+        "postgresql.indexes": 0.32,
+        "postgresql.transactions": null
+      },
+      "turn": {
+        "sequence": 29,
+        "action_id": "postgresql",
+        "difficulty": "BASIC",
+        "difficulty_reason": "CARRY:QUESTION_CAP",
+        "followup_reason": "OPEN_CRITERIA",
+        "target_criteria": [
+          "postgresql.indexes",
+          "postgresql.transactions",
+          "postgresql.schema",
+          "postgresql.operations",
+          "postgresql.migrations"
+        ],
+        "question_text": "Розкажіть про PostgreSQL (базовий рівень): «Індекси та плани виконання» та «Транзакції та ізоляція», питання 29?",
+        "answer_text": "Щодо postgresql.indexes: лише чув про це. Щодо postgresql.transactions: застосовував на практиці, знаю основні підводні камені. Щодо practice-backend.ambiguity: розумію загальну ідею, але без деталей. Щодо practice-backend.tradeoffs: розумію загальну ідею, але без деталей.",
+        "scores_quoting_this_answer": {
+          "practice-backend.ambiguity": 0.61,
+          "practice-backend.tradeoffs": 0.67,
+          "postgresql.indexes": 0.3
+        },
+        "eval_goal_after_answer": {
+          "criterion_ids": [
+            "postgresql.indexes"
+          ],
+          "reason": "Є прогалина.",
+          "expected_evidence": "Приклад."
+        }
+      },
+      "next_turn": {
+        "sequence": 30,
+        "action_id": "postgresql",
+        "difficulty": "BASIC",
+        "difficulty_reason": "WEAK",
+        "followup_reason": "Є прогалина.",
+        "target_criteria": [
+          "postgresql.indexes"
+        ],
+        "question_text": "Розкажіть про PostgreSQL (базовий рівень): «Індекси та плани виконання», питання 30?",
+        "answer_text": "Щодо postgresql.indexes: лише чув про це.",
+        "scores_quoting_this_answer": {
+          "postgresql.indexes": 0.32
+        },
+        "eval_goal_after_answer": {
+          "criterion_ids": [
+            "postgresql.indexes"
+          ],
+          "reason": "Є прогалина.",
+          "expected_evidence": "Приклад."
+        }
+      },
+      "indexes_questions_in_topic": 2
+    },
+    "ungraded_open_example": {
+      "run_id": "ch4-m-C03-D-b50-s1",
+      "profile_id": "C03",
+      "confirmed": [
+        "git.branching"
+      ],
+      "open": [
+        "git.collaboration"
+      ],
+      "open_was_ungraded": [
+        "git.collaboration"
+      ],
+      "confirmed_kept_to_end": true,
+      "final_scores": {
+        "git.branching": 0.79,
+        "git.collaboration": 0.38
+      },
+      "turn": {
+        "sequence": 43,
+        "action_id": "git",
+        "difficulty": "BASIC",
+        "difficulty_reason": "CARRY:QUESTION_CAP",
+        "followup_reason": "OPEN_CRITERIA",
+        "target_criteria": [
+          "git.branching",
+          "git.collaboration",
+          "git.history"
+        ],
+        "question_text": "Розкажіть про Git (базовий рівень): «Гілки та злиття» та «Командна робота з репозиторієм», питання 43?",
+        "answer_text": "Щодо git.branching: застосовував на практиці, знаю основні підводні камені. Щодо git.collaboration: лише чув про це.",
+        "scores_quoting_this_answer": {
+          "git.branching": 0.79
+        },
+        "eval_goal_after_answer": {
+          "criterion_ids": [
+            "git.collaboration"
+          ],
+          "reason": "Є прогалина.",
+          "expected_evidence": "Приклад."
+        }
+      },
+      "next_turn": {
+        "sequence": 44,
+        "action_id": "git",
+        "difficulty": "INTERMEDIATE",
+        "difficulty_reason": "STRONG",
+        "followup_reason": "Є прогалина.",
+        "target_criteria": [
+          "git.collaboration"
+        ],
+        "question_text": "Розкажіть про Git (середній рівень): «Командна робота з репозиторієм», питання 44?",
+        "answer_text": "Щодо git.collaboration: лише чув про це. Щодо practice-backend.diagnosis: лише чув про це. Щодо practice-backend.rationale: лише чув про це.",
+        "scores_quoting_this_answer": {
+          "practice-backend.diagnosis": 0.25,
+          "practice-backend.rationale": 0.3,
+          "git.collaboration": 0.38
+        },
+        "eval_goal_after_answer": {
+          "criterion_ids": [
+            "git.collaboration"
+          ],
+          "reason": "Є прогалина.",
+          "expected_evidence": "Приклад."
+        }
+      }
+    }
+  }
+}

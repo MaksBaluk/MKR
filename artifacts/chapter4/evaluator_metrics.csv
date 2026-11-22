@@ -1,0 +1,10 @@
+section,metric,value,n,status,note
+JSON/contract validation,evaluator outputs rejected (MALFORMED/INVALID),0,18735,SIMULATED,"product validation (criterion membership, verbatim quotes) applied to stub outputs"
+JSON/contract validation,provider exceptions,0,18735,SIMULATED,
+FakeChat/stub,share of answers UNGRADED,0.0,18735,SIMULATED,stub Evaluator; not evidence of LLM quality
+FakeChat/stub,MAE vs adjudicated criterion annotation,,0,NO_GROUND_TRUTH,"template answers: measures stub noise vs annotators, not a real Evaluator"
+FakeChat/stub,UNKNOWN detection (annotator NO_EVIDENCE and system null),,0,NO_GROUND_TRUTH,
+FakeChat/stub,"unjustified score > 0 (annotator NO_EVIDENCE, system > 0)",,0,NO_GROUND_TRUTH,
+FakeChat/stub,repeat consistency,,,NOT_APPLICABLE,stub grades are deterministic per seed by construction
+local LLM,all E4 metrics,,,NOT_RUN,no local LLM available in this environment
+production LLM,all E4 metrics,,,NOT_RUN,no paid/real LLM calls allowed (EB-2)

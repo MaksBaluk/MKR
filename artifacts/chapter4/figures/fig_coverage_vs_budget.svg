@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" font-family="sans-serif" font-size="12">
+<rect width="640" height="400" fill="white"/>
+<text x="60" y="22" font-size="14">Покриття релевантних критеріїв залежно від бюджету (SIMULATED)</text>
+<line x1="60" y1="350" x2="450" y2="350" stroke="black"/>
+<line x1="60" y1="40" x2="60" y2="350" stroke="black"/>
+<text x="255.0" y="388" text-anchor="middle">бюджет питань</text>
+<text x="14" y="195.0" transform="rotate(-90 14 195.0)" text-anchor="middle">частка оцінених критеріїв</text>
+<text x="60.0" y="366" text-anchor="middle">10</text>
+<text x="157.5" y="366" text-anchor="middle">20</text>
+<text x="255.0" y="366" text-anchor="middle">30</text>
+<text x="450.0" y="366" text-anchor="middle">50</text>
+<text x="54" y="354.0" text-anchor="end">0</text>
+<line x1="60" y1="350.0" x2="450" y2="350.0" stroke="#e5e7eb"/>
+<text x="54" y="292.0" text-anchor="end">0.2</text>
+<line x1="60" y1="288.0" x2="450" y2="288.0" stroke="#e5e7eb"/>
+<text x="54" y="230.0" text-anchor="end">0.4</text>
+<line x1="60" y1="226.0" x2="450" y2="226.0" stroke="#e5e7eb"/>
+<text x="54" y="168.0" text-anchor="end">0.6</text>
+<line x1="60" y1="164.0" x2="450" y2="164.0" stroke="#e5e7eb"/>
+<text x="54" y="106.0" text-anchor="end">0.8</text>
+<line x1="60" y1="102.0" x2="450" y2="102.0" stroke="#e5e7eb"/>
+<text x="54" y="44.0" text-anchor="end">1</text>
+<line x1="60" y1="40.0" x2="450" y2="40.0" stroke="#e5e7eb"/>
+<polyline fill="none" stroke="#1f5fa8" stroke-width="2" points="60.0,277.5 157.5,207.4 255.0,207.4 450.0,207.4"/>
+<circle cx="60.0" cy="277.5" r="3" fill="#1f5fa8"/>
+<circle cx="157.5" cy="207.4" r="3" fill="#1f5fa8"/>
+<circle cx="255.0" cy="207.4" r="3" fill="#1f5fa8"/>
+<circle cx="450.0" cy="207.4" r="3" fill="#1f5fa8"/>
+<rect x="462" y="40" width="12" height="3" fill="#1f5fa8"/><text x="480" y="45">B: статичне</text>
+<polyline fill="none" stroke="#c2410c" stroke-width="2" points="60.0,316.3 157.5,283.4 255.0,266.8 450.0,253.2"/>
+<circle cx="60.0" cy="316.3" r="3" fill="#c2410c"/>
+<circle cx="157.5" cy="283.4" r="3" fill="#c2410c"/>
+<circle cx="255.0" cy="266.8" r="3" fill="#c2410c"/>
+<circle cx="450.0" cy="253.2" r="3" fill="#c2410c"/>
+<rect x="462" y="58" width="12" height="3" fill="#c2410c"/><text x="480" y="63">C: адаптивне без ринку</text>
+<polyline fill="none" stroke="#15803d" stroke-width="2" points="60.0,309.0 157.5,278.3 255.0,263.5 450.0,251.6"/>
+<circle cx="60.0" cy="309.0" r="3" fill="#15803d"/>
+<circle cx="157.5" cy="278.3" r="3" fill="#15803d"/>
+<circle cx="255.0" cy="263.5" r="3" fill="#15803d"/>
+<circle cx="450.0" cy="251.6" r="3" fill="#15803d"/>
+<rect x="462" y="76" width="12" height="3" fill="#15803d"/><text x="480" y="81">D: CompetenceMatch</text>
+<polyline fill="none" stroke="#7c3aed" stroke-width="2" points="60.0,350.0 157.5,350.0 255.0,350.0 450.0,350.0"/>
+<circle cx="60.0" cy="350.0" r="3" fill="#7c3aed"/>
+<circle cx="157.5" cy="350.0" r="3" fill="#7c3aed"/>
+<circle cx="255.0" cy="350.0" r="3" fill="#7c3aed"/>
+<circle cx="450.0" cy="350.0" r="3" fill="#7c3aed"/>
+<rect x="462" y="94" width="12" height="3" fill="#7c3aed"/><text x="480" y="99">A: початковий профіль</text>
+</svg>

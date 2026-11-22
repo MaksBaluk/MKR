@@ -1,5 +1,7 @@
 # Expert label templates
 
+**Protocol v2 (chapter 4, 2026-11):** the working annotation files are `../data/annotations/expert_criterion_annotations.csv`, `expert_vacancy_relevance.csv`, `expert_seniority.csv` (header-only; annotator ids `LLM_ANNOTATOR_1/2/3` = pilot, `HUMAN_EXPERT_<n>` = human, final rows `ADJUDICATED`), with inputs and the formal 0–3 scale, level definitions, fixed vacancy pool and adjudication procedure in `../data/annotation_inputs/`. `scripts/chapter4/chapter4_metrics.py` reads them. The two files below are the slots for the product loader `backend/experiments/expert_labels.py` (human experts only, `data_status=EXPERT`); they stay empty.
+
 `relevance_labels.csv` and `criterion_labels.csv` are header-only. They hold no labels; real expert labels must come from independent human annotators and are never invented or generated.
 
 ## relevance_labels.csv

@@ -1,0 +1,55 @@
+run_id,suite,candidate_model,mode_label,total_budget,seed,first_reason,difficulty_mix,reached_advanced,assessed_level
+ch4-m-C14-B-b10-s0,modes,insensitive,B_STATIC,10,0,FIXED:LEVEL:junior,{'BASIC': 10},False,JUNIOR
+ch4-m-C14-B-b10-s1,modes,insensitive,B_STATIC,10,1,FIXED:LEVEL:junior,{'BASIC': 10},False,JUNIOR
+ch4-m-C14-B-b10-s2,modes,insensitive,B_STATIC,10,2,FIXED:LEVEL:junior,{'BASIC': 10},False,JUNIOR
+ch4-m-C14-B-b20-s0,modes,insensitive,B_STATIC,20,0,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b20-s1,modes,insensitive,B_STATIC,20,1,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b20-s2,modes,insensitive,B_STATIC,20,2,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b30-s0,modes,insensitive,B_STATIC,30,0,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b30-s1,modes,insensitive,B_STATIC,30,1,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b30-s2,modes,insensitive,B_STATIC,30,2,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b50-s0,modes,insensitive,B_STATIC,50,0,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b50-s1,modes,insensitive,B_STATIC,50,1,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b50-s2,modes,insensitive,B_STATIC,50,2,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-D-b10-s0,modes,insensitive,D_FULL_COMPETENCEMATCH,10,0,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 7}",True,UNKNOWN
+ch4-m-C14-D-b10-s1,modes,insensitive,D_FULL_COMPETENCEMATCH,10,1,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 7}",True,UNKNOWN
+ch4-m-C14-D-b10-s2,modes,insensitive,D_FULL_COMPETENCEMATCH,10,2,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 7}",True,UNKNOWN
+ch4-m-C14-D-b20-s0,modes,insensitive,D_FULL_COMPETENCEMATCH,20,0,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 17}",True,SENIOR
+ch4-m-C14-D-b20-s1,modes,insensitive,D_FULL_COMPETENCEMATCH,20,1,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 17}",True,SENIOR
+ch4-m-C14-D-b20-s2,modes,insensitive,D_FULL_COMPETENCEMATCH,20,2,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 17}",True,SENIOR
+ch4-m-C14-D-b30-s0,modes,insensitive,D_FULL_COMPETENCEMATCH,30,0,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 20}",True,SENIOR
+ch4-m-C14-D-b30-s1,modes,insensitive,D_FULL_COMPETENCEMATCH,30,1,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 21}",True,SENIOR
+ch4-m-C14-D-b30-s2,modes,insensitive,D_FULL_COMPETENCEMATCH,30,2,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 19}",True,SENIOR
+ch4-m-C14-D-b50-s0,modes,insensitive,D_FULL_COMPETENCEMATCH,50,0,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 20}",True,SENIOR
+ch4-m-C14-D-b50-s1,modes,insensitive,D_FULL_COMPETENCEMATCH,50,1,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 21}",True,SENIOR
+ch4-m-C14-D-b50-s2,modes,insensitive,D_FULL_COMPETENCEMATCH,50,2,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 19}",True,SENIOR
+ch4-m-C14-Dfd-b10-s0,modes,insensitive,D_FIXED_DIFFICULTY,10,0,FIXED:LEVEL:junior,{'BASIC': 10},False,UNKNOWN
+ch4-m-C14-Dfd-b10-s1,modes,insensitive,D_FIXED_DIFFICULTY,10,1,FIXED:LEVEL:junior,{'BASIC': 10},False,UNKNOWN
+ch4-m-C14-Dfd-b10-s2,modes,insensitive,D_FIXED_DIFFICULTY,10,2,FIXED:LEVEL:junior,{'BASIC': 10},False,UNKNOWN
+ch4-m-C14-Dfd-b20-s0,modes,insensitive,D_FIXED_DIFFICULTY,20,0,FIXED:LEVEL:junior,{'BASIC': 20},False,SENIOR
+ch4-m-C14-Dfd-b20-s1,modes,insensitive,D_FIXED_DIFFICULTY,20,1,FIXED:LEVEL:junior,{'BASIC': 20},False,SENIOR
+ch4-m-C14-Dfd-b20-s2,modes,insensitive,D_FIXED_DIFFICULTY,20,2,FIXED:LEVEL:junior,{'BASIC': 20},False,SENIOR
+ch4-m-C14-Dfd-b30-s0,modes,insensitive,D_FIXED_DIFFICULTY,30,0,FIXED:LEVEL:junior,{'BASIC': 23},False,SENIOR
+ch4-m-C14-Dfd-b30-s1,modes,insensitive,D_FIXED_DIFFICULTY,30,1,FIXED:LEVEL:junior,{'BASIC': 24},False,SENIOR
+ch4-m-C14-Dfd-b30-s2,modes,insensitive,D_FIXED_DIFFICULTY,30,2,FIXED:LEVEL:junior,{'BASIC': 22},False,SENIOR
+ch4-m-C14-Dfd-b50-s0,modes,insensitive,D_FIXED_DIFFICULTY,50,0,FIXED:LEVEL:junior,{'BASIC': 23},False,SENIOR
+ch4-m-C14-Dfd-b50-s1,modes,insensitive,D_FIXED_DIFFICULTY,50,1,FIXED:LEVEL:junior,{'BASIC': 24},False,SENIOR
+ch4-m-C14-Dfd-b50-s2,modes,insensitive,D_FIXED_DIFFICULTY,50,2,FIXED:LEVEL:junior,{'BASIC': 22},False,SENIOR
+ch4-m-C14-B-b20-s0-dsens,ablation_sensitive,sensitive,B_STATIC,20,0,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b20-s1-dsens,ablation_sensitive,sensitive,B_STATIC,20,1,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b20-s2-dsens,ablation_sensitive,sensitive,B_STATIC,20,2,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b50-s0-dsens,ablation_sensitive,sensitive,B_STATIC,50,0,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b50-s1-dsens,ablation_sensitive,sensitive,B_STATIC,50,1,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-B-b50-s2-dsens,ablation_sensitive,sensitive,B_STATIC,50,2,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-D-b20-s0-dsens,ablation_sensitive,sensitive,D_FULL_COMPETENCEMATCH,20,0,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 17}",True,SENIOR
+ch4-m-C14-D-b20-s1-dsens,ablation_sensitive,sensitive,D_FULL_COMPETENCEMATCH,20,1,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 1, 'ADVANCED': 18}",True,MIDDLE
+ch4-m-C14-D-b20-s2-dsens,ablation_sensitive,sensitive,D_FULL_COMPETENCEMATCH,20,2,LEVEL:junior,"{'BASIC': 2, 'INTERMEDIATE': 2, 'ADVANCED': 16}",True,SENIOR
+ch4-m-C14-D-b50-s0-dsens,ablation_sensitive,sensitive,D_FULL_COMPETENCEMATCH,50,0,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 20}",True,SENIOR
+ch4-m-C14-D-b50-s1-dsens,ablation_sensitive,sensitive,D_FULL_COMPETENCEMATCH,50,1,LEVEL:junior,"{'BASIC': 1, 'INTERMEDIATE': 1, 'ADVANCED': 24}",True,SENIOR
+ch4-m-C14-D-b50-s2-dsens,ablation_sensitive,sensitive,D_FULL_COMPETENCEMATCH,50,2,LEVEL:junior,"{'BASIC': 2, 'INTERMEDIATE': 2, 'ADVANCED': 20}",True,SENIOR
+ch4-m-C14-Dfd-b20-s0-dsens,ablation_sensitive,sensitive,D_FIXED_DIFFICULTY,20,0,FIXED:LEVEL:junior,{'BASIC': 20},False,JUNIOR
+ch4-m-C14-Dfd-b20-s1-dsens,ablation_sensitive,sensitive,D_FIXED_DIFFICULTY,20,1,FIXED:LEVEL:junior,{'BASIC': 20},False,MIDDLE
+ch4-m-C14-Dfd-b20-s2-dsens,ablation_sensitive,sensitive,D_FIXED_DIFFICULTY,20,2,FIXED:LEVEL:junior,{'BASIC': 20},False,MIDDLE
+ch4-m-C14-Dfd-b50-s0-dsens,ablation_sensitive,sensitive,D_FIXED_DIFFICULTY,50,0,FIXED:LEVEL:junior,{'BASIC': 32},False,SENIOR
+ch4-m-C14-Dfd-b50-s1-dsens,ablation_sensitive,sensitive,D_FIXED_DIFFICULTY,50,1,FIXED:LEVEL:junior,{'BASIC': 32},False,SENIOR
+ch4-m-C14-Dfd-b50-s2-dsens,ablation_sensitive,sensitive,D_FIXED_DIFFICULTY,50,2,FIXED:LEVEL:junior,{'BASIC': 27},False,SENIOR

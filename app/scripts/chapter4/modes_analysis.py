@@ -205,7 +205,7 @@ def seniority_rows(runs) -> list[dict]:
 def criterion_rows(runs) -> list[dict]:
     out = []
     for r in runs:
-        if r["suite"] != "modes" or r["total_budget"] not in (20, 50, None):
+        if r["suite"] != "modes" or r["total_budget"] not in (50, None):
             continue
         prof = BY_ID[r["profile_id"]]
         graded = {a["criterion_id"]: a for a in r["assessments"]}
@@ -443,13 +443,13 @@ def build() -> dict:
     rank = ranking_rows(runs)
     write_csv(OUT / "ranking_results.csv", list(rank[0]), rank)
     _merge_csv(OUT / "seniority_results.csv", seniority_rows(runs), {"modes", "ablation_sensitive"})
-    # turns: seed 0 at budgets 10 and 50 (all modes), the sensitive-candidate seed-0 budget-50 runs and the stub check
-    sel = [r for r in runs if r["seed"] == 0 and (r["suite"] == "stub_check" or
-                                                  (r["suite"] == "modes" and r["total_budget"] in (20, 50)) or
-                                                  (r["suite"] == "ablation_sensitive" and r["total_budget"] == 50))]
+    # turns (size bound): seed 0 at budget 50 for every mode and the stub check; all turns are in raw/modes_runs.jsonl.gz
+    sel = [r for r in runs if r["seed"] == 0 and r["total_budget"] == 50 and r["suite"] in ("modes", "stub_check")]
     turns = [{"run_id": r["run_id"], "suite": r["suite"], "label": "SIMULATED", "profile_id": r["profile_id"],
               "mode_label": r["mode_label"], "total_budget": r["total_budget"], "seed": r["seed"],
-              "interview_id": r["interview_id"], **t} for r in sel for t in r["turns"]]
+              "interview_id": r["interview_id"],
+              **{k: v for k, v in t.items() if k not in ("controller_before", "controller_after")}}
+             for r in sel for t in r["turns"]]
     _merge_jsonl(OUT / "interview_turns.jsonl", turns, {"modes", "ablation_sensitive", "stub_check"})
     comp = []
     budgets = sorted({r["total_budget"] for r in runs if r["suite"] == "modes" and r["total_budget"]})
