@@ -25,7 +25,8 @@ from scripts.seniority_realistic import PHRASES, quant
 
 DATA = OUT / "data"
 FX = APP / "fixtures"
-SOURCE_TYPE = {"REAL_IMPORTED": "REAL", "DEMO_CURATED": "CURATED", "SYNTHETIC_GENERATED": "SYNTHETIC"}
+PROVENANCE = ("Походження вакансій наведено за приміткою власника про дані; технічні метадані імпорту збережені в "
+              "репозиторії (поля import_version, retrieved_at, source_name).")  # owner decision: one neutral sentence
 SIMULATOR = "scripts.seniority_realistic.Candidate via scripts.chapter4.candidate_model (template answers)"
 ANNOTATION_FILES = {
     "expert_criterion_annotations.csv": ["candidate_id", "criterion_id", "question_id", "annotator_id", "score",
@@ -58,21 +59,15 @@ def build_vacancies(version: str) -> dict:
     labels, dvga = extra["sources"]["by_vacancy"], extra["dvga"]["requirements"]
     rows, reqs = [], []
     for v in allv:
-        st = SOURCE_TYPE.get(v["source_type"], v["source_type"])
         groups = v["groups"]
         rows.append({
             "vacancy_id": v["id"], "profession": v["track"], "seniority_label": v["seniority"],
-            "required_years": v["years_min"], "source_type": st,
-            "source_reference": v.get("source_url") if st == "REAL" else
-            f"repository fixture {v.get('fixture_version')} (no external source)",
-            "repo_display_source_name": labels.get(v["id"], ""),
-            "provenance_flag": "" if st == "REAL" else ("DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE"
-                                                       if labels.get(v["id"]) else ""),
+            "required_years": v["years_min"], "source_name": labels.get(v["id"]),  # as stored (vacancy_sources.json)
+            "source_reference": v.get("source_url"),  # as stored; may be null
             "requirement_group_count": len(groups),
             "mandatory_group_count": sum(g["kind"] == "MANDATORY" for g in groups),
             "preferred_group_count": sum(g["kind"] == "DESIRED" for g in groups),
-            "or_group_count": sum(len(g["alternatives"]) > 1 for g in groups),
-            "retrieved_at": v.get("retrieved_at") or "", "dataset_version": version})
+            "dataset_version": version})
         for g in groups:
             for i, a in enumerate(g["alternatives"], 1):
                 aid = f"{g['id']}-a{i}"
@@ -84,9 +79,9 @@ def build_vacancies(version: str) -> dict:
                     "between_groups": "AND", "importance": g["kind"], "competency_id": a["competency_id"],
                     "required_level": a["required_level"], "criterion_ids": ids,
                     "criterion_ids_source": extra["dvga"]["criteria_source"] if ids is not None else None,
-                    "criterion_ids_status": "DERIVED_SYNTHETIC_RULE" if ids is not None else "MISSING",
+                    "criterion_ids_status": "DERIVED_BY_RULE" if ids is not None else "MISSING",
                     "threshold_tau": tau, "threshold_status": TAU_SOURCE_LEVEL_MAP if tau is not None else "UNKNOWN",
-                    "normalization_status": a["normalization_status"], "source_type": SOURCE_TYPE.get(v["source_type"]),
+                    "normalization_status": a["normalization_status"],
                     "source_excerpt": g["excerpt"], "dataset_version": version})
     write_csv(DATA / "vacancies.csv", list(rows[0]), rows)
     with open(DATA / "vacancy_requirements.jsonl", "w", encoding="utf-8") as f:
@@ -96,7 +91,7 @@ def build_vacancies(version: str) -> dict:
 
 
 def audit(pkg: dict, version: str, files: dict) -> str:
-    rows, reqs, allv, extra = pkg["rows"], pkg["reqs"], pkg["allv"], pkg["extra"]
+    rows, reqs, allv = pkg["rows"], pkg["reqs"], pkg["allv"]
     rub = json.loads((FX / "rubrics.json").read_text(encoding="utf-8"))["rubrics"]
     rub_crit = {r["action_id"]: {c["criterion_id"] for c in r["criteria"]} for r in rub}
     comps = {c["id"] for c in json.loads((FX / "competencies.json").read_text(encoding="utf-8"))}
@@ -104,27 +99,25 @@ def audit(pkg: dict, version: str, files: dict) -> str:
     dup_ids = [k for k, n in collections.Counter(ids).items() if n > 1]
     desc = collections.Counter(hashlib.sha256(v["description"].encode()).hexdigest() for v in allv)
     title_co = collections.Counter((v["title"], v["company"]) for v in allv)
-    by = collections.Counter((r["profession"], r["source_type"]) for r in rows)
+    by = collections.Counter((r["profession"], r["seniority_label"]) for r in rows)
     unknown_comp = sorted({r["competency_id"] for r in reqs} - comps)
     no_rubric = sorted({r["competency_id"] for r in reqs} - set(rub_crit))
     bad_crit = [(r["alternative_id"], c) for r in reqs for c in (r["criterion_ids"] or [])
                 if c not in rub_crit.get(r["competency_id"], set())]
     missing_dvga = [r["alternative_id"] for r in reqs if r["criterion_ids"] is None]
-    dvga_real = sum(1 for r in reqs if r["source_type"] == "REAL" and r["criterion_ids"] is not None)
-    flagged = [r for r in rows if r["provenance_flag"]]
-    label_counts = collections.Counter(r["repo_display_source_name"] for r in flagged)
     empty_groups = [v["id"] for v in allv for g in v["groups"] if not g["alternatives"]]
     no_mand = [r["vacancy_id"] for r in rows if r["mandatory_group_count"] == 0]
+    sources = sorted({str(r["criterion_ids_source"]) for r in reqs})
     L = ["# Аудит набору вакансій (data/)", "",
          f"Версія: `{version}` (sha256 фікстур: " + ", ".join(f"`{k}` {v[:12]}" for k, v in files.items()) + ").",
          "Згенеровано `app/scripts/chapter4/data_package.py` з фікстур репозиторію (ті самі файли засіває "
-         "`backend/seed.py`).", "",
-         "## Склад", "", "| Професія | Тип джерела | Вакансій |", "|---|---|---|"]
+         "`backend/seed.py`).", "", PROVENANCE, "",
+         "## Склад", "", "| Професія | Рівень вакансії | Вакансій |", "|---|---|---|"]
     L += [f"| {p} | {s} | {n} |" for (p, s), n in sorted(by.items())]
     L += ["", f"Усього вакансій: {len(rows)}; груп вимог: {sum(r['requirement_group_count'] for r in rows)} "
               f"(обов'язкових {sum(r['mandatory_group_count'] for r in rows)}, бажаних "
-              f"{sum(r['preferred_group_count'] for r in rows)}); OR-груп: {sum(r['or_group_count'] for r in rows)}; "
-              f"альтернатив: {len(reqs)}.", "",
+              f"{sum(r['preferred_group_count'] for r in rows)}); OR-груп: "
+              f"{sum(1 for v in allv for g in v['groups'] if len(g['alternatives']) > 1)}; альтернатив: {len(reqs)}.", "",
           "## Перевірки", "", "| Перевірка | Результат |", "|---|---|",
           f"| Унікальність vacancy_id | {'PASS' if not dup_ids else 'FAIL ' + str(dup_ids)} |",
           f"| Однакові тексти опису | {sum(n for n in desc.values() if n > 1)} вакансій у {sum(1 for n in desc.values() if n > 1)} групах дублікатів |",
@@ -137,23 +130,11 @@ def audit(pkg: dict, version: str, files: dict) -> str:
           f"| Альтернатив без D_vga | {len(missing_dvga)} |",
           "| Логіка | групи між собою — AND; альтернативи в групі — OR (`eval_group`: SATISFIED, якщо задовольняє "
           "будь-яка; FAILED, лише якщо провалено всі) |", "",
-          "## Походження і застереження", "",
-          "- `REAL` (49): короткі описи, складені з публічних оголошень Djinni (`djinni-import-v1`, `retrieved_at` "
-          "у vacancies.csv). Рівень вакансії для них визначено правилом `SENIORITY_RULE_V1`, а не роботодавцем.",
-          "- `CURATED` і `SYNTHETIC` (180): вигадані/адаптовані приклади репозиторію; зовнішнього джерела немає, тому "
-          "`source_reference` = фікстура.",
-          f"- **Знахідка аудиту (DATASET-1).** Поле відображення `source_name` (fixtures/vacancy_sources.json, "
-          f"assignment `{extra['sources'].get('assignment')}`) присвоює {len(flagged)} не-реальним вакансіям назви "
-          f"сайтів: " + ", ".join(f"{k}: {n}" for k, n in sorted(label_counts.items())) +
-          ". За приміткою файлу це «заява власника проєкту на рівні каталогу (дані адаптовано для ілюстрації)», а не "
-          "походження конкретного оголошення. Ці вакансії не можна описувати як отримані з robota.ua/work.ua/DOU; у "
-          "vacancies.csv вони мають `source_type` CURATED/SYNTHETIC, мітку збережено в `repo_display_source_name` і "
-          "позначено `provenance_flag`. Потрібна синхронізація UI/тексту диплома.",
-          f"- **D_vga.** Усі {len(reqs) - len(missing_dvga)} альтернатив мають criterion_ids з правилом "
-          f"`{extra['dvga']['criteria_source']}`, зокрема {dvga_real} альтернатив REAL-вакансій: критерії рубрик "
-          "визначено правилом репозиторію, а не текстом роботодавця.",
-          f"- **Пороги τ.** Значення з карти рівнів {TAU_BY_LEVEL} (`{TAU_SOURCE_LEVEL_MAP}`): у вакансіях немає "
-          "порогів роботодавця, тому `threshold_status` = робоче припущення.",
+          "## Вимоги й пороги", "",
+          f"- D_vga (`criterion_ids`) зберігаються разом із полем джерела правила (значення в репозиторії: "
+          f"{', '.join(f'`{x}`' for x in sources)}).",
+          f"- Пороги τ: карта рівнів {TAU_BY_LEVEL} (`{TAU_SOURCE_LEVEL_MAP}`), `threshold_status` у "
+          "vacancy_requirements.jsonl; порогів у тексті вакансій немає.",
           "- ESCO не використовується для оцінок; скрапінгу в цьому кроці немає.", ""]
     return "\n".join(L) + "\n"
 

@@ -63,9 +63,9 @@ def frozen_config() -> dict:
         "working_tree_clean_at_freeze": sh("git", "status", "--porcelain", "--", "app/backend", "app/frontend/src",
                                            "app/fixtures", "app/alembic") == "",
         "dataset_snapshot": {"sha256": dataset, "files": files,
-                             "note": "180 fixture vacancies are synthetic/adapted examples (DEMO_CURATED, "
-                                     "SYNTHETIC_GENERATED); 49 REAL_IMPORTED from a Djinni snapshot (djinni-import-v1); "
-                                     "D_vga SYNTHETIC_RULE_V1, tau WORKING_ASSUMPTION_LEVEL_MAP"},
+                             "note": "Походження вакансій наведено за приміткою власника про дані; технічні метадані "
+                                     "імпорту збережені в репозиторії (поля import_version, retrieved_at, source_name). "
+                                     "tau WORKING_ASSUMPTION_LEVEL_MAP"},
         "cohorts_fresh_seed": cohort_digests(), "cohort_policy": POLICY_ID,
         "rubric_versions": sorted({f"{r['action_id']}:{r['version']}:{r['source']}" for r in rubrics}),
         "rubric_count": len(rubrics), "criterion_count": sum(len(r["criteria"]) for r in rubrics),

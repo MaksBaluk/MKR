@@ -396,7 +396,7 @@ def fallback_summary(runs) -> list[dict]:
 def evaluation_metrics(dist: list[dict]) -> list[dict]:
     nogt = "No independent expert labels exist (EXPERIMENT_BLOCKER EB-1); see expert_annotation_templates/."
     rows = [{"metric": m, "component": comp, "status": "NO_GROUND_TRUTH", "value": "", "n": "", "ci95": "",
-             "scope": "real candidates / real vacancies", "note": nogt}
+             "scope": "independent labels for candidates and candidate x vacancy pairs", "note": nogt}
             for m, comp in (("MAE (criterion score vs expert)", "Evaluator"), ("Precision@5", "Ranking"),
                             ("NDCG@10", "Ranking"), ("Accuracy vs expert level", "SeniorityEstimator"),
                             ("Macro-F1 vs expert level", "SeniorityEstimator"),
@@ -494,6 +494,10 @@ def build() -> dict:
     # manifest: append the run ids of this suite (Phase-1 entries and frozen_config untouched)
     man_path = OUT / "experiment_manifest.json"
     man = json.loads(man_path.read_text(encoding="utf-8"))
+    ds = man.get("frozen_config", {}).get("dataset_snapshot", {})
+    if "note" in ds:  # owner decision: one neutral provenance sentence (values/hashes unchanged)
+        ds["note"] = ("Походження вакансій наведено за приміткою власника про дані; технічні метадані імпорту збережені "
+                      "в репозиторії (поля import_version, retrieved_at, source_name). tau WORKING_ASSUMPTION_LEVEL_MAP")
     man["runs"] = [x for x in man.get("runs", []) if x.get("suite") not in {"modes", "ablation_sensitive", "stub_check"}]
     for suite in ("modes", "ablation_sensitive", "stub_check"):
         ids = [r["run_id"] for r in runs if r["suite"] == suite]

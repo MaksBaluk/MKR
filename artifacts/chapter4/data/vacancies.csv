@@ -1,230 +1,230 @@
-vacancy_id,profession,seniority_label,required_years,source_type,source_reference,repo_display_source_name,provenance_flag,requirement_group_count,mandatory_group_count,preferred_group_count,or_group_count,retrieved_at,dataset_version
-python-01,python,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-02,python,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-03,python,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-04,python,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-05,python,LEAD,6,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-06,python,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-07,python,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-08,python,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-09,python,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-10,python,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-11,python,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-12,python,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-13,python,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-14,python,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-15,python,LEAD,6,CURATED,repository fixture fixtures-v1 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-16,python,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-17,python,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-18,python,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-19,python,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-20,python,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-21,python,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-22,python,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-23,python,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-24,python,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-25,python,LEAD,6,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-26,python,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-27,python,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-28,python,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-29,python,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-30,python,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-01,marketing,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-02,marketing,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-03,marketing,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-04,marketing,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-05,marketing,LEAD,6,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-06,marketing,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-07,marketing,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-08,marketing,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-09,marketing,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-10,marketing,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-11,marketing,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-12,marketing,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-13,marketing,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-14,marketing,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-15,marketing,LEAD,6,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-16,marketing,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-17,marketing,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-18,marketing,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-19,marketing,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-20,marketing,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-21,marketing,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-22,marketing,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-23,marketing,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-24,marketing,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-25,marketing,LEAD,6,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-26,marketing,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-27,marketing,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-28,marketing,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-29,marketing,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-marketing-30,marketing,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-01,design,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-02,design,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-03,design,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-04,design,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-05,design,LEAD,6,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-06,design,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-07,design,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-08,design,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-09,design,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-10,design,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-11,design,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-12,design,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-13,design,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-14,design,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-15,design,LEAD,6,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-16,design,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-17,design,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-18,design,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-19,design,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-20,design,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-21,design,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-22,design,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-23,design,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-24,design,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-25,design,LEAD,6,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-26,design,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-27,design,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-28,design,JUNIOR,0,CURATED,repository fixture fixtures-v1 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-29,design,MIDDLE,2,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-design-30,design,SENIOR,4,CURATED,repository fixture fixtures-v1 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,8,3,1,,ds-66dcff9404cc
-python-31,python,JUNIOR,0,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,6,4,3,,ds-66dcff9404cc
-python-32,python,MIDDLE,3,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,2,,ds-66dcff9404cc
-python-33,python,SENIOR,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,7,3,3,,ds-66dcff9404cc
-python-34,python,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-python-35,python,LEAD,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,7,3,3,,ds-66dcff9404cc
-python-36,python,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-python-37,python,JUNIOR,1,SYNTHETIC,repository fixture fixtures-v2 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-python-38,python,SENIOR,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,2,,ds-66dcff9404cc
-python-39,python,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,6,2,1,,ds-66dcff9404cc
-python-40,python,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,5,4,2,,ds-66dcff9404cc
-python-41,python,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,7,3,2,,ds-66dcff9404cc
-python-42,python,SENIOR,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,7,3,3,,ds-66dcff9404cc
-python-43,python,JUNIOR,1,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-python-44,python,SENIOR,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-python-45,python,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,6,2,1,,ds-66dcff9404cc
-python-46,python,SENIOR,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,1,,ds-66dcff9404cc
-python-47,python,JUNIOR,0,SYNTHETIC,repository fixture fixtures-v2 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,5,4,2,,ds-66dcff9404cc
-python-48,python,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,11,7,4,3,,ds-66dcff9404cc
-python-49,python,LEAD,6,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-python-50,python,SENIOR,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,7,3,2,,ds-66dcff9404cc
-python-51,python,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,6,2,1,,ds-66dcff9404cc
-python-52,python,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,5,4,2,,ds-66dcff9404cc
-python-53,python,JUNIOR,1,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-python-54,python,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,2,,ds-66dcff9404cc
-python-55,python,MIDDLE,3,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,1,,ds-66dcff9404cc
-python-56,python,LEAD,6,SYNTHETIC,repository fixture fixtures-v2 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-python-57,python,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,6,2,1,,ds-66dcff9404cc
-python-58,python,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),DOU,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,7,3,3,,ds-66dcff9404cc
-python-59,python,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,1,,ds-66dcff9404cc
-python-60,python,LEAD,6,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-marketing-31,marketing,JUNIOR,0,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,4,4,1,,ds-66dcff9404cc
-marketing-32,marketing,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,1,,ds-66dcff9404cc
-marketing-33,marketing,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,6,4,2,,ds-66dcff9404cc
-marketing-34,marketing,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,5,4,2,,ds-66dcff9404cc
-marketing-35,marketing,LEAD,7,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,5,4,2,,ds-66dcff9404cc
-marketing-36,marketing,JUNIOR,0,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,6,4,3,,ds-66dcff9404cc
-marketing-37,marketing,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,6,4,2,,ds-66dcff9404cc
-marketing-38,marketing,LEAD,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,5,4,2,,ds-66dcff9404cc
-marketing-39,marketing,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,7,3,3,,ds-66dcff9404cc
-marketing-40,marketing,SENIOR,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,7,2,2,,ds-66dcff9404cc
-marketing-41,marketing,MIDDLE,3,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,2,,ds-66dcff9404cc
-marketing-42,marketing,LEAD,7,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,3,,ds-66dcff9404cc
-marketing-43,marketing,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,6,2,1,,ds-66dcff9404cc
-marketing-44,marketing,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-marketing-45,marketing,JUNIOR,0,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,6,2,2,,ds-66dcff9404cc
-marketing-46,marketing,JUNIOR,0,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-marketing-47,marketing,MIDDLE,3,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,1,,ds-66dcff9404cc
-marketing-48,marketing,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-marketing-49,marketing,JUNIOR,0,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,4,4,1,,ds-66dcff9404cc
-marketing-50,marketing,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,3,,ds-66dcff9404cc
-marketing-51,marketing,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-marketing-52,marketing,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,6,4,2,,ds-66dcff9404cc
-marketing-53,marketing,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,7,2,2,,ds-66dcff9404cc
-marketing-54,marketing,SENIOR,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,6,4,3,,ds-66dcff9404cc
-marketing-55,marketing,JUNIOR,0,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-marketing-56,marketing,LEAD,6,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,6,4,2,,ds-66dcff9404cc
-marketing-57,marketing,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,1,,ds-66dcff9404cc
-marketing-58,marketing,SENIOR,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,2,,ds-66dcff9404cc
-marketing-59,marketing,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,6,2,2,,ds-66dcff9404cc
-marketing-60,marketing,JUNIOR,1,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,2,,ds-66dcff9404cc
-design-31,design,JUNIOR,0,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-design-32,design,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,2,,ds-66dcff9404cc
-design-33,design,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-design-34,design,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,7,3,3,,ds-66dcff9404cc
-design-35,design,LEAD,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,6,2,2,,ds-66dcff9404cc
-design-36,design,MIDDLE,3,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,1,,ds-66dcff9404cc
-design-37,design,JUNIOR,0,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,2,,ds-66dcff9404cc
-design-38,design,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-design-39,design,LEAD,5,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,7,2,2,,ds-66dcff9404cc
-design-40,design,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-design-41,design,JUNIOR,0,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-design-42,design,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,2,,ds-66dcff9404cc
-design-43,design,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,7,2,2,,ds-66dcff9404cc
-design-44,design,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,2,,ds-66dcff9404cc
-design-45,design,MIDDLE,3,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,6,2,1,,ds-66dcff9404cc
-design-46,design,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,1,,ds-66dcff9404cc
-design-47,design,JUNIOR,1,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,4,4,1,,ds-66dcff9404cc
-design-48,design,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,1,,ds-66dcff9404cc
-design-49,design,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,1,,ds-66dcff9404cc
-design-50,design,LEAD,7,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,6,2,1,,ds-66dcff9404cc
-design-51,design,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,6,4,2,,ds-66dcff9404cc
-design-52,design,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,1,,ds-66dcff9404cc
-design-53,design,LEAD,6,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-design-54,design,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,5,4,2,,ds-66dcff9404cc
-design-55,design,JUNIOR,1,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-design-56,design,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,8,5,3,1,,ds-66dcff9404cc
-design-57,design,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),work.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,10,6,4,2,,ds-66dcff9404cc
-design-58,design,SENIOR,4,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,7,2,2,,ds-66dcff9404cc
-design-59,design,MIDDLE,2,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,5,4,2,,ds-66dcff9404cc
-design-60,design,JUNIOR,0,SYNTHETIC,repository fixture fixtures-v2 (no external source),robota.ua,DISPLAY_LABEL_NAMES_A_SITE_ON_NON_REAL_FIXTURE,9,6,3,2,,ds-66dcff9404cc
-djinni-python-751196,python,JUNIOR,1,REAL,https://djinni.co/jobs/751196-trainee-junior-python-developer/,,,5,5,0,0,2026-11-18,ds-66dcff9404cc
-djinni-python-827023,python,SENIOR,7,REAL,https://djinni.co/jobs/827023-senior-python-developer/,,,4,4,0,0,2026-11-18,ds-66dcff9404cc
-djinni-python-858605,python,SENIOR,6,REAL,https://djinni.co/jobs/858605-senior-python-engineer/,,,7,5,2,2,2026-11-18,ds-66dcff9404cc
-djinni-python-764691,python,JUNIOR,2,REAL,https://djinni.co/jobs/764691-junior-python-software-engineer/,,,11,10,1,1,2026-11-18,ds-66dcff9404cc
-djinni-python-772474,python,JUNIOR,1,REAL,https://djinni.co/jobs/772474-technical-support-engineer-weekend-shifts/,,,8,8,0,3,2026-11-18,ds-66dcff9404cc
-djinni-python-857924,python,SENIOR,7,REAL,https://djinni.co/jobs/857924-senior-python-data-systems-engineer/,,,3,3,0,0,2026-11-18,ds-66dcff9404cc
-djinni-python-857846,python,SENIOR,5,REAL,https://djinni.co/jobs/857846-senior-python-developer-with-aws/,,,6,4,2,1,2026-11-18,ds-66dcff9404cc
-djinni-python-816687,python,MIDDLE,5,REAL,https://djinni.co/jobs/816687-middle-python-developer/,,,5,5,0,2,2026-11-18,ds-66dcff9404cc
-djinni-python-788396,python,SENIOR,10,REAL,https://djinni.co/jobs/788396-senior-python-backend-engineer/,,,4,4,0,0,2026-11-18,ds-66dcff9404cc
-djinni-python-857755,python,MIDDLE,2,REAL,https://djinni.co/jobs/857755-python-developer-freelance/,,,3,3,0,1,2026-11-18,ds-66dcff9404cc
-djinni-python-857578,python,SENIOR,5,REAL,https://djinni.co/jobs/857578-senior-software-engineer-python/,,,9,6,3,0,2026-11-18,ds-66dcff9404cc
-djinni-python-857523,python,SENIOR,5,REAL,https://djinni.co/jobs/857523-senior-python-software-engineer/,,,4,4,0,2,2026-11-18,ds-66dcff9404cc
-djinni-python-853644,python,JUNIOR,1,REAL,https://djinni.co/jobs/853644-bmc-discovery-knowledge-developer-trainee-irc/,,,3,3,0,0,2026-11-18,ds-66dcff9404cc
-djinni-python-851764,python,MIDDLE,3,REAL,https://djinni.co/jobs/851764-middle-python-typescript-react-next-js-engine/,,,4,3,1,3,2026-11-18,ds-66dcff9404cc
-djinni-python-851008,python,LEAD,5,REAL,https://djinni.co/jobs/851008-team-lead-python/,,,5,4,1,2,2026-11-18,ds-66dcff9404cc
-djinni-python-856905,python,SENIOR,8,REAL,https://djinni.co/jobs/856905-senior-python-developer-krakow/,,,12,11,1,2,2026-11-18,ds-66dcff9404cc
-djinni-python-723379,python,JUNIOR,1,REAL,https://djinni.co/jobs/723379-trainee-junior-python-developer/,,,8,8,0,0,2026-11-18,ds-66dcff9404cc
-djinni-python-856553,python,SENIOR,8,REAL,https://djinni.co/jobs/856553-senior-python-data-systems-engineer/,,,3,3,0,1,2026-11-18,ds-66dcff9404cc
-djinni-python-659831,python,SENIOR,5,REAL,https://djinni.co/jobs/659831-full-stack-engineer-python-and-data-systems/,,,3,3,0,0,2026-11-18,ds-66dcff9404cc
-djinni-python-856141,python,MIDDLE,3,REAL,https://djinni.co/jobs/856141-backend-developer-python-aws-edi-x12/,,,3,3,0,0,2026-11-18,ds-66dcff9404cc
-djinni-python-856101,python,MIDDLE,2,REAL,https://djinni.co/jobs/856101-middle-python-backend-dev-ai-native-claude/,,,4,3,1,0,2026-11-18,ds-66dcff9404cc
-djinni-python-856093,python,LEAD,5,REAL,https://djinni.co/jobs/856093-lead-backend-integrations-engineer-python-fas/,,,4,4,0,0,2026-11-18,ds-66dcff9404cc
-djinni-python-856036,python,JUNIOR,1,REAL,https://djinni.co/jobs/856036-ai-native-full-stack-python-developer-django-/,,,13,6,7,1,2026-11-18,ds-66dcff9404cc
-djinni-python-856030,python,JUNIOR,1,REAL,https://djinni.co/jobs/856030-ai-developer-python-django-next-js/,,,4,3,1,0,2026-11-18,ds-66dcff9404cc
-djinni-python-833910,python,SENIOR,5,REAL,https://djinni.co/jobs/833910-senior-python-developer/,,,6,5,1,0,2026-11-18,ds-66dcff9404cc
-djinni-python-855640,python,MIDDLE,2,REAL,https://djinni.co/jobs/855640-python-developer/,,,9,9,0,4,2026-11-18,ds-66dcff9404cc
-djinni-python-855422,python,SENIOR,7,REAL,https://djinni.co/jobs/855422-senior-python-engineer-armenia-based-only/,,,6,2,4,0,2026-11-18,ds-66dcff9404cc
-djinni-python-855410,python,MIDDLE,3,REAL,https://djinni.co/jobs/855410-api-developer/,,,11,11,0,0,2026-11-18,ds-66dcff9404cc
-djinni-python-854906,python,SENIOR,7,REAL,https://djinni.co/jobs/854906-senior-python-developer-react/,,,6,5,1,1,2026-11-18,ds-66dcff9404cc
-djinni-python-854880,python,SENIOR,5,REAL,https://djinni.co/jobs/854880-senior-python-developer/,,,6,5,1,0,2026-11-18,ds-66dcff9404cc
-djinni-marketing-820465,marketing,JUNIOR,2,REAL,https://djinni.co/jobs/820465-retention-manager/,,,4,4,0,0,2026-11-18,ds-66dcff9404cc
-djinni-marketing-858610,marketing,MIDDLE,2,REAL,https://djinni.co/jobs/858610-media-buyer-google-retargeting/,,,8,7,1,0,2026-11-18,ds-66dcff9404cc
-djinni-marketing-817921,marketing,SENIOR,3,REAL,https://djinni.co/jobs/817921-senior-retention-marketing-specialist/,,,3,3,0,0,2026-11-18,ds-66dcff9404cc
-djinni-marketing-759779,marketing,MIDDLE,2,REAL,https://djinni.co/jobs/759779-marketing-manager-middle/,,,4,4,0,0,2026-11-18,ds-66dcff9404cc
-djinni-marketing-858368,marketing,LEAD,3,REAL,https://djinni.co/jobs/858368-team-lead-retention/,,,6,6,0,1,2026-11-18,ds-66dcff9404cc
-djinni-marketing-858364,marketing,MIDDLE,3,REAL,https://djinni.co/jobs/858364-retention-marketing-specialist/,,,3,3,0,0,2026-11-18,ds-66dcff9404cc
-djinni-marketing-838993,marketing,LEAD,5,REAL,https://djinni.co/jobs/838993-head-of-marketing/,,,6,4,2,1,2026-11-18,ds-66dcff9404cc
-djinni-marketing-858181,marketing,MIDDLE,3,REAL,https://djinni.co/jobs/858181-retention-and-bonus-manager/,,,5,4,1,0,2026-11-18,ds-66dcff9404cc
-djinni-marketing-858088,marketing,MIDDLE,2,REAL,https://djinni.co/jobs/858088-marketing-manager/,,,7,6,1,0,2026-11-18,ds-66dcff9404cc
-djinni-marketing-857982,marketing,LEAD,2,REAL,https://djinni.co/jobs/857982-retention-team-lead/,,,8,6,2,1,2026-11-18,ds-66dcff9404cc
-djinni-marketing-824881,marketing,JUNIOR,1,REAL,https://djinni.co/jobs/824881-google-zzz-demand-gen-specialist/,,,6,4,2,1,2026-11-18,ds-66dcff9404cc
-djinni-marketing-458789,marketing,MIDDLE,2,REAL,https://djinni.co/jobs/458789-paid-social-media-specialist/,,,3,3,0,0,2026-11-18,ds-66dcff9404cc
-djinni-marketing-857590,marketing,MIDDLE,3,REAL,https://djinni.co/jobs/857590-newsletters-and-email-marketing-manager/,,,6,6,0,2,2026-11-18,ds-66dcff9404cc
-djinni-marketing-857428,marketing,LEAD,5,REAL,https://djinni.co/jobs/857428-head-of-marketing/,,,6,6,0,0,2026-11-18,ds-66dcff9404cc
-djinni-design-838527,design,JUNIOR,1,REAL,https://djinni.co/jobs/838527-ui-ux-designer/,,,4,2,2,1,2026-11-18,ds-66dcff9404cc
-djinni-design-524735,design,JUNIOR,1,REAL,https://djinni.co/jobs/524735-junior-ui-ux-designer/,,,8,7,1,1,2026-11-18,ds-66dcff9404cc
-djinni-design-857025,design,SENIOR,5,REAL,https://djinni.co/jobs/857025-senior-product-designer/,,,4,4,0,0,2026-11-18,ds-66dcff9404cc
-djinni-design-853503,design,MIDDLE,2,REAL,https://djinni.co/jobs/853503-marketing-motion-designer/,,,3,2,1,1,2026-11-18,ds-66dcff9404cc
-djinni-design-858775,design,SENIOR,5,REAL,https://djinni.co/jobs/858775-senior-frontend-developer-vue-3-nuxt-3-for-wo/,,,3,3,0,0,2026-11-18,ds-66dcff9404cc
+vacancy_id,profession,seniority_label,required_years,source_name,source_reference,requirement_group_count,mandatory_group_count,preferred_group_count,dataset_version
+python-01,python,JUNIOR,0,DOU,,11,8,3,ds-66dcff9404cc
+python-02,python,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+python-03,python,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+python-04,python,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+python-05,python,LEAD,6,work.ua,,11,8,3,ds-66dcff9404cc
+python-06,python,SENIOR,4,work.ua,,11,8,3,ds-66dcff9404cc
+python-07,python,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+python-08,python,JUNIOR,0,robota.ua,,11,8,3,ds-66dcff9404cc
+python-09,python,MIDDLE,2,DOU,,11,8,3,ds-66dcff9404cc
+python-10,python,SENIOR,4,work.ua,,11,8,3,ds-66dcff9404cc
+python-11,python,JUNIOR,0,DOU,,11,8,3,ds-66dcff9404cc
+python-12,python,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+python-13,python,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+python-14,python,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+python-15,python,LEAD,6,DOU,,11,8,3,ds-66dcff9404cc
+python-16,python,SENIOR,4,DOU,,11,8,3,ds-66dcff9404cc
+python-17,python,MIDDLE,2,DOU,,11,8,3,ds-66dcff9404cc
+python-18,python,JUNIOR,0,work.ua,,11,8,3,ds-66dcff9404cc
+python-19,python,MIDDLE,2,DOU,,11,8,3,ds-66dcff9404cc
+python-20,python,SENIOR,4,DOU,,11,8,3,ds-66dcff9404cc
+python-21,python,JUNIOR,0,robota.ua,,11,8,3,ds-66dcff9404cc
+python-22,python,MIDDLE,2,DOU,,11,8,3,ds-66dcff9404cc
+python-23,python,SENIOR,4,work.ua,,11,8,3,ds-66dcff9404cc
+python-24,python,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+python-25,python,LEAD,6,robota.ua,,11,8,3,ds-66dcff9404cc
+python-26,python,SENIOR,4,work.ua,,11,8,3,ds-66dcff9404cc
+python-27,python,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+python-28,python,JUNIOR,0,DOU,,11,8,3,ds-66dcff9404cc
+python-29,python,MIDDLE,2,DOU,,11,8,3,ds-66dcff9404cc
+python-30,python,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-01,marketing,JUNIOR,0,work.ua,,11,8,3,ds-66dcff9404cc
+marketing-02,marketing,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-03,marketing,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-04,marketing,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+marketing-05,marketing,LEAD,6,work.ua,,11,8,3,ds-66dcff9404cc
+marketing-06,marketing,SENIOR,4,work.ua,,11,8,3,ds-66dcff9404cc
+marketing-07,marketing,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-08,marketing,JUNIOR,0,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-09,marketing,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-10,marketing,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-11,marketing,JUNIOR,0,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-12,marketing,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+marketing-13,marketing,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-14,marketing,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+marketing-15,marketing,LEAD,6,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-16,marketing,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-17,marketing,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+marketing-18,marketing,JUNIOR,0,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-19,marketing,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-20,marketing,SENIOR,4,work.ua,,11,8,3,ds-66dcff9404cc
+marketing-21,marketing,JUNIOR,0,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-22,marketing,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+marketing-23,marketing,SENIOR,4,work.ua,,11,8,3,ds-66dcff9404cc
+marketing-24,marketing,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-25,marketing,LEAD,6,work.ua,,11,8,3,ds-66dcff9404cc
+marketing-26,marketing,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-27,marketing,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-28,marketing,JUNIOR,0,work.ua,,11,8,3,ds-66dcff9404cc
+marketing-29,marketing,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+marketing-30,marketing,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+design-01,design,JUNIOR,0,work.ua,,11,8,3,ds-66dcff9404cc
+design-02,design,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+design-03,design,SENIOR,4,work.ua,,11,8,3,ds-66dcff9404cc
+design-04,design,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+design-05,design,LEAD,6,robota.ua,,11,8,3,ds-66dcff9404cc
+design-06,design,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+design-07,design,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+design-08,design,JUNIOR,0,work.ua,,11,8,3,ds-66dcff9404cc
+design-09,design,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+design-10,design,SENIOR,4,work.ua,,11,8,3,ds-66dcff9404cc
+design-11,design,JUNIOR,0,work.ua,,11,8,3,ds-66dcff9404cc
+design-12,design,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+design-13,design,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+design-14,design,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+design-15,design,LEAD,6,robota.ua,,11,8,3,ds-66dcff9404cc
+design-16,design,SENIOR,4,work.ua,,11,8,3,ds-66dcff9404cc
+design-17,design,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+design-18,design,JUNIOR,0,work.ua,,11,8,3,ds-66dcff9404cc
+design-19,design,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+design-20,design,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+design-21,design,JUNIOR,0,robota.ua,,11,8,3,ds-66dcff9404cc
+design-22,design,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+design-23,design,SENIOR,4,work.ua,,11,8,3,ds-66dcff9404cc
+design-24,design,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+design-25,design,LEAD,6,work.ua,,11,8,3,ds-66dcff9404cc
+design-26,design,SENIOR,4,robota.ua,,11,8,3,ds-66dcff9404cc
+design-27,design,MIDDLE,2,robota.ua,,11,8,3,ds-66dcff9404cc
+design-28,design,JUNIOR,0,robota.ua,,11,8,3,ds-66dcff9404cc
+design-29,design,MIDDLE,2,work.ua,,11,8,3,ds-66dcff9404cc
+design-30,design,SENIOR,4,work.ua,,11,8,3,ds-66dcff9404cc
+python-31,python,JUNIOR,0,work.ua,,10,6,4,ds-66dcff9404cc
+python-32,python,MIDDLE,3,robota.ua,,8,5,3,ds-66dcff9404cc
+python-33,python,SENIOR,5,robota.ua,,10,7,3,ds-66dcff9404cc
+python-34,python,MIDDLE,2,robota.ua,,8,5,3,ds-66dcff9404cc
+python-35,python,LEAD,5,robota.ua,,10,7,3,ds-66dcff9404cc
+python-36,python,MIDDLE,2,robota.ua,,8,5,3,ds-66dcff9404cc
+python-37,python,JUNIOR,1,DOU,,8,5,3,ds-66dcff9404cc
+python-38,python,SENIOR,5,robota.ua,,9,6,3,ds-66dcff9404cc
+python-39,python,MIDDLE,2,DOU,,8,6,2,ds-66dcff9404cc
+python-40,python,SENIOR,4,DOU,,9,5,4,ds-66dcff9404cc
+python-41,python,MIDDLE,2,robota.ua,,10,7,3,ds-66dcff9404cc
+python-42,python,SENIOR,5,DOU,,10,7,3,ds-66dcff9404cc
+python-43,python,JUNIOR,1,work.ua,,8,5,3,ds-66dcff9404cc
+python-44,python,SENIOR,5,robota.ua,,8,5,3,ds-66dcff9404cc
+python-45,python,MIDDLE,2,work.ua,,8,6,2,ds-66dcff9404cc
+python-46,python,SENIOR,5,work.ua,,9,6,3,ds-66dcff9404cc
+python-47,python,JUNIOR,0,DOU,,9,5,4,ds-66dcff9404cc
+python-48,python,MIDDLE,2,work.ua,,11,7,4,ds-66dcff9404cc
+python-49,python,LEAD,6,robota.ua,,8,5,3,ds-66dcff9404cc
+python-50,python,SENIOR,5,DOU,,10,7,3,ds-66dcff9404cc
+python-51,python,MIDDLE,2,DOU,,8,6,2,ds-66dcff9404cc
+python-52,python,MIDDLE,2,work.ua,,9,5,4,ds-66dcff9404cc
+python-53,python,JUNIOR,1,robota.ua,,8,5,3,ds-66dcff9404cc
+python-54,python,SENIOR,4,DOU,,9,6,3,ds-66dcff9404cc
+python-55,python,MIDDLE,3,work.ua,,9,6,3,ds-66dcff9404cc
+python-56,python,LEAD,6,DOU,,8,5,3,ds-66dcff9404cc
+python-57,python,MIDDLE,2,work.ua,,8,6,2,ds-66dcff9404cc
+python-58,python,SENIOR,4,DOU,,10,7,3,ds-66dcff9404cc
+python-59,python,MIDDLE,2,robota.ua,,9,6,3,ds-66dcff9404cc
+python-60,python,LEAD,6,robota.ua,,8,5,3,ds-66dcff9404cc
+marketing-31,marketing,JUNIOR,0,work.ua,,8,4,4,ds-66dcff9404cc
+marketing-32,marketing,MIDDLE,2,robota.ua,,9,6,3,ds-66dcff9404cc
+marketing-33,marketing,SENIOR,4,work.ua,,10,6,4,ds-66dcff9404cc
+marketing-34,marketing,MIDDLE,2,work.ua,,9,5,4,ds-66dcff9404cc
+marketing-35,marketing,LEAD,7,work.ua,,9,5,4,ds-66dcff9404cc
+marketing-36,marketing,JUNIOR,0,work.ua,,10,6,4,ds-66dcff9404cc
+marketing-37,marketing,MIDDLE,2,work.ua,,10,6,4,ds-66dcff9404cc
+marketing-38,marketing,LEAD,5,work.ua,,9,5,4,ds-66dcff9404cc
+marketing-39,marketing,MIDDLE,2,robota.ua,,10,7,3,ds-66dcff9404cc
+marketing-40,marketing,SENIOR,5,work.ua,,9,7,2,ds-66dcff9404cc
+marketing-41,marketing,MIDDLE,3,robota.ua,,9,6,3,ds-66dcff9404cc
+marketing-42,marketing,LEAD,7,robota.ua,,9,6,3,ds-66dcff9404cc
+marketing-43,marketing,MIDDLE,2,robota.ua,,8,6,2,ds-66dcff9404cc
+marketing-44,marketing,MIDDLE,2,robota.ua,,8,5,3,ds-66dcff9404cc
+marketing-45,marketing,JUNIOR,0,robota.ua,,8,6,2,ds-66dcff9404cc
+marketing-46,marketing,JUNIOR,0,robota.ua,,8,5,3,ds-66dcff9404cc
+marketing-47,marketing,MIDDLE,3,work.ua,,9,6,3,ds-66dcff9404cc
+marketing-48,marketing,SENIOR,4,work.ua,,8,5,3,ds-66dcff9404cc
+marketing-49,marketing,JUNIOR,0,robota.ua,,8,4,4,ds-66dcff9404cc
+marketing-50,marketing,SENIOR,4,work.ua,,9,6,3,ds-66dcff9404cc
+marketing-51,marketing,MIDDLE,2,robota.ua,,8,5,3,ds-66dcff9404cc
+marketing-52,marketing,SENIOR,4,robota.ua,,10,6,4,ds-66dcff9404cc
+marketing-53,marketing,MIDDLE,2,robota.ua,,9,7,2,ds-66dcff9404cc
+marketing-54,marketing,SENIOR,5,robota.ua,,10,6,4,ds-66dcff9404cc
+marketing-55,marketing,JUNIOR,0,robota.ua,,8,5,3,ds-66dcff9404cc
+marketing-56,marketing,LEAD,6,work.ua,,10,6,4,ds-66dcff9404cc
+marketing-57,marketing,MIDDLE,2,robota.ua,,9,6,3,ds-66dcff9404cc
+marketing-58,marketing,SENIOR,5,work.ua,,8,5,3,ds-66dcff9404cc
+marketing-59,marketing,SENIOR,4,robota.ua,,8,6,2,ds-66dcff9404cc
+marketing-60,marketing,JUNIOR,1,robota.ua,,8,5,3,ds-66dcff9404cc
+design-31,design,JUNIOR,0,robota.ua,,8,5,3,ds-66dcff9404cc
+design-32,design,MIDDLE,2,work.ua,,9,6,3,ds-66dcff9404cc
+design-33,design,SENIOR,4,robota.ua,,8,5,3,ds-66dcff9404cc
+design-34,design,MIDDLE,2,work.ua,,10,7,3,ds-66dcff9404cc
+design-35,design,LEAD,5,robota.ua,,8,6,2,ds-66dcff9404cc
+design-36,design,MIDDLE,3,work.ua,,9,6,3,ds-66dcff9404cc
+design-37,design,JUNIOR,0,work.ua,,8,5,3,ds-66dcff9404cc
+design-38,design,SENIOR,4,work.ua,,8,5,3,ds-66dcff9404cc
+design-39,design,LEAD,5,robota.ua,,9,7,2,ds-66dcff9404cc
+design-40,design,MIDDLE,2,robota.ua,,8,5,3,ds-66dcff9404cc
+design-41,design,JUNIOR,0,robota.ua,,8,5,3,ds-66dcff9404cc
+design-42,design,MIDDLE,2,robota.ua,,9,6,3,ds-66dcff9404cc
+design-43,design,SENIOR,4,robota.ua,,9,7,2,ds-66dcff9404cc
+design-44,design,SENIOR,4,work.ua,,9,6,3,ds-66dcff9404cc
+design-45,design,MIDDLE,3,work.ua,,8,6,2,ds-66dcff9404cc
+design-46,design,MIDDLE,2,work.ua,,9,6,3,ds-66dcff9404cc
+design-47,design,JUNIOR,1,robota.ua,,8,4,4,ds-66dcff9404cc
+design-48,design,SENIOR,4,robota.ua,,9,6,3,ds-66dcff9404cc
+design-49,design,MIDDLE,2,work.ua,,9,6,3,ds-66dcff9404cc
+design-50,design,LEAD,7,robota.ua,,8,6,2,ds-66dcff9404cc
+design-51,design,MIDDLE,2,work.ua,,10,6,4,ds-66dcff9404cc
+design-52,design,SENIOR,4,robota.ua,,9,6,3,ds-66dcff9404cc
+design-53,design,LEAD,6,work.ua,,8,5,3,ds-66dcff9404cc
+design-54,design,SENIOR,4,work.ua,,9,5,4,ds-66dcff9404cc
+design-55,design,JUNIOR,1,work.ua,,8,5,3,ds-66dcff9404cc
+design-56,design,MIDDLE,2,work.ua,,8,5,3,ds-66dcff9404cc
+design-57,design,MIDDLE,2,work.ua,,10,6,4,ds-66dcff9404cc
+design-58,design,SENIOR,4,robota.ua,,9,7,2,ds-66dcff9404cc
+design-59,design,MIDDLE,2,robota.ua,,9,5,4,ds-66dcff9404cc
+design-60,design,JUNIOR,0,robota.ua,,9,6,3,ds-66dcff9404cc
+djinni-python-751196,python,JUNIOR,1,,https://djinni.co/jobs/751196-trainee-junior-python-developer/,5,5,0,ds-66dcff9404cc
+djinni-python-827023,python,SENIOR,7,,https://djinni.co/jobs/827023-senior-python-developer/,4,4,0,ds-66dcff9404cc
+djinni-python-858605,python,SENIOR,6,,https://djinni.co/jobs/858605-senior-python-engineer/,7,5,2,ds-66dcff9404cc
+djinni-python-764691,python,JUNIOR,2,,https://djinni.co/jobs/764691-junior-python-software-engineer/,11,10,1,ds-66dcff9404cc
+djinni-python-772474,python,JUNIOR,1,,https://djinni.co/jobs/772474-technical-support-engineer-weekend-shifts/,8,8,0,ds-66dcff9404cc
+djinni-python-857924,python,SENIOR,7,,https://djinni.co/jobs/857924-senior-python-data-systems-engineer/,3,3,0,ds-66dcff9404cc
+djinni-python-857846,python,SENIOR,5,,https://djinni.co/jobs/857846-senior-python-developer-with-aws/,6,4,2,ds-66dcff9404cc
+djinni-python-816687,python,MIDDLE,5,,https://djinni.co/jobs/816687-middle-python-developer/,5,5,0,ds-66dcff9404cc
+djinni-python-788396,python,SENIOR,10,,https://djinni.co/jobs/788396-senior-python-backend-engineer/,4,4,0,ds-66dcff9404cc
+djinni-python-857755,python,MIDDLE,2,,https://djinni.co/jobs/857755-python-developer-freelance/,3,3,0,ds-66dcff9404cc
+djinni-python-857578,python,SENIOR,5,,https://djinni.co/jobs/857578-senior-software-engineer-python/,9,6,3,ds-66dcff9404cc
+djinni-python-857523,python,SENIOR,5,,https://djinni.co/jobs/857523-senior-python-software-engineer/,4,4,0,ds-66dcff9404cc
+djinni-python-853644,python,JUNIOR,1,,https://djinni.co/jobs/853644-bmc-discovery-knowledge-developer-trainee-irc/,3,3,0,ds-66dcff9404cc
+djinni-python-851764,python,MIDDLE,3,,https://djinni.co/jobs/851764-middle-python-typescript-react-next-js-engine/,4,3,1,ds-66dcff9404cc
+djinni-python-851008,python,LEAD,5,,https://djinni.co/jobs/851008-team-lead-python/,5,4,1,ds-66dcff9404cc
+djinni-python-856905,python,SENIOR,8,,https://djinni.co/jobs/856905-senior-python-developer-krakow/,12,11,1,ds-66dcff9404cc
+djinni-python-723379,python,JUNIOR,1,,https://djinni.co/jobs/723379-trainee-junior-python-developer/,8,8,0,ds-66dcff9404cc
+djinni-python-856553,python,SENIOR,8,,https://djinni.co/jobs/856553-senior-python-data-systems-engineer/,3,3,0,ds-66dcff9404cc
+djinni-python-659831,python,SENIOR,5,,https://djinni.co/jobs/659831-full-stack-engineer-python-and-data-systems/,3,3,0,ds-66dcff9404cc
+djinni-python-856141,python,MIDDLE,3,,https://djinni.co/jobs/856141-backend-developer-python-aws-edi-x12/,3,3,0,ds-66dcff9404cc
+djinni-python-856101,python,MIDDLE,2,,https://djinni.co/jobs/856101-middle-python-backend-dev-ai-native-claude/,4,3,1,ds-66dcff9404cc
+djinni-python-856093,python,LEAD,5,,https://djinni.co/jobs/856093-lead-backend-integrations-engineer-python-fas/,4,4,0,ds-66dcff9404cc
+djinni-python-856036,python,JUNIOR,1,,https://djinni.co/jobs/856036-ai-native-full-stack-python-developer-django-/,13,6,7,ds-66dcff9404cc
+djinni-python-856030,python,JUNIOR,1,,https://djinni.co/jobs/856030-ai-developer-python-django-next-js/,4,3,1,ds-66dcff9404cc
+djinni-python-833910,python,SENIOR,5,,https://djinni.co/jobs/833910-senior-python-developer/,6,5,1,ds-66dcff9404cc
+djinni-python-855640,python,MIDDLE,2,,https://djinni.co/jobs/855640-python-developer/,9,9,0,ds-66dcff9404cc
+djinni-python-855422,python,SENIOR,7,,https://djinni.co/jobs/855422-senior-python-engineer-armenia-based-only/,6,2,4,ds-66dcff9404cc
+djinni-python-855410,python,MIDDLE,3,,https://djinni.co/jobs/855410-api-developer/,11,11,0,ds-66dcff9404cc
+djinni-python-854906,python,SENIOR,7,,https://djinni.co/jobs/854906-senior-python-developer-react/,6,5,1,ds-66dcff9404cc
+djinni-python-854880,python,SENIOR,5,,https://djinni.co/jobs/854880-senior-python-developer/,6,5,1,ds-66dcff9404cc
+djinni-marketing-820465,marketing,JUNIOR,2,,https://djinni.co/jobs/820465-retention-manager/,4,4,0,ds-66dcff9404cc
+djinni-marketing-858610,marketing,MIDDLE,2,,https://djinni.co/jobs/858610-media-buyer-google-retargeting/,8,7,1,ds-66dcff9404cc
+djinni-marketing-817921,marketing,SENIOR,3,,https://djinni.co/jobs/817921-senior-retention-marketing-specialist/,3,3,0,ds-66dcff9404cc
+djinni-marketing-759779,marketing,MIDDLE,2,,https://djinni.co/jobs/759779-marketing-manager-middle/,4,4,0,ds-66dcff9404cc
+djinni-marketing-858368,marketing,LEAD,3,,https://djinni.co/jobs/858368-team-lead-retention/,6,6,0,ds-66dcff9404cc
+djinni-marketing-858364,marketing,MIDDLE,3,,https://djinni.co/jobs/858364-retention-marketing-specialist/,3,3,0,ds-66dcff9404cc
+djinni-marketing-838993,marketing,LEAD,5,,https://djinni.co/jobs/838993-head-of-marketing/,6,4,2,ds-66dcff9404cc
+djinni-marketing-858181,marketing,MIDDLE,3,,https://djinni.co/jobs/858181-retention-and-bonus-manager/,5,4,1,ds-66dcff9404cc
+djinni-marketing-858088,marketing,MIDDLE,2,,https://djinni.co/jobs/858088-marketing-manager/,7,6,1,ds-66dcff9404cc
+djinni-marketing-857982,marketing,LEAD,2,,https://djinni.co/jobs/857982-retention-team-lead/,8,6,2,ds-66dcff9404cc
+djinni-marketing-824881,marketing,JUNIOR,1,,https://djinni.co/jobs/824881-google-zzz-demand-gen-specialist/,6,4,2,ds-66dcff9404cc
+djinni-marketing-458789,marketing,MIDDLE,2,,https://djinni.co/jobs/458789-paid-social-media-specialist/,3,3,0,ds-66dcff9404cc
+djinni-marketing-857590,marketing,MIDDLE,3,,https://djinni.co/jobs/857590-newsletters-and-email-marketing-manager/,6,6,0,ds-66dcff9404cc
+djinni-marketing-857428,marketing,LEAD,5,,https://djinni.co/jobs/857428-head-of-marketing/,6,6,0,ds-66dcff9404cc
+djinni-design-838527,design,JUNIOR,1,,https://djinni.co/jobs/838527-ui-ux-designer/,4,2,2,ds-66dcff9404cc
+djinni-design-524735,design,JUNIOR,1,,https://djinni.co/jobs/524735-junior-ui-ux-designer/,8,7,1,ds-66dcff9404cc
+djinni-design-857025,design,SENIOR,5,,https://djinni.co/jobs/857025-senior-product-designer/,4,4,0,ds-66dcff9404cc
+djinni-design-853503,design,MIDDLE,2,,https://djinni.co/jobs/853503-marketing-motion-designer/,3,2,1,ds-66dcff9404cc
+djinni-design-858775,design,SENIOR,5,,https://djinni.co/jobs/858775-senior-frontend-developer-vue-3-nuxt-3-for-wo/,3,3,0,ds-66dcff9404cc

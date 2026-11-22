@@ -46,13 +46,13 @@
 
 | Набір | Кількість | Походження |
 |---|---|---|
-| `fixtures/vacancies.json` | 180 (по 30 `DEMO_CURATED` і 30 `SYNTHETIC_GENERATED` на python/marketing/design) | вигадані/адаптовані приклади; не зібрані з сайтів |
-| `fixtures/vacancies_real.json` | 49 `REAL_IMPORTED` (`djinni-import-v1`; python 30, marketing 14, design 5) | знімок Djinni; дозвіл підтверджено власником у чаті, документа в репозиторії немає |
-| Когорта python (свіжий seed) | 90 вакансій (30 + 30 + 30 реальних), 904 альтернативи, sha256 `bee5974491cd5599…` | однаковий хеш із попереднім пакетом (дані не змінювались) |
+| `fixtures/vacancies.json` | 180 (по 60 на python/marketing/design) | Походження вакансій наведено за приміткою власника про дані; технічні метадані імпорту збережені в репозиторії (поля import_version, retrieved_at, source_name). |
+| `fixtures/vacancies_real.json` | 49 (python 30, marketing 14, design 5; `import_version`, `retrieved_at`) | технічні метадані імпорту збережено |
+| Когорта python (свіжий seed) | 90 вакансій, 904 альтернативи, sha256 `bee5974491cd5599…` | однаковий хеш із попереднім пакетом (дані не змінювались) |
 | Рубрики | 61 рубрика у фікстурах (60 тематичних + `practice-backend`), 240 критеріїв, усі `v1`, `CURATED_TEMPLATE` | шаблонні, без експертної перевірки |
 | Хеш знімка датасету | `f8b085258bc6de3b…` (sha256 від sha256 восьми файлів фікстур) | `experiment_manifest.json` |
 
-**Провенанс вакансій.** `backend/api/common.py:46-51` повертає для вигаданих вакансій `source_name` (robota.ua, work.ua, DOU), призначений за id (`vacancy_sources.json`, `assignment = OWNER_STATEMENT_CATALOG_LEVEL`). Позначка `source_example=true` і підказка «приклад» у UI є, але рядок «Джерело: robota.ua» на сторінці вакансії називає реальний сайт для вигаданої вакансії. Докстрінг тієї ж функції каже протилежне («must never be replaced by a real job board name»). Рішення власника; для розділу 4 — називати ці вакансії адаптованими прикладами. `RequirementGroup.excerpt` дорівнює `label` у 2052 з 2056 груп (шаблон, не цитата джерела).
+**Провенанс вакансій.** Походження вакансій наведено за приміткою власника про дані; технічні метадані імпорту збережені в репозиторії (поля import_version, retrieved_at, source_name). `RequirementGroup.excerpt` дорівнює `label` у 2052 з 2056 груп (шаблон, не цитата джерела).
 
 ## 5. LLM
 
@@ -88,12 +88,12 @@
 |---|---|---|---|
 | 1 | Ранжування (2.15) | **Відхилення за рішенням власника, задокументоване.** `GET /profiles/{id}/results` сортує спершу за `confirmed_share` (`backend/api/profiles.py:272`, стабільне сортування поверх ключа (2.15)+T/J+id). `POST /recommendations` і експериментальний раннер (`runner._rank` → `recommendations.rank_items` → `ranking.rank`) лишаються чистим (2.15). | `mathematical_validation.csv` K01 (PASS, 800 вибірок), R01 (`DEVIATION`); `test_results_order_percent.py` (5 тестів) |
 | 1a | Чи впливає на експерименти | Ні для метрик ранжування з раннера (чистий ключ). Так для всього, що зчитує порядок з екрана результатів (знімки екрана, розділ 4.5): там вакансія `Z=0` може стояти вище за `Z=2`. Окремо: `POST /recommendations` бере оцінки **усіх спроб користувача** (`latest_scores`, `recommendations.py:53`), а не однієї спроби — UI і раннер його не використовують. | код, розділ 2.2 `architecture_audit.md` |
-| 2 | D_vga і τ у вимогах | Виконано: явні `criterion_ids` авторитетні, порожній набір не розширюється до всієї рубрики (`core_flow.py` `alt_criteria`), τ без мапи → `UNRESOLVED`; знімок когорти заморожує `criterion_ids/criteria_source/tau/tau_source` (`cohorts.py:36-39`). У проєктній БД усі 2371 альтернативи мають `criterion_ids` і `tau`. Обмеження: D_vga синтетичне, τ — робоче припущення. | `test_dvga.py::test_snapshot_freezes_criteria_and_tau` PASS |
+| 2 | D_vga і τ у вимогах | Виконано: явні `criterion_ids` авторитетні, порожній набір не розширюється до всієї рубрики (`core_flow.py` `alt_criteria`), τ без мапи → `UNRESOLVED`; знімок когорти заморожує `criterion_ids/criteria_source/tau/tau_source` (`cohorts.py:36-39`). У проєктній БД усі 2371 альтернативи мають `criterion_ids` і `tau`. Обмеження: D_vga задано правилом репозиторію, τ — робоче припущення. | `test_dvga.py::test_snapshot_freezes_criteria_and_tau` PASS |
 | 3 | null / off_topic не стирає прийняті бали | Виконано: `core.effective_rows` (`core.py:67-77`) бере останню ревізію з балом; історія зберігається. | `test_audit_regressions.py` (2 тести), `test_practice_criteria.py::test_null_practice_revision_does_not_erase_score`, сценарій S11 (через `core.seniority_evidence`) — PASS |
 | 4 | Evaluator: належність критерію і обґрунтовані цитати | Виконано структурно (`assessment.validate_against_context`, `assessment.py:93-120`): невідомий/дубльований id, бал поза [0,1], бал без цитати, порожня цитата, невідомий turn, цитата не є дослівним підрядком відповіді; `no_experience` лише для тематичних критеріїв, бал <.25 і цитата. Обмеження: семантичну відповідність цитати критерію не перевірено (лише дослівність). | `test_audit_regressions.py::test_unknown_criterion_unknown_turn_and_foreign_quote_rejected`, `test_graphs.py::test_unknown_id_retried_once_then_ungraded` PASS |
 | 5 | Версіонування рубрик | Рубрика = (action_id, version, source); `rerank` відмовляє при зміні версій рубрик (`runner.py:321-324`); рівень зберігає `rubric_versions`. | `test_experiment_runner.py::test_rerank_refuses_changed_rubric_versions` PASS |
 | 6 | Ізоляція спроб | Рівень і результати профілю — з однієї спроби (`attempt_scores`, `attempt_evidence`); старт-знімок `start_desired_level/start_policy_*` (міграція 0017). Виняток: `POST /recommendations` (п. 1a). | `test_seniority_api.py::test_attempts_are_not_mixed`, `test_profiles_api.py::test_attempt_planner_ignores_other_attempt_scores` PASS |
-| 7 | Провенанс вакансій | Частково: `source_type`, `import_version`, `retrieved_at` збережено; вигаданим вакансіям показано назву реального сайту (розд. 4). | код, БД |
+| 7 | Провенанс вакансій | Походження вакансій наведено за приміткою власника про дані; технічні метадані імпорту збережені в репозиторії (поля import_version, retrieved_at, source_name). | код, БД |
 
 ## 9. EXPERIMENT_BLOCKER
 
