@@ -1,7 +1,10 @@
 """Merge two pilot annotation passes, compute agreement (before adjudication), adjudicate per
-ANNOTATION_INSTRUCTIONS.md section 5 steps 1-2, list rows for a third pass.
+ANNOTATION_INSTRUCTIONS.md section 5 steps 1-2, list rows for a third pass, and apply the third-pass decisions
+(LLM_ANNOTATOR_3, section 5 step 3) as the final ADJUDICATED rows for exactly those keys.
 
 Usage: python app/scripts/chapter4/annotation_merge.py [--src DIR] [--out DIR]
+Raw passes are read from --src (annotator_1/2/*.csv, annotator_3/decisions.csv) when present, otherwise from the
+LLM_ANNOTATOR_1/2/3 rows already stored in the output CSVs, so the merge is reproducible from the repository alone.
 Idempotent: rows of the merged annotator ids are replaced on rerun.
 """
 from __future__ import annotations
@@ -15,7 +18,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "artifacts/chapter4/data"
 SRC = ROOT / ".superpowers/sdd/annot"
-A1, A2, ADJ = "LLM_ANNOTATOR_1", "LLM_ANNOTATOR_2", "ADJUDICATED"
+A1, A2, A3, ADJ = "LLM_ANNOTATOR_1", "LLM_ANNOTATOR_2", "LLM_ANNOTATOR_3", "ADJUDICATED"
+RAW_IDS = {A1, A2, A3, ADJ}
 LEVELS = ["JUNIOR", "MIDDLE", "SENIOR", "UNKNOWN"]
 FILES = {
     "sen": "expert_seniority.csv",
@@ -70,7 +74,7 @@ def validate(src: Path, inputs: Path) -> dict[str, list[str]]:
     errs = []
     for a, aid in (("annotator_1", A1), ("annotator_2", A2)):
         for kind, fn in FILES.items():
-            _, rows = read(src / a / fn)
+            rows = raw_rows(src, a, aid, kind)
             if len(rows) != COUNTS[kind]:
                 errs.append(f"{a}/{fn}: {len(rows)} rows, expected {COUNTS[kind]}")
             keys = [tuple(r[k] for k in KEYS[kind]) for r in rows]
@@ -100,12 +104,48 @@ def validate(src: Path, inputs: Path) -> dict[str, list[str]]:
     return {"errors": errs}
 
 
+OUT_DIR = DATA / "annotations"
+
+
+def raw_rows(src: Path, sub: str, aid: str, kind: str, out: Path | None = None) -> list[dict]:
+    """One raw pass: from the source directory when present, else from the stored rows of the output CSV."""
+    p = src / sub / FILES[kind]
+    if p.exists():
+        return read(p)[1]
+    return [r for r in read((out or OUT_DIR) / FILES[kind])[1] if r["annotator_id"] == aid]
+
+
+def third_pass(src: Path, out: Path) -> list[dict]:
+    """LLM_ANNOTATOR_3 decisions as dicts kind, candidate_id, vacancy_or_criterion_id, decision, rationale."""
+    p = src / "annotator_3" / "decisions.csv"
+    if p.exists():
+        rows = read(p)[1]
+        assert all(r["annotator_id"] == A3 for r in rows), "annotator_3/decisions.csv: wrong annotator_id"
+        return rows
+    rows = []
+    for r in read(out / FILES["rel"])[1]:
+        if r["annotator_id"] == A3:
+            rows.append({"kind": "relevance", "candidate_id": r["candidate_id"], "vacancy_or_criterion_id": r["vacancy_id"],
+                         "decision": r["relevance"], "rationale": r["rationale"], "annotator_id": A3})
+    for r in read(out / FILES["sen"])[1]:
+        if r["annotator_id"] == A3:
+            rows.append({"kind": "level", "candidate_id": r["candidate_id"], "vacancy_or_criterion_id": "",
+                         "decision": r["level"], "rationale": r["rationale"], "annotator_id": A3})
+    return rows
+
+
 def merge(src: Path, out: Path, inputs: Path) -> dict:
-    res: dict = {"third": [], "n": {}, "m": {}}
+    res: dict = {"third": [], "n": {}, "m": {}, "third_applied": {}, "followed": Counter()}
     third = res["third"]
+    dec = third_pass(src, out)
+    dec_by = {("rel" if d["kind"] == "relevance" else "sen", d["candidate_id"], d["vacancy_or_criterion_id"]): d
+              for d in dec}
+    assert len(dec_by) == len(dec), "duplicate third-pass keys"
     for kind, fn in FILES.items():
-        h, r1 = read(src / "annotator_1" / fn)
-        _, r2 = read(src / "annotator_2" / fn)
+        h = read(out / fn)[0]
+        r1 = raw_rows(src, "annotator_1", A1, kind, out)
+        r2 = raw_rows(src, "annotator_2", A2, kind, out)
+        r3 = []
         d1 = {tuple(r[k] for k in KEYS[kind]): r for r in r1}
         d2 = {tuple(r[k] for k in KEYS[kind]): r for r in r2}
         keys = sorted(d1)
@@ -122,6 +162,18 @@ def merge(src: Path, out: Path, inputs: Path) -> dict:
                 pairs.append((k, x, y))
                 if abs(x - y) >= 2 or (x >= 2) != (y >= 2):
                     third.append(("relevance", k[0], k[1], x, y, a["rationale"], b["rationale"]))
+                    d = dec_by.pop(("rel", k[0], k[1]), None)
+                    if d is None:
+                        continue
+                    z = int(d["decision"])
+                    assert 0 <= z <= 3, f"bad third-pass relevance {k}"
+                    res["followed"]["A1" if z == x else "A2" if z == y else "neither"] += 1
+                    r3.append({"candidate_id": k[0], "vacancy_id": k[1], "annotator_id": A3, "relevance": z,
+                               "rationale": d["rationale"], "scale_version": a["scale_version"]})
+                    base.update(relevance=z, rationale=f"Третій прохід ({A3}): {d['rationale']}",
+                                scale_version=a["scale_version"])
+                    res["third_applied"]["rel"] = res["third_applied"].get("rel", 0) + 1
+                    adj.append(base)
                     continue
                 base.update(relevance=(x + y) // 2, rationale=f"A1: {a['rationale']} | A2: {b['rationale']}",
                             scale_version=a["scale_version"])
@@ -129,6 +181,17 @@ def merge(src: Path, out: Path, inputs: Path) -> dict:
                 pairs.append((k, a["level"], b["level"]))
                 if a["level"] != b["level"]:
                     third.append(("level", k[0], "", a["level"], b["level"], a["rationale"], b["rationale"]))
+                    d = dec_by.pop(("sen", k[0], ""), None)
+                    if d is None:
+                        continue
+                    z = d["decision"]
+                    assert z in LEVELS, f"bad third-pass level {k}"
+                    res["followed"]["A1" if z == a["level"] else "A2" if z == b["level"] else "neither"] += 1
+                    r3.append({"candidate_id": k[0], "annotator_id": A3, "level": z, "rationale": d["rationale"],
+                               "evidence_refs": ""})
+                    base.update(level=z, rationale=f"Третій прохід ({A3}): {d['rationale']}", evidence_refs="")
+                    res["third_applied"]["sen"] = res["third_applied"].get("sen", 0) + 1
+                    adj.append(base)
                     continue
                 base.update(level=a["level"], rationale=f"A1: {a['rationale']} | A2: {b['rationale']}",
                             evidence_refs=a["evidence_refs"])
@@ -148,13 +211,14 @@ def merge(src: Path, out: Path, inputs: Path) -> dict:
         res[kind] = pairs
         res["n"][kind] = len(adj)
         _, existing = read(out / fn)
-        keep = [r for r in existing if r["annotator_id"] not in {A1, A2, ADJ}]
-        write(out / fn, h, keep + r1 + r2 + adj)
+        keep = [r for r in existing if r["annotator_id"] not in RAW_IDS]
+        write(out / fn, h, keep + r1 + r2 + r3 + adj)
     tp = out / "third_pass_needed.csv"
     with tp.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(["kind", "candidate_id", "vacancy_or_criterion_id", "label_1", "label_2", "rationale_1", "rationale_2"])
         w.writerows(third)
+    assert not dec_by, f"third-pass decisions for keys not on the third-pass list: {sorted(dec_by)[:5]}"
     return res
 
 
@@ -193,7 +257,8 @@ def fmt(v: float) -> str:
 
 def report(res: dict, s: dict, out: Path) -> None:
     t = Counter(x[0] for x in res["third"])
-    L = ["# Узгодженість двох пілотних проходів розмітки", "",
+    ta, fo = res["third_applied"], res["followed"]
+    L = ["# Узгодженість пілотних проходів розмітки", "",
          "## Метод", "",
          "Два незалежні проходи `LLM_ANNOTATOR_1` та `LLM_ANNOTATOR_2` (мітка `LLM_ANNOTATOR_PILOT`) — "
          "це **LLM-розмітники, а не експерти-люди**. Узгодженість обчислено **до** узгодження "
@@ -225,16 +290,25 @@ def report(res: dict, s: dict, out: Path) -> None:
           f"частка |Δ|>0.2 = **{fmt(s['crit_big'])}**.",
           "- Обидва проходи ставили оцінки за якорями рубрики з фраз відповіді (відповіді шаблонні), тому "
           "збіг критеріїв значною мірою тривіальний і не свідчить про незалежну якість розмітки.", "",
-          "## Узгодження (§5.1–5.2)", "",
-          f"Записано рядків `ADJUDICATED`: релевантність {res['n']['rel']}, рівень {res['n']['sen']}, критерії {res['n']['crit']}. "
+          "## Узгодження (§5.1–5.3)", "",
+          f"Рядків `ADJUDICATED` після двох проходів (§5.1–5.2): релевантність {res['n']['rel'] - ta.get('rel', 0)}, "
+          f"рівень {res['n']['sen'] - ta.get('sen', 0)}, критерії {res['n']['crit'] - ta.get('crit', 0)}. "
           "Релевантність: середнє з округленням униз, якщо |r1−r2|≤1 і обидві оцінки по одну сторону порогу 2 "
           "(пара 1 vs 2 перетинає поріг, тому йде на третій прохід за §5.1); критерій — середнє; рівень — спільне значення.", "",
-          "## Рядки для третього проходу", "",
-          f"Файл `third_pass_needed.csv` (обидві мітки й обґрунтування; не розв'язано): релевантність **{t['relevance']}**, "
-          f"рівень **{t['level']}**, критерії **{t['criterion']}**.", "",
+          "## Третій прохід (§5.3)", "",
+          f"Файл `third_pass_needed.csv` (обидві мітки й обґрунтування): релевантність **{t['relevance']}**, "
+          f"рівень **{t['level']}**, критерії **{t['criterion']}**. Третій незалежний прохід `{A3}` (мітка "
+          "`LLM_ANNOTATOR_PILOT`, LLM, а не людина) бачив лише ці рядки, інструкцію та описи кандидатів і вакансій; "
+          f"застосовано рішень: релевантність **{ta.get('rel', 0)}**, рівень **{ta.get('sen', 0)}**. Рішення третього "
+          "проходу записано як остаточні рядки `ADJUDICATED` лише для цих ключів (обґрунтування — з третього проходу); "
+          f"сирі рядки `{A1}`, `{A2}`, `{A3}` збережено.", "",
+          f"- Збіг рішення третього проходу з першим розмітником: **{fo['A1']}**, з другим: **{fo['A2']}**, "
+          f"з жодним: **{fo['neither']}** (з {sum(fo.values())}).", "",
+          f"Остаточно `ADJUDICATED`: релевантність **{res['n']['rel']}** з 944, рівень **{res['n']['sen']}** з 18, "
+          f"критерії **{res['n']['crit']}** з 202.", "",
           "## Застереження", "",
           "- Розмітники — LLM, а не люди-експерти; це **пілот**, не еталон.",
-          "- Обидва оцінювали за таблицями архетипів/груп профілів (див. їхні notes.md), тому мітки в межах групи "
+          "- Усі три проходи оцінювали за таблицями архетипів/груп профілів (див. їхні notes.md), тому мітки в межах групи "
           "сильно корельовані; ефективний обсяг вибірки значно менший за 944/202, а показники узгодженості, "
           "імовірно, **завищені**.",
           "- Значення κ не слід трактувати як довіру до якості еталону; потрібна розмітка експертами-людьми.",
@@ -254,7 +328,18 @@ def main() -> None:
     res = merge(a.src, a.out, a.inputs)
     s = stats(res)
     report(res, s, a.out)
-    print({k: v for k, v in s.items() if isinstance(v, float)}, Counter(x[0] for x in res["third"]), res["n"])
+    print({k: v for k, v in s.items() if isinstance(v, float)}, Counter(x[0] for x in res["third"]), res["n"],
+          dict(res["followed"]))
+
+
+def build() -> dict:
+    """Entry point for build_all: merge from the default --src (falls back to stored raw rows)."""
+    errs = validate(SRC, DATA / "annotation_inputs")["errors"]
+    if errs:
+        raise SystemExit("validation failed:\n" + "\n".join(errs[:20]))
+    res = merge(SRC, OUT_DIR, DATA / "annotation_inputs")
+    report(res, stats(res), OUT_DIR)
+    return {"adjudicated": res["n"], "third_applied": res["third_applied"], "followed": dict(res["followed"])}
 
 
 if __name__ == "__main__":
