@@ -1,1 +1,607 @@
 candidate_id,criterion_id,question_id,annotator_id,score,evidence_status,rubric_version,comment
+C01,celery.design,rb-00031,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C01,celery.retries,rb-00031,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C01,observability.incidents,rb-00029,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C01,observability.logging,rb-00029,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C01,python-core.testing,rb-00062,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C01,python-core.typing,rb-00062,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C01,sql.aggregation,rb-00009,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C01,sql.joins,rb-00009,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C01,sql.correctness,rb-00067,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C01,sql.joins,rb-00067,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C01,aws.deploy,rb-00084,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C01,aws.iam,rb-00084,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C02,ci-cd.deploy,rb-00133,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C02,ci-cd.feedback,rb-00133,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C02,docker.runtime,rb-00151,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C02,docker.security,rb-00151,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C02,rest-api.contract,rb-00100,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C02,rest-api.security,rb-00100,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C02,python-core.testing,rb-00154,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C02,python-core.typing,rb-00154,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C02,python-core.errors,rb-00086,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C02,python-core.testing,rb-00086,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C02,fastapi.dependencies,rb-00130,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C03,django.architecture,rb-00232,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C03,django.migrations,rb-00232,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C03,python-core.typing,rb-00213,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C03,python-core.typing,rb-00212,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C03,python-core.testing,rb-00212,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C03,celery.design,rb-00190,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C03,celery.retries,rb-00190,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C03,celery.design,rb-00191,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C03,celery.retries,rb-00191,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C03,python-core.errors,rb-00160,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C03,python-core.testing,rb-00160,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C04,django.architecture,rb-00315,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C04,django.orm,rb-00315,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C04,sql.correctness,rb-00317,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C04,sql.joins,rb-00317,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C04,rest-api.contract,rb-00258,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C04,rest-api.security,rb-00258,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C04,aws.deploy,rb-00332,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C04,aws.cost,rb-00332,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C04,ci-cd.deploy,rb-00318,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C04,ci-cd.feedback,rb-00318,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C04,sql.aggregation,rb-00270,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C04,sql.performance,rb-00270,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C05,postgresql.indexes,rb-00357,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C05,postgresql.operations,rb-00357,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C05,ci-cd.feedback,rb-00348,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C05,ci-cd.safety,rb-00348,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C05,kafka.errors,rb-00344,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C05,kafka.semantics,rb-00344,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C05,kafka.consumers,rb-00411,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C05,kafka.errors,rb-00411,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C05,sql.joins,rb-00425,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C05,sql.correctness,rb-00425,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C05,django.architecture,rb-00413,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C05,django.orm,rb-00413,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C06,celery.design,rb-00479,LLM_ANNOTATOR_1,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,celery.retries,rb-00479,LLM_ANNOTATOR_1,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,docker.images,rb-00455,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C06,docker.security,rb-00455,LLM_ANNOTATOR_1,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,docker.runtime,rb-00516,LLM_ANNOTATOR_1,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,docker.security,rb-00516,LLM_ANNOTATOR_1,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,postgresql.indexes,rb-00484,LLM_ANNOTATOR_1,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,postgresql.migrations,rb-00484,LLM_ANNOTATOR_1,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,kafka.consumers,rb-00482,LLM_ANNOTATOR_1,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,kafka.errors,rb-00482,LLM_ANNOTATOR_1,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,aws.cost,rb-00452,LLM_ANNOTATOR_1,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,aws.iam,rb-00452,LLM_ANNOTATOR_1,0.0,EVIDENCED,v1,не знаю цього і не працював
+C07,app-security.authz,rb-00579,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,app-security.dependencies,rb-00579,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,aws.cost,rb-00644,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,aws.deploy,rb-00644,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C07,rest-api.security,rb-00627,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,rest-api.contract,rb-00627,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C07,ci-cd.pipeline,rb-00643,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C07,ci-cd.feedback,rb-00608,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,ci-cd.safety,rb-00608,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,aws.deploy,rb-00560,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C07,aws.cost,rb-00560,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C08,kafka.schemas,rb-00773,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C08,rest-api.contract,rb-00685,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C08,rest-api.pagination,rb-00685,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C08,python-core.typing,rb-00721,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C08,python-core.testing,rb-00721,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C08,postgresql.migrations,rb-00764,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C08,postgresql.operations,rb-00764,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C08,docker.compose,rb-00751,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C08,kafka.consumers,rb-00667,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C08,kafka.schemas,rb-00667,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C09,rest-api.contract,rb-00820,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,rest-api.security,rb-00820,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C09,python-core.idioms,rb-00807,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,python-core.typing,rb-00807,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,python-core.testing,rb-00882,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,python-core.typing,rb-00882,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,python-core.idioms,rb-00881,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,python-core.errors,rb-00881,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,kubernetes.resources,rb-00836,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C09,fastapi.dependencies,rb-00811,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C09,fastapi.validation,rb-00811,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C10,ci-cd.pipeline,rb-01051,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C10,kafka.schemas,rb-01040,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C10,kafka.semantics,rb-01040,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C10,sql.correctness,rb-00942,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C10,sql.performance,rb-00942,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C10,app-security.authz,rb-00996,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C10,app-security.secrets,rb-00996,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C10,observability.incidents,rb-00962,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C10,observability.logging,rb-00962,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C10,pytest.coverage,rb-01006,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C10,pytest.structure,rb-01006,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,sql.joins,rb-01095,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,fastapi.validation,rb-01121,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,fastapi.dependencies,rb-01121,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,python-core.typing,rb-01127,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,python-core.testing,rb-01127,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,postgresql.indexes,rb-01138,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,postgresql.schema,rb-01138,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,python-core.idioms,rb-01139,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,python-core.errors,rb-01139,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,python-core.errors,rb-01072,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,python-core.testing,rb-01072,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C12,fastapi.dependencies,rb-01250,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C12,app-security.authz,rb-01235,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C12,sqlalchemy.loading,rb-01242,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C12,sqlalchemy.models,rb-01242,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C12,ci-cd.feedback,rb-01258,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C12,ci-cd.safety,rb-01258,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C12,aws.cost,rb-01293,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C12,aws.deploy,rb-01293,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C12,ci-cd.feedback,rb-01178,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C12,ci-cd.safety,rb-01178,LLM_ANNOTATOR_1,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C13,docker.compose,rb-01331,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C13,docker.runtime,rb-01331,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,git.history,rb-01403,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C13,python-core.idioms,rb-01320,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,python-core.typing,rb-01320,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,sqlalchemy.concurrency,rb-01385,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,sqlalchemy.loading,rb-01385,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,pytest.flaky,rb-01375,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C13,pytest.isolation,rb-01375,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,fastapi.testing,rb-01392,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kubernetes.workloads,rb-01440,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kubernetes.resources,rb-01440,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kubernetes.security,rb-01441,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kubernetes.troubleshooting,rb-01441,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,sql.aggregation,rb-01413,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C14,sql.joins,rb-01413,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,pytest.flaky,rb-01464,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C14,pytest.isolation,rb-01464,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kafka.schemas,rb-01447,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kafka.semantics,rb-01447,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,fastapi.async,rb-01470,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,fastapi.testing,rb-01470,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,sql.correctness,rb-01536,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,sql.performance,rb-01536,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,linux.diagnostics,rb-01551,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,linux.networking,rb-01551,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C15,ci-cd.deploy,rb-01533,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,ci-cd.pipeline,rb-01533,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,kafka.consumers,rb-01529,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,kafka.schemas,rb-01529,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,async-python.concurrency,rb-01575,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,async-python.blocking,rb-01575,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,kafka.consumers,rb-01568,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,kafka.errors,rb-01568,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,python-core.errors,rb-01613,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,python-core.testing,rb-01613,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,celery.design,rb-01651,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,celery.idempotency,rb-01651,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,kubernetes.troubleshooting,rb-01656,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,kubernetes.workloads,rb-01656,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,git.branching,rb-01659,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,git.collaboration,rb-01659,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C16,pytest.flaky,rb-01678,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C16,pytest.isolation,rb-01678,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,docker.compose,rb-01698,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C16,docker.images,rb-01698,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,rest-api.contract,rb-01731,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,rest-api.pagination,rb-01731,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,pytest.structure,rb-01737,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,pytest.isolation,rb-01737,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,linux.services,rb-01773,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C17,aws.deploy,rb-01722,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,aws.services,rb-01722,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C17,kubernetes.troubleshooting,rb-01755,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,kubernetes.workloads,rb-01755,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,rest-api.pagination,rb-01798,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,rest-api.security,rb-01798,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,kubernetes.troubleshooting,rb-01843,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,kubernetes.workloads,rb-01843,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,git.branching,rb-01817,LLM_ANNOTATOR_1,0.3,EVIDENCED,v1,лише чув про це
+C18,git.history,rb-01817,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C18,postgresql.indexes,rb-01815,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,postgresql.operations,rb-01815,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,fastapi.async,rb-01803,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,fastapi.testing,rb-01803,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,python-core.idioms,rb-01800,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,python-core.typing,rb-01800,LLM_ANNOTATOR_1,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,docker.compose,rb-01879,LLM_ANNOTATOR_1,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C01,sql.aggregation,rb-00009,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C01,sql.joins,rb-00009,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C01,observability.incidents,rb-00029,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C01,observability.logging,rb-00029,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C01,celery.design,rb-00031,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C01,celery.retries,rb-00031,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C01,python-core.testing,rb-00062,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C01,python-core.typing,rb-00062,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C01,sql.correctness,rb-00067,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C01,sql.joins,rb-00067,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C01,aws.deploy,rb-00084,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C01,aws.iam,rb-00084,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C02,python-core.errors,rb-00086,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C02,python-core.testing,rb-00086,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C02,rest-api.contract,rb-00100,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C02,rest-api.security,rb-00100,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C02,fastapi.dependencies,rb-00130,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C02,ci-cd.deploy,rb-00133,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C02,ci-cd.feedback,rb-00133,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C02,docker.runtime,rb-00151,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C02,docker.security,rb-00151,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C02,python-core.testing,rb-00154,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C02,python-core.typing,rb-00154,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C03,python-core.errors,rb-00160,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C03,python-core.testing,rb-00160,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C03,celery.design,rb-00190,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C03,celery.retries,rb-00190,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C03,celery.design,rb-00191,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C03,celery.retries,rb-00191,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C03,python-core.testing,rb-00212,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C03,python-core.typing,rb-00212,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C03,python-core.typing,rb-00213,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C03,django.architecture,rb-00232,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C03,django.migrations,rb-00232,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C04,rest-api.contract,rb-00258,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C04,rest-api.security,rb-00258,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C04,sql.aggregation,rb-00270,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C04,sql.performance,rb-00270,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C04,django.architecture,rb-00315,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C04,django.orm,rb-00315,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C04,sql.correctness,rb-00317,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C04,sql.joins,rb-00317,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C04,ci-cd.deploy,rb-00318,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C04,ci-cd.feedback,rb-00318,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C04,aws.cost,rb-00332,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C04,aws.deploy,rb-00332,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C05,kafka.errors,rb-00344,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C05,kafka.semantics,rb-00344,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C05,ci-cd.feedback,rb-00348,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C05,ci-cd.safety,rb-00348,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C05,postgresql.indexes,rb-00357,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C05,postgresql.operations,rb-00357,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C05,kafka.consumers,rb-00411,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C05,kafka.errors,rb-00411,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C05,django.architecture,rb-00413,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C05,django.orm,rb-00413,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C05,sql.correctness,rb-00425,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C05,sql.joins,rb-00425,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C06,aws.cost,rb-00452,LLM_ANNOTATOR_2,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,aws.iam,rb-00452,LLM_ANNOTATOR_2,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,docker.images,rb-00455,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C06,docker.security,rb-00455,LLM_ANNOTATOR_2,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,celery.design,rb-00479,LLM_ANNOTATOR_2,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,celery.retries,rb-00479,LLM_ANNOTATOR_2,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,kafka.consumers,rb-00482,LLM_ANNOTATOR_2,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,kafka.errors,rb-00482,LLM_ANNOTATOR_2,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,postgresql.indexes,rb-00484,LLM_ANNOTATOR_2,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,postgresql.migrations,rb-00484,LLM_ANNOTATOR_2,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,docker.runtime,rb-00516,LLM_ANNOTATOR_2,0.0,EVIDENCED,v1,не знаю цього і не працював
+C06,docker.security,rb-00516,LLM_ANNOTATOR_2,0.0,EVIDENCED,v1,не знаю цього і не працював
+C07,aws.cost,rb-00560,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,aws.deploy,rb-00560,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C07,app-security.authz,rb-00579,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,app-security.dependencies,rb-00579,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,ci-cd.feedback,rb-00608,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,ci-cd.safety,rb-00608,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,rest-api.contract,rb-00627,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C07,rest-api.security,rb-00627,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,ci-cd.pipeline,rb-00643,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C07,aws.cost,rb-00644,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C07,aws.deploy,rb-00644,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C08,kafka.consumers,rb-00667,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C08,kafka.schemas,rb-00667,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C08,rest-api.contract,rb-00685,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C08,rest-api.pagination,rb-00685,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C08,python-core.testing,rb-00721,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C08,python-core.typing,rb-00721,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C08,docker.compose,rb-00751,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C08,postgresql.migrations,rb-00764,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C08,postgresql.operations,rb-00764,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C08,kafka.schemas,rb-00773,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C09,python-core.idioms,rb-00807,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,python-core.typing,rb-00807,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,fastapi.dependencies,rb-00811,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C09,fastapi.validation,rb-00811,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,rest-api.contract,rb-00820,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,rest-api.security,rb-00820,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C09,kubernetes.resources,rb-00836,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C09,python-core.errors,rb-00881,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,python-core.idioms,rb-00881,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,python-core.testing,rb-00882,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C09,python-core.typing,rb-00882,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C10,sql.correctness,rb-00942,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C10,sql.performance,rb-00942,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C10,observability.incidents,rb-00962,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C10,observability.logging,rb-00962,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C10,app-security.authz,rb-00996,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C10,app-security.secrets,rb-00996,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C10,pytest.coverage,rb-01006,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C10,pytest.structure,rb-01006,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C10,kafka.schemas,rb-01040,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C10,kafka.semantics,rb-01040,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C10,ci-cd.pipeline,rb-01051,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,python-core.errors,rb-01072,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,python-core.testing,rb-01072,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,sql.joins,rb-01095,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,fastapi.dependencies,rb-01121,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,fastapi.validation,rb-01121,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,python-core.testing,rb-01127,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,python-core.typing,rb-01127,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,postgresql.indexes,rb-01138,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,postgresql.schema,rb-01138,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,python-core.errors,rb-01139,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C11,python-core.idioms,rb-01139,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C12,ci-cd.feedback,rb-01178,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C12,ci-cd.safety,rb-01178,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C12,app-security.authz,rb-01235,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C12,sqlalchemy.loading,rb-01242,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C12,sqlalchemy.models,rb-01242,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C12,fastapi.dependencies,rb-01250,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C12,ci-cd.feedback,rb-01258,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C12,ci-cd.safety,rb-01258,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C12,aws.cost,rb-01293,LLM_ANNOTATOR_2,0.6,EVIDENCED,v1,"розумію загальну ідею, але без деталей"
+C12,aws.deploy,rb-01293,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C13,python-core.idioms,rb-01320,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,python-core.typing,rb-01320,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,docker.compose,rb-01331,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C13,docker.runtime,rb-01331,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,pytest.flaky,rb-01375,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C13,pytest.isolation,rb-01375,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,sqlalchemy.concurrency,rb-01385,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,sqlalchemy.loading,rb-01385,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,fastapi.testing,rb-01392,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,git.history,rb-01403,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C14,sql.aggregation,rb-01413,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C14,sql.joins,rb-01413,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kubernetes.resources,rb-01440,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kubernetes.workloads,rb-01440,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kubernetes.security,rb-01441,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kubernetes.troubleshooting,rb-01441,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kafka.schemas,rb-01447,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kafka.semantics,rb-01447,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,pytest.flaky,rb-01464,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C14,pytest.isolation,rb-01464,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,fastapi.async,rb-01470,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,fastapi.testing,rb-01470,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,kafka.consumers,rb-01529,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,kafka.schemas,rb-01529,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,ci-cd.deploy,rb-01533,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,ci-cd.pipeline,rb-01533,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,sql.correctness,rb-01536,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,sql.performance,rb-01536,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,linux.diagnostics,rb-01551,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,linux.networking,rb-01551,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C15,kafka.consumers,rb-01568,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,kafka.errors,rb-01568,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,async-python.blocking,rb-01575,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,async-python.concurrency,rb-01575,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,python-core.errors,rb-01613,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,python-core.testing,rb-01613,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,celery.design,rb-01651,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,celery.idempotency,rb-01651,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,kubernetes.troubleshooting,rb-01656,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,kubernetes.workloads,rb-01656,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,git.branching,rb-01659,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,git.collaboration,rb-01659,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C16,pytest.flaky,rb-01678,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C16,pytest.isolation,rb-01678,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,docker.compose,rb-01698,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C16,docker.images,rb-01698,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,aws.deploy,rb-01722,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,aws.services,rb-01722,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C17,rest-api.contract,rb-01731,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,rest-api.pagination,rb-01731,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,pytest.isolation,rb-01737,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,pytest.structure,rb-01737,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,kubernetes.troubleshooting,rb-01755,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,kubernetes.workloads,rb-01755,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,linux.services,rb-01773,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C17,rest-api.pagination,rb-01798,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,rest-api.security,rb-01798,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,python-core.idioms,rb-01800,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,python-core.typing,rb-01800,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,fastapi.async,rb-01803,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,fastapi.testing,rb-01803,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,postgresql.indexes,rb-01815,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,postgresql.operations,rb-01815,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,git.branching,rb-01817,LLM_ANNOTATOR_2,0.3,EVIDENCED,v1,лише чув про це
+C18,git.history,rb-01817,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C18,kubernetes.troubleshooting,rb-01843,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,kubernetes.workloads,rb-01843,LLM_ANNOTATOR_2,0.9,EVIDENCED,v1,робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,docker.compose,rb-01879,LLM_ANNOTATOR_2,0.78,EVIDENCED,v1,"застосовував на практиці, знаю основні підводні камені"
+C01,aws.deploy,rb-00084,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C01,aws.iam,rb-00084,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C01,celery.design,rb-00031,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C01,celery.retries,rb-00031,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C01,observability.incidents,rb-00029,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C01,observability.logging,rb-00029,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C01,python-core.testing,rb-00062,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C01,python-core.typing,rb-00062,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C01,sql.aggregation,rb-00009,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C01,sql.correctness,rb-00067,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C01,sql.joins,rb-00009,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C01,sql.joins,rb-00067,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C02,ci-cd.deploy,rb-00133,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C02,ci-cd.feedback,rb-00133,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C02,docker.runtime,rb-00151,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C02,docker.security,rb-00151,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C02,fastapi.dependencies,rb-00130,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C02,python-core.errors,rb-00086,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C02,python-core.testing,rb-00086,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C02,python-core.testing,rb-00154,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C02,python-core.typing,rb-00154,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C02,rest-api.contract,rb-00100,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C02,rest-api.security,rb-00100,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C03,celery.design,rb-00190,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C03,celery.design,rb-00191,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C03,celery.retries,rb-00190,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C03,celery.retries,rb-00191,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C03,django.architecture,rb-00232,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C03,django.migrations,rb-00232,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C03,python-core.errors,rb-00160,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C03,python-core.testing,rb-00160,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C03,python-core.testing,rb-00212,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C03,python-core.typing,rb-00212,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C03,python-core.typing,rb-00213,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C04,aws.cost,rb-00332,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C04,aws.deploy,rb-00332,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C04,ci-cd.deploy,rb-00318,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C04,ci-cd.feedback,rb-00318,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C04,django.architecture,rb-00315,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C04,django.orm,rb-00315,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C04,rest-api.contract,rb-00258,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C04,rest-api.security,rb-00258,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C04,sql.aggregation,rb-00270,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C04,sql.correctness,rb-00317,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C04,sql.joins,rb-00317,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C04,sql.performance,rb-00270,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C05,ci-cd.feedback,rb-00348,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C05,ci-cd.safety,rb-00348,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C05,django.architecture,rb-00413,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C05,django.orm,rb-00413,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C05,kafka.consumers,rb-00411,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C05,kafka.errors,rb-00344,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C05,kafka.errors,rb-00411,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C05,kafka.semantics,rb-00344,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C05,postgresql.indexes,rb-00357,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C05,postgresql.operations,rb-00357,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C05,sql.correctness,rb-00425,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C05,sql.joins,rb-00425,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C06,aws.cost,rb-00452,ADJUDICATED,0,EVIDENCED,v1,A1: не знаю цього і не працював | A2: не знаю цього і не працював
+C06,aws.iam,rb-00452,ADJUDICATED,0,EVIDENCED,v1,A1: не знаю цього і не працював | A2: не знаю цього і не працював
+C06,celery.design,rb-00479,ADJUDICATED,0,EVIDENCED,v1,A1: не знаю цього і не працював | A2: не знаю цього і не працював
+C06,celery.retries,rb-00479,ADJUDICATED,0,EVIDENCED,v1,A1: не знаю цього і не працював | A2: не знаю цього і не працював
+C06,docker.images,rb-00455,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C06,docker.runtime,rb-00516,ADJUDICATED,0,EVIDENCED,v1,A1: не знаю цього і не працював | A2: не знаю цього і не працював
+C06,docker.security,rb-00455,ADJUDICATED,0,EVIDENCED,v1,A1: не знаю цього і не працював | A2: не знаю цього і не працював
+C06,docker.security,rb-00516,ADJUDICATED,0,EVIDENCED,v1,A1: не знаю цього і не працював | A2: не знаю цього і не працював
+C06,kafka.consumers,rb-00482,ADJUDICATED,0,EVIDENCED,v1,A1: не знаю цього і не працював | A2: не знаю цього і не працював
+C06,kafka.errors,rb-00482,ADJUDICATED,0,EVIDENCED,v1,A1: не знаю цього і не працював | A2: не знаю цього і не працював
+C06,postgresql.indexes,rb-00484,ADJUDICATED,0,EVIDENCED,v1,A1: не знаю цього і не працював | A2: не знаю цього і не працював
+C06,postgresql.migrations,rb-00484,ADJUDICATED,0,EVIDENCED,v1,A1: не знаю цього і не працював | A2: не знаю цього і не працював
+C07,app-security.authz,rb-00579,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C07,app-security.dependencies,rb-00579,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C07,aws.cost,rb-00560,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C07,aws.cost,rb-00644,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C07,aws.deploy,rb-00560,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C07,aws.deploy,rb-00644,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C07,ci-cd.feedback,rb-00608,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C07,ci-cd.pipeline,rb-00643,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C07,ci-cd.safety,rb-00608,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C07,rest-api.contract,rb-00627,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C07,rest-api.security,rb-00627,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C08,docker.compose,rb-00751,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C08,kafka.consumers,rb-00667,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C08,kafka.schemas,rb-00667,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C08,kafka.schemas,rb-00773,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C08,postgresql.migrations,rb-00764,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C08,postgresql.operations,rb-00764,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C08,python-core.testing,rb-00721,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C08,python-core.typing,rb-00721,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C08,rest-api.contract,rb-00685,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C08,rest-api.pagination,rb-00685,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C09,fastapi.dependencies,rb-00811,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C09,fastapi.validation,rb-00811,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C09,kubernetes.resources,rb-00836,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C09,python-core.errors,rb-00881,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C09,python-core.idioms,rb-00807,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C09,python-core.idioms,rb-00881,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C09,python-core.testing,rb-00882,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C09,python-core.typing,rb-00807,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C09,python-core.typing,rb-00882,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C09,rest-api.contract,rb-00820,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C09,rest-api.security,rb-00820,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C10,app-security.authz,rb-00996,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C10,app-security.secrets,rb-00996,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C10,ci-cd.pipeline,rb-01051,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C10,kafka.schemas,rb-01040,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C10,kafka.semantics,rb-01040,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C10,observability.incidents,rb-00962,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C10,observability.logging,rb-00962,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C10,pytest.coverage,rb-01006,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C10,pytest.structure,rb-01006,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C10,sql.correctness,rb-00942,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C10,sql.performance,rb-00942,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C11,fastapi.dependencies,rb-01121,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C11,fastapi.validation,rb-01121,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C11,postgresql.indexes,rb-01138,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C11,postgresql.schema,rb-01138,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C11,python-core.errors,rb-01072,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C11,python-core.errors,rb-01139,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C11,python-core.idioms,rb-01139,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C11,python-core.testing,rb-01072,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C11,python-core.testing,rb-01127,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C11,python-core.typing,rb-01127,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C11,sql.joins,rb-01095,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C12,app-security.authz,rb-01235,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C12,aws.cost,rb-01293,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C12,aws.deploy,rb-01293,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C12,ci-cd.feedback,rb-01178,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C12,ci-cd.feedback,rb-01258,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C12,ci-cd.safety,rb-01178,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C12,ci-cd.safety,rb-01258,ADJUDICATED,0.6,EVIDENCED,v1,"A1: розумію загальну ідею, але без деталей | A2: розумію загальну ідею, але без деталей"
+C12,fastapi.dependencies,rb-01250,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C12,sqlalchemy.loading,rb-01242,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C12,sqlalchemy.models,rb-01242,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C13,docker.compose,rb-01331,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C13,docker.runtime,rb-01331,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,fastapi.testing,rb-01392,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,git.history,rb-01403,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C13,pytest.flaky,rb-01375,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C13,pytest.isolation,rb-01375,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,python-core.idioms,rb-01320,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,python-core.typing,rb-01320,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,sqlalchemy.concurrency,rb-01385,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C13,sqlalchemy.loading,rb-01385,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,fastapi.async,rb-01470,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,fastapi.testing,rb-01470,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kafka.schemas,rb-01447,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kafka.semantics,rb-01447,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kubernetes.resources,rb-01440,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kubernetes.security,rb-01441,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kubernetes.troubleshooting,rb-01441,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,kubernetes.workloads,rb-01440,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,pytest.flaky,rb-01464,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C14,pytest.isolation,rb-01464,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C14,sql.aggregation,rb-01413,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C14,sql.joins,rb-01413,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,async-python.blocking,rb-01575,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,async-python.concurrency,rb-01575,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,ci-cd.deploy,rb-01533,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,ci-cd.pipeline,rb-01533,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,kafka.consumers,rb-01529,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,kafka.consumers,rb-01568,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,kafka.errors,rb-01568,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,kafka.schemas,rb-01529,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,linux.diagnostics,rb-01551,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,linux.networking,rb-01551,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C15,sql.correctness,rb-01536,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C15,sql.performance,rb-01536,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,celery.design,rb-01651,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,celery.idempotency,rb-01651,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,docker.compose,rb-01698,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C16,docker.images,rb-01698,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,git.branching,rb-01659,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,git.collaboration,rb-01659,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C16,kubernetes.troubleshooting,rb-01656,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,kubernetes.workloads,rb-01656,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,pytest.flaky,rb-01678,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C16,pytest.isolation,rb-01678,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,python-core.errors,rb-01613,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C16,python-core.testing,rb-01613,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,aws.deploy,rb-01722,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,aws.services,rb-01722,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C17,kubernetes.troubleshooting,rb-01755,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,kubernetes.workloads,rb-01755,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,linux.services,rb-01773,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C17,pytest.isolation,rb-01737,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,pytest.structure,rb-01737,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,rest-api.contract,rb-01731,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,rest-api.pagination,rb-01731,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,rest-api.pagination,rb-01798,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C17,rest-api.security,rb-01798,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,docker.compose,rb-01879,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C18,fastapi.async,rb-01803,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,fastapi.testing,rb-01803,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,git.branching,rb-01817,ADJUDICATED,0.3,EVIDENCED,v1,A1: лише чув про це | A2: лише чув про це
+C18,git.history,rb-01817,ADJUDICATED,0.78,EVIDENCED,v1,"A1: застосовував на практиці, знаю основні підводні камені | A2: застосовував на практиці, знаю основні підводні камені"
+C18,kubernetes.troubleshooting,rb-01843,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,kubernetes.workloads,rb-01843,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,postgresql.indexes,rb-01815,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,postgresql.operations,rb-01815,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,python-core.idioms,rb-01800,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
+C18,python-core.typing,rb-01800,ADJUDICATED,0.9,EVIDENCED,v1,A1: робив це сам у продакшені й пояснюю механізм на конкретному  | A2: робив це сам у продакшені й пояснюю механізм на конкретному 
