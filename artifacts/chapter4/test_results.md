@@ -44,3 +44,13 @@
 ## 3. Збої
 
 Збоїв у жодному запуску немає. Попередження: 81 `DeprecationWarning` (sqlite datetime adapter, Python 3.12), 3 `DeprecationWarning` Alembic (`path_separator`). Під час інтерв'ю зі заглушкою в журналі є рядки `interviewer question rejected … kind=NOT_UKRAINIAN` — це очікувана поведінка продукту на артефакт заглушки (див. `seniority_audit.md` §4), а не збій тесту.
+
+## Фаза 2 (2026-11-23)
+
+| Команда | Середовище | Результат | Тривалість |
+|---|---|---|---|
+| `cd app && uv run pytest -q` | чистий git worktree на commit `414404e` (продуктовий код = `282f6fb`), SQLite, локальний `app/.env` | 892 passed, 4 skipped | 169 с |
+| `uv run pytest -q tests/test_chapter4_modes.py` | те саме | 7 passed (детермінованість seed, однакові умови режимів, бюджети, сітка, статистика, дослідницький планувальник) | ≈ 4 с |
+| `uv run python -m scripts.chapter4.build_all --workers 6` | чистий worktree, усі виходи фази 2 попередньо видалено | 0 помилок; 1350 SIMULATED прогонів; хеш вмісту `eca6a8386e6af0ac` = закоміченому | 6 хв 23 с |
+
+Основне робоче дерево на момент фази 2 містило незакомічені зміни продуктового коду з іншої сесії (`agents/graphs.py`, frontend); вони не входять у заморожену конфігурацію, тому тести й експерименти запускалися в окремому чистому worktree.
