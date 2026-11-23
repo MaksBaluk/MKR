@@ -2,8 +2,8 @@
 
 E2 interview_experiment_results.csv; E3 ranking_metrics.csv (P@5 / NDCG@10 only against ADJUDICATED relevance labels,
 else NO_GROUND_TRUTH; extra ranking metrics always); E4 evaluator_metrics.csv; E5 seniority_experiment_results.csv and
-estimator_metrics.csv; tables/ (4.1-4.7) and figures/ (SVG, Ukrainian labels) with CSV sources in figures_data/;
-missing_evidence.md. Unit of analysis for ranking/estimator metrics = candidate (seeds averaged).
+estimator_metrics.csv. Tables 4.1-4.7, figures, hypotheses and reports: scripts/chapter4/final_report.py.
+P@5/NDCG@10 rank only the fixed annotated pool (see pool_ranking). Unit of analysis = candidate (seeds averaged).
 Run from app/:  uv run python -m scripts.chapter4.chapter4_metrics
 """
 from __future__ import annotations
@@ -74,29 +74,64 @@ def e2(runs) -> list[dict]:
     return out
 
 
+def pools() -> dict[str, list[str]]:
+    """Fixed annotated vacancy pool per candidate (annotation_inputs/vacancy_pool.csv, file order)."""
+    out: dict[str, list[str]] = defaultdict(list)
+    for r in _read(DATA / "annotation_inputs" / "vacancy_pool.csv"):
+        out[r["candidate_id"]].append(r["vacancy_id"])
+    return dict(out)
+
+
+def pool_ranking(ranking: list[str], pool_ids: list[str]) -> tuple[list[str], int]:
+    """Rank only the fixed pool: the run's order restricted to pool vacancies. Pool vacancies absent from the run's
+    ranking are not dropped: they are appended after the ranked ones in pool-file order (a fixed, system-independent
+    order) and counted. With the full 90-vacancy rankings of the frozen runs this count is 0 for every run."""
+    pool_set, rank_set = set(pool_ids), set(ranking)
+    missing = [v for v in pool_ids if v not in rank_set]
+    return [v for v in ranking if v in pool_set] + missing, len(missing)
+
+
+def run_pool_metrics(r: dict, ann: dict, pool_map: dict) -> dict | None:
+    """P@5 (relevant = grade >= 2) and NDCG@10 (linear gain) of one run against ADJUDICATED pool labels."""
+    labels, pool_ids = ann["relevance"].get(r["profile_id"]), pool_map.get(r["profile_id"])
+    if not labels or not pool_ids:
+        return None
+    lab = {v: labels[v] for v in pool_ids if v in labels}
+    if len(lab) != len(pool_ids):
+        raise MissingLabelsError(f"{r['profile_id']}: {len(pool_ids) - len(lab)} pool vacancies without ADJUDICATED label")
+    ranked, missing = pool_ranking(r["ranking"], pool_ids)
+    return {"p5": precision_at_k(ranked, lab, 5), "ndcg10": ndcg_at_k(ranked, lab, 10), "missing": missing,
+            "pool_size": len(pool_ids), "pool_relevant": sum(g >= 2 for g in lab.values())}
+
+
 def e3(runs, ann) -> list[dict]:
     groups = defaultdict(list)
     for r in runs:
         if r["suite"] == "modes":
             groups[(r["profile_id"], r["mode_label"], r["total_budget"])].append(r)
     a_rank = {pid: rs[0]["ranking"] for (pid, m, _), rs in groups.items() if m == A}
+    pool_map = pools()
     out = []
     for (pid, mode, bud), rs in sorted(groups.items(), key=lambda kv: str(kv[0])):
-        labels = ann["relevance"].get(pid)
-        p5, n10, status = [], [], "NO_GROUND_TRUTH"
-        if labels:
-            try:
-                for r in rs:
-                    p5.append(precision_at_k(r["ranking"], labels, 5))
-                    n10.append(ndcg_at_k(r["ranking"], labels, 10))
+        pm, status = [], "NO_GROUND_TRUTH"
+        try:
+            pm = [x for x in (run_pool_metrics(r, ann, pool_map) for r in rs) if x is not None]
+            if pm:
                 status = f"COMPUTED_{ann['ground_truth_version']}"
-            except MissingLabelsError:
-                p5, n10, status = [], [], "INCOMPLETE_LABELS"
+        except MissingLabelsError:
+            pm, status = [], "INCOMPLETE_LABELS"
+        p5 = [x["p5"] for x in pm]
+        n10 = [x["ndcg10"] for x in pm if x["ndcg10"] is not None]
         top5s = [r["ranking"][:5] for r in rs]
         stab = [_overlap(x, y, 5) for i, x in enumerate(top5s) for y in top5s[i + 1:]]
         out.append({"candidate_id": pid, "mode": mode, "budget": bud or "", "n_runs": len(rs),
                     "precision_at_5": round(statistics.fmean(p5), 4) if p5 else "",
                     "ndcg_at_10": round(statistics.fmean(n10), 4) if n10 else "",
+                    "precision_at_5_sd_seeds": round(statistics.pstdev(p5), 4) if len(p5) > 1 else "",
+                    "ndcg_at_10_sd_seeds": round(statistics.pstdev(n10), 4) if len(n10) > 1 else "",
+                    "evaluation_set": "fixed annotated pool (pool-v1); run ranking restricted to pool",
+                    "pool_size": pm[0]["pool_size"] if pm else "", "pool_relevant_ge2": pm[0]["pool_relevant"] if pm else "",
+                    "pool_missing_from_ranking": sum(x["missing"] for x in pm) if pm else "",
                     "ground_truth_version": ann["ground_truth_version"] or "", "status": status,
                     "share_top10_unresolved_mandatory": round(statistics.fmean(r["top10_share_unresolved_mandatory"] for r in rs), 4),
                     "share_top10_failed_mandatory": round(statistics.fmean(r["top10_share_failed_mandatory"] for r in rs), 4),
@@ -252,88 +287,6 @@ def _md_table(rows: list[dict], cols: list[str]) -> str:
                      ["| " + " | ".join(str(r.get(c, "")) for c in cols) + " |" for r in rows])
 
 
-def tables_and_figures(e2rows, e3rows, e5m, runs) -> None:
-    TAB.mkdir(parents=True, exist_ok=True)
-    FIGS.mkdir(parents=True, exist_ok=True)
-    agg = []
-    for mode in MODES:
-        for bud in sorted({x["budget"] for x in e2rows if x["mode"] == mode}, key=str):
-            rs = [x for x in e2rows if x["mode"] == mode and x["budget"] == bud]
-            by_c = defaultdict(list)
-            for x in rs:
-                by_c[x["candidate_id"]].append(x)
-
-            def m(key):
-                return round(statistics.fmean(statistics.fmean(float(y[key]) for y in v) for v in by_c.values()), 4)
-            agg.append({"mode": mode, "budget": bud or "—", "candidates": len(by_c), "runs": len(rs),
-                        "questions_used": m("questions_used"), "relevant_coverage": m("relevant_coverage"),
-                        "critical_coverage": m("critical_coverage"), "unknown_count": m("unknown_count"),
-                        "unresolved_mandatory_count": m("unresolved_mandatory_count"),
-                        "fallback_questions": m("fallback_questions"), "status": "SIMULATED"})
-    write_csv(TAB / "table_4_3_interview_modes.csv", list(agg[0]), agg)
-    (TAB / "table_4_3_interview_modes.md").write_text(
-        "# Таблиця 4.3. Порівняння режимів інтерв'ю (SIMULATED; середнє по кандидатах, сіди усереднено)\n\n"
-        + _md_table(agg, list(agg[0])) + "\n", encoding="utf-8")
-    rk = []
-    for mode in MODES:
-        for bud in sorted({x["budget"] for x in e3rows if x["mode"] == mode}, key=str):
-            rs = [x for x in e3rows if x["mode"] == mode and x["budget"] == bud]
-            rk.append({"mode": mode, "budget": bud or "—", "candidates": len(rs),
-                       "precision_at_5": rs[0]["precision_at_5"] and round(statistics.fmean(float(x["precision_at_5"]) for x in rs), 4),
-                       "ndcg_at_10": rs[0]["ndcg_at_10"] and round(statistics.fmean(float(x["ndcg_at_10"]) for x in rs), 4),
-                       "status": rs[0]["status"],
-                       "share_top10_unresolved_mandatory": round(statistics.fmean(x["share_top10_unresolved_mandatory"] for x in rs), 4),
-                       "share_top10_failed_mandatory": round(statistics.fmean(x["share_top10_failed_mandatory"] for x in rs), 4),
-                       "top5_overlap_vs_A": round(statistics.fmean(x["top5_overlap_vs_A"] for x in rs), 4)})
-    write_csv(TAB / "table_4_4_recommendations.csv", list(rk[0]), rk)
-    (TAB / "table_4_4_recommendations.md").write_text(
-        "# Таблиця 4.4. Якість рекомендацій (P@5/NDCG@10 — лише за незалежними мітками; інакше NO_GROUND_TRUTH)\n\n"
-        + _md_table(rk, list(rk[0])) + "\n", encoding="utf-8")
-    sim = [x for x in e5m if x["truth"] == "SIMULATED_GROUND_TRUTH"]
-    write_csv(TAB / "table_4_5_estimator_simulated_truth.csv", list(sim[0]), sim)
-    (TAB / "table_4_5_estimator_simulated_truth.md").write_text(
-        "# Таблиця 4.5. SeniorityEstimator через інтерв'ю проти SIMULATED-істини (не експертні мітки)\n\n"
-        + _md_table(sim, list(sim[0])) + "\n", encoding="utf-8")
-    abl = _read(OUT / "ablation_results.csv")
-    if abl:
-        (TAB / "table_4_6_ablation.md").write_text(
-            "# Таблиця 4.6. Абляція зміни складності (D vs D без зміни складності vs B, C), SIMULATED\n\n"
-            + _md_table(abl, ["candidate_model", "total_budget", "mode_label", "n_runs", "n_questions", "graded_share",
-                              "level_correct", "difficulty_changes_overall", "difficulty_mix"]) + "\n", encoding="utf-8")
-    # figure sources and SVGs
-    fig_rows = [x for x in agg if x["budget"] != "—"]
-    write_csv(FIGD / "fig_coverage_vs_budget_candidate_mean.csv", list(fig_rows[0]), fig_rows)
-    a_cov = next(x["relevant_coverage"] for x in agg if x["mode"] == A)
-    series = {UA[m]: [(float(x["budget"]), x["relevant_coverage"]) for x in fig_rows if x["mode"] == m]
-              for m in (B, C, D)}
-    series[UA[A]] = [(float(b), a_cov) for b in sorted({float(x["budget"]) for x in fig_rows})]
-    _svg_lines(FIGS / "fig_coverage_vs_budget.svg", "Покриття релевантних критеріїв залежно від бюджету (SIMULATED)",
-               "бюджет питань", "частка оцінених критеріїв", series, 1.0)
-    series_q = {UA[m]: [(float(x["budget"]), x["questions_used"]) for x in fig_rows if x["mode"] == m] for m in (B, C, D)}
-    _svg_lines(FIGS / "fig_questions_used.svg", "Фактично використані питання (SIMULATED)", "бюджет питань",
-               "питань", series_q, 50.0)
-    acc = [x for x in sim if x["mode"] in (B, C, D)]
-    series_l = {UA[m]: [(float(x["budget"]), x["accuracy_candidate_mean"]) for x in acc if x["mode"] == m]
-                for m in (B, C, D)}
-    write_csv(FIGD / "fig_level_accuracy_vs_budget.csv", list(acc[0]), acc)
-    _svg_lines(FIGS / "fig_level_accuracy_vs_budget.svg", "Збіг рівня з SIMULATED-істиною (не експертні мітки)",
-               "бюджет питань", "частка збігів", series_l, 1.0)
-
-
-def missing_evidence(ann) -> str:
-    n = ann["n_rows"]
-    return "\n".join([
-        "# Відсутні докази (оновлюється `chapter4_metrics.py`)", "",
-        f"- Незалежні мітки релевантності: рядків {n['relevance']} (ADJUDICATED кандидатів: {len(ann['relevance'])}). "
-        "Без них P@5/NDCG@10 = NO_GROUND_TRUTH (H2 NOT_TESTED).",
-        f"- Незалежні рівні кандидатів: рядків {n['seniority']} (ADJUDICATED: {len(ann['levels'])}). Метрики "
-        "оцінювача проти експертів = NO_GROUND_TRUTH; доступна лише SIMULATED-істина (генератор).",
-        f"- Незалежні оцінки критеріїв: рядків {n['criterion']}. MAE Evaluator = NO_GROUND_TRUTH.",
-        "- Реальна LLM (локальна або продакшн) не запускалася: усі прогони — заглушки (EB-2).",
-        "- Реальних кандидатів і людських експертів немає; профілі — 18 симульованих (LLM-авторських) описів.",
-        "- Фігури PNG не створено (matplotlib відсутній); SVG створено вбудованим генератором.", ""])
-
-
 def build() -> dict:
     runs = [derive(r) for r in load_runs()]
     ann = annotations()
@@ -346,8 +299,6 @@ def build() -> dict:
     e5rows, e5m = e5(runs, ann)
     write_csv(OUT / "seniority_experiment_results.csv", list(e5rows[0]), e5rows)
     write_csv(OUT / "estimator_metrics.csv", list(dict.fromkeys(k for x in e5m for k in x)), e5m)
-    tables_and_figures(e2rows, e3rows, e5m, runs)
-    (OUT / "missing_evidence.md").write_text(missing_evidence(ann), encoding="utf-8")
     return {"e2_rows": len(e2rows), "e3_rows": len(e3rows), "e5_rows": len(e5rows),
             "ground_truth_version": ann["ground_truth_version"], "annotation_rows": ann["n_rows"]}
 

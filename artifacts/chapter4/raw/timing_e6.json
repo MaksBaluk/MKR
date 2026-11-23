@@ -1,0 +1,240 @@
+{
+  "components": {
+    "matching": {
+      "n": 600,
+      "median_ms": 3.7155,
+      "p95_ms": 3.8601,
+      "min_ms": 3.5178,
+      "max_ms": 13.1001,
+      "mean_ms": 3.7502
+    },
+    "ranking": {
+      "n": 600,
+      "median_ms": 0.0144,
+      "p95_ms": 0.0147,
+      "min_ms": 0.0135,
+      "max_ms": 0.017,
+      "mean_ms": 0.0143
+    },
+    "results": {
+      "n": 600,
+      "median_ms": 12.8361,
+      "p95_ms": 13.7332,
+      "min_ms": 12.6528,
+      "max_ms": 48.7381,
+      "mean_ms": 13.2429
+    },
+    "estimator": {
+      "n": 600,
+      "median_ms": 0.1192,
+      "p95_ms": 0.1246,
+      "min_ms": 0.1065,
+      "max_ms": 0.1399,
+      "mean_ms": 0.1179
+    },
+    "estimator_with_db": {
+      "n": 600,
+      "median_ms": 3.1551,
+      "p95_ms": 3.398,
+      "min_ms": 2.0437,
+      "max_ms": 36.1443,
+      "mean_ms": 3.2434
+    },
+    "market": {
+      "n": 600,
+      "median_ms": 0.2095,
+      "p95_ms": 0.2197,
+      "min_ms": 0.1919,
+      "max_ms": 0.2458,
+      "mean_ms": 0.2085
+    }
+  },
+  "per_candidate": {
+    "C02": {
+      "interview_setup_s_stub": 1.346,
+      "n_questions": 41,
+      "vacancies": 90,
+      "matching": {
+        "n": 200,
+        "median_ms": 3.6548,
+        "p95_ms": 3.6922,
+        "min_ms": 3.6064,
+        "max_ms": 3.708,
+        "mean_ms": 3.6534
+      },
+      "ranking": {
+        "n": 200,
+        "median_ms": 0.0144,
+        "p95_ms": 0.0146,
+        "min_ms": 0.0135,
+        "max_ms": 0.017,
+        "mean_ms": 0.0144
+      },
+      "results": {
+        "n": 200,
+        "median_ms": 12.7886,
+        "p95_ms": 13.3257,
+        "min_ms": 12.6528,
+        "max_ms": 48.0186,
+        "mean_ms": 13.026
+      },
+      "estimator": {
+        "n": 200,
+        "median_ms": 0.1149,
+        "p95_ms": 0.1178,
+        "min_ms": 0.1065,
+        "max_ms": 0.1299,
+        "mean_ms": 0.1128
+      },
+      "estimator_with_db": {
+        "n": 200,
+        "median_ms": 3.155,
+        "p95_ms": 3.612,
+        "min_ms": 3.0787,
+        "max_ms": 36.1443,
+        "mean_ms": 3.6905
+      },
+      "market": {
+        "n": 200,
+        "median_ms": 0.2064,
+        "p95_ms": 0.2157,
+        "min_ms": 0.1919,
+        "max_ms": 0.2219,
+        "mean_ms": 0.2033
+      }
+    },
+    "C09": {
+      "interview_setup_s_stub": 1.191,
+      "n_questions": 37,
+      "vacancies": 90,
+      "matching": {
+        "n": 200,
+        "median_ms": 3.8054,
+        "p95_ms": 4.0998,
+        "min_ms": 3.6265,
+        "max_ms": 13.1001,
+        "mean_ms": 3.9003
+      },
+      "ranking": {
+        "n": 200,
+        "median_ms": 0.0142,
+        "p95_ms": 0.0144,
+        "min_ms": 0.014,
+        "max_ms": 0.0146,
+        "mean_ms": 0.0142
+      },
+      "results": {
+        "n": 200,
+        "median_ms": 13.3952,
+        "p95_ms": 14.0036,
+        "min_ms": 12.7243,
+        "max_ms": 47.2301,
+        "mean_ms": 13.5541
+      },
+      "estimator": {
+        "n": 200,
+        "median_ms": 0.12,
+        "p95_ms": 0.1232,
+        "min_ms": 0.1178,
+        "max_ms": 0.1273,
+        "mean_ms": 0.1203
+      },
+      "estimator_with_db": {
+        "n": 200,
+        "median_ms": 3.2662,
+        "p95_ms": 3.3899,
+        "min_ms": 3.2256,
+        "max_ms": 36.1439,
+        "mean_ms": 3.7671
+      },
+      "market": {
+        "n": 200,
+        "median_ms": 0.2172,
+        "p95_ms": 0.2231,
+        "min_ms": 0.213,
+        "max_ms": 0.2458,
+        "mean_ms": 0.2179
+      }
+    },
+    "C15": {
+      "interview_setup_s_stub": 0.718,
+      "n_questions": 23,
+      "vacancies": 90,
+      "matching": {
+        "n": 200,
+        "median_ms": 3.7201,
+        "p95_ms": 3.7609,
+        "min_ms": 3.5178,
+        "max_ms": 4.0291,
+        "mean_ms": 3.6967
+      },
+      "ranking": {
+        "n": 200,
+        "median_ms": 0.0145,
+        "p95_ms": 0.0147,
+        "min_ms": 0.0135,
+        "max_ms": 0.0155,
+        "mean_ms": 0.0144
+      },
+      "results": {
+        "n": 200,
+        "median_ms": 12.8143,
+        "p95_ms": 13.4518,
+        "min_ms": 12.6599,
+        "max_ms": 48.7381,
+        "mean_ms": 13.1486
+      },
+      "estimator": {
+        "n": 200,
+        "median_ms": 0.1214,
+        "p95_ms": 0.1258,
+        "min_ms": 0.1124,
+        "max_ms": 0.1399,
+        "mean_ms": 0.1205
+      },
+      "estimator_with_db": {
+        "n": 200,
+        "median_ms": 2.1015,
+        "p95_ms": 2.1919,
+        "min_ms": 2.0437,
+        "max_ms": 35.0583,
+        "mean_ms": 2.2726
+      },
+      "market": {
+        "n": 200,
+        "median_ms": 0.2086,
+        "p95_ms": 0.2122,
+        "min_ms": 0.1937,
+        "max_ms": 0.2152,
+        "mean_ms": 0.2044
+      }
+    }
+  },
+  "experiment": "E6",
+  "status": "MEASURED_DETERMINISTIC_ONLY",
+  "repeats_per_candidate": 200,
+  "warmup": 10,
+  "candidates": [
+    "C02",
+    "C09",
+    "C15"
+  ],
+  "git_commit": "333a73157ba0a4f0be9ca2de98e3d6ec32b3ea97",
+  "product_tree_clean": true,
+  "product_code": "frozen 282f6fb (backend/fixtures unchanged since)",
+  "machine": {
+    "platform": "macOS-27.2.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "cpu": "Apple M3 Pro",
+    "logical_cpus": 12,
+    "python": "3.12.13",
+    "db": "SQLite in-memory (StaticPool), seeded fixtures",
+    "process": "single process, no parallel load"
+  },
+  "measured_at": "2026-11-23T00:56:08+0100",
+  "llm_latency": {
+    "status": "NOT_RUN",
+    "reason": "no local or production LLM was called; stub-interview time (interview_setup_s_stub, experiment_runs.csv total_s) is not LLM latency"
+  },
+  "excluded": "pytest durations are not used as performance measurements"
+}
