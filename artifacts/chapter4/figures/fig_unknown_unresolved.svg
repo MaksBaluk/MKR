@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1284" height="420" font-family="sans-serif" font-size="12">
+<rect width="1284" height="420" fill="white"/>
+<text x="64" y="22" font-size="14">Неоцінені критерії та невирішені обов'язкові групи (SIMULATED)</text>
+<line x1="64" y1="350" x2="1094" y2="350" stroke="black"/>
+<line x1="64" y1="44" x2="64" y2="350" stroke="black"/>
+<text x="14" y="197.0" transform="rotate(-90 14 197.0)" text-anchor="middle">частка</text>
+<text x="64" y="410" font-size="11" fill="#444">Вуса — мінімум і максимум середніх за кандидатами.</text>
+<text x="58" y="354.0" text-anchor="end">0</text><line x1="64" y1="350.0" x2="1094" y2="350.0" stroke="#e5e7eb"/>
+<text x="58" y="292.8" text-anchor="end">0.2</text><line x1="64" y1="288.8" x2="1094" y2="288.8" stroke="#e5e7eb"/>
+<text x="58" y="231.6" text-anchor="end">0.4</text><line x1="64" y1="227.6" x2="1094" y2="227.6" stroke="#e5e7eb"/>
+<text x="58" y="170.4" text-anchor="end">0.6</text><line x1="64" y1="166.4" x2="1094" y2="166.4" stroke="#e5e7eb"/>
+<text x="58" y="109.2" text-anchor="end">0.8</text><line x1="64" y1="105.2" x2="1094" y2="105.2" stroke="#e5e7eb"/>
+<text x="58" y="48.0" text-anchor="end">1</text><line x1="64" y1="44.0" x2="1094" y2="44.0" stroke="#e5e7eb"/>
+<text x="103.6" y="366" text-anchor="middle">A</text>
+<rect x="75.6" y="44.0" width="26.0" height="306.0" fill="#1f5fa8"/>
+<line x1="88.6" y1="44.0" x2="88.6" y2="44.0" stroke="black"/>
+<rect x="103.6" y="44.0" width="26.0" height="306.0" fill="#c2410c"/>
+<line x1="116.6" y1="44.0" x2="116.6" y2="44.0" stroke="black"/>
+<text x="182.8" y="366" text-anchor="middle">B b10</text>
+<rect x="154.8" y="115.6" width="26.0" height="234.4" fill="#1f5fa8"/>
+<line x1="167.8" y1="119.2" x2="167.8" y2="115.4" stroke="black"/>
+<rect x="182.8" y="123.3" width="26.0" height="226.7" fill="#c2410c"/>
+<line x1="195.8" y1="139.0" x2="195.8" y2="114.5" stroke="black"/>
+<text x="262.1" y="366" text-anchor="middle">B b20</text>
+<rect x="234.1" y="184.8" width="26.0" height="165.2" fill="#1f5fa8"/>
+<line x1="247.1" y1="191.9" x2="247.1" y2="184.2" stroke="black"/>
+<rect x="262.1" y="204.8" width="26.0" height="145.2" fill="#c2410c"/>
+<line x1="275.1" y1="218.3" x2="275.1" y2="197.9" stroke="black"/>
+<text x="341.3" y="366" text-anchor="middle">B b30</text>
+<rect x="313.3" y="184.8" width="26.0" height="165.2" fill="#1f5fa8"/>
+<line x1="326.3" y1="191.9" x2="326.3" y2="184.2" stroke="black"/>
+<rect x="341.3" y="204.8" width="26.0" height="145.2" fill="#c2410c"/>
+<line x1="354.3" y1="218.3" x2="354.3" y2="197.9" stroke="black"/>
+<text x="420.5" y="366" text-anchor="middle">B b50</text>
+<rect x="392.5" y="184.8" width="26.0" height="165.2" fill="#1f5fa8"/>
+<line x1="405.5" y1="191.9" x2="405.5" y2="184.2" stroke="black"/>
+<rect x="420.5" y="204.8" width="26.0" height="145.2" fill="#c2410c"/>
+<line x1="433.5" y1="218.3" x2="433.5" y2="197.9" stroke="black"/>
+<text x="499.8" y="366" text-anchor="middle">C b10</text>
+<rect x="471.8" y="77.3" width="26.0" height="272.7" fill="#1f5fa8"/>
+<line x1="484.8" y1="96.3" x2="484.8" y2="59.3" stroke="black"/>
+<rect x="499.8" y="78.7" width="26.0" height="271.3" fill="#c2410c"/>
+<line x1="512.8" y1="105.6" x2="512.8" y2="68.9" stroke="black"/>
+<text x="579.0" y="366" text-anchor="middle">C b20</text>
+<rect x="551.0" y="109.7" width="26.0" height="240.3" fill="#1f5fa8"/>
+<line x1="564.0" y1="152.4" x2="564.0" y2="73.3" stroke="black"/>
+<rect x="579.0" y="108.8" width="26.0" height="241.2" fill="#c2410c"/>
+<line x1="592.0" y1="169.8" x2="592.0" y2="84.4" stroke="black"/>
+<text x="658.2" y="366" text-anchor="middle">C b30</text>
+<rect x="630.2" y="126.2" width="26.0" height="223.8" fill="#1f5fa8"/>
+<line x1="643.2" y1="171.5" x2="643.2" y2="87.4" stroke="black"/>
+<rect x="658.2" y="128.6" width="26.0" height="221.4" fill="#c2410c"/>
+<line x1="671.2" y1="170.0" x2="671.2" y2="106.0" stroke="black"/>
+<text x="737.5" y="366" text-anchor="middle">C b50</text>
+<rect x="709.5" y="139.6" width="26.0" height="210.4" fill="#1f5fa8"/>
+<line x1="722.5" y1="171.5" x2="722.5" y2="114.1" stroke="black"/>
+<rect x="737.5" y="146.6" width="26.0" height="203.4" fill="#c2410c"/>
+<line x1="750.5" y1="170.0" x2="750.5" y2="124.9" stroke="black"/>
+<text x="816.7" y="366" text-anchor="middle">D b10</text>
+<rect x="788.7" y="84.5" width="26.0" height="265.5" fill="#1f5fa8"/>
+<line x1="801.7" y1="109.0" x2="801.7" y2="63.1" stroke="black"/>
+<rect x="816.7" y="97.9" width="26.0" height="252.1" fill="#c2410c"/>
+<line x1="829.7" y1="128.0" x2="829.7" y2="75.9" stroke="black"/>
+<text x="895.9" y="366" text-anchor="middle">D b20</text>
+<rect x="867.9" y="114.7" width="26.0" height="235.3" fill="#1f5fa8"/>
+<line x1="880.9" y1="151.1" x2="880.9" y2="82.2" stroke="black"/>
+<rect x="895.9" y="134.6" width="26.0" height="215.4" fill="#c2410c"/>
+<line x1="908.9" y1="178.3" x2="908.9" y2="101.8" stroke="black"/>
+<text x="975.2" y="366" text-anchor="middle">D b30</text>
+<rect x="947.2" y="129.3" width="26.0" height="220.7" fill="#1f5fa8"/>
+<line x1="960.2" y1="165.1" x2="960.2" y2="93.7" stroke="black"/>
+<rect x="975.2" y="155.8" width="26.0" height="194.2" fill="#c2410c"/>
+<line x1="988.2" y1="194.6" x2="988.2" y2="123.8" stroke="black"/>
+<text x="1054.4" y="366" text-anchor="middle">D b50</text>
+<rect x="1026.4" y="141.1" width="26.0" height="208.9" fill="#1f5fa8"/>
+<line x1="1039.4" y1="165.1" x2="1039.4" y2="118.0" stroke="black"/>
+<rect x="1054.4" y="175.9" width="26.0" height="174.1" fill="#c2410c"/>
+<line x1="1067.4" y1="194.6" x2="1067.4" y2="152.7" stroke="black"/>
+<rect x="1106" y="44" width="12" height="10" fill="#1f5fa8"/><text x="1124" y="53">неоцінені критерії (з 80)</text>
+<rect x="1106" y="62" width="12" height="10" fill="#c2410c"/><text x="1124" y="71">невирішені обов'язкові групи (з 566)</text>
+</svg>

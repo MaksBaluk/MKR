@@ -54,3 +54,14 @@
 | `uv run python -m scripts.chapter4.build_all --workers 6` | чистий worktree, усі виходи фази 2 попередньо видалено | 0 помилок; 1350 SIMULATED прогонів; хеш вмісту `eca6a8386e6af0ac` = закоміченому | 6 хв 23 с |
 
 Основне робоче дерево на момент фази 2 містило незакомічені зміни продуктового коду з іншої сесії (`agents/graphs.py`, frontend); вони не входять у заморожену конфігурацію, тому тести й експерименти запускалися в окремому чистому worktree.
+
+## Фаза 3 (2026-11-23)
+
+| Команда | Середовище | Результат | Тривалість |
+|---|---|---|---|
+| `cd app && uv run pytest -q -p no:cacheprovider` | чистий git worktree на commit `a6c9398` + незакомічені файли фази 3 лише в `app/scripts/chapter4`, `app/tests/test_chapter4_*`, `artifacts/chapter4` (продуктовий код = `282f6fb`), SQLite, локальний `app/.env` | 899 passed, 4 skipped (4 = `test_chapter4_postgres.py` без `CH4_PG_URL`), 0 failed, 81 warnings | 162.69 с |
+| `uv run pytest -q tests/test_chapter4_annotation_merge.py tests/test_chapter4_final_report.py` | те саме | 7 passed | 1.0 с |
+| `uv run python -m scripts.chapter4.timing_e6` | те саме, Apple M3 Pro | E6 записано в `raw/timing_e6.json` (200 вимірів × 3 кандидати на компонент) | ≈ 19 с |
+| `uv run python -m scripts.chapter4.build_all --phase3-only` (двічі) | те саме | 0 помилок; SHA-256 дерева `artifacts/chapter4` однаковий після двох запусків | ≈ 13–15 с |
+
+Не запускалося у фазі 3: реальна LLM (локальна чи продакшн), розмітка експертами-людьми, повний pytest на PostgreSQL, frontend-тести й Playwright (frontend не змінювався з фази 1). Основне робоче дерево містить незакомічені зміни продуктового коду іншої сесії; тести й побудова виконувались лише в окремому чистому worktree.

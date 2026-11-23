@@ -1,0 +1,13 @@
+panel,pilot_level,assessed_level,runs
+"B: статичне, бюджет 50",JUNIOR,JUNIOR,15
+"B: статичне, бюджет 50",MIDDLE,MIDDLE,18
+"B: статичне, бюджет 50",SENIOR,JUNIOR,3
+"B: статичне, бюджет 50",SENIOR,MIDDLE,15
+"B: статичне, бюджет 50",UNKNOWN,JUNIOR,3
+"D: CompetenceMatch, бюджет 50",JUNIOR,JUNIOR,15
+"D: CompetenceMatch, бюджет 50",MIDDLE,JUNIOR,2
+"D: CompetenceMatch, бюджет 50",MIDDLE,MIDDLE,16
+"D: CompetenceMatch, бюджет 50",SENIOR,MIDDLE,2
+"D: CompetenceMatch, бюджет 50",SENIOR,SENIOR,16
+"D: CompetenceMatch, бюджет 50",UNKNOWN,JUNIOR,2
+"D: CompetenceMatch, бюджет 50",UNKNOWN,UNKNOWN,1

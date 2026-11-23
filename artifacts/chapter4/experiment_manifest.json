@@ -1788,5 +1788,42 @@
     "algorithm_version": "rank-2.15+tv-jv/v1",
     "command": "cd app && uv run python -m scripts.chapter4.build_all",
     "note": "produced on older code (before policy v4, WP-B, WS-1); not comparable on prompts; regenerate"
+  },
+  "phase3": {
+    "git_commit_product": "282f6fb2a286bdc0291bf42c4b87cf89b63d9e92",
+    "ground_truth_version": "PILOT_LLM_ANNOTATOR",
+    "ground_truth_note": "ADJUDICATED pilot labels from LLM_ANNOTATOR_1/2 + third pass LLM_ANNOTATOR_3; not human experts",
+    "annotation_rows": {
+      "relevance": 2918,
+      "seniority": 55,
+      "criterion": 606
+    },
+    "result_status": {
+      "E1": "COMPLETED (algorithm correctness)",
+      "E2": "COMPLETED_SIMULATED",
+      "E3": "COMPUTED_PILOT_LLM_ANNOTATOR (SIMULATED candidates)",
+      "E4": "LOW_INFORMATION: templated answers, stub Evaluator; local/production LLM NOT_RUN",
+      "E5": "COMPUTED_PILOT_LLM_ANNOTATOR + SIMULATED_GROUND_TRUTH",
+      "E6": "DETERMINISTIC_MEASURED; LLM latency NOT_RUN"
+    },
+    "evaluation_set": "fixed annotated pool pool-v1 (944 pairs); run rankings restricted to the pool",
+    "statistics": "unit = candidate (n=18); cluster bootstrap 5000 reps, rng seed 20261119; exact sign test",
+    "hypotheses": {
+      "H1": "NOT_SUPPORTED",
+      "H2": "INCONCLUSIVE",
+      "H3": "INCONCLUSIVE",
+      "H4": "INCONCLUSIVE"
+    },
+    "figures": [
+      "fig_coverage_vs_budget",
+      "fig_coverage_bcd",
+      "fig_ranking_quality",
+      "fig_unknown_unresolved",
+      "fig_level_confusion",
+      "fig_interview_duration",
+      "fig_questions_used",
+      "fig_level_accuracy_vs_budget"
+    ],
+    "command": "cd app && uv run python -m scripts.chapter4.build_all --phase3-only"
   }
 }

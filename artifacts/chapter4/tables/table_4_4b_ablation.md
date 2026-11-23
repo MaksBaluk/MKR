@@ -1,0 +1,52 @@
+# Таблиця 4.4б. Абляція зміни складності (D / D без зміни складності / B / C), SIMULATED
+
+| candidate_model | total_budget | mode_label | n_runs | n_questions | graded_share | level_correct | difficulty_changes_overall |
+|---|---|---|---|---|---|---|---|
+| insensitive | 10 | B_STATIC | 54 | 10.0 | 0.234 | 0.6667 | 0.0 |
+| insensitive | 10 | C_ADAPTIVE_NO_MARKET | 54 | 10.0 | 0.1088 | 0.0 | 0.9259 |
+| insensitive | 10 | D_FIXED_DIFFICULTY | 54 | 10.0 | 0.1322 | 0.0556 | 0.0 |
+| insensitive | 10 | D_FULL_COMPETENCEMATCH | 54 | 10.0 | 0.1322 | 0.0556 | 1.5185 |
+| insensitive | 10 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (graded_share) | 54 |  | 0.0 |  |  |
+| insensitive | 10 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (criterion_coverage) | 54 |  |  |  |  |
+| insensitive | 10 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (level_correct) | 54 |  |  | 0.0 |  |
+| insensitive | 10 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (unresolved_critical_share) | 54 |  |  |  |  |
+| insensitive | 20 | B_STATIC | 54 | 20.0 | 0.46 | 0.6667 | 0.0 |
+| insensitive | 20 | C_ADAPTIVE_NO_MARKET | 54 | 20.0 | 0.2148 | 0.0185 | 1.2963 |
+| insensitive | 20 | D_FIXED_DIFFICULTY | 54 | 20.0 | 0.2322 | 0.5 | 0.0 |
+| insensitive | 20 | D_FULL_COMPETENCEMATCH | 54 | 20.0 | 0.2313 | 0.5 | 2.4444 |
+| insensitive | 20 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (graded_share) | 54 |  | -0.0009 |  |  |
+| insensitive | 20 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (criterion_coverage) | 54 |  |  |  |  |
+| insensitive | 20 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (level_correct) | 54 |  |  | 0.0 |  |
+| insensitive | 20 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (unresolved_critical_share) | 54 |  |  |  |  |
+| insensitive | 30 | B_STATIC | 54 | 20.0 | 0.46 | 0.6667 | 0.0 |
+| insensitive | 30 | C_ADAPTIVE_NO_MARKET | 54 | 27.1111 | 0.2685 | 0.1296 | 1.4444 |
+| insensitive | 30 | D_FIXED_DIFFICULTY | 54 | 27.3333 | 0.2812 | 0.9074 | 0.0 |
+| insensitive | 30 | D_FULL_COMPETENCEMATCH | 54 | 27.2778 | 0.2789 | 0.9074 | 3.0556 |
+| insensitive | 30 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (graded_share) | 54 |  | -0.0023 |  |  |
+| insensitive | 30 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (criterion_coverage) | 54 |  |  |  |  |
+| insensitive | 30 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (level_correct) | 54 |  |  | 0.0 |  |
+| insensitive | 30 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (unresolved_critical_share) | 54 |  |  |  |  |
+| insensitive | 50 | B_STATIC | 54 | 20.0 | 0.46 | 0.6667 | 0.0 |
+| insensitive | 50 | C_ADAPTIVE_NO_MARKET | 54 | 34.7407 | 0.3123 | 0.1852 | 1.9815 |
+| insensitive | 50 | D_FIXED_DIFFICULTY | 54 | 35.3519 | 0.3206 | 0.9074 | 0.0 |
+| insensitive | 50 | D_FULL_COMPETENCEMATCH | 54 | 35.1296 | 0.3174 | 0.9074 | 3.2222 |
+| insensitive | 50 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (graded_share) | 54 |  | -0.0032 |  |  |
+| insensitive | 50 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (criterion_coverage) | 54 |  |  |  |  |
+| insensitive | 50 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (level_correct) | 54 |  |  | 0.0 |  |
+| insensitive | 50 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (unresolved_critical_share) | 54 |  |  |  |  |
+| sensitive | 20 | B_STATIC | 54 | 20.0 | 0.4604 | 0.6667 | 0.0 |
+| sensitive | 20 | C_ADAPTIVE_NO_MARKET | 54 | 20.0 | 0.2088 | 0.0185 | 2.037 |
+| sensitive | 20 | D_FIXED_DIFFICULTY | 54 | 20.0 | 0.225 | 0.4259 | 0.0 |
+| sensitive | 20 | D_FULL_COMPETENCEMATCH | 54 | 20.0 | 0.2259 | 0.463 | 3.1481 |
+| sensitive | 20 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (graded_share) | 54 |  | 0.0009 |  |  |
+| sensitive | 20 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (criterion_coverage) | 54 |  |  |  |  |
+| sensitive | 20 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (level_correct) | 54 |  |  | 0.037 |  |
+| sensitive | 20 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (unresolved_critical_share) | 54 |  |  |  |  |
+| sensitive | 50 | B_STATIC | 54 | 20.0 | 0.4604 | 0.6667 | 0.0 |
+| sensitive | 50 | C_ADAPTIVE_NO_MARKET | 54 | 35.0556 | 0.3106 | 0.1852 | 3.6296 |
+| sensitive | 50 | D_FIXED_DIFFICULTY | 54 | 36.037 | 0.3174 | 0.9074 | 0.0 |
+| sensitive | 50 | D_FULL_COMPETENCEMATCH | 54 | 35.6852 | 0.315 | 0.9074 | 4.3333 |
+| sensitive | 50 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (graded_share) | 54 |  | -0.0023 |  |  |
+| sensitive | 50 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (criterion_coverage) | 54 |  |  |  |  |
+| sensitive | 50 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (level_correct) | 54 |  |  | 0.0 |  |
+| sensitive | 50 | DIFF D_FULL_COMPETENCEMATCH - D_FIXED_DIFFICULTY (unresolved_critical_share) | 54 |  |  |  |  |

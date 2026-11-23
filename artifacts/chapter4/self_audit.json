@@ -1,0 +1,43 @@
+{
+  "method": "separate stdlib re-implementation (pool restriction, P@5, NDCG@10 linear gain, coverage, level accuracy, abstention) vs published tables; tolerance 0.0006 (3-decimal rounding)",
+  "items": [
+    {
+      "quantity": "P@5 D b50",
+      "independent": 0.6778,
+      "published": 0.678,
+      "agree": true
+    },
+    {
+      "quantity": "NDCG@10 A",
+      "independent": 0.6585,
+      "published": 0.658,
+      "agree": true
+    },
+    {
+      "quantity": "relevant coverage B b20",
+      "independent": 0.46,
+      "published": 0.46,
+      "agree": true
+    },
+    {
+      "quantity": "level accuracy (pilot) D b50",
+      "independent": 0.8889,
+      "published": 0.889,
+      "agree": true
+    },
+    {
+      "quantity": "abstention (pilot) D b10",
+      "independent": 0.8889,
+      "published": 0.889,
+      "agree": true
+    },
+    {
+      "quantity": "ADJUDICATED relevance rows",
+      "independent": 944,
+      "published": 944.0,
+      "agree": true
+    }
+  ],
+  "summary": "6/6 agree",
+  "discrepancies": []
+}

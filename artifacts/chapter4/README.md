@@ -1,4 +1,4 @@
-# Матеріали розділу 4: як відтворити (фази 1–2)
+# Матеріали розділу 4: як відтворити (фази 1–3)
 
 Фаза 1 охоплює етапи 1–4 і 8 специфікації (`.superpowers/sdd/ch4-spec.md`): знімок реалізації, аудит SeniorityEstimator і архітектури, контрольні сценарії S01–S12, перевірку математичного ядра, технічне тестування. Етапи 5–7, 9–12 (порівняння режимів, адаптивність, незалежна якість, тексти розділу) — наступні фази.
 
@@ -73,15 +73,43 @@ uv run pytest -q tests/test_chapter4_modes.py
 | `simulation_method.md` | генеративний алгоритм кандидатів/заглушок, режими, статистика (для 4.2) | вручну |
 | `raw/modes_runs.jsonl.gz`, `raw/modes_meta.json` | усі прогони режимів з ходами й ревізіями оцінок; перевірка відтворюваності | `modes_experiment.py` |
 | `experiment_runs.csv` | один рядок на прогін: питання, теми, follow-up, зміни складності, fallback/UNGRADED, покриття, невирішені критичні, рівень, ширина інтервалів, `config_ref` | `modes_analysis.py` |
-| `interview_experiment_results.csv` (E2), `ranking_metrics.csv` (E3), `evaluator_metrics.csv` (E4), `seniority_experiment_results.csv`, `estimator_metrics.csv` (E5) | поля протоколу v2; P@5/NDCG/MAE/точність проти експертів — `NO_GROUND_TRUTH`, доки немає ADJUDICATED-міток | `chapter4_metrics.py` |
+| `interview_experiment_results.csv` (E2), `ranking_metrics.csv` (E3), `evaluator_metrics.csv` (E4), `seniority_experiment_results.csv`, `estimator_metrics.csv` (E5) | поля протоколу v2; з фази 3 P@5/NDCG/MAE/точність обчислено проти пілотних `ADJUDICATED`-міток (статус `COMPUTED_PILOT_LLM_ANNOTATOR`) | `chapter4_metrics.py` |
 | `mode_comparison.csv` | парні різниці режимів, кластерний бутстреп-ДІ, знаковий тест, d_z | `modes_analysis.py` |
 | `ablation_results.csv` | B / C / D без зміни складності / D, дві моделі кандидата | `modes_analysis.py` |
 | `criterion_results.csv`, `ranking_results.csv` | критерії (бюджет 50, і режим A) і Top-10 кожного прогону | `modes_analysis.py` |
 | `seniority_results.csv`, `interview_turns.jsonl` | рядки фази 1 + рядки з `suite` (у jsonl — ходи seed 0, бюджет 50 і stub_check; усі ходи в raw) | `seniority_scenarios_ch4.py` + `modes_analysis.py` |
 | `adaptivity_evidence.md/.json` | етап 6: вибір теми, складність, followup_goal на збережених ходах | `adaptivity_evidence.py` |
 | `evaluation_metrics.csv` | статуси NO_GROUND_TRUTH / SIMULATED_GROUND_TRUTH / NOT_APPLICABLE | `modes_analysis.py` |
-| `figures_data/*.csv`, `figures/*.svg`, `tables/*` | джерела рисунків, SVG з українськими підписами, таблиці 4.3–4.6 | `modes_analysis.py`, `chapter4_metrics.py` |
-| `missing_evidence.md` | чого бракує для повних висновків | `chapter4_metrics.py` |
-| `data/` | `vacancies.csv`, `vacancy_requirements.jsonl`, `dataset_audit.md`, `candidates.csv`, `hidden/scenario_definitions.json` (приховано), `candidate_competency_reference.jsonl` (null), `response_bank.jsonl`, `annotations/*.csv` (порожні), `annotation_inputs/` (інструкція, шкала 0–3, пул вакансій) | `data_package.py` |
+| `figures_data/*.csv`, `figures/*.svg`, `tables/*` | джерела рисунків, SVG з українськими підписами; з фази 3 таблиці 4.1–4.7 — див. нижче | `modes_analysis.py`, `final_report.py` |
+| `missing_evidence.md` | чого бракує для повних висновків | `final_report.py` |
+| `data/` | `vacancies.csv`, `vacancy_requirements.jsonl`, `dataset_audit.md`, `candidates.csv`, `hidden/scenario_definitions.json` (приховано), `candidate_competency_reference.jsonl` (null), `response_bank.jsonl`, `annotations/*.csv` (з фази 3 — пілотна розмітка), `annotation_inputs/` (інструкція, шкала 0–3, пул вакансій) | `data_package.py` |
 
 Ідентифікатори: `ch4-m-<кандидат>-<режим>-b<бюджет>-s<seed>` (режими A, B, C, D, Dfd; суфікси `-dsens` — чутлива модель кандидата, `-enstub` — документована заглушка для перевірки EB-3). Усі прогони — SIMULATED на commit `282f6fb` (продуктовий код) і `experiment_manifest.json` → `frozen_config`; список run_id — `experiment_manifest.json` → `runs`.
+
+
+## Фаза 3 (етапи 7, 9, 10, 12: розмітка, метрики, гіпотези, звіт)
+
+Одна команда (з `app/`; нових симуляцій не запускає, читає збережені прогони й розмітку; ≈ 15 с):
+
+```bash
+uv run python -m scripts.chapter4.build_all --phase3-only          # + --with-timing переміряє E6 (≈ 20 с)
+uv run pytest -q tests/test_chapter4_annotation_merge.py tests/test_chapter4_final_report.py
+```
+
+Повна перебудова всього пакета (фази 2–3): `uv run python -m scripts.chapter4.build_all` (≈ 6–7 хв). Повторний запуск `--phase3-only` дає побайтово однаковий вміст `artifacts/chapter4/` (перевірено хешем дерева). Значення E6 змінюються між вимірами, тому `raw/timing_e6.json` переписується лише з `--with-timing`.
+
+| Файл | Зміст | Генератор |
+|---|---|---|
+| `data/annotations/*.csv`, `agreement_report.md` | сирі проходи `LLM_ANNOTATOR_1/2/3` + остаточні `ADJUDICATED` (944 / 18 / 202); узгодженість до узгодження; третій прохід (86 релевантність, 1 рівень) | `annotation_merge.py` (джерело — `.superpowers/sdd/annot/`, за відсутності — збережені сирі рядки) |
+| `ranking_metrics.csv` | P@5, NDCG@10 на фіксованому пулі `pool-v1` (ранжування прогону обмежено пулом; відсутні в ранжуванні вакансії пулу дописуються в кінець і рахуються — 0), стабільність між сідами, зміни рангу щодо A | `chapter4_metrics.py` |
+| `hypothesis_comparisons.csv` | парні різниці режимів (покриття, P@5, NDCG@10, рівень, невирішені групи, Top-5, повторні питання) з бутстреп-ДІ та знаковим тестом | `final_report.py` |
+| `hypotheses.csv` | H1–H4: статус, первинна метрика, підсумок, обмеження | `final_report.py` |
+| `ranking_per_candidate_differences.csv`, `level_confusion_pilot.csv` | покращення/погіршення за кандидатом (D проти A/B/C); матриці рівнів проти пілоту | `final_report.py` |
+| `tables/table_4_1 … 4_7` (+ `4_4b_ablation`) | таблиці 4.1–4.7 (md + csv), українські заголовки; відсутні дані — статус і причина | `final_report.py` |
+| `figures/*.svg`, `figures_data/fig_*.csv` | покриття за бюджетом, B/C/D, P@5/NDCG@10, неоцінені/невирішені, матриця рівнів, тривалість (заглушки), питання, збіг рівня | `final_report.py` |
+| `raw/timing_e6.json` | E6: медіана/p95 детермінованих компонентів (matching, ранжування, rank_items, оцінювач, ринок); затримка LLM NOT_RUN | `timing_e6.py` |
+| `chapter4_evidence_report.md`, `chapter4_results_summary.md`, `missing_evidence.md` | звіт етапу 12 (A–G), підсумок чисел, відсутні докази | `final_report.py` + `report_text.py` |
+| `self_audit.json` | незалежне перерахування 6 ключових чисел із сирих файлів (лише stdlib) | `self_audit.py` |
+| `thesis_changes_1_3.md` | таблиця змін розділів 1–3 (DOCX відсутній) | вручну |
+
+Мітки: розмітка — `LLM_ANNOTATOR_PILOT` (LLM, не експерти-люди; корельовані між собою й з LLM-оцінювачами); кандидати — SIMULATED; Evaluator — заглушка. Продуктовий код не змінювався (`282f6fb`).
