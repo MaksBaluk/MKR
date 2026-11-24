@@ -17,9 +17,9 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input, Select } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FIT_ANCHOR } from '@/lib/vacancyFit';
+import { FIT_ANCHOR, shareLabel } from '@/lib/vacancyFit';
 import { bandFor } from '@/lib/bands';
-import { groupBySection, SECTIONS, sectionTitle } from '@/lib/levelView';
+import { sectionBadge } from '@/lib/levelView';
 import {
   assessedLabel, DEFAULT_FILTERS, FIT_EXPLANATION, filtersFromQuery, filtersToQuery, fitLabel,
   hasActiveFilters, MIN_SHARE_OPTIONS, PAGE_SIZE, resultsApiPath, SENIORITIES, totalPages, vacancyCount,
@@ -76,13 +76,13 @@ function FitBlock({ item }: { item: ResultVacancy }) {
       <div className="flex items-start justify-between gap-2">
         <p className="flex flex-col">
           <span className="text-xs text-ink-subtle">Збіг профілю</span>
-          <span className="text-2xl font-bold tabular-nums text-primary">{item.confirmed_share}%</span>
+          <span className="text-2xl font-bold tabular-nums text-primary">{shareLabel(item.confirmed_share)}%</span>
         </p>
         <InfoPopover label="Як розраховано збіг профілю">{FIT_EXPLANATION}</InfoPopover>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-surface-muted" role="img" aria-label={fitLabel(item.confirmed_share)}>
+      <div className="h-2 overflow-hidden rounded-full bg-surface-muted" role="img" aria-label={fitLabel(shareLabel(item.confirmed_share))}>
         <div className="h-full rounded-full bg-primary transition-[width] duration-500 motion-reduce:transition-none"
-          style={{ width: `${item.confirmed_share}%` }} />
+          style={{ width: `${shareLabel(item.confirmed_share)}%` }} />
       </div>
       <p className="text-xs text-ink-subtle">{assessedLabel(item.groups_assessed, item.groups_total)}</p>
       {item.label === 'LOW_INFORMATION' && <Badge className="self-start">Мало даних</Badge>}
@@ -103,11 +103,12 @@ function VacancyCard({ item, rank }: { item: ResultVacancy; rank: number }) {
           <SourceMark label={item.source_label} example={item.source_example} />
         </div>
         <div className="min-w-0 flex-1">
-          <h4 className="text-base font-semibold text-ink [overflow-wrap:anywhere]">
+          <p className="mb-1"><Badge>{sectionBadge(item.section)}</Badge></p>
+          <h3 className="text-base font-semibold text-ink [overflow-wrap:anywhere]">
             <Link to={href} className="rounded hover:text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
               {item.title}
             </Link>
-          </h4>
+          </h3>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-ink-muted">
             <span>{item.company}</span>
             {item.location && (
@@ -317,18 +318,16 @@ export function ResultsScreen({ profile }: { profile: CandidateProfile }) {
 
   const pages = totalPages(data.total, PAGE_SIZE);
   const offset = (data.page - 1) * data.page_size;
-  const sections = groupBySection(data.items);
 
   return (
     <div className="flex flex-col gap-6">
-      <LevelSummary level={data.level} profileTarget={profile.target_level} />
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]">
         <section aria-labelledby="vacancies-title" className="flex flex-col gap-4">
           <h2 id="vacancies-title" ref={listHeading} tabIndex={-1} className="scroll-mt-24 text-xl font-semibold tracking-tight text-ink">
             Вакансії вашої добірки
           </h2>
           <p className="-mt-2 text-sm text-ink-muted">
-            Номер картки — це її місце в загальному списку, упорядкованому за відсотком. Розділи лише групують вакансії й не змінюють порядку.
+            Номер — місце вакансії в списку за відсотком збігу. Позначка на картці показує, до якого розділу вона належить.
           </p>
           <Card className="p-4 sm:p-5"><FilterBar filters={filters} onChange={update} /></Card>
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -350,30 +349,17 @@ export function ResultsScreen({ profile }: { profile: CandidateProfile }) {
               Змініть умови пошуку або поверніться до повного списку.
             </EmptyState>
           ) : (
-            // Sections group the current page only (the server paginates the percent-first list), so a section may
-            // continue on the next page. Every item of the page is rendered once; ranks are the positions in that list.
-            <div className={`flex flex-col gap-5 transition-opacity motion-reduce:transition-none ${loading ? 'opacity-60' : ''}`}
-              aria-busy={loading}>
-              {SECTIONS.map((section) => {
-                const group = sections[section];
-                if (!group) return null;
-                const id = `section-${section.toLowerCase()}`;
-                return (
-                  <section key={section} aria-labelledby={id} className="flex flex-col gap-3">
-                    <h3 id={id} className="text-base font-semibold text-ink">{sectionTitle(section)}</h3>
-                    <ol className="flex flex-col gap-3" aria-labelledby={id}>
-                      {group.map((item) => (
-                        <li key={item.vacancy_id}><VacancyCard item={item} rank={offset + data.items.indexOf(item) + 1} /></li>
-                      ))}
-                    </ol>
-                  </section>
-                );
-              })}
-            </div>
+            <ol aria-label="Вакансії за відсотком збігу" aria-busy={loading}
+              className={`flex flex-col gap-3 transition-opacity motion-reduce:transition-none ${loading ? 'opacity-60' : ''}`}>
+              {data.items.map((item, i) => (
+                <li key={item.vacancy_id}><VacancyCard item={item} rank={offset + i + 1} /></li>
+              ))}
+            </ol>
           )}
           <Pagination page={data.page} pages={pages} onPage={goPage} />
         </section>
-        <aside className="flex min-w-0 flex-col gap-4 xl:sticky xl:top-24">
+        <aside className="order-first flex min-w-0 flex-col gap-4 xl:order-none xl:sticky xl:top-24">
+          <LevelSummary level={data.level} profileTarget={profile.target_level} />
           <CompetencySection competencies={data.competencies} />
         </aside>
       </div>

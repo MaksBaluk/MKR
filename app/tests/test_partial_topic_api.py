@@ -6,7 +6,7 @@ from tests.test_interview_flow import llm  # noqa: F401
 from tests.test_profiles_api import API, finished  # noqa: F401
 
 
-def _setup(db, finished, criterion_ids=None):
+def _setup(db, finished, criterion_ids=None, score=0.95):
     with db() as s:
         rid, action = s.execute(select(RubricCriterion.rubric_id, Rubric.action_id).join(Rubric)
                                 .where(Rubric.version == "v1", Rubric.source.in_(("CURATED", "CURATED_TEMPLATE", "REVIEWED")))
@@ -28,7 +28,7 @@ def _setup(db, finished, criterion_ids=None):
         for r in s.scalars(select(CriterionAssessment).where(CriterionAssessment.session_id == iv.id)).all():
             s.delete(r)
         s.add(CriterionAssessment(user_id=iv.user_id, session_id=iv.id, action_id=action,
-                                  criterion_id=crit[0].criterion_id, rubric_id=rid, score=0.95, reason="ok",
+                                  criterion_id=crit[0].criterion_id, rubric_id=rid, score=score, reason="ok",
                                   evidence=[], revision=1, sufficient_evidence=True))
         s.commit()
         return action, vid
@@ -74,3 +74,17 @@ def test_recommendations_one_of_five_not_met(client, auth, db, finished):
     r = client.post(f"{API}/recommendations", json={"cohort_id": cid}, headers=auth).json()
     item = next(i for i in r["items"] if i["vacancy_id"] == vid)
     assert item["met_count"] == 0 and item["z"] != 2
+
+
+def test_detail_names_the_weak_criterion_behind_a_gap(client, auth, db, finished):
+    action, vid = _setup(db, finished, criterion_ids=True, score=0.3)
+    alt = client.get(f"{API}/profiles/{finished['id']}/results/{vid}", headers=auth).json()["groups"][0]["alternatives"][0]
+    assert alt["state"] == "GAP"
+    (weak,) = alt["weak_criteria"]
+    assert weak["score"] == 0.3 and weak["title"] and weak["id"] in alt["required_criteria"]
+
+
+def test_detail_has_no_weak_criteria_when_the_requirement_is_met(client, auth, db, finished):
+    action, vid = _setup(db, finished, criterion_ids=True)
+    alt = client.get(f"{API}/profiles/{finished['id']}/results/{vid}", headers=auth).json()["groups"][0]["alternatives"][0]
+    assert alt["state"] == "MET" and alt["weak_criteria"] == []

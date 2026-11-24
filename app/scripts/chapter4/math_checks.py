@@ -351,7 +351,7 @@ def t01(rng):
 def r01(rng):
     from backend.api import profiles as profiles_api
     src = inspect.getsource(profiles_api.results)
-    percent_first = 'items.sort(key=lambda i: -i["confirmed_share"])' in src
+    percent_first = 'items.sort(key=lambda i: (-i["confirmed_share"], i["section"] != "DESIRED_LEVEL"))' in src
     rec = inspect.getsource(__import__("backend.api.recommendations", fromlist=["x"]).rank_items)
     pure = "for r in order(ranked)]" in rec and ".sort(" not in rec and "sorted(" not in rec
     z0 = VacancyRanking("a", 0, 2, 0.8, 0.0, 0.2, 0.0, True, False, "RANKED", confirmed_share=0.8)

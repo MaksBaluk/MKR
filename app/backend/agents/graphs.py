@@ -153,6 +153,16 @@ def validate_question(text: str, off_topic: bool, criterion_ids=()) -> str | Non
     return None
 
 
+def _norm_q(text: str) -> str:
+    return " ".join(re.sub(r"[^\w\s]", " ", text.casefold()).split())
+
+
+def _is_repeat(question: str, asked: list[str] | None) -> bool:
+    """True when the question is the same text as one already shown (case/punctuation/spacing ignored)."""
+    n = _norm_q(question)
+    return bool(n) and any(n == _norm_q(a) for a in asked or [])
+
+
 def _bank_text(action_id: str, label: str, asked: list[str] | None = None) -> str:
     """First free-text bank question not shown yet; a generic ask only when the bank is exhausted."""
     asked = asked or []
@@ -179,10 +189,14 @@ def _build_ask(model):
                 practice_gaps=s.get("practice_gaps"))
             resp = _invoke(model, [SystemMessage(INTERVIEWER_SYSTEM), HumanMessage(user)])
             question = _text(resp).strip().strip('"«»').strip()
-            if validate_question(question, s.get("off_topic_detected", False)) in ("TOO_LONG", "MULTI_PART"):
+            asked = s.get("asked_questions", [])
+            reason = validate_question(question, s.get("off_topic_detected", False))
+            if reason in ("TOO_LONG", "MULTI_PART") or _is_repeat(question, asked):
                 # one more try with the reason, before the bank is used
-                retry = user + "\n\nПопередня версія задовга або з кількома питаннями. Дай ОДНЕ питання до 25 слів."
-                resp = _invoke(model, [SystemMessage(INTERVIEWER_SYSTEM), HumanMessage(retry)])
+                note = ("Таке питання вже було. Постав інше, не перефразуй раніше поставлені."
+                        if _is_repeat(question, asked)
+                        else "Попередня версія задовга або з кількома питаннями. Дай ОДНЕ питання до 25 слів.")
+                resp = _invoke(model, [SystemMessage(INTERVIEWER_SYSTEM), HumanMessage(user + "\n\n" + note)])
                 question = _text(resp).strip().strip('"«»').strip()
             return {"question": question}
         except Exception as exc:  # noqa: BLE001 - any provider failure means bank fallback
@@ -196,6 +210,8 @@ def _build_ask(model):
         goal = s.get("followup_goal") or {}
         known = [*s.get("unmet_criteria", []), *(goal.get("criterion_ids") or []), *(s.get("practice_gaps") or [])]
         reason = validate_question(q, s.get("off_topic_detected", False), known)
+        if not reason and _is_repeat(q, s.get("asked_questions")):
+            reason = "REPEATS_ASKED"
         if reason:
             log.warning("interviewer question rejected action=%s kind=%s", s.get("action_id"), reason)
             return {"question": None}

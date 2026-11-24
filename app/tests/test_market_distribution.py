@@ -84,3 +84,15 @@ def test_levels_split_vacancies_by_required_level(client, db):
     for item in body["items"]:
         assert item["levels"] == expected[item["action_id"]]
         assert sum(item["levels"].values()) >= 1
+
+
+def test_seniority_filter_counts_only_that_level_and_totals_cover_all(client, db):
+    whole = distribution(client, "python").json()
+    totals = whole["seniority_totals"]
+    assert sum(totals.values()) == whole["vacancies_total"] and whole["seniority"] is None
+    for level in ("junior", "senior"):
+        r = client.get(f"{API}/market/distribution", params={"track": "python", "seniority": level}).json()
+        assert r["seniority"] == level and r["vacancies_total"] == totals.get(level, 0)
+        assert all(0 <= i["share_percent"] <= 100 for i in r["items"])
+        assert r["seniority_totals"] == totals
+    assert client.get(f"{API}/market/distribution", params={"track": "python", "seniority": "guru"}).status_code == 422

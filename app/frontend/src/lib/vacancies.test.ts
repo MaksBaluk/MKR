@@ -172,3 +172,20 @@ describe('backToListPath', () => {
     expect(backToListPath({ fromList: 42 })).toBe('/vacancies');
   });
 });
+
+import { postingExcerpts } from '@/lib/vacancies';
+
+describe('postingExcerpts', () => {
+  test('unique, trimmed, mandatory first, skipping phrases the description has', () => {
+    const groups = [
+      { kind: 'DESIRED', excerpt: 'Nice to have SQL.' },
+      { kind: 'MANDATORY', excerpt: 'Analytics tools: GA, Tableau;' },
+      { kind: 'MANDATORY', excerpt: 'Analytics tools: GA, Tableau;' },
+      { kind: 'MANDATORY', excerpt: 'Already in text' },
+      { kind: 'MANDATORY', excerpt: '  ' },
+    ];
+    expect(postingExcerpts(groups, 'Опис. already in text.')).toEqual([
+      { kind: 'MANDATORY', text: 'Analytics tools: GA, Tableau' }, { kind: 'DESIRED', text: 'Nice to have SQL.' },
+    ]);
+  });
+});

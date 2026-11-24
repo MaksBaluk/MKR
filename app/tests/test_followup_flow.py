@@ -27,7 +27,7 @@ class PolicyChat:
         system, human = messages[0].content, messages[1].content
         if system == INTERVIEWER_SYSTEM:
             self.asked += 1
-            return SimpleNamespace(content=f"Опишіть випадок номер {'один' if self.asked == 1 else 'інший'} з вашої практики?")
+            return SimpleNamespace(content=f"Опишіть випадок номер {self.asked} з вашої практики?")
         data = {k: json.loads(v) for k, v in (line.split(": ", 1) for line in human.splitlines()
                                               if re.match(r"(action_id|allowed_criterion_ids|open_criterion_ids): ", line))}
         self.evaluator_inputs.append(data)

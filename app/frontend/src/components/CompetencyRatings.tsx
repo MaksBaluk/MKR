@@ -99,7 +99,7 @@ export function CompetencyRatings({ track, profileId, competencies }: {
         Фіолетова смуга знизу і кружок — ваша самооцінка: пересуньте кружок від 0% («не володію») до 100% («впевнено володію»).
         Самооцінка не впливає на оцінку співбесіди.
       </p>
-      <ul className="grid gap-3 lg:grid-cols-2">
+      <ul className="grid gap-3 2xl:grid-cols-2">
         {shown.map((r) => {
           const id = `cr-${r.id}`;
           const st = state[r.id] ?? 'idle';

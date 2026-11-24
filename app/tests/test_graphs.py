@@ -267,6 +267,36 @@ def test_fallback_does_not_repeat_a_question_already_asked():
     assert second.question_text != first.question_text
 
 
+_REPEAT_STATE = {"action_id": ACTION, "action_name": "PostgreSQL", "summary": "", "unmet_criteria": ["sql_design"],
+                 "previous_answers": [], "followup_goal": None}
+_SEEN = "Як би ви перевірили, що індекс у PostgreSQL прискорює запит?"
+_FRESH = "Який план виконання запиту ви б аналізували в PostgreSQL і чому?"
+
+
+def test_ask_retries_when_the_llm_repeats_an_asked_question():
+    model = FakeModel(_SEEN, _FRESH)
+    out = run_ask({**_REPEAT_STATE, "asked_questions": [_SEEN]}, model)
+    assert out.source == "LLM_INTERVIEWER" and out.question_text == _FRESH and model.calls == 2
+
+
+def test_ask_repeat_is_detected_after_case_and_punctuation_changes():
+    model = FakeModel("  " + _SEEN.upper().rstrip("?") + " ?! ", _FRESH)
+    out = run_ask({**_REPEAT_STATE, "asked_questions": [_SEEN]}, model)
+    assert out.question_text == _FRESH and model.calls == 2
+
+
+def test_ask_falls_back_to_the_bank_when_the_llm_keeps_repeating():
+    model = FakeModel(_SEEN, _SEEN)
+    out = run_ask({**_REPEAT_STATE, "asked_questions": [_SEEN]}, model)
+    assert out.source == "FALLBACK_UNGRADED" and out.question_text != _SEEN and model.calls == 2
+
+
+def test_ask_does_not_retry_when_the_question_is_new():
+    model = FakeModel(_FRESH)
+    out = run_ask({**_REPEAT_STATE, "asked_questions": [_SEEN]}, model)
+    assert out.question_text == _FRESH and model.calls == 1
+
+
 class SlowModel:
     """A provider that never answers in time (a stalled stream)."""
 

@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { desiredLabel, explanationWithoutHigher, higherNotice, levelLabel, unassessedItems } from '@/lib/levelView';
 import type { AssessedLevel, LevelPool } from '@/types';
@@ -23,32 +22,42 @@ function CriterionList({ title, items, empty }: { title: string; items: LevelPoo
 /**
  * Desired level (the candidate's own statement) next to the level supported by the graded answers. The level is an
  * assessment of the supplied answers under the level policy, not verified work history and not a chance of being hired.
+ * Compact card for the side column; the criterion lists are collapsed into one "Деталі рівня" block.
  */
 export function LevelSummary({ level, profileTarget }: { level: AssessedLevel | null | undefined; profileTarget: string | null }) {
   const desired = desiredLabel(level ? level.desired_level : profileTarget);
+  const unknown = !level || level.assessed_level === 'UNKNOWN';
+  const checked = level ? level.confirmed_strengths.length + level.critical_gaps.length : 0;
+  const total = level ? checked + unassessedItems(level).length : 0;
   return (
     <Card className="min-w-0">
       <CardHeader>
-        <CardTitle id="level-title">Рівень за співбесідою</CardTitle>
+        <CardTitle id="level-title">Ваш рівень</CardTitle>
         <CardDescription>
-          Висновок спирається лише на оцінки ваших відповідей у цій співбесіді і не впливає на порядок вакансій.
+          Висновок спирається лише на оцінки ваших відповідей і не впливає на порядок вакансій.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <dl className="grid gap-3 sm:grid-cols-2">
+      <CardContent className="flex flex-col gap-3">
+        <dl className="grid grid-cols-2 gap-2">
           <div className="rounded-xl bg-surface-muted p-3">
-            <dt className="text-xs text-ink-subtle">Бажаний рівень</dt>
-            <dd className="text-lg font-semibold text-ink">
-              {desired}
-            </dd>
+            <dt className="text-xs text-ink-subtle">Бажаний</dt>
+            <dd className="text-lg font-semibold text-ink">{desired}</dd>
           </div>
           <div className="rounded-xl bg-primary-soft p-3">
-            <dt className="text-xs text-ink-subtle">Підтверджений рівень</dt>
+            <dt className="text-xs text-ink-subtle">Підтверджений</dt>
             <dd className="text-lg font-semibold text-primary">
-              {level ? levelLabel(level.assessed_level) : 'Недостатньо даних'}
+              {level && !unknown ? levelLabel(level.assessed_level) : 'Не визначено'}
             </dd>
           </div>
         </dl>
+        {unknown && (
+          <p className="text-sm text-ink-muted">
+            {level && total > 0
+              ? `Підтверджено ${level.confirmed_strengths.length} із ${total} критичних вимог. `
+              : 'Рівень не вдалося визначити за збереженими оцінками. '}
+            Щоб рівень можна було визначити, відповідайте в співбесіді розгорнутіше й із прикладами.
+          </p>
+        )}
         {level && (() => {
           const notice = higherNotice(level);
           if (!notice) return null;
@@ -67,14 +76,17 @@ export function LevelSummary({ level, profileTarget }: { level: AssessedLevel | 
             </div>
           );
         })()}
-        {level ? (
-          <>
-            {explanationWithoutHigher(level).length > 0 && (
-              <ul className="flex flex-col gap-1 text-sm text-ink-muted">
-                {explanationWithoutHigher(level).map((line, i) => <li key={i}>{line}</li>)}
-              </ul>
-            )}
-            <div className="flex flex-col gap-2">
+        {level && (
+          <details className="rounded-lg border border-line px-3 py-2 text-sm">
+            <summary className="min-h-8 cursor-pointer py-1 font-medium text-ink hover:text-primary-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+              Деталі рівня
+            </summary>
+            <div className="mt-2 flex flex-col gap-2">
+              {explanationWithoutHigher(level).length > 0 && (
+                <ul className="flex flex-col gap-1 text-ink-muted">
+                  {explanationWithoutHigher(level).map((line, i) => <li key={i}>{line}</li>)}
+                </ul>
+              )}
               <CriterionList title="Підтверджено" items={level.confirmed_strengths} empty="Підтверджених критичних критеріїв поки немає." />
               <CriterionList title="Прогалини" items={level.critical_gaps} empty="Критичних прогалин не виявлено." />
               <CriterionList title="Не перевірено" items={unassessedItems(level)} empty="Усі критичні вимоги перевірено." />
@@ -87,16 +99,11 @@ export function LevelSummary({ level, profileTarget }: { level: AssessedLevel | 
                   items={level.no_experience_pools} empty="" />
               )}
             </div>
-            {level.note && (
-              <p className="flex flex-wrap items-center gap-2 text-xs text-ink-muted">
-                <Badge variant="warning">{level.note}</Badge>
-                Правила визначення рівня є робочим припущенням.
-              </p>
-            )}
-          </>
-        ) : (
-          <p className="text-sm text-ink-muted">
-            Рівень не вдалося визначити за збереженими оцінками. Вакансії нижче показано як завжди.
+          </details>
+        )}
+        {level && (
+          <p className="text-xs text-ink-muted">
+            <span aria-hidden="true">ⓘ </span>Правила визначення рівня — робоче припущення, ще не перевірене експертами.
           </p>
         )}
       </CardContent>

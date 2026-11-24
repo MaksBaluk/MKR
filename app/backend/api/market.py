@@ -2,7 +2,7 @@
 from collections import Counter
 from typing import Literal
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -25,8 +25,14 @@ def _highest_levels(rows) -> dict[tuple[str, str], int]:
 
 
 @router.get("/distribution")
-def distribution(track: Literal["python", "marketing", "design"], db: Session = Depends(get_db)):
-    active = (Vacancy.track == track, Vacancy.is_active.is_(True))
+def distribution(track: Literal["python", "marketing", "design"],
+                 seniority: Literal["junior", "middle", "senior", "lead"] | None = Query(None),
+                 db: Session = Depends(get_db)):
+    """Shares for the whole track, or for the vacancies of one seniority; `seniority_totals` counts every level."""
+    track_active = (Vacancy.track == track, Vacancy.is_active.is_(True))
+    by_level = db.execute(select(func.lower(Vacancy.seniority), func.count()).where(*track_active)
+                          .group_by(func.lower(Vacancy.seniority))).all()
+    active = track_active + ((func.lower(Vacancy.seniority) == seniority,) if seniority else ())
     total = db.scalar(select(func.count()).select_from(Vacancy).where(*active)) or 0
     # distinct (vacancy, action) pairs: each vacancy counts once per action, even across OR alternatives
     rows_all = db.execute(
@@ -43,7 +49,8 @@ def distribution(track: Literal["python", "marketing", "design"], db: Session = 
     rows = sorted(counts.items(), key=lambda kv: (-round(100 * kv[1] / total), kv[0])) if total else []
     items = [{"action_id": action_id, "name": names.get(action_id, action_id),
               "share_percent": round(100 * n / total), "levels": levels[action_id]} for action_id, n in rows]
-    return {"track": track, "vacancies_total": total, "items": items}
+    return {"track": track, "seniority": seniority, "seniority_totals": {k or "unknown": n for k, n in by_level},
+            "vacancies_total": total, "items": items}
 
 
 @router.get("/overview")

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { altText, groupStatusText, pct, summaryChips, whySentence } from '@/lib/vacancyFit';
+import { altText, groupStatusText, pct, shareLabel, summaryChips, whySentence } from '@/lib/vacancyFit';
 import type { FitAlternative, FitGroup } from '@/types';
 
 const alt = (o: Partial<FitAlternative> = {}): FitAlternative => ({
@@ -57,5 +57,22 @@ describe('vacancyFit', () => {
   test('why: OR with one unknown alternative', () => {
     const g = group({ status: 'UNRESOLVED', alternatives: [alt({ candidate_score: 0.3 }), alt({ name: 'Vue', candidate_score: null, state: 'UNKNOWN' })] });
     expect(whySentence(g)).toBe('Це не оцінювали у співбесіді, тому невідомо, чи ви відповідаєте.');
+  });
+  test('shareLabel never shows 100', () => {
+    expect(shareLabel(100)).toBe(99);
+    expect(shareLabel(99.6)).toBe(99);
+    expect(shareLabel(87.4)).toBe(87);
+    expect(shareLabel(0)).toBe(0);
+  });
+  test('a gap with a high average names the weak criterion', () => {
+    const a = alt({ candidate_score: 0.8, threshold: 0.75, weak_criteria: [{ id: 'x.a', title: 'Валідація запитів', score: 0.55 }] });
+    expect(altText(a)).toBe('Потрібен робочий рівень: у середньому 80%, але «Валідація запитів» лише 55%');
+    expect(whySentence(group({ alternatives: [a] })))
+      .toBe('Не вистачає: «Валідація запитів» — 55%, потрібно від 75% за кожним критерієм. У середньому за темою 80%.');
+  });
+  test('several weak criteria show the weakest and a count', () => {
+    const a = alt({ candidate_score: 0.8, threshold: 0.75, weak_criteria: [
+      { id: 'x.a', title: 'Перший', score: 0.6 }, { id: 'x.b', title: 'Другий', score: 0.4 }] });
+    expect(altText(a)).toBe('Потрібен робочий рівень: у середньому 80%, але «Другий» лише 40% і ще 1');
   });
 });

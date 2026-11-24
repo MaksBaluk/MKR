@@ -187,6 +187,21 @@ export function missingFromDescription(description: string | null, items: readon
   return (items ?? []).filter((item) => !text.includes(item));
 }
 
+/** Original posting phrases kept with the requirement groups: unique, trimmed, mandatory first, none the description already shows. */
+export function postingExcerpts(groups: readonly { kind: string; excerpt: string }[], description: string | null): { kind: string; text: string }[] {
+  const text = (description ?? '').toLowerCase();
+  const seen = new Set<string>();
+  const out: { kind: string; text: string }[] = [];
+  for (const g of [...groups.filter((x) => x.kind === 'MANDATORY'), ...groups.filter((x) => x.kind !== 'MANDATORY')]) {
+    const t = g.excerpt.replace(/\s+/g, ' ').trim().replace(/[;,]$/, '');
+    const key = t.toLowerCase();
+    if (t === '' || seen.has(key) || text.includes(key)) continue;
+    seen.add(key);
+    out.push({ kind: g.kind, text: t });
+  }
+  return out;
+}
+
 /** «← До вакансій» target: the list URL the user came from (with its filters), else the plain list. */
 export function backToListPath(state: unknown): string {
   const from = (state as { fromList?: unknown } | null)?.fromList;

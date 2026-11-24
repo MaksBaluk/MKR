@@ -304,6 +304,8 @@ export interface FitAlternative {
   /** Share (0..1) of the alternative's required criteria that were graded; below 1 the state stays UNKNOWN. */
   coverage?: number | null;
   state: FitState;
+  /** Required criteria below the needed score (the reason for GAP when the topic average looks high enough). */
+  weak_criteria?: { id: string; title: string; score: number }[];
 }
 
 export interface FitGroup {

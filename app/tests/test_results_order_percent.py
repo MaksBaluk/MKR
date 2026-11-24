@@ -24,10 +24,10 @@ def test_results_sorted_by_percent_then_215_key_then_tv_jv(client, auth, finishe
     keys = []
     for i in rows:
         t, j = self_claim_metrics(revs[i["vacancy_id"]]["groups"], ratings)
-        keys.append((-i["confirmed_share"], -i["z"], -i["x"], -i["l_mandatory"], -i["l_preferred"], i["w_mandatory"],
+        keys.append((-i["confirmed_share"], i["section"] != "DESIRED_LEVEL", -i["z"], -i["x"], -i["l_mandatory"], -i["l_preferred"], i["w_mandatory"],
                      i["w_preferred"], -t, -j, i["vacancy_id"]))
     assert len(rows) > 5 and keys == sorted(keys)
-    assert any(a[0] == b[0] for a, b in zip(keys, keys[1:]))  # equal percents exist, so the (2.15)+T/J tie-break is exercised
+    assert any(a[0] == b[0] for a, b in zip(keys, keys[1:]))  # equal percents exist, so the desired-level + (2.15)+T/J tie-break is exercised
 
 
 def test_fits_means_some_confirmed_share(client, auth, finished):  # noqa: F811

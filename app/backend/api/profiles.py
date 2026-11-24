@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from backend.api.cohorts import _market_input, get_or_create_cohort
 from backend.api.common import create_attempt, open_attempt
-from backend.api.core import (_names, _revisions, action_summary, attempt_scores, cohort_actions, current_criteria_rows,
+from backend.api.core import (_names, _revisions, _seeded_criteria, action_summary, attempt_scores, cohort_actions, current_criteria_rows,
                               effective_rows,
                               profile_self_ratings, rubric_map)
 from backend.api.level import level_for_attempt
@@ -268,8 +268,8 @@ def results(profile_id: str, page: int = Query(1, ge=1), page_size: int = Query(
                                          profile_self_ratings(db, prof.id)))]
     # Display order (owner decision, deviates from thesis (2.15)): displayed confirmed_share percent first. The sort is
     # stable over rank_items' (2.15) + T_v/J_v + id order, so equal percents keep that key. Filters keep relative order.
-    # POST /recommendations keeps the pure (2.15) key.
-    items.sort(key=lambda i: -i["confirmed_share"])
+    # POST /recommendations keeps the pure (2.15) key. Equal percents: desired-level vacancies first (owner decision).
+    items.sort(key=lambda i: (-i["confirmed_share"], i["section"] != "DESIRED_LEVEL"))
     if work_mode:
         items = [i for i in items if (i["work_mode"] or "").lower() == work_mode.lower()]
     if seniority:
@@ -326,11 +326,17 @@ def result_detail(profile_id: str, vacancy_id: str, db: Session = Depends(get_db
             state = {"SATISFIED": "MET", "FAILED": "GAP"}.get(
                 status, "BORDERLINE" if score is not None and not req.unknown else "UNKNOWN")
             level = min(3, max(1, a["required_level"]))
+            titles = {c.criterion_id: (c.anchors or {}).get("title") or c.criterion_id
+                      for c in _seeded_criteria(db, a["competency_id"])}
+            eps = min(0.05, tau / 2)  # the same margin as FAILED in §4: below it the criterion is an established gap
+            weak = [{"id": c, "title": titles.get(c, c), "score": scores[c]} for c, _ in required
+                    if scores.get(c) is not None and scores[c] < tau - eps]
             alternatives.append({"competency_id": a["competency_id"], "name": names.get(a["competency_id"], a["competency_id"]),
                                  "required_level": level, "required_label": LEVEL_WORDS[level], "threshold": tau,
                                  "threshold_source": a.get("tau_source") or TAU_SOURCE_LEVEL_MAP,
                                  "required_criteria": [c for c, _ in required],
-                                 "candidate_score": score, "coverage": req.e, "state": state})
+                                 "candidate_score": score, "coverage": req.e, "state": state,
+                                 "weak_criteria": weak})
         groups.append({"id": g.get("id"), "kind": g["kind"], "label": g.get("label", ""), "excerpt": g.get("excerpt", ""),
                        "status": ev.status, "alternatives": alternatives})
     summary = {"met": sum(1 for g in groups if g["status"] == "SATISFIED"),

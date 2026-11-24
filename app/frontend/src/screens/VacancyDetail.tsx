@@ -3,7 +3,8 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, Briefcase, Clock, ExternalLink, Loader2, MapPin, MessageSquare, SearchX } from 'lucide-react';
 import { api, ApiError } from '@/api';
 import { ErrorRetry } from '@/components/ErrorRetry';
-import { useVacancyFit, VacancyFit } from '@/components/VacancyFit';
+import { FitExplanation, FitRing } from '@/components/FitExplanation';
+import { useVacancyFit } from '@/components/VacancyFit';
 import { SourceMark } from '@/components/SourceMark';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -15,9 +16,9 @@ import { useStartAttempt } from '@/hooks/useStartAttempt';
 import { useActiveProfile } from '@/lib/activeProfile';
 import { trackLabel } from '@/lib/profiles';
 import {
-  SENIORITY_LABEL, WORK_MODE_LABEL, backToListPath, employmentLabel, formatSalary, kindLabel, levelWord, missingFromDescription, parseDescription, yearsLabel,
+  SENIORITY_LABEL, WORK_MODE_LABEL, backToListPath, employmentLabel, formatSalary, kindLabel, levelWord, missingFromDescription, parseDescription, postingExcerpts, yearsLabel,
 } from '@/lib/vacancies';
-import type { RequirementGroup, VacancyDetail as Vacancy } from '@/types';
+import type { RequirementGroup, VacancyDetail as Vacancy, VacancyFitBreakdown } from '@/types';
 
 function Description({ text, title }: { text: string | null; title: string }) {
   const nodes = parseDescription(text, title);
@@ -68,17 +69,17 @@ function Requirement({ g }: { g: RequirementGroup }) {
   );
 }
 
+type FitHook = ReturnType<typeof useVacancyFit>;
+
 /** «Де ви підходите і чому» for the active profile; a hint with a profile link when there is no finished attempt. */
-function FitSection({ vacancyId }: { vacancyId: string }) {
-  const { active } = useActiveProfile();
-  const finished = active?.latest_finished_attempt ? active.id : null;
-  const { data, state, retry } = useVacancyFit(finished, vacancyId);
+function FitSection({ fit, profileId }: { fit: FitHook; profileId: string | null }) {
+  const { data, state, retry } = fit;
   const { hash } = useLocation();
   // The section appears after the fetch, so the browser's own anchor jump has nothing to land on yet.
   useEffect(() => {
     if (hash === '#fit' && (data || state === 'missing')) document.getElementById('fit')?.scrollIntoView({ block: 'start' });
   }, [hash, data, state]);
-  if (!finished)
+  if (!profileId)
     return (
       <Card id="fit" className="scroll-mt-24 p-4 text-sm text-ink-muted">
         Щоб побачити, де ви підходите до цієї вакансії, завершіть співбесіду у{' '}
@@ -89,7 +90,7 @@ function FitSection({ vacancyId }: { vacancyId: string }) {
   if (state === 'error') return <div id="fit"><ErrorRetry message="Не вдалося завантажити розбір збігу." onRetry={retry} /></div>;
   if (state === 'missing')
     return <Card id="fit" className="p-4 text-sm text-ink-muted">Ця вакансія не входить до вашої добірки, тому розбору збігу для неї немає.</Card>;
-  return data ? <VacancyFit data={data} /> : null;
+  return data ? <FitExplanation data={data} profileId={profileId} /> : null;
 }
 
 /** Interview CTA when the active profile is in this vacancy's track and has no finished attempt yet. */
@@ -119,6 +120,10 @@ export function VacancyDetail() {
   const [v, setV] = useState<Vacancy | null>(null);
   const [error, setError] = useState<{ status: number; message: string } | null>(null);
   const [nonce, setNonce] = useState(0);
+  const { active } = useActiveProfile();
+  const finishedId = active?.latest_finished_attempt ? active.id : null;
+  const fit = useVacancyFit(finishedId, id);
+  const fitData: VacancyFitBreakdown | null = fit.data;
 
   useEffect(() => {
     let live = true;
@@ -176,6 +181,7 @@ export function VacancyDetail() {
   ].filter(Boolean) as { icon: typeof MapPin; text: string }[];
   const responsibilities = missingFromDescription(v.description, v.responsibilities);
   const benefits = missingFromDescription(v.description, v.benefits);
+  const excerpts = postingExcerpts(v.requirements, v.description);
   const mandatory = v.requirements.filter((g) => g.kind === 'MANDATORY');
   const desired = v.requirements.filter((g) => g.kind !== 'MANDATORY');
 
@@ -193,19 +199,38 @@ export function VacancyDetail() {
             ))}
             {v.seniority && SENIORITY_LABEL[v.seniority] && <li><Badge variant="warning" className="py-1">{SENIORITY_LABEL[v.seniority]}</Badge></li>}
             {years && <li><Badge className="py-1">Досвід: {years}</Badge></li>}
+            {fitData && <li><Badge variant="success" className="py-1">Зарплата: {salary ?? 'не вказано'}</Badge></li>}
           </ul>
         </div>
-        <div className="shrink-0 rounded-xl bg-success-soft px-4 py-3 sm:text-right">
-          <p className="text-xs text-success-ink">Зарплата на місяць</p>
-          <p className="text-lg font-bold whitespace-nowrap text-success-ink">{salary ?? 'Не вказано'}</p>
-        </div>
+        {fitData ? <FitRing percent={fitData.confirmed_share} /> : (
+          <div className="shrink-0 rounded-xl bg-success-soft px-4 py-3 sm:text-right">
+            <p className="text-xs text-success-ink">Зарплата на місяць</p>
+            <p className="text-lg font-bold whitespace-nowrap text-success-ink">{salary ?? 'Не вказано'}</p>
+          </div>
+        )}
       </Card>
+      {fitData && <FitSection fit={fit} profileId={finishedId} />}
 
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className={fitData ? 'flex flex-col gap-4' : 'grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]'}>
         <div className="flex min-w-0 flex-col gap-4">
-          <FitSection vacancyId={v.id} />
-          <Card className="flex flex-col gap-5 p-4 sm:p-6">
+          {!fitData && <FitSection fit={fit} profileId={finishedId} />}
+          <Card className="flex flex-col gap-5 p-4 sm:p-6" aria-labelledby="vacancy-description-title">
+            <h2 id="vacancy-description-title" className="text-lg font-semibold text-ink">Опис вакансії</h2>
             <Description text={v.description} title={v.title} />
+            {excerpts.length > 0 && (
+              <section className="flex flex-col gap-2">
+                <h3 className="text-base font-semibold text-ink">Вимоги з оголошення</h3>
+                <p className="text-xs text-ink-subtle">Фрази з оригінального оголошення, як вони збережені в каталозі (мовою джерела).</p>
+                <ul className="flex flex-col gap-2 text-sm text-ink">
+                  {excerpts.map((e) => (
+                    <li key={e.text} className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-2">
+                      <Badge variant={e.kind === 'MANDATORY' ? 'danger' : 'default'} className="self-start">{kindLabel(e.kind)}</Badge>
+                      <span className="[overflow-wrap:anywhere]">{e.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
             <ExtraList title="Обов’язки" items={responsibilities} />
             <ExtraList title="Ми пропонуємо" items={benefits} />
             {v.stack && v.stack.length > 0 && (
@@ -229,7 +254,7 @@ export function VacancyDetail() {
           </Card>
         </div>
 
-        <aside aria-labelledby="req-title" className="flex flex-col gap-4 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto">
+        {!fitData && <aside aria-labelledby="req-title" className="flex flex-col gap-4 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto">
           <Card className="p-4">
             <h2 id="req-title" className="text-base font-semibold text-ink">Вимоги</h2>
             <p className="mt-0.5 text-xs text-ink-subtle">
@@ -242,7 +267,7 @@ export function VacancyDetail() {
             )}
           </Card>
           <FitCta track={v.track} />
-        </aside>
+        </aside>}
       </div>
     </article>
   );
